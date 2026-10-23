@@ -225,7 +225,10 @@
     @apply rounded-e-2xl border-s-4 border-chart-2/60 bg-muted/50 py-3 ps-5 pe-4 text-foreground/85 not-italic;
   }
   .markdown-document table {
-    @apply rounded-xl border;
+    @apply table w-full border-separate border-spacing-0 overflow-hidden rounded-xl border;
+  }
+  .markdown-document tbody tr:last-child td {
+    @apply border-b-0;
   }
   .markdown-document thead {
     @apply bg-muted;

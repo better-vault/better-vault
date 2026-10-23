@@ -9,7 +9,7 @@ import {
   PencilEdit01Icon,
   RepeatIcon,
 } from "@hugeicons/core-free-icons";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
@@ -32,6 +32,7 @@ export function OutputViewer({ id }: { id: string }) {
   const { closeOutput, readSource, requestOutputAction } = useWorkspace();
   const runner = useStudioRunner();
   const output = useOutput(id);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const gone = output === null || (output !== undefined && !isStudioToolId(output.toolId));
 
   // A deleted output, here or in another tab, goes back to the list.
@@ -47,7 +48,7 @@ export function OutputViewer({ id }: { id: string }) {
   const parsed = output.status === "ready" ? definition?.data.safeParse(output.data) : undefined;
 
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea className="h-full" viewportRef={scrollRef}>
       <div className="flex min-h-full flex-col px-4 pb-6 sm:px-6">
         <div
           className={cn(
@@ -127,6 +128,7 @@ export function OutputViewer({ id }: { id: string }) {
             <client.Viewer
               title={output.title}
               data={parsed.data}
+              scrollRef={scrollRef}
               onOpenPassage={(passage) => readSource(passage.sourceId, passage.chunkId)}
             />
           )}

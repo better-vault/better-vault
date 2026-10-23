@@ -132,7 +132,7 @@ Please search existing issues first, and **never paste API keys** into an issue.
 ## 🙏 Credits
 
 - [Panel UI](https://panelui.dev) for the sheets, dialogs, prompt and the rest of the interface.
-- [Rare UI](https://rareui.com) for the web search and citation component.
+- [Rare UI](https://rareui.com) for the web search, citation and contents-rail components.
 - [Pele](https://pele.run) for rendering Mermaid diagrams.
 - [Anatomy](https://skills.wheresryan.sh/anatomy) by Ryan, the inspiration for anatomy diagrams.
 - [Hugeicons](https://hugeicons.com) for icons.
@@ -140,4 +140,4 @@ Please search existing issues first, and **never paste API keys** into an issue.
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 the better-vault contributors. Third-party components keep their own licenses. The Rare UI component is MIT + Commons Clause with an attribution requirement (see `components/ui/web-search.tsx`).
+[MIT](LICENSE) © 2026 the better-vault contributors. Third-party components keep their own licenses. The Rare UI components are MIT + Commons Clause with an attribution requirement (see `components/ui/web-search.tsx` and `components/ui/rail-toc.tsx`).

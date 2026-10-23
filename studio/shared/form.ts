@@ -12,6 +12,8 @@ export interface ToolFormProps<Options> {
 export interface ToolViewerProps<Data> {
   title: string;
   data: Data;
+  /** The element the viewer scrolls in, for parts that follow the reading. */
+  scrollRef?: import("react").RefObject<HTMLElement | null>;
   /** Opens a cited passage in the source reader. */
   onOpenPassage: (passage: import("@/lib/chat/types").PassageRef) => void;
 }
