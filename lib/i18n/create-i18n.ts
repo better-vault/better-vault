@@ -1,11 +1,6 @@
 import i18next, { type i18n } from "i18next";
 import { initReactI18next } from "react-i18next";
-import {
-  defaultLanguage,
-  defaultNamespace,
-  namespaces,
-  type LanguageCode,
-} from "./config";
+import { defaultLanguage, defaultNamespace, namespaces, type LanguageCode } from "./config";
 import { resources } from "./resources";
 
 /**
