@@ -19,13 +19,13 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 | **Notebook**         | A workspace with its own sources, chat and Studio outputs.                                                                                                                                                                           |
 | **Source**           | A document added to a notebook: pasted text, a TXT/MD/PDF file or a web page. It is stored as plain text and split into **chunks** for retrieval. A source can be selected or deselected; only selected sources are used as context. |
 | **Chat mode**        | **Sources** (default): the model answers only from the notebook's selected sources and cites passages as `[n]`. **Web**: the model may also use its provider's own web search.                                                       |
-| **Studio**           | The `+` sheet. It holds **tools** (Report, Flashcards, Quiz, Data table, Mind map, and later Slide deck, Infographic, Anatomy). Each tool opens a **dialog** of options.                                                             |
+| **Studio**           | The sheet opened by **Add**. It holds **tools** (Report, Flashcards, Quiz, Data table, Mind map, and later Slide deck, Infographic, Anatomy). Each tool opens a **dialog** of options.                                               |
 | **Output**           | One generated Studio result (for example "Entrepreneurship Flashcards"). It is listed under the tools and opened in a **viewer** in the Studio tab.                                                                                  |
 | **Provider / model** | Where a request goes: OpenAI, Anthropic, Google, Ollama or LM Studio, plus a model id. Chosen in the prompt bar; keys are entered in Settings.                                                                                       |
 
 ## Interface
 
-- **Top left:** `+` opens the **Studio sheet** (tools grid and outputs list). The button next to it opens the **Settings sheet**, whose rows open nested sheets (`Sheet.Next`).
+- **Top left:** a shadcn `ButtonGroup` with the **Settings** button (gear, opens the Settings sheet, whose rows open nested sheets with `Sheet.Next`) followed by **Add** (opens the **Studio sheet**: tools grid and outputs list).
 - **Top right:** tabs switch the main view: **Chat · Sources · Studio**.
 - **Bottom centre, in the Chat tab only:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch. It does not appear over the Sources or Studio views.
 - Choosing a tool closes the Studio sheet and opens the tool's Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.

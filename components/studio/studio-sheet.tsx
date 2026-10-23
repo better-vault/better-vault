@@ -15,7 +15,7 @@ interface StudioSheetProps {
 }
 
 /**
- * The `+` sheet: the Studio's tools, and under them what has been created.
+ * The Studio sheet, opened by "Add": the Studio's tools, and under them what has been created.
  * Choosing a tool closes the sheet and opens the tool's dialog; choosing an
  * output closes it and opens the output in the Studio tab.
  */

@@ -54,7 +54,7 @@
   },
   "view": {
     "emptyTitle": "Nothing created yet",
-    "emptyBody": "Open the Studio with + to create a report, flashcards, a quiz, a mind map and more.",
+    "emptyBody": "Use Add at the top left to create a report, flashcards, a quiz, a mind map and more.",
     "openStudio": "Open Studio",
     "all": "All outputs",
     "generatingBody": "This can take a minute. You can keep working meanwhile.",

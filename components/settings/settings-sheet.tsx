@@ -9,7 +9,7 @@ import {
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -32,13 +32,15 @@ import { SettingsRow } from "./settings-row";
 interface SettingsSheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** The button that opens the sheet; it gets the gear icon. Default: a round ghost button. */
+  trigger?: ReactElement;
 }
 
 /**
  * General settings. Each row opens a sheet of its own on top. A choice that
  * needs a dialog closes the sheets first.
  */
-export function SettingsSheet({ open: openProp, onOpenChange }: SettingsSheetProps) {
+export function SettingsSheet({ open: openProp, onOpenChange, trigger }: SettingsSheetProps) {
   const { t, i18n } = useTranslation("settings");
   const router = useRouter();
   const [ownOpen, setOwnOpen] = useState(false);
@@ -57,7 +59,7 @@ export function SettingsSheet({ open: openProp, onOpenChange }: SettingsSheetPro
     <>
       <Sheet side="left" open={open} onOpenChange={setOpen}>
         <Sheet.Trigger
-          render={<Button variant="ghost" shape="pill" size="icon" aria-label={t("title")} />}
+          render={trigger ?? <Button variant="ghost" shape="pill" size="icon" aria-label={t("title")} />}
         >
           <Icon icon={Settings01Icon} />
         </Sheet.Trigger>

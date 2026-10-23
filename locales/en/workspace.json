@@ -1,4 +1,6 @@
 {
+  "add": "Add",
+  "toolbar": "Studio and settings",
   "tabs": {
     "label": "View",
     "chat": "Chat",
