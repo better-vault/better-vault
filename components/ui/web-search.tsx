@@ -9,8 +9,9 @@
  * Projects that ship this file must credit Rare UI with a visible link to
  * https://rareui.com (better-vault does so in the README and Settings → About).
  *
- * Adapted for better-vault: colours use Panel theme tokens and icons come
- * from Hugeicons.
+ * Adapted for better-vault: colours use Panel theme tokens, icons come from
+ * Hugeicons, a source can carry its own `site` label (notebook sources have
+ * no web address), and the component's words can be translated (`strings`).
  */
 
 import {
@@ -48,6 +49,8 @@ export type WebSource = {
   url: string;
   snippet?: string;
   favicon?: string;
+  /** better-vault: a name to show instead of the site taken from `url` (used for notebook sources). */
+  site?: string;
 };
 
 const COLUMNS = 4;
@@ -123,8 +126,28 @@ const siteName = (url: string) => {
   return parts.length > 1 ? parts[parts.length - 2] : parts[0];
 };
 
+// better-vault: notebook sources have no web address, so they can carry their own label.
+const siteOf = (source: WebSource) => source.site ?? siteName(source.url);
+const placeOf = (source: WebSource) => source.site ?? hostOf(source.url);
+
+/** better-vault: the component's own words, so they can be translated. */
+export type WebSearchStrings = {
+  /** The text after the count on the card that reveals the rest, e.g. "more sources". */
+  more: (count: number) => string;
+  /** Read out for that card, e.g. "Show 3 more sources". */
+  showMore: (count: number) => string;
+  showLess: string;
+};
+
+const DEFAULT_STRINGS: WebSearchStrings = {
+  more: (count) => `more ${count === 1 ? "source" : "sources"}`,
+  showMore: (count) => `Show ${count} more sources`,
+  showLess: "Show less",
+};
+
 export type WebSearchProps = Omit<ComponentProps<"div">, "children"> & {
   sources: WebSource[];
+  strings?: Partial<WebSearchStrings>;
   status?: WebSearchStatus;
   query?: string;
   label?: string;
@@ -137,6 +160,7 @@ export type WebSearchProps = Omit<ComponentProps<"div">, "children"> & {
 
 function WebSearch({
   sources,
+  strings: stringsProp,
   status = "done",
   query,
   label,
@@ -149,6 +173,7 @@ function WebSearch({
   ...props
 }: WebSearchProps) {
   const reduced = !!useReducedMotion();
+  const strings = { ...DEFAULT_STRINGS, ...stringsProp };
   const [openState, setOpenState] = useState(defaultOpen);
   const [expanded, setExpanded] = useState(false);
   const [measureRef, labelWidth] = useSize<HTMLSpanElement>("width");
@@ -306,6 +331,7 @@ function WebSearch({
                     COLUMNS - 1,
                     <MoreCard
                       sources={hidden}
+                      strings={strings}
                       onClick={() => setExpanded(true)}
                       reduced={reduced}
                     />,
@@ -324,7 +350,7 @@ function WebSearch({
                       )}
                     >
                       <Chevron className="-ms-0.5 rotate-180 transition-transform duration-200 group-hover:-translate-y-px" />
-                      Show less
+                      {strings.showLess}
                     </button>,
                   )}
               </AnimatePresence>
@@ -407,7 +433,7 @@ function SourceCard({
       <span className="flex items-center gap-1.5">
         <Favicon source={source} size={16} />
         <span className="min-w-0 flex-1 truncate text-[11.5px] font-medium text-muted-foreground">
-          {siteName(source.url)}
+          {siteOf(source)}
         </span>
         <span className="text-[11px] font-semibold tabular-nums text-muted-foreground/70">
           {index}
@@ -419,10 +445,12 @@ function SourceCard({
 
 function MoreCard({
   sources,
+  strings,
   onClick,
   reduced,
 }: {
   sources: WebSource[];
+  strings: WebSearchStrings;
   onClick: () => void;
   reduced: boolean;
 }) {
@@ -430,7 +458,7 @@ function MoreCard({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Show ${sources.length} more sources`}
+      aria-label={strings.showMore(sources.length)}
       className={cn(CARD_SHELL, "group justify-between")}
     >
       <FaviconStack sources={sources} reduced={reduced} />
@@ -448,7 +476,7 @@ function MoreCard({
             </motion.span>
           </AnimatePresence>
         </span>
-        more {sources.length === 1 ? "source" : "sources"}
+        {strings.more(sources.length)}
       </span>
     </button>
   );
@@ -570,7 +598,7 @@ function FaviconStack({
 
 function Favicon({ source, size }: { source: WebSource; size: number }) {
   const [broken, setBroken] = useState(false);
-  const name = siteName(source.url);
+  const name = siteOf(source);
   const hue = hash(name) % 360;
   const image = source.favicon && !broken;
 
@@ -715,7 +743,7 @@ function WebSearchCitation({
       <a
         {...linkTo(source.url, linked)}
         tabIndex={linked ? undefined : 0}
-        aria-label={`${source.title}, ${hostOf(source.url)}`}
+        aria-label={`${source.title}, ${placeOf(source)}`}
         className={cn(
           !linked && "cursor-default",
           "inline-flex h-[19px] -translate-y-px items-center gap-1 rounded-full bg-muted ps-[3px] pe-1.5 text-[11px] font-semibold leading-none text-muted-foreground no-underline outline-none transition-colors hover:bg-card hover:text-foreground hover:shadow-[0_1px_3px_rgba(0,0,0,0.1)] dark:hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring",
@@ -724,7 +752,7 @@ function WebSearchCitation({
         )}
       >
         <Favicon source={source} size={14} />
-        {siteName(source.url)}
+        {siteOf(source)}
         {index !== undefined && (
           <span className="tabular-nums opacity-60">{index}</span>
         )}
@@ -754,7 +782,7 @@ function WebSearchCitation({
               <span className="flex items-center gap-1.5">
                 <Favicon source={source} size={18} />
                 <span className="truncate text-[12px] font-medium text-muted-foreground">
-                  {hostOf(source.url)}
+                  {placeOf(source)}
                 </span>
               </span>
               <span className="mt-1.5 line-clamp-2 block text-[13.5px] font-semibold leading-[18px] text-foreground">
