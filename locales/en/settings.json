@@ -1,1 +1,90 @@
-{}
+{
+  "title": "Settings",
+  "description": "Saved in this browser only.",
+  "rows": {
+    "providers": "AI providers",
+    "providersHint_one": "{{count}} ready",
+    "providersHint_other": "{{count}} ready",
+    "providersNone": "None set up",
+    "appearance": "Appearance",
+    "language": "Language",
+    "data": "Data",
+    "about": "About"
+  },
+  "providers": {
+    "title": "AI providers",
+    "description": "Add a key or a local model. Keys stay in this browser and are only sent to reach the provider.",
+    "ready": "Ready",
+    "off": "Off",
+    "needsKey": "Needs a key",
+    "enable": "Use {{name}}",
+    "apiKey": "API key",
+    "apiKeyPlaceholder": "Paste your key",
+    "getKey": "Get a key",
+    "showKey": "Show key",
+    "hideKey": "Hide key",
+    "baseURL": "Server address",
+    "models": "Models",
+    "refresh": "Load models",
+    "refreshing": "Loading…",
+    "modelsLoaded_one": "{{count}} model available",
+    "modelsLoaded_other": "{{count}} models available",
+    "modelsSuggested": "Suggested models. Load the full list from {{name}}.",
+    "modelsEmptyLocal": "Start {{name}}, then load your models.",
+    "loadFailed": "Could not load models: {{error}}",
+    "addModel": "Add a model by id",
+    "addModelPlaceholder": "model-id",
+    "removeModel": "Remove {{model}}",
+    "webSearch": "Built-in web search",
+    "noWebSearch": "No web search",
+    "context": "Context size",
+    "contextHint": "How much source text is sent with each request, in characters. Lower it if your local model has a small context window.",
+    "localHint": "Local models work when better-vault runs on the same machine."
+  },
+  "appearance": {
+    "title": "Appearance",
+    "theme": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "title": "Language",
+    "description": "The language of the interface. Answers follow the language you write in, and each Studio tool lets you pick its output language.",
+    "helpTranslate": "Help translate better-vault"
+  },
+  "data": {
+    "title": "Data",
+    "description": "Everything is stored in this browser.",
+    "export": "Export backup",
+    "exportHint": "Notebooks, sources, chats and outputs as a JSON file. API keys are not included.",
+    "import": "Import backup",
+    "importHint": "Adds the notebooks from a backup file.",
+    "imported_one": "Imported {{count}} notebook",
+    "imported_other": "Imported {{count}} notebooks",
+    "importFailed": "That file is not a better-vault backup.",
+    "deleteAll": "Delete all notebooks",
+    "deleteAllHint": "Removes every notebook from this browser. Settings and keys are kept.",
+    "deleteAllConfirm": {
+      "title": "Delete all notebooks?",
+      "body": "Every notebook, source, chat and Studio output in this browser will be deleted. This can't be undone.",
+      "confirm": "Delete everything"
+    },
+    "deleted": "All notebooks deleted"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {{version}}",
+    "description": "An open-source, bring-your-own-model alternative to NotebookLM.",
+    "github": "Source code",
+    "issues": "Report a problem",
+    "license": "MIT license",
+    "credits": "Built with",
+    "panel": "Interface components",
+    "rare": "Web search and citations",
+    "pele": "Diagrams",
+    "hugeicons": "Icons",
+    "anatomy": "Inspiration for anatomy diagrams",
+    "aiSdk": "Model access"
+  }
+}

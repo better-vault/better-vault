@@ -1,1 +1,13 @@
-{}
+{
+  "title": "Notebooks",
+  "subtitle": "Each notebook keeps its own sources, chat and Studio outputs.",
+  "newNotebook": "New notebook",
+  "untitled": "Untitled notebook",
+  "empty": {
+    "title": "No notebooks yet",
+    "body": "Create a notebook, add a few sources and start asking questions."
+  },
+  "updated": "Updated {{time}}",
+  "menu": "Notebook options",
+  "settings": "Settings"
+}

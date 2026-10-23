@@ -1,1 +1,62 @@
-{}
+{
+  "title": "Sources",
+  "description": "Only selected sources are used in the chat and in the Studio.",
+  "selected": "{{selected}} of {{total}} selected",
+  "selectAll": "Select all sources",
+  "add": "Add source",
+  "empty": {
+    "title": "Add your first source",
+    "body": "Upload a PDF, Markdown or text file, add a web page, or paste text."
+  },
+  "kinds": {
+    "text": "Text",
+    "markdown": "Markdown",
+    "pdf": "PDF",
+    "url": "Web page"
+  },
+  "words_one": "{{count}} word",
+  "words_other": "{{count}} words",
+  "select": "Use {{title}}",
+  "menu": "Options for {{title}}",
+  "read": "Read",
+  "openPage": "Open page",
+  "rename": {
+    "title": "Rename source",
+    "label": "Name"
+  },
+  "delete": {
+    "title": "Delete “{{title}}”?",
+    "body": "It will be removed from this notebook. Chats and outputs made from it are kept.",
+    "confirm": "Delete source"
+  },
+  "addDialog": {
+    "title": "Add sources",
+    "description": "Sources stay in this browser. Their text is sent to your model when you ask questions or create something.",
+    "tabs": {
+      "file": "Upload",
+      "url": "Web page",
+      "text": "Paste text"
+    },
+    "drop": "Drop files here",
+    "choose": "Choose files",
+    "fileTypes": "PDF, Markdown or text files, up to 20 MB each.",
+    "urlLabel": "Address",
+    "urlPlaceholder": "https://example.com/article",
+    "urlHint": "The page's main text is saved as a source.",
+    "textTitle": "Title",
+    "textTitlePlaceholder": "Pasted text",
+    "textLabel": "Text",
+    "textPlaceholder": "Paste notes, an article or a transcript",
+    "submit": "Add",
+    "adding": "Adding…"
+  },
+  "added_one": "Added {{count}} source",
+  "added_other": "Added {{count}} sources",
+  "errors": {
+    "empty": "No text could be read from {{name}}.",
+    "type": "{{name}} is not a supported file type.",
+    "tooLarge": "{{name}} is larger than 20 MB.",
+    "read": "Could not read {{name}}: {{error}}",
+    "url": "Enter a full address starting with http:// or https://."
+  }
+}

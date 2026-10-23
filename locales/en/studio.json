@@ -1,1 +1,64 @@
-{}
+{
+  "title": "Studio",
+  "description": "Turn your selected sources into study material.",
+  "created": "Created",
+  "empty": "Nothing created yet. Choose a tool above.",
+  "status": {
+    "generating": "Generating…",
+    "failed": "Failed",
+    "interrupted": "Interrupted: the page was closed before it finished."
+  },
+  "outputMenu": "Options for {{title}}",
+  "rename": {
+    "title": "Rename",
+    "label": "Name"
+  },
+  "delete": {
+    "title": "Delete “{{title}}”?",
+    "body": "It will be removed from this notebook.",
+    "confirm": "Delete"
+  },
+  "tools": {
+    "report": {
+      "name": "Reports",
+      "description": "Briefing docs, study guides, blog posts or your own format."
+    },
+    "flashcards": {
+      "name": "Flashcards",
+      "description": "Cards to test yourself, front and back."
+    },
+    "quiz": {
+      "name": "Quiz",
+      "description": "Multiple-choice questions with explanations."
+    },
+    "mind-map": {
+      "name": "Mind map",
+      "description": "A mind map or another diagram of the ideas."
+    },
+    "data-table": {
+      "name": "Data table",
+      "description": "Facts from your sources, in rows and columns."
+    },
+    "anatomy": {
+      "name": "Anatomy",
+      "description": "An interactive figure you can take apart to learn how something works."
+    },
+    "slide-deck": {
+      "name": "Slide deck",
+      "description": "A presentation built from your sources."
+    },
+    "infographic": {
+      "name": "Infographic",
+      "description": "A one-page visual summary."
+    }
+  },
+  "view": {
+    "emptyTitle": "Nothing created yet",
+    "emptyBody": "Open the Studio with + to create a report, flashcards, a quiz, a mind map and more.",
+    "openStudio": "Open Studio",
+    "all": "All outputs",
+    "generatingBody": "This can take a minute. You can keep working meanwhile.",
+    "failedTitle": "This one didn't work",
+    "retry": "Try again"
+  }
+}

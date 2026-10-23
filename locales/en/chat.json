@@ -1,1 +1,66 @@
-{}
+{
+  "placeholder": {
+    "sources": "Ask about your sources…",
+    "web": "Ask anything. The model can search the web…"
+  },
+  "mode": {
+    "label": "Answer from",
+    "sources": "Sources",
+    "web": "Web",
+    "sourcesHint": "Answers use only your selected sources.",
+    "webHint": "The model may also search the web.",
+    "webUnavailable": "{{name}} has no built-in web search."
+  },
+  "model": "Model",
+  "send": "Send",
+  "stop": "Stop",
+  "menu": "More",
+  "addSource": "Add a source",
+  "clearChat": "Clear chat",
+  "setup": {
+    "banner": "Add an API key or a local model to start.",
+    "action": "Set up"
+  },
+  "noSources": "Select a source, or switch to Web.",
+  "status": {
+    "thinking": "Thinking…",
+    "reading": "Reading your sources…",
+    "searching": "Searching the web…"
+  },
+  "empty": {
+    "title": "Ask your sources",
+    "body_one": "Answers come from your selected source, with citations.",
+    "body_other": "Answers come from your {{count}} selected sources, with citations.",
+    "noSources": "Add a source to begin, or switch to Web to ask anything.",
+    "suggestions": {
+      "summary": "Summarize the key ideas",
+      "questions": "What questions do these sources answer?",
+      "terms": "Explain the most important terms",
+      "plan": "Make a study plan from these sources"
+    }
+  },
+  "sources": {
+    "read_one": "Read {{count}} source",
+    "read_other": "Read {{count}} sources",
+    "searched_one": "Searched {{count}} site",
+    "searched_other": "Searched {{count}} sites",
+    "searching": "Searching the web",
+    "searchingFor": "Searching “{{query}}”",
+    "more_one": "more source",
+    "more_other": "more sources",
+    "showMore": "Show {{count}} more sources",
+    "showLess": "Show less"
+  },
+  "actions": {
+    "label": "Message actions",
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Try again"
+  },
+  "error": "The answer could not be completed: {{error}}",
+  "clear": {
+    "title": "Clear this chat?",
+    "body": "The conversation in this notebook will be deleted. Sources and Studio outputs are kept.",
+    "confirm": "Clear chat"
+  }
+}

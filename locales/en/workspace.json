@@ -1,1 +1,29 @@
-{}
+{
+  "tabs": {
+    "label": "View",
+    "chat": "Chat",
+    "sources": "Sources",
+    "studio": "Studio"
+  },
+  "openStudio": "Open Studio",
+  "openSettings": "Open settings",
+  "notebookMenu": "Notebook options",
+  "allNotebooks": "All notebooks",
+  "newNotebook": "New notebook",
+  "renameNotebook": "Rename notebook",
+  "deleteNotebook": "Delete notebook",
+  "rename": {
+    "title": "Rename notebook",
+    "label": "Name"
+  },
+  "delete": {
+    "title": "Delete “{{title}}”?",
+    "body": "Its sources, chat and Studio outputs will be deleted from this browser. This can't be undone.",
+    "confirm": "Delete notebook"
+  },
+  "notFound": {
+    "title": "Notebook not found",
+    "body": "It may have been deleted, or it was created in another browser.",
+    "action": "Back to notebooks"
+  }
+}
