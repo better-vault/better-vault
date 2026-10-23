@@ -11,7 +11,8 @@
  *
  * Adapted for better-vault: colours use Panel theme tokens, icons come from
  * Hugeicons, a source can carry its own `site` label (notebook sources have
- * no web address), and the component's words can be translated (`strings`).
+ * no web address), the component's words can be translated (`strings`), and
+ * pressing a card can be handled (`onSourceSelect`).
  */
 
 import {
@@ -148,6 +149,8 @@ const DEFAULT_STRINGS: WebSearchStrings = {
 export type WebSearchProps = Omit<ComponentProps<"div">, "children"> & {
   sources: WebSource[];
   strings?: Partial<WebSearchStrings>;
+  /** better-vault: called when a source card is pressed, e.g. to open a notebook source. */
+  onSourceSelect?: (source: WebSource) => void;
   status?: WebSearchStatus;
   query?: string;
   label?: string;
@@ -161,6 +164,7 @@ export type WebSearchProps = Omit<ComponentProps<"div">, "children"> & {
 function WebSearch({
   sources,
   strings: stringsProp,
+  onSourceSelect,
   status = "done",
   query,
   label,
@@ -309,6 +313,7 @@ function WebSearch({
                       source={source}
                       index={i + 1}
                       linked={linked}
+                      onSelect={onSourceSelect}
                     />,
                   ),
                 )}
@@ -411,20 +416,35 @@ function SourceCard({
   source,
   index,
   linked,
+  onSelect,
 }: {
   source: WebSource;
   index: number;
   linked: boolean;
+  onSelect?: (source: WebSource) => void;
 }) {
   return (
     <a
       data-slot="web-search-source"
       {...linkTo(source.url, linked)}
       title={source.title}
+      role={!linked && onSelect ? "button" : undefined}
+      tabIndex={!linked && onSelect ? 0 : undefined}
+      onClick={onSelect ? () => onSelect(source) : undefined}
+      onKeyDown={
+        !linked && onSelect
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSelect(source);
+              }
+            }
+          : undefined
+      }
       className={cn(
         CARD_SHELL,
         "group justify-between",
-        !linked && "cursor-default",
+        !linked && !onSelect && "cursor-default",
       )}
     >
       <span className="line-clamp-2 text-[12.5px] font-semibold leading-[17px] text-foreground/85 transition-colors group-hover:text-foreground">
@@ -741,6 +761,7 @@ function WebSearchCitation({
       {...props}
     >
       <a
+        data-slot="web-search-citation-link"
         {...linkTo(source.url, linked)}
         tabIndex={linked ? undefined : 0}
         aria-label={`${source.title}, ${placeOf(source)}`}

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/panelui/button";
+import { ChatProvider } from "@/components/chat/chat-provider";
+import { PromptBar } from "@/components/chat/prompt-bar";
 import { Tabs } from "@/components/panelui/tabs";
 import { AddSourceDialog } from "@/components/sources/add-source-dialog";
 import { SourceReader } from "@/components/sources/source-reader";
@@ -21,7 +23,9 @@ export function Workspace({ notebookId }: { notebookId: string }) {
   if (notebook === null) return <NotebookNotFound />;
   return (
     <WorkspaceProvider notebook={notebook}>
-      <WorkspaceLayout />
+      <ChatProvider notebookId={notebook.id}>
+        <WorkspaceLayout />
+      </ChatProvider>
     </WorkspaceProvider>
   );
 }
@@ -51,6 +55,7 @@ function WorkspaceLayout() {
         <Tabs.Content value="studio" className="h-full">
           <StudioView />
         </Tabs.Content>
+        <PromptBar />
       </div>
       <AddSourceDialog notebookId={notebook.id} open={addSourceOpen} onOpenChange={setAddSourceOpen} />
       <SourceReader reading={reading} onClose={closeReader} />

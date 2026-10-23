@@ -132,3 +132,70 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Text written by the model (chat answers, reports). Tokens only. */
+@layer components {
+  .markdown {
+    @apply text-[0.9375rem] leading-7 text-foreground;
+    overflow-wrap: anywhere;
+  }
+  .markdown > * + * {
+    @apply mt-3;
+  }
+  .markdown h1 {
+    @apply mt-6 text-2xl font-semibold tracking-tight first:mt-0;
+  }
+  .markdown h2 {
+    @apply mt-6 text-xl font-semibold tracking-tight first:mt-0;
+  }
+  .markdown h3,
+  .markdown h4 {
+    @apply mt-5 text-base font-semibold first:mt-0;
+  }
+  .markdown ul {
+    @apply list-disc ps-5;
+  }
+  .markdown ol {
+    @apply list-decimal ps-5;
+  }
+  .markdown li + li {
+    @apply mt-1;
+  }
+  .markdown li > ul,
+  .markdown li > ol {
+    @apply mt-1;
+  }
+  .markdown li::marker {
+    @apply text-muted-foreground;
+  }
+  .markdown strong {
+    @apply font-semibold;
+  }
+  .markdown a:not([data-slot]) {
+    @apply font-medium underline underline-offset-4;
+  }
+  .markdown blockquote {
+    @apply border-s-2 ps-4 text-muted-foreground;
+  }
+  .markdown code {
+    @apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  .markdown pre {
+    @apply overflow-x-auto rounded-xl bg-muted p-4 text-sm leading-6;
+  }
+  .markdown pre code {
+    @apply bg-transparent p-0;
+  }
+  .markdown hr {
+    @apply my-6 border-border;
+  }
+  .markdown table {
+    @apply block w-full overflow-x-auto text-sm;
+  }
+  .markdown th {
+    @apply border-b px-3 py-2 text-start font-semibold;
+  }
+  .markdown td {
+    @apply border-b px-3 py-2 align-top;
+  }
+}
