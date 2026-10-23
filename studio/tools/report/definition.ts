@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passageRefSchema } from "@/lib/grounding/passage-schema";
 import { stripCitations } from "@/lib/grounding/passages";
 import { defineTool, textBlob } from "@/studio/types";
 
@@ -12,19 +13,10 @@ export const reportOptions = z.object({
   length: z.enum(reportLengths).default("standard"),
 });
 
-const passageRef = z.object({
-  n: z.number(),
-  chunkId: z.string(),
-  sourceId: z.string(),
-  title: z.string(),
-  kind: z.enum(["text", "markdown", "pdf", "url"]),
-  snippet: z.string(),
-});
-
 export const reportData = z.object({
   markdown: z.string(),
   /** The passages the report may cite as [n]. */
-  passages: z.array(passageRef),
+  passages: z.array(passageRefSchema),
 });
 
 export type ReportOptions = z.infer<typeof reportOptions>;
