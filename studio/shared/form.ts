@@ -4,6 +4,8 @@ export interface ToolFormProps<Options> {
   onChange: (value: Options) => void;
   focus: string;
   onFocusChange: (focus: string) => void;
+  /** The sources chosen in the dialog. */
+  sourceIds: string[];
 }
 
 /** What a tool's viewer receives. */

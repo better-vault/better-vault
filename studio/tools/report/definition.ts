@@ -3,11 +3,13 @@ import { stripCitations } from "@/lib/grounding/passages";
 import { defineTool, textBlob } from "@/studio/types";
 
 export const reportTemplates = ["briefing", "study-guide", "blog-post", "custom"] as const;
+export const reportLengths = ["short", "standard", "long"] as const;
 
 export const reportOptions = z.object({
   template: z.enum(reportTemplates),
-  /** The user's own description, for the "custom" template. */
+  /** The user's own description, for the "custom" template or a suggested format. */
   instructions: z.string().max(4000),
+  length: z.enum(reportLengths).default("standard"),
 });
 
 const passageRef = z.object({
@@ -31,7 +33,7 @@ export type ReportData = z.infer<typeof reportData>;
 export const reportTool = defineTool({
   id: "report",
   options: reportOptions,
-  defaults: { template: "briefing", instructions: "" } satisfies ReportOptions,
+  defaults: { template: "briefing", instructions: "", length: "standard" } satisfies ReportOptions,
   data: reportData,
   exports: [
     {

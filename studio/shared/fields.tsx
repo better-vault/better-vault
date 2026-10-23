@@ -171,7 +171,8 @@ export function OptionCards<Value extends string>({
   columns = 2,
 }: {
   label: string;
-  value: Value;
+  /** The chosen option; any other value leaves every card unchosen. */
+  value: string;
   onChange: (value: Value) => void;
   options: readonly OptionCard<Value>[];
   columns?: 2 | 3;

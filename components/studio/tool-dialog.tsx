@@ -86,7 +86,7 @@ function ToolForm({ notebookId, toolId, onDone }: { notebookId: string; toolId: 
         description={t(`tools.${toolId}.description`)}
       />
       <Dialog.Body>
-        <Form value={options} onChange={setOptions} focus={focus} onFocusChange={setFocus} />
+        <Form value={options} onChange={setOptions} focus={focus} onFocusChange={setFocus} sourceIds={chosen} />
         <div className="grid gap-4 sm:grid-cols-2">
           <LanguageField value={language} onChange={setLanguage} />
           <SourcesField sources={sources ?? []} value={chosen} onChange={setSourceIds} />

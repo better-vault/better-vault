@@ -4,9 +4,8 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from "r
 import { useTranslation } from "react-i18next";
 import { db, type StudioOutput } from "@/lib/db/database";
 import { createOutput, failOutput, finishOutput, markInterruptedOutputs } from "@/lib/db/outputs";
-import { activeModel, contextCharsFor, credentialsFor, getSettings } from "@/lib/db/settings";
-import { getChunks } from "@/lib/db/sources";
-import { selectPassages } from "@/lib/grounding/passages";
+import { activeModel, getSettings } from "@/lib/db/settings";
+import { modelRequestFor, NoModelError, NoSourcesError } from "@/lib/studio/request";
 import type { StudioToolId } from "@/studio/tools";
 import type { SavedOptions } from "@/studio/types";
 
@@ -34,18 +33,7 @@ export function StudioRunnerProvider({ notebookId, children }: { notebookId: str
     async function run(outputId: string, toolId: StudioToolId, saved: SavedOptions) {
       running.add(outputId);
       try {
-        const settings = await getSettings();
-        const model = activeModel(settings);
-        if (!model) throw new Error(t("errors.noModel"));
-        const sources = (await db.sources.bulkGet(saved.common.sourceIds)).filter((source) => source !== undefined);
-        const chunks = await getChunks(sources.map((source) => source.id));
-        const passages = selectPassages({
-          sources,
-          chunks,
-          budget: contextCharsFor(settings, model.provider),
-          query: saved.common.focus,
-        });
-        if (passages.length === 0) throw new Error(t("errors.noSources"));
+        const { model, credentials, passages } = await modelRequestFor(saved.common.sourceIds, saved.common.focus);
 
         const response = await fetch("/api/studio", {
           method: "POST",
@@ -57,14 +45,22 @@ export function StudioRunnerProvider({ notebookId, children }: { notebookId: str
             focus: saved.common.focus,
             passages,
             model,
-            credentials: credentialsFor(settings, model.provider),
+            credentials,
           }),
         });
         const body = (await response.json().catch(() => ({}))) as { title?: string; data?: unknown; error?: string };
         if (!response.ok || body.title === undefined) throw new Error(body.error ?? response.statusText);
         await finishOutput(outputId, { title: body.title, data: body.data });
       } catch (error) {
-        await failOutput(outputId, error instanceof Error ? error.message : String(error));
+        const message =
+          error instanceof NoModelError
+            ? t("errors.noModel")
+            : error instanceof NoSourcesError
+              ? t("errors.noSources")
+              : error instanceof Error
+                ? error.message
+                : String(error);
+        await failOutput(outputId, message);
       } finally {
         running.delete(outputId);
       }

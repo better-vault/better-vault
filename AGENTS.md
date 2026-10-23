@@ -49,6 +49,8 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 - **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship.
 - **Text:** every user-facing string goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error.
 - **Direction:** use logical utilities (`ms-*`, `pe-*`, `start-*`, `text-start`) so right-to-left languages work.
+- **CSS:** keep a single `@layer components` block in `app/globals.css`; the Turbopack Tailwind loader drops any later one.
+- **Scrolling:** pages scroll in shadcn's `ScrollArea` (`components/ui/scroll-area.tsx`), never the browser's bar. Panel sheet and dialog bodies have their own.
 - **Accessibility:** icon-only buttons need an `aria-label` (translated).
 
 ## Code map

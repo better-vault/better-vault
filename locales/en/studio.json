@@ -105,7 +105,20 @@
       }
     },
     "instructions": "Describe the report",
-    "instructionsPlaceholder": "For example: a one-page summary for a beginner, with a table of key terms"
+    "instructionsPlaceholder": "For example: a one-page summary for a beginner, with a table of key terms",
+    "length": "Length",
+    "lengths": {
+      "short": "Short",
+      "standard": "Standard",
+      "long": "Long"
+    },
+    "suggested": "Suggested for your sources",
+    "loadingSuggestions": "Finding formats that suit your sources…",
+    "viewer": {
+      "contents": "Contents",
+      "readingTime_one": "{{count}} min read",
+      "readingTime_other": "{{count}} min read"
+    }
   },
   "flashcards": {
     "amount": "Number of cards",

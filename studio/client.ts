@@ -20,12 +20,14 @@ export interface ToolClient {
   wide?: boolean;
   /** Viewers that fill the height of the Studio tab. */
   fill?: boolean;
+  /** Viewers that use a wider page, e.g. a document with its table of contents. */
+  wideViewer?: boolean;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** How each available tool looks in the browser: its dialog form and its viewer. */
 export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
-  report: { Form: ReportForm, Viewer: ReportViewer, wide: true },
+  report: { Form: ReportForm, Viewer: ReportViewer, wide: true, wideViewer: true },
   flashcards: { Form: FlashcardsForm, Viewer: FlashcardsViewer },
   quiz: { Form: QuizForm, Viewer: QuizViewer },
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },

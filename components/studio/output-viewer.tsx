@@ -52,7 +52,7 @@ export function OutputViewer({ id }: { id: string }) {
         <div
           className={cn(
             "mx-auto flex w-full flex-1 flex-col pt-2",
-            client?.fill ? "max-w-6xl" : "max-w-4xl",
+            client?.fill || client?.wideViewer ? "max-w-6xl" : "max-w-4xl",
           )}
         >
           <header className="flex flex-wrap items-center gap-3 pb-5">

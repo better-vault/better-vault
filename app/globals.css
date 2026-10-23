@@ -204,4 +204,33 @@
   .markdown td {
     @apply border-b px-3 py-2 align-top;
   }
+
+  /* A report read as a document: larger section headings and roomier text. */
+  .markdown-document {
+    @apply text-base leading-7;
+  }
+  .markdown-document > * + * {
+    @apply mt-4;
+  }
+  .markdown-document h2 {
+    @apply mt-12 scroll-mt-6 text-[1.625rem] leading-tight font-semibold tracking-tight first:mt-0;
+  }
+  .markdown-document h3 {
+    @apply mt-8 scroll-mt-6 text-lg font-semibold;
+  }
+  .markdown-document li + li {
+    @apply mt-2;
+  }
+  .markdown-document blockquote {
+    @apply rounded-e-2xl border-s-4 border-chart-2/60 bg-muted/50 py-3 ps-5 pe-4 text-foreground/85 not-italic;
+  }
+  .markdown-document table {
+    @apply rounded-xl border;
+  }
+  .markdown-document thead {
+    @apply bg-muted;
+  }
+  .markdown-document tbody tr:nth-child(even) {
+    @apply bg-muted/30;
+  }
 }
