@@ -238,6 +238,8 @@ export interface DialogContentProps extends Omit<ComponentProps<'div'>, 'childre
   size?: 'sm' | 'md' | 'lg';
   /** Show the round close button in the top trailing corner. Default `true`. */
   showClose?: boolean;
+  /** What a screen reader calls the close button. Default `Close`. (better-vault: for translation.) */
+  closeLabel?: string;
   /** Frost the page behind it instead of only dimming it. */
   blur?: boolean;
   /**
@@ -254,6 +256,7 @@ function DialogContent({
   variant = 'inset',
   size = 'md',
   showClose = true,
+  closeLabel = 'Close',
   blur = false,
   inline = false,
   className,
@@ -272,7 +275,7 @@ function DialogContent({
       <div data-slot="dialog-panel" className={slots.panel()}>
         {rest}
         {/* Last in the order, so focus starts on the task, not the way out. */}
-        {showClose ? <DialogClose aria-label="Close" className={slots.close()} icon /> : null}
+        {showClose ? <DialogClose aria-label={closeLabel} className={slots.close()} icon /> : null}
       </div>
       {footer}
     </DialogContext.Provider>

@@ -565,6 +565,8 @@ export interface SheetContentProps extends Omit<ComponentProps<'div'>, 'children
   showGrabber?: boolean;
   /** Show the round close button in the top trailing corner. Default true. */
   showClose?: boolean;
+  /** What a screen reader calls the close button. Default `Close`. (better-vault: for translation.) */
+  closeLabel?: string;
   /** Frost the page behind the sheet instead of only dimming it. */
   blur?: boolean;
   /**
@@ -582,6 +584,7 @@ function SheetContent({
   size = 'auto',
   showGrabber,
   showClose = true,
+  closeLabel = 'Close',
   blur = false,
   inline = false,
   className,
@@ -600,7 +603,7 @@ function SheetContent({
   const inside = (
     <>
       {(showGrabber ?? vertical) ? <div aria-hidden className={slots.grabber()} /> : null}
-      {showClose ? <SheetClose aria-label="Close" className={slots.close()} icon /> : null}
+      {showClose ? <SheetClose aria-label={closeLabel} className={slots.close()} icon /> : null}
       {children}
     </>
   );

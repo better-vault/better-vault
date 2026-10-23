@@ -314,10 +314,12 @@ export interface MessageActionProps extends Omit<ComponentProps<'button'>, 'chil
   copy?: string | (() => string);
   /** For a toggle such as a thumbs-up: whether it is on. */
   pressed?: boolean;
+  /** Shown for a moment after `copy`. Default `Copied`. (better-vault: for translation.) */
+  copiedLabel?: string;
 }
 
 /** An icon button with a tooltip: copy, retry, rate, share. */
-function MessageAction({ label, children, copy, pressed, onClick, className, ...props }: MessageActionProps) {
+function MessageAction({ label, children, copy, pressed, copiedLabel = 'Copied', onClick, className, ...props }: MessageActionProps) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -336,7 +338,7 @@ function MessageAction({ label, children, copy, pressed, onClick, className, ...
     timer.current = setTimeout(() => setCopied(false), 1600);
   };
 
-  const shown = copied ? 'Copied' : label;
+  const shown = copied ? copiedLabel : label;
   return (
     <Tooltip.Root>
       <Tooltip.Trigger
