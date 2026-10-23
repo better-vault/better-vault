@@ -7,6 +7,9 @@ import { buttonVariants } from "@/components/panelui/button";
 import { ChatProvider } from "@/components/chat/chat-provider";
 import { PromptBar } from "@/components/chat/prompt-bar";
 import { Tabs } from "@/components/panelui/tabs";
+import { OutputActionDialogs } from "@/components/studio/output-action-dialogs";
+import { StudioRunnerProvider } from "@/components/studio/studio-runner";
+import { ToolDialog } from "@/components/studio/tool-dialog";
 import { AddSourceDialog } from "@/components/sources/add-source-dialog";
 import { SourceReader } from "@/components/sources/source-reader";
 import { useNotebook } from "@/lib/db/notebooks";
@@ -24,14 +27,17 @@ export function Workspace({ notebookId }: { notebookId: string }) {
   return (
     <WorkspaceProvider notebook={notebook}>
       <ChatProvider notebookId={notebook.id}>
-        <WorkspaceLayout />
+        <StudioRunnerProvider notebookId={notebook.id}>
+          <WorkspaceLayout />
+        </StudioRunnerProvider>
       </ChatProvider>
     </WorkspaceProvider>
   );
 }
 
 function WorkspaceLayout() {
-  const { notebook, tab, setTab, addSourceOpen, setAddSourceOpen, reading, closeReader } = useWorkspace();
+  const { notebook, tab, setTab, addSourceOpen, setAddSourceOpen, reading, closeReader, activeTool, closeTool } =
+    useWorkspace();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -46,8 +52,10 @@ function WorkspaceLayout() {
     >
       <TopBar />
       <div className="relative min-h-0 flex-1">
-        <Tabs.Content value="chat" keepMounted className="h-full">
+        {/* The prompt belongs to the chat; kept mounted so a draft survives a tab switch. */}
+        <Tabs.Content value="chat" keepMounted className="relative h-full">
           <ChatView />
+          <PromptBar />
         </Tabs.Content>
         <Tabs.Content value="sources" className="h-full">
           <SourcesView />
@@ -55,10 +63,11 @@ function WorkspaceLayout() {
         <Tabs.Content value="studio" className="h-full">
           <StudioView />
         </Tabs.Content>
-        <PromptBar />
       </div>
       <AddSourceDialog notebookId={notebook.id} open={addSourceOpen} onOpenChange={setAddSourceOpen} />
       <SourceReader reading={reading} onClose={closeReader} />
+      <ToolDialog notebookId={notebook.id} toolId={activeTool} onClose={closeTool} />
+      <OutputActionDialogs />
     </Tabs>
   );
 }

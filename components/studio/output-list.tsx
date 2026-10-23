@@ -7,14 +7,12 @@ import {
   MoreVerticalIcon,
   PencilEdit01Icon,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ConfirmDialog } from "@/components/common/confirm-dialog";
-import { RenameDialog } from "@/components/common/rename-dialog";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
+import { useWorkspace } from "@/components/workspace/workspace-context";
 import type { StudioOutput } from "@/lib/db/database";
-import { deleteOutput, renameOutput, useOutputs } from "@/lib/db/outputs";
+import { useOutputs } from "@/lib/db/outputs";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { isStudioToolId, studioTools } from "@/studio/tools";
@@ -44,11 +42,14 @@ export function OutputList({
   );
 }
 
+/**
+ * One output: its tool, title and state. Rename and delete open their dialogs
+ * in the workspace, so a sheet showing this row closes first.
+ */
 export function OutputRow({ output, onOpen }: { output: StudioOutput; onOpen: () => void }) {
   const { t, i18n } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
-  const [renaming, setRenaming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const { requestOutputAction } = useWorkspace();
   const tool = isStudioToolId(output.toolId) ? studioTools[output.toolId] : null;
 
   const meta =
@@ -91,32 +92,19 @@ export function OutputRow({ output, onOpen }: { output: StudioOutput; onOpen: ()
           <Icon icon={MoreVerticalIcon} size={16} />
         </Menu.Trigger>
         <Menu.Content align="end">
-          <Menu.Item onClick={() => setRenaming(true)} disabled={output.status !== "ready"}>
+          <Menu.Item
+            onClick={() => requestOutputAction({ kind: "rename", output })}
+            disabled={output.status !== "ready"}
+          >
             <Icon icon={PencilEdit01Icon} />
             {tCommon("actions.rename")}
           </Menu.Item>
-          <Menu.Item variant="destructive" onClick={() => setDeleting(true)}>
+          <Menu.Item variant="destructive" onClick={() => requestOutputAction({ kind: "delete", output })}>
             <Icon icon={Delete02Icon} />
             {tCommon("actions.delete")}
           </Menu.Item>
         </Menu.Content>
       </Menu>
-      <RenameDialog
-        open={renaming}
-        onOpenChange={setRenaming}
-        title={t("rename.title")}
-        label={t("rename.label")}
-        value={output.title}
-        onSave={(title) => renameOutput(output.id, title)}
-      />
-      <ConfirmDialog
-        open={deleting}
-        onOpenChange={setDeleting}
-        title={t("delete.title", { title: output.title })}
-        body={t("delete.body")}
-        confirmLabel={t("delete.confirm")}
-        onConfirm={() => deleteOutput(output.id)}
-      />
     </div>
   );
 }

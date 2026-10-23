@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { Sheet } from "@/components/panelui/sheet";
 import { useWorkspace } from "@/components/workspace/workspace-context";
-import { studioToolIds, studioTools, type StudioToolId } from "@/studio/tools";
+import { studioToolIds, studioTools } from "@/studio/tools";
 import { OutputList } from "./output-list";
 import { ToolTile } from "./tool-tile";
 
@@ -16,13 +16,13 @@ interface StudioSheetProps {
 
 /**
  * The `+` sheet: the Studio's tools, and under them what has been created.
- * A tool opens its dialog; an output opens in the Studio tab.
+ * Choosing a tool closes the sheet and opens the tool's dialog; choosing an
+ * output closes it and opens the output in the Studio tab.
  */
 export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
   const { t } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
-  const { notebook, openOutput } = useWorkspace();
-  const [, setActiveTool] = useState<StudioToolId | null>(null);
+  const { notebook, openOutput, openTool } = useWorkspace();
 
   return (
     <Sheet side="left" open={open} onOpenChange={onOpenChange}>
@@ -35,7 +35,7 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
         <Sheet.Body>
           <div className="grid grid-cols-2 gap-2">
             {studioToolIds.map((id) => (
-              <ToolTile key={id} tool={studioTools[id]} onSelect={() => setActiveTool(id)} />
+              <ToolTile key={id} tool={studioTools[id]} onSelect={() => openTool(id)} />
             ))}
           </div>
           <section className="mt-6 pb-4">

@@ -1,0 +1,34 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
+import { ChoiceField, FocusField } from "@/studio/shared/fields";
+import type { ToolFormProps } from "@/studio/shared/form";
+import { amounts, difficulties, type FlashcardsOptions } from "./definition";
+
+export function FlashcardsForm({ value, onChange, focus, onFocusChange }: ToolFormProps<FlashcardsOptions>) {
+  const { t } = useTranslation("studio");
+  return (
+    <>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ChoiceField
+          label={t("flashcards.amount")}
+          value={value.amount}
+          onChange={(amount) => onChange({ ...value, amount })}
+          options={amounts.map((amount) => ({ value: amount, label: t(`choices.${amount}`) }))}
+        />
+        <ChoiceField
+          label={t("flashcards.difficulty")}
+          value={value.difficulty}
+          onChange={(difficulty) => onChange({ ...value, difficulty })}
+          options={difficulties.map((difficulty) => ({ value: difficulty, label: t(`choices.${difficulty}`) }))}
+        />
+      </div>
+      <FocusField
+        label={t("flashcards.focusLabel")}
+        placeholder={t("flashcards.focusPlaceholder")}
+        value={focus}
+        onChange={onFocusChange}
+      />
+    </>
+  );
+}

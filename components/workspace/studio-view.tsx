@@ -5,14 +5,17 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { OutputList } from "@/components/studio/output-list";
+import { OutputViewer } from "@/components/studio/output-viewer";
 import { useOutputs } from "@/lib/db/outputs";
 import { useWorkspace } from "./workspace-context";
 
 /** The Studio tab: the open output, or every output when none is open. */
 export function StudioView() {
   const { t } = useTranslation("studio");
-  const { notebook, openOutput, setStudioOpen } = useWorkspace();
+  const { notebook, openOutput, openOutputId, setStudioOpen } = useWorkspace();
   const outputs = useOutputs(notebook.id);
+
+  if (openOutputId) return <OutputViewer id={openOutputId} />;
 
   if (outputs && outputs.length === 0) {
     return (
@@ -30,7 +33,7 @@ export function StudioView() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 pb-40 sm:px-6">
+    <div className="h-full overflow-y-auto px-4 pb-10 sm:px-6">
       <div className="mx-auto max-w-2xl pt-4">
         <h2 className="mb-3 px-1 text-sm font-medium text-muted-foreground">{t("view.all")}</h2>
         <OutputList notebookId={notebook.id} onOpen={(output) => openOutput(output.id)} />

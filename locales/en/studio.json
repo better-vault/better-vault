@@ -60,5 +60,175 @@
     "generatingBody": "This can take a minute. You can keep working meanwhile.",
     "failedTitle": "This one didn't work",
     "retry": "Try again"
+  },
+  "dialog": {
+    "create": "Create",
+    "language": "Output language",
+    "languageAuto": "Same as the sources",
+    "sources": "Sources",
+    "allSources": "All sources",
+    "focus": "Focus",
+    "optional": "Optional",
+    "focusPlaceholder": "For example: concentrate on financing a new venture"
+  },
+  "errors": {
+    "noModel": "Set up a model in Settings first.",
+    "noSources": "Choose at least one source.",
+    "failed": "Could not create it: {{error}}"
+  },
+  "choices": {
+    "fewer": "Fewer",
+    "standard": "Standard",
+    "more": "More",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "report": {
+    "format": "Format",
+    "templates": {
+      "briefing": {
+        "name": "Briefing doc",
+        "description": "An overview of your sources with key insights and quotes."
+      },
+      "study-guide": {
+        "name": "Study guide",
+        "description": "A short-answer quiz, essay questions and a glossary."
+      },
+      "blog-post": {
+        "name": "Blog post",
+        "description": "The most insightful takeaways in a readable article."
+      },
+      "custom": {
+        "name": "Create your own",
+        "description": "Describe the structure, style and tone you want."
+      }
+    },
+    "instructions": "Describe the report",
+    "instructionsPlaceholder": "For example: a one-page summary for a beginner, with a table of key terms"
+  },
+  "flashcards": {
+    "amount": "Number of cards",
+    "difficulty": "Difficulty",
+    "focusLabel": "What should they cover?",
+    "focusPlaceholder": "For example: the definitions in chapter two",
+    "viewer": {
+      "hint": "Space flips the card; ← and → move between cards.",
+      "flip": "Show answer",
+      "flipBack": "Show question",
+      "previous": "Previous card",
+      "next": "Next card",
+      "knew": "I knew it",
+      "missed": "Still learning",
+      "progress": "{{current}} / {{total}}",
+      "shuffle": "Shuffle",
+      "restart": "Start over",
+      "finished": "Done! You knew {{known}} of {{total}}.",
+      "practiceMissed_one": "Practise the card you missed",
+      "practiceMissed_other": "Practise the {{count}} you missed"
+    }
+  },
+  "quiz": {
+    "amount": "Number of questions",
+    "difficulty": "Difficulty",
+    "focusLabel": "What should it cover?",
+    "focusPlaceholder": "For example: the stages of launching a venture",
+    "viewer": {
+      "progress": "Question {{current}} of {{total}}",
+      "showHint": "Show a hint",
+      "next": "Next question",
+      "finish": "See results",
+      "correct": "Correct",
+      "incorrect": "Not quite",
+      "score": "You got {{score}} of {{total}} right",
+      "retry": "Try again",
+      "answer": "Answer: {{answer}}"
+    }
+  },
+  "data-table": {
+    "focusLabel": "Describe the table",
+    "focusPlaceholder": "For example: each concept with its definition, an example and where it appears",
+    "viewer": {
+      "rows_one": "{{count}} row",
+      "rows_other": "{{count}} rows",
+      "copyMarkdown": "Copy as Markdown"
+    }
+  },
+  "mind-map": {
+    "diagram": "Kind of diagram",
+    "detail": "Level of detail",
+    "details": {
+      "concise": "Concise",
+      "standard": "Standard",
+      "detailed": "Detailed"
+    },
+    "focusLabel": "What should it show?",
+    "focusPlaceholder": "For example: how a business idea becomes a company",
+    "diagrams": {
+      "mindmap": {
+        "name": "Mind map",
+        "description": "The central topic and its branches"
+      },
+      "flowchart": {
+        "name": "Flowchart",
+        "description": "Steps and decisions of a process"
+      },
+      "timeline": {
+        "name": "Timeline",
+        "description": "Events in order"
+      },
+      "sequence": {
+        "name": "Sequence",
+        "description": "Who does what, step by step"
+      },
+      "state": {
+        "name": "Stages",
+        "description": "States and what moves between them"
+      },
+      "class": {
+        "name": "Concept model",
+        "description": "Concepts, attributes and relations"
+      },
+      "er": {
+        "name": "Relationships",
+        "description": "Things and how they relate"
+      },
+      "quadrant": {
+        "name": "Quadrant chart",
+        "description": "Items placed on two axes"
+      },
+      "journey": {
+        "name": "Journey",
+        "description": "Stages of an experience and how they feel"
+      },
+      "ishikawa": {
+        "name": "Cause and effect",
+        "description": "A fishbone of causes behind a problem"
+      },
+      "kanban": {
+        "name": "Kanban board",
+        "description": "Tasks grouped in columns"
+      },
+      "gantt": {
+        "name": "Gantt chart",
+        "description": "Tasks over time"
+      }
+    },
+    "viewer": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit to view",
+      "copyCode": "Copy Mermaid code",
+      "downloadSvg": "Download SVG",
+      "renderError": "This diagram could not be drawn: {{error}}"
+    }
+  },
+  "viewer": {
+    "back": "All outputs",
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied",
+    "actions": "Output actions",
+    "meta": "{{sources}} · {{model}} · {{time}}"
   }
 }
