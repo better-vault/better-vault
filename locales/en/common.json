@@ -1,0 +1,35 @@
+{
+  "appName": "better-vault",
+  "tagline": "Your sources, your model.",
+  "actions": {
+    "add": "Add",
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "copied": "Copied",
+    "create": "Create",
+    "delete": "Delete",
+    "done": "Done",
+    "download": "Download",
+    "edit": "Edit",
+    "open": "Open",
+    "remove": "Remove",
+    "rename": "Rename",
+    "retry": "Try again",
+    "save": "Save"
+  },
+  "status": {
+    "loading": "Loading…",
+    "generating": "Generating…",
+    "error": "Something went wrong",
+    "saved": "Saved"
+  },
+  "badges": {
+    "new": "New",
+    "soon": "Soon"
+  },
+  "sourceCount_one": "{{count}} source",
+  "sourceCount_other": "{{count}} sources"
+}
