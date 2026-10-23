@@ -219,8 +219,19 @@
       "zoomOut": "Zoom out",
       "fit": "Fit to view",
       "copyCode": "Copy Mermaid code",
-      "downloadSvg": "Download SVG",
-      "renderError": "This diagram could not be drawn: {{error}}"
+      "renderError": "This diagram could not be drawn: {{error}}",
+      "views": {
+        "tree": "Tree",
+        "diagram": "Diagram"
+      },
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "expand": "Show the branches of {{label}}",
+      "collapse": "Hide the branches of {{label}}",
+      "ask": "Ask about {{label}} in the chat",
+      "hint": "Click a topic to ask about it in the chat.",
+      "question": "Discuss what the sources say about “{{topic}}”, in the context of “{{parents}}”.",
+      "questionRoot": "Discuss what the sources say about “{{topic}}”."
     }
   },
   "viewer": {
@@ -229,6 +240,21 @@
     "copy": "Copy",
     "copied": "Copied",
     "actions": "Output actions",
-    "meta": "{{sources}} · {{model}} · {{time}}"
+    "meta": "{{sources}} · {{model}} · {{time}}",
+    "downloadAs": "Download as",
+    "formats": {
+      "docx": "Word document (.docx)",
+      "xlsx": "Excel workbook (.xlsx)",
+      "csv": "CSV file (.csv)",
+      "md": "Markdown (.md)",
+      "svg": "SVG image (.svg)",
+      "png": "PNG image (.png)",
+      "mmd": "Mermaid code (.mmd)"
+    }
+  },
+  "export": {
+    "question": "Question",
+    "answer": "Answer",
+    "answerKey": "Answer key"
   }
 }

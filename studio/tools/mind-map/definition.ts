@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defineTool } from "@/studio/types";
+import { defineTool, textBlob } from "@/studio/types";
 
 /** Diagram kinds offered, all rendered by Pele from Mermaid text. */
 export const diagramKinds = [
@@ -39,5 +39,22 @@ export const mindMapTool = defineTool({
   options: mindMapOptions,
   defaults: { diagram: "mindmap", detail: "standard" } satisfies MindMapOptions,
   data: mindMapData,
-  download: (_title, data) => ({ content: data.mermaid, extension: "mmd", type: "text/plain" }),
+  exports: [
+    {
+      format: "png",
+      build: async (_title, data) => {
+        const [{ exportSvg }, { svgToPng }] = await Promise.all([import("./render"), import("@/studio/exports/image")]);
+        const image = await exportSvg(data);
+        return svgToPng(image.svg, image.width, image.height);
+      },
+    },
+    {
+      format: "svg",
+      build: async (_title, data) => {
+        const { exportSvg } = await import("./render");
+        return textBlob((await exportSvg(data)).svg, "image/svg+xml");
+      },
+    },
+    { format: "mmd", build: async (_title, data) => textBlob(data.mermaid, "text/plain") },
+  ],
 });
