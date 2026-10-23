@@ -143,7 +143,10 @@ const sheetVariants = tv({
     description: 'text-[15px] leading-5 text-muted-foreground',
     body: 'relative flex min-h-0 flex-1 flex-col',
     bodyViewport: 'min-h-0 flex-1 overscroll-contain outline-none',
-    bodyContent: 'px-6 pb-2',
+    // better-vault: Base UI's scroll content is `min-width: fit-content`, so one
+    // long unbroken line widened the sheet and showed a horizontal scrollbar.
+    // The body only scrolls down; `min-w-0!` keeps it to the sheet's width.
+    bodyContent: 'min-w-0! px-6 pb-2',
     scrollbar:
       'my-3 me-1 flex w-1.5 opacity-0 transition-opacity delay-300 data-hovering:opacity-100 data-hovering:delay-0 data-scrolling:opacity-100 data-scrolling:delay-0',
     thumb: 'relative flex-1 rounded-full bg-foreground/20',
