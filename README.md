@@ -36,16 +36,16 @@ better-vault is a research notebook. You add **sources** (PDFs, web pages, notes
 - **Choose your model.** OpenAI, Anthropic, Google, or a local model through Ollama or LM Studio. You bring the key; nothing is locked to one vendor.
 - **Keep your data.** Everything is stored in your browser (IndexedDB). There is no account and no database, and your keys never leave your browser except to reach the model you picked.
 
-| Studio tool                                                                                                                         | Status           |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| Reports (briefing doc, study guide, blog post, custom)                                                                              | v0.1             |
-| Flashcards                                                                                                                          | v0.1             |
-| Quiz                                                                                                                                | v0.1             |
-| Data table                                                                                                                          | v0.1             |
-| Mind map and other diagrams, rendered with [Pele](https://pele.run)                                                                 | v0.1             |
-| Slide deck                                                                                                                          | planned for v0.2 |
-| Infographic                                                                                                                         | planned for v0.2 |
-| **Explain with an anatomy diagram**: an interactive, explorable figure, inspired by [Anatomy](https://skills.wheresryan.sh/anatomy) | planned for v0.2 |
+| Studio tool                                                                                                                | What you get                                                                                                                                                                                               | Download as       |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| **Reports**                                                                                                                | Briefing doc, study guide, blog post, your own format, or a format suggested for your sources; read as a document with a table of contents and citations                                                   | Word, Markdown    |
+| **Flashcards**                                                                                                             | Flip cards with keyboard shortcuts, shuffle and "knew it / still learning" tallies                                                                                                                         | Word, CSV (Anki)  |
+| **Quiz**                                                                                                                   | Multiple-choice questions with hints, explanations and a score                                                                                                                                             | Word, Markdown    |
+| **Data table**                                                                                                             | Facts from your sources in rows and columns                                                                                                                                                                | Excel, CSV        |
+| **Mind map**                                                                                                               | An interactive tree like NotebookLM's: open branches, click a topic to ask about it in the chat. Plus 11 more diagram kinds (flowchart, timeline, cause and effect, …) drawn with [Pele](https://pele.run) | PNG, SVG, Mermaid |
+| Slide deck                                                                                                                 | planned for v0.2                                                                                                                                                                                           |                   |
+| Infographic                                                                                                                | planned for v0.2                                                                                                                                                                                           |                   |
+| **Anatomy diagram**: an interactive figure you can take apart, inspired by [Anatomy](https://skills.wheresryan.sh/anatomy) | planned for v0.2                                                                                                                                                                                           |                   |
 
 Audio and video overviews are out of scope.
 
@@ -82,6 +82,15 @@ Local models work when better-vault runs on the same machine as the model server
 - Notebooks, sources, chats and Studio outputs are stored in your browser's IndexedDB. **Settings → Data** exports and imports them as a JSON file.
 - API keys are stored in your browser. Each request sends the key to this app's own API route, which passes it to the provider and never stores or logs it.
 - If you host better-vault for other people, they use their own keys in their own browsers.
+
+### Hosting for others
+
+Two optional environment variables tighten a public deployment:
+
+| Variable                             | Default | Effect                                                                                                                  |
+| ------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS` | `true`  | Set to `false` to turn off Ollama and LM Studio, whose address comes from the user and would make the server fetch it.  |
+| `BETTER_VAULT_ALLOW_PRIVATE_URLS`    | `false` | Set to `true` to let web-page sources point at private or local network addresses (only for trusted, private installs). |
 
 ## 🧱 Tech stack
 

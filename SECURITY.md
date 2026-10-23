@@ -11,7 +11,9 @@ We aim to reply within a week and will credit you in the release notes unless yo
 - API keys are stored in the user's browser (IndexedDB) and sent with each request to the app's own API routes over the same origin.
 - The routes pass keys to the chosen provider and never store or log them.
 - Notebooks, sources and outputs never leave the browser except as model context for the provider the user picked.
-- The web page fetcher (`/api/sources/parse`) only allows `http` and `https` addresses and refuses private and local network addresses.
+- The web page fetcher (`/api/sources/parse`) only allows `http` and `https` addresses and refuses private and local network addresses on every redirect (unless `BETTER_VAULT_ALLOW_PRIVATE_URLS=true`).
+- Ollama and LM Studio addresses come from the user. On a public server, set `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS=false` so the server never fetches user-supplied addresses.
+- Diagrams written by a model are drawn by Pele with links and images turned off.
 
 ## Supported versions
 
