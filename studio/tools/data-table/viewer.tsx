@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { ToolViewerProps } from "@/studio/shared/form";
 import type { DataTableData } from "./definition";
 
@@ -23,7 +24,9 @@ export function DataTableViewer({ data }: ToolViewerProps<DataTableData>) {
   return (
     <div className="flex flex-col gap-3 pb-10">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{t("data-table.viewer.rows", { count: data.rows.length })}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("data-table.viewer.rows", { count: data.rows.length })}
+        </p>
         <Button
           variant="ghost"
           size="sm"
@@ -36,7 +39,7 @@ export function DataTableViewer({ data }: ToolViewerProps<DataTableData>) {
           {t("data-table.viewer.copyMarkdown")}
         </Button>
       </div>
-      <div className="overflow-auto rounded-2xl border">
+      <ScrollArea horizontal className="rounded-2xl border" viewportClassName="max-h-[70vh]">
         <table className="w-full min-w-max border-collapse text-sm">
           <thead className="sticky top-0 bg-muted">
             <tr>
@@ -59,7 +62,7 @@ export function DataTableViewer({ data }: ToolViewerProps<DataTableData>) {
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

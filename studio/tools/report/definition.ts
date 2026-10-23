@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { defineTool } from "@/studio/types";
+import { stripCitations } from "@/lib/grounding/passages";
+import { defineTool, textBlob } from "@/studio/types";
 
 export const reportTemplates = ["briefing", "study-guide", "blog-post", "custom"] as const;
 
@@ -32,9 +33,18 @@ export const reportTool = defineTool({
   options: reportOptions,
   defaults: { template: "briefing", instructions: "" } satisfies ReportOptions,
   data: reportData,
-  download: (title, data) => ({
-    content: `# ${title}\n\n${data.markdown.replace(/\[(\d+(?:\s*[,–-]\s*\d+)*)\](?!\()/g, "")}`,
-    extension: "md",
-    type: "text/markdown",
-  }),
+  exports: [
+    {
+      format: "docx",
+      build: async (title, data) => {
+        const { isRightToLeft, markdownToBlocks, wordDocument } = await import("@/studio/exports/docx");
+        const rtl = isRightToLeft(data.markdown);
+        return wordDocument({ title, rtl, children: markdownToBlocks(data.markdown, data.passages, rtl) });
+      },
+    },
+    {
+      format: "md",
+      build: async (title, data) => textBlob(`# ${title}\n\n${stripCitations(data.markdown)}\n`, "text/markdown"),
+    },
+  ],
 });

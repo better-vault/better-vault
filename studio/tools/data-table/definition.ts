@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { csvRow } from "@/studio/csv";
-import { defineTool } from "@/studio/types";
+import { defineTool, textBlob } from "@/studio/types";
 
 export const dataTableOptions = z.object({});
 
@@ -17,9 +17,26 @@ export const dataTableTool = defineTool({
   options: dataTableOptions,
   defaults: {} satisfies DataTableOptions,
   data: dataTableData,
-  download: (_title, data) => ({
-    content: [csvRow(data.columns), ...data.rows.map(csvRow)].join("\n"),
-    extension: "csv",
-    type: "text/csv",
-  }),
+  exports: [
+    {
+      format: "xlsx",
+      build: async (_title, data) => {
+        const { default: writeExcelFile } = await import("write-excel-file/browser");
+        const longest = (column: number) =>
+          Math.max(data.columns[column].length, ...data.rows.map((row) => row[column]?.length ?? 0));
+        const sheet = [
+          data.columns.map((value) => ({ value, fontWeight: "bold" as const, backgroundColor: "#EFEFEF" })),
+          ...data.rows.map((row) => row.map((value) => ({ value, wrap: true }))),
+        ];
+        return writeExcelFile(sheet, {
+          columns: data.columns.map((_, at) => ({ width: Math.min(60, Math.max(12, longest(at) + 2)) })),
+          stickyRowsCount: 1,
+        }).toBlob();
+      },
+    },
+    {
+      format: "csv",
+      build: async (_title, data) => textBlob([csvRow(data.columns), ...data.rows.map(csvRow)].join("\n"), "text/csv"),
+    },
+  ],
 });

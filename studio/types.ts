@@ -20,9 +20,27 @@ export interface ToolDefinition<Options = unknown, Data = unknown> {
   defaults: Options;
   /** The shape of a finished output. */
   data: z.ZodType<Data>;
-  /** The output as a file, for the Download action. */
-  download?: (title: string, data: Data) => { content: string; extension: string; type: string };
+  /** Files the output can be downloaded as; the first is the main one. */
+  exports?: ExportOption<Data>[];
 }
+
+export type ExportFormat = "docx" | "xlsx" | "csv" | "md" | "svg" | "png" | "mmd";
+
+/** Words written into exported documents, in the UI language. */
+export interface ExportText {
+  question: string;
+  answer: string;
+  answerKey: string;
+}
+
+export interface ExportOption<Data> {
+  format: ExportFormat;
+  /** Builds the file in the browser. Heavy libraries are imported inside, only when needed. */
+  build: (title: string, data: Data, text: ExportText) => Promise<Blob>;
+}
+
+/** A text file as a Blob. */
+export const textBlob = (content: string, type: string) => new Blob([content], { type: `${type};charset=utf-8` });
 
 export function defineTool<Options, Data>(definition: ToolDefinition<Options, Data>) {
   return definition;
