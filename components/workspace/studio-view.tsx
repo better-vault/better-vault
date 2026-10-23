@@ -6,6 +6,7 @@ import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { OutputList } from "@/components/studio/output-list";
 import { OutputViewer } from "@/components/studio/output-viewer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useOutputs } from "@/lib/db/outputs";
 import { useWorkspace } from "./workspace-context";
 
@@ -33,11 +34,11 @@ export function StudioView() {
   }
 
   return (
-    <div className="h-full overflow-y-auto px-4 pb-10 sm:px-6">
-      <div className="mx-auto max-w-2xl pt-4">
+    <ScrollArea className="h-full">
+      <div className="mx-auto max-w-2xl px-4 pt-4 pb-10 sm:px-6">
         <h2 className="mb-3 px-1 text-sm font-medium text-muted-foreground">{t("view.all")}</h2>
         <OutputList notebookId={notebook.id} onOpen={(output) => openOutput(output.id)} />
       </div>
-    </div>
+    </ScrollArea>
   );
 }

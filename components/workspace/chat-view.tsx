@@ -8,6 +8,7 @@ import { AssistantMessage } from "@/components/chat/assistant-message";
 import { useChatSession } from "@/components/chat/chat-provider";
 import { Icon } from "@/components/icon";
 import { Message } from "@/components/panelui/message";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSources } from "@/lib/db/sources";
 import { useWorkspace } from "./workspace-context";
 
@@ -33,18 +34,24 @@ export function ChatView() {
   if (chat.messages.length === 0) return <EmptyChat />;
 
   const retry = () =>
-    chat.retry().catch((error: unknown) => toast.error(error instanceof Error ? error.message : String(error)));
+    chat
+      .retry()
+      .catch((error: unknown) =>
+        toast.error(error instanceof Error ? error.message : String(error)),
+      );
 
   return (
-    <div ref={scroller} className="h-full overflow-y-auto px-4 pb-56 sm:px-6">
-      <div className="mx-auto flex max-w-3xl flex-col gap-8 pt-4">
+    <ScrollArea className="h-full" viewportRef={scroller}>
+      <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pt-4 pb-56 sm:px-6">
         {chat.messages.map((message, at) =>
           message.role === "user" ? (
             <Message key={message.id} from="user">
               <Message.Content>
                 <Message.Bubble>
                   <Message.BubbleContent className="whitespace-pre-wrap">
-                    {message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n")}
+                    {message.parts
+                      .flatMap((part) => (part.type === "text" ? [part.text] : []))
+                      .join("\n")}
                   </Message.BubbleContent>
                 </Message.Bubble>
               </Message.Content>
@@ -68,7 +75,10 @@ export function ChatView() {
           </Message>
         ) : null}
         {chat.status === "error" && chat.error ? (
-          <div role="alert" className="flex items-center gap-3 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <div
+            role="alert"
+            className="flex items-center gap-3 rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
             <span className="min-w-0 flex-1">{t("error", { error: chat.error.message })}</span>
             <button
               type="button"
@@ -80,7 +90,7 @@ export function ChatView() {
           </div>
         ) : null}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 
@@ -92,43 +102,49 @@ function EmptyChat() {
   const selected = sources?.filter((source) => source.selected).length ?? 0;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-4 pb-48 text-center">
-      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("empty.title")}</h2>
-      {sources && selected === 0 ? (
-        <>
-          <p className="mt-2 max-w-md text-muted-foreground">{t("empty.noSources")}</p>
-          <button
-            type="button"
-            onClick={() => setAddSourceOpen(true)}
-            className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Icon icon={Book02Icon} size={16} />
-            {t("addSource")}
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="mt-2 max-w-md text-muted-foreground">{t("empty.body", { count: selected })}</p>
-          <div className="mt-8 flex max-w-xl flex-wrap justify-center gap-2">
-            {SUGGESTIONS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                disabled={chat.status === "submitted" || chat.status === "streaming"}
-                onClick={() =>
-                  chat.send(t(`empty.suggestions.${key}`)).catch((error: unknown) =>
-                    toast.error(error instanceof Error ? error.message : String(error)),
-                  )
-                }
-                className="inline-flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-              >
-                <Icon icon={Idea01Icon} size={16} className="text-chart-4" />
-                {t(`empty.suggestions.${key}`)}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    <ScrollArea className="h-full">
+      <div className="flex min-h-full flex-col items-center justify-center px-4 pt-6 pb-48 text-center">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("empty.title")}</h2>
+        {sources && selected === 0 ? (
+          <>
+            <p className="mt-2 max-w-md text-muted-foreground">{t("empty.noSources")}</p>
+            <button
+              type="button"
+              onClick={() => setAddSourceOpen(true)}
+              className="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium transition-colors outline-none hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Icon icon={Book02Icon} size={16} />
+              {t("addSource")}
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="mt-2 max-w-md text-muted-foreground">
+              {t("empty.body", { count: selected })}
+            </p>
+            <div className="mt-8 flex max-w-xl flex-wrap justify-center gap-2">
+              {SUGGESTIONS.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={chat.status === "submitted" || chat.status === "streaming"}
+                  onClick={() =>
+                    chat
+                      .send(t(`empty.suggestions.${key}`))
+                      .catch((error: unknown) =>
+                        toast.error(error instanceof Error ? error.message : String(error)),
+                      )
+                  }
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                >
+                  <Icon icon={Idea01Icon} size={16} className="text-chart-4" />
+                  {t(`empty.suggestions.${key}`)}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </ScrollArea>
   );
 }

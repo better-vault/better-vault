@@ -16,6 +16,7 @@ import { Input } from "@/components/panelui/input";
 import { Label } from "@/components/panelui/label";
 import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { providerIds, providers, type ProviderId } from "@/lib/ai/catalog";
 import { providerIcons } from "@/lib/ai/provider-icons";
 import {
@@ -61,7 +62,11 @@ export function ProvidersPanel() {
                     aria-hidden
                     className={cn(
                       "size-2 rounded-full",
-                      status === "ready" ? "bg-success" : status === "needsKey" ? "bg-warning" : "bg-muted-foreground/30",
+                      status === "ready"
+                        ? "bg-success"
+                        : status === "needsKey"
+                          ? "bg-warning"
+                          : "bg-muted-foreground/30",
                     )}
                   />
                 }
@@ -171,7 +176,10 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
                     const value = event.target.value;
                     setApiKey(value);
                     // A key being entered means the provider should be used.
-                    save({ apiKey: value.trim(), ...(value.trim() && !saved.enabled ? { enabled: true } : {}) });
+                    save({
+                      apiKey: value.trim(),
+                      ...(value.trim() && !saved.enabled ? { enabled: true } : {}),
+                    });
                   }}
                 />
                 <Input.Addon align="end">
@@ -203,7 +211,11 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
           )}
 
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Icon icon={Globe02Icon} size={16} className={info.webSearch ? "text-info" : undefined} />
+            <Icon
+              icon={Globe02Icon}
+              size={16}
+              className={info.webSearch ? "text-info" : undefined}
+            />
             {info.webSearch ? t("providers.webSearch") : t("providers.noWebSearch")}
           </p>
 
@@ -214,7 +226,7 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
                 type="button"
                 disabled={!canLoad || loading}
                 onClick={loadModels}
-                className="inline-flex cursor-pointer items-center gap-1 text-foreground underline-offset-4 hover:underline disabled:cursor-default disabled:opacity-50 disabled:no-underline"
+                className="inline-flex cursor-pointer items-center gap-1 text-foreground underline-offset-4 hover:underline disabled:cursor-default disabled:no-underline disabled:opacity-50"
               >
                 {loading ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
                 {loading ? t("providers.refreshing") : t("providers.refresh")}
@@ -231,26 +243,28 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
             }
           >
             {models.length > 0 ? (
-              <ul className="flex max-h-48 flex-wrap gap-1.5 overflow-y-auto rounded-xl border p-2">
-                {models.map((model) => (
-                  <li
-                    key={model}
-                    className="flex items-center gap-1 rounded-full bg-muted py-0.5 ps-2.5 pe-1 font-mono text-xs"
-                  >
-                    {model}
-                    {saved.models.length > 0 ? (
-                      <button
-                        type="button"
-                        aria-label={t("providers.removeModel", { model })}
-                        onClick={() => save({ models: saved.models.filter((m) => m !== model) })}
-                        className="cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
-                      >
-                        <Icon icon={Cancel01Icon} size={12} />
-                      </button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+              <ScrollArea className="rounded-xl border" viewportClassName="max-h-48">
+                <ul className="flex flex-wrap gap-1.5 p-2">
+                  {models.map((model) => (
+                    <li
+                      key={model}
+                      className="flex items-center gap-1 rounded-full bg-muted py-0.5 ps-2.5 pe-1 font-mono text-xs"
+                    >
+                      {model}
+                      {saved.models.length > 0 ? (
+                        <button
+                          type="button"
+                          aria-label={t("providers.removeModel", { model })}
+                          onClick={() => save({ models: saved.models.filter((m) => m !== model) })}
+                          className="cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                        >
+                          <Icon icon={Cancel01Icon} size={12} />
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
             ) : null}
             <form
               className="flex gap-2"
@@ -276,7 +290,11 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
           </Field>
 
           {info.local ? (
-            <Field label={t("providers.context")} htmlFor={contextId} hint={t("providers.contextHint")}>
+            <Field
+              label={t("providers.context")}
+              htmlFor={contextId}
+              hint={t("providers.contextHint")}
+            >
               <Input
                 id={contextId}
                 type="number"

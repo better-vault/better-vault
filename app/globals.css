@@ -128,6 +128,12 @@
   html {
     @apply font-sans;
   }
+  /* Pages scroll with shadcn's ScrollArea; anything else that scrolls natively
+     gets a thin bar in the theme's border colour. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
   body {
     @apply bg-background text-foreground;
   }

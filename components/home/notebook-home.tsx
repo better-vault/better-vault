@@ -17,6 +17,7 @@ import { RenameDialog } from "@/components/common/rename-dialog";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Notebook } from "@/lib/db/database";
 import {
   createNotebook,
@@ -53,35 +54,41 @@ export function NotebookHome() {
         </div>
         <SettingsSheet />
       </header>
-      <main className="min-h-0 flex-1 overflow-y-auto px-4 pb-16 sm:px-6">
-        <div className="mx-auto max-w-5xl pt-8 sm:pt-12">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t("title")}</h1>
-          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
+      <ScrollArea className="min-h-0 flex-1">
+        <main className="px-4 pb-16 sm:px-6">
+          <div className="mx-auto max-w-5xl pt-8 sm:pt-12">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t("title")}</h1>
+            <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <button
-              type="button"
-              onClick={create}
-              className="flex h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-muted-foreground outline-none transition-colors hover:border-foreground/30 hover:bg-muted/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Icon icon={Add01Icon} strokeWidth={2.2} />
-              </span>
-              <span className="text-sm font-medium">{t("newNotebook")}</span>
-            </button>
-            {notebooks?.map((notebook) => (
-              <NotebookCard key={notebook.id} notebook={notebook} sources={counts?.get(notebook.id)?.sources ?? 0} />
-            ))}
-          </div>
-
-          {notebooks && notebooks.length === 0 ? (
-            <div className="mt-10 text-center">
-              <p className="font-medium">{t("empty.title")}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{t("empty.body")}</p>
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <button
+                type="button"
+                onClick={create}
+                className="flex h-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-muted-foreground transition-colors outline-none hover:border-foreground/30 hover:bg-muted/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Icon icon={Add01Icon} strokeWidth={2.2} />
+                </span>
+                <span className="text-sm font-medium">{t("newNotebook")}</span>
+              </button>
+              {notebooks?.map((notebook) => (
+                <NotebookCard
+                  key={notebook.id}
+                  notebook={notebook}
+                  sources={counts?.get(notebook.id)?.sources ?? 0}
+                />
+              ))}
             </div>
-          ) : null}
-        </div>
-      </main>
+
+            {notebooks && notebooks.length === 0 ? (
+              <div className="mt-10 text-center">
+                <p className="font-medium">{t("empty.title")}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t("empty.body")}</p>
+              </div>
+            ) : null}
+          </div>
+        </main>
+      </ScrollArea>
     </div>
   );
 }
@@ -104,7 +111,7 @@ function NotebookCard({ notebook, sources }: { notebook: Notebook; sources: numb
         <Icon icon={Notebook01Icon} />
       </span>
       <div className="pointer-events-none mt-auto min-w-0">
-        <p className="line-clamp-2 font-semibold leading-snug">{notebook.title}</p>
+        <p className="line-clamp-2 leading-snug font-semibold">{notebook.title}</p>
         <p className="mt-1 truncate text-xs text-muted-foreground">
           {tCommon("sourceCount", { count: sources })} ·{" "}
           {t("updated", { time: formatRelativeTime(notebook.updatedAt, i18n.language) })}

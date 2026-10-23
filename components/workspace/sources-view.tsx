@@ -6,6 +6,7 @@ import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { SourceRow } from "@/components/sources/source-row";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { setAllSourcesSelected, useSources } from "@/lib/db/sources";
 import { useWorkspace } from "./workspace-context";
 
@@ -20,8 +21,8 @@ export function SourcesView() {
   const all = sources.length > 0 && selected === sources.length;
 
   return (
-    <div className="h-full overflow-y-auto px-4 pb-10 sm:px-6">
-      <div className="mx-auto max-w-2xl pt-4">
+    <ScrollArea className="h-full">
+      <div className="mx-auto max-w-2xl px-4 pt-4 pb-10 sm:px-6">
         <div className="flex items-end justify-between gap-4 px-1">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">{t("title")}</h2>
@@ -37,7 +38,7 @@ export function SourcesView() {
           <button
             type="button"
             onClick={() => setAddSourceOpen(true)}
-            className="mt-8 flex w-full cursor-pointer flex-col items-center gap-3 rounded-3xl border border-dashed px-6 py-14 text-center outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+            className="mt-8 flex w-full cursor-pointer flex-col items-center gap-3 rounded-3xl border border-dashed px-6 py-14 text-center transition-colors outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-muted">
               <Icon icon={Book02Icon} size={22} />
@@ -68,6 +69,6 @@ export function SourcesView() {
           </>
         )}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
