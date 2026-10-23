@@ -1,7 +1,7 @@
 # Vendored registry components keep their upstream formatting.
 components/panelui/
 components/ui/
-pnpm-lock.yaml
+package-lock.json
 .next/
 node_modules/
 coverage/

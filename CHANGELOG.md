@@ -8,5 +8,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - Next.js 16 app with Panel UI, shadcn fallbacks, Rare UI web search and Hugeicons.
-- i18next localisation with typed keys, a language registry ready for right-to-left languages, and `pnpm i18n:check`.
+- i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.

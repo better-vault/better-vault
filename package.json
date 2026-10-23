@@ -13,7 +13,8 @@
     "url": "https://github.com/better-vault/better-vault/issues"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": ">=20.9",
+    "npm": ">=10"
   },
   "scripts": {
     "dev": "next dev",
@@ -75,6 +76,5 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.5"
-  },
-  "packageManager": "pnpm@9.15.0"
+  }
 }

@@ -4,13 +4,13 @@ Thank you for helping. This guide covers setup, the rules the code follows and h
 
 ## Setup
 
-Requirements: Node.js 20.9+ and pnpm 9.
+Requirements: Node.js 20.9+ with npm 10 (included with Node.js).
 
 ```bash
 git clone https://github.com/<you>/better-vault.git
 cd better-vault
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 The app runs at <http://localhost:3000>. Add an API key in **Settings → AI providers** to try AI features, or use a local model through Ollama or LM Studio.
@@ -35,7 +35,7 @@ The app runs at <http://localhost:3000>. Add an API key in **Settings → AI pro
 2. Commit with [Conventional Commits](https://www.conventionalcommits.org): `feat: add quiz hints`, `fix(chat): keep citations after reload`.
 3. Run every check:
    ```bash
-   pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm build
+   npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
    ```
 4. Open a pull request and fill in the template. Add screenshots for UI changes, in light and dark mode.
 
@@ -44,7 +44,7 @@ The app runs at <http://localhost:3000>. Add an API key in **Settings → AI pro
 1. Copy `locales/en/` to `locales/<code>/` and translate the values (not the keys). Keep `{{placeholders}}` as they are.
 2. Import the files in `lib/i18n/resources.ts`.
 3. Add the language to `lib/i18n/config.ts`; use `dir: "rtl"` for right-to-left scripts.
-4. Run `pnpm i18n:check`.
+4. Run `npm run i18n:check`.
 
 ## Adding a Studio tool
 

@@ -51,13 +51,13 @@ Audio and video overviews are out of scope.
 
 ## 🚀 Getting started
 
-**Requirements:** [Node.js](https://nodejs.org) 20.9 or newer and [pnpm](https://pnpm.io) 9.
+**Requirements:** [Node.js](https://nodejs.org) 20.9 or newer, with npm 10 (included with Node.js).
 
 ```bash
 git clone https://github.com/better-vault/better-vault.git
 cd better-vault
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Open <http://localhost:3000>, then **Settings → AI providers** and paste an API key, or point it at a local model. No `.env` file is needed.
@@ -65,8 +65,8 @@ Open <http://localhost:3000>, then **Settings → AI providers** and paste an AP
 ### Production build
 
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 ### Local models (Ollama, LM Studio)
@@ -95,7 +95,7 @@ Contributions are welcome, from typo fixes to new Studio tools. Please read [CON
 2. Make your change. Use [Conventional Commits](https://www.conventionalcommits.org) for messages.
 3. Run the checks:
    ```bash
-   pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm build
+   npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
    ```
 4. Open a pull request and fill in the template.
 
@@ -108,7 +108,7 @@ The UI is fully translatable with [i18next](https://www.i18next.com). English is
 1. Copy `locales/en/` to `locales/<code>/` (for example `locales/fr/`) and translate the values, not the keys.
 2. Import the new files in `lib/i18n/resources.ts`.
 3. Add the language to `lib/i18n/config.ts`, with `dir: "rtl"` for right-to-left scripts.
-4. Run `pnpm i18n:check` to find missing or extra keys, then open a pull request.
+4. Run `npm run i18n:check` to find missing or extra keys, then open a pull request.
 
 ## 🐛 Reporting issues
 

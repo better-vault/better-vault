@@ -43,7 +43,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ## UI rules
 
-- **Components:** Panel UI first (`components/panelui`, added with `pnpm dlx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not hand-edit vendored components unless necessary, and note why in the file.
+- **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not hand-edit vendored components unless necessary, and note why in the file.
 - **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `app/globals.css`, which holds the Panel palette. Never use raw colours like `bg-neutral-800` or hex values in app code.
 - **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship.
 - **Text:** every user-facing string goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error.
@@ -73,18 +73,20 @@ locales/<lng>/*.json      translations
 ## How to…
 
 - **Add a Studio tool:** create `studio/tools/<id>/` with `definition.ts` (id, icon, tint, option schema and defaults), `server.ts` (prompt and output schema), `dialog.tsx` (options form) and `viewer.tsx` (output view). Register it in the client and server registries and add its strings under `studio` in `locales/en/studio.json`.
-- **Add a UI language:** copy `locales/en/` to `locales/<code>/`, import it in `lib/i18n/resources.ts`, add it to `lib/i18n/config.ts`, run `pnpm i18n:check`.
+- **Add a UI language:** copy `locales/en/` to `locales/<code>/`, import it in `lib/i18n/resources.ts`, add it to `lib/i18n/config.ts`, run `npm run i18n:check`.
 - **Add a provider:** add it to the catalog in `lib/ai/catalog.ts` and handle it in `lib/ai/providers.ts` (model factory, optional web-search tool, model listing).
 
 ## Commands
 
+The project uses **npm** (not pnpm or yarn). Keep `package-lock.json` committed and use `npx` for one-off tools.
+
 ```bash
-pnpm dev            # start on http://localhost:3000
-pnpm lint           # ESLint
-pnpm typecheck      # next typegen + tsc
-pnpm test           # Vitest
-pnpm i18n:check     # every locale has the same keys as English
-pnpm build          # production build
+npm run dev        # start on http://localhost:3000
+npm run lint       # ESLint
+npm run typecheck  # next typegen + tsc
+npm test           # Vitest
+npm run i18n:check # every locale has the same keys as English
+npm run build      # production build
 ```
 
 ## Workflow
@@ -93,7 +95,7 @@ pnpm build          # production build
 - **Push** to GitHub when a set of tasks is complete.
 - **Versioning:** SemVer, starting at 0.1.0. The version lives in `package.json`, and `CHANGELOG.md` collects changes under "Unreleased".
 - **Releases:** when a phase is complete, **ask the maintainer whether to release**. Only on a yes: bump the version, move "Unreleased" under the new version in the changelog, tag `vX.Y.Z` and create a GitHub release.
-- Before pushing: `pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm build`.
+- Before pushing: `npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build`.
 
 ## Roadmap
 
