@@ -1,0 +1,79 @@
+{
+  "name": "better-vault",
+  "version": "0.1.0",
+  "description": "An open-source, bring-your-own-model alternative to NotebookLM.",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/better-vault/better-vault.git"
+  },
+  "homepage": "https://github.com/better-vault/better-vault#readme",
+  "bugs": {
+    "url": "https://github.com/better-vault/better-vault/issues"
+  },
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "i18n:check": "node scripts/check-locales.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.87",
+    "@ai-sdk/google": "^4.0.104",
+    "@ai-sdk/openai": "^4.0.101",
+    "@ai-sdk/openai-compatible": "^3.0.77",
+    "@ai-sdk/react": "^4.0.154",
+    "@base-ui/react": "^1.9.0",
+    "@hugeicons/core-free-icons": "^4.3.5",
+    "@hugeicons/react": "^1.1.10",
+    "@mozilla/readability": "^0.6.0",
+    "ai": "^7.0.150",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.0",
+    "dexie": "^4.4.7",
+    "dexie-react-hooks": "^4.4.0",
+    "i18next": "^26.5.6",
+    "linkedom": "^0.18.14",
+    "minisearch": "^7.2.0",
+    "motion": "^14.6.0",
+    "next": "16.4.3",
+    "next-themes": "^0.4.6",
+    "pele": "^1.9.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-i18next": "^17.1.4",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "shadcn": "^4.22.1",
+    "sonner": "^2.0.8",
+    "tailwind-variants": "^3.3.1",
+    "tw-animate-css": "^1.4.0",
+    "unpdf": "^1.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "fake-indexeddb": "^6.2.6",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
