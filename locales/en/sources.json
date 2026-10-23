@@ -14,8 +14,8 @@
     "pdf": "PDF",
     "url": "Web page"
   },
-  "words_one": "{{count}} word",
-  "words_other": "{{count}} words",
+  "words_one": "{{formattedCount}} word",
+  "words_other": "{{formattedCount}} words",
   "select": "Use {{title}}",
   "menu": "Options for {{title}}",
   "read": "Read",

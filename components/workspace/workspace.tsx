@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/panelui/button";
 import { Tabs } from "@/components/panelui/tabs";
+import { AddSourceDialog } from "@/components/sources/add-source-dialog";
+import { SourceReader } from "@/components/sources/source-reader";
 import { useNotebook } from "@/lib/db/notebooks";
 import { ChatView } from "./chat-view";
 import { SourcesView } from "./sources-view";
@@ -25,7 +27,7 @@ export function Workspace({ notebookId }: { notebookId: string }) {
 }
 
 function WorkspaceLayout() {
-  const { notebook, tab, setTab } = useWorkspace();
+  const { notebook, tab, setTab, addSourceOpen, setAddSourceOpen, reading, closeReader } = useWorkspace();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -50,6 +52,8 @@ function WorkspaceLayout() {
           <StudioView />
         </Tabs.Content>
       </div>
+      <AddSourceDialog notebookId={notebook.id} open={addSourceOpen} onOpenChange={setAddSourceOpen} />
+      <SourceReader reading={reading} onClose={closeReader} />
     </Tabs>
   );
 }
