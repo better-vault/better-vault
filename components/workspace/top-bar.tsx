@@ -6,7 +6,7 @@ import { Icon } from "@/components/icon";
 import { Tabs } from "@/components/panelui/tabs";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
 import { StudioSheet } from "@/components/studio/studio-sheet";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/panelui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { useSources } from "@/lib/db/sources";
 import { NotebookMenu } from "./notebook-menu";
@@ -27,17 +27,27 @@ export function TopBar() {
   return (
     <header className="flex items-center gap-3 px-3 pt-3 pb-2 sm:px-4">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        {/* shadcn's ButtonGroup holding Panel buttons: Panel's outline look,
+            with the group's two ends rounded into one pill. */}
         <ButtonGroup aria-label={t("toolbar")}>
           <SettingsSheet
             open={settingsOpen}
             onOpenChange={setSettingsOpen}
-            trigger={<Button variant="outline" size="icon-lg" aria-label={tSettings("title")} title={tSettings("title")} />}
+            trigger={
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={tSettings("title")}
+                title={tSettings("title")}
+                className="w-10 rounded-s-full! ps-0.5"
+              />
+            }
           />
           <StudioSheet
             open={studioOpen}
             onOpenChange={setStudioOpen}
             trigger={
-              <Button variant="outline" size="lg" className="px-3.5" title={t("openStudio")}>
+              <Button variant="outline" size="md" title={t("openStudio")} className="rounded-e-full! ps-3 pe-4">
                 {t("add")}
               </Button>
             }
