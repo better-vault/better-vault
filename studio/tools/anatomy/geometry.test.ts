@@ -12,6 +12,7 @@ import {
   paintOrder,
   poseFor,
   stretched,
+  zoomBetween,
 } from "./geometry";
 import * as k from "./kit/iso-kit";
 import { scene as sceneSchema, type Scene } from "./scene";
@@ -72,9 +73,9 @@ describe("stretched", () => {
 
 describe("fitFigure", () => {
   it("keeps every part inside the drawing in every pose", () => {
-    const projection = fitFigure(springScale);
     for (const step of [0, 1]) {
       for (const explode of [0, 1]) {
+        const projection = fitFigure(springScale, { apart: explode > 0 });
         const pose = poseFor(springScale, step, explode);
         for (const part of springScale.parts) {
           const at = pose.get(part.id)!;
@@ -90,6 +91,22 @@ describe("fitFigure", () => {
         }
       }
     }
+  });
+});
+
+describe("zoomBetween", () => {
+  it("maps the camera put together onto the camera taken apart", () => {
+    const together = fitFigure(springScale);
+    const apart = fitFigure(springScale, { apart: true });
+    expect(zoomBetween(together, apart, 0)).toBe("");
+    const [a, , , d, e, f] = zoomBetween(together, apart, 1)
+      .match(/[-\d.e]+/g)!
+      .map(Number);
+    const point: k.Point3 = [12, -30, 40];
+    const [x, y] = k.iso(point, together);
+    const [ax, ay] = k.iso(point, apart);
+    expect(a * x + e).toBeCloseTo(ax, 6);
+    expect(d * y + f).toBeCloseTo(ay, 6);
   });
 });
 

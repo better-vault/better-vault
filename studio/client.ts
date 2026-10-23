@@ -34,5 +34,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
   quiz: { Form: QuizForm, Viewer: QuizViewer },
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },
   "mind-map": { Form: MindMapForm, Viewer: MindMapViewer, wide: true, fill: true },
-  anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, wideViewer: true },
+  anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, fill: true },
 };

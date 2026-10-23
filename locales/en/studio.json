@@ -265,25 +265,23 @@
       "figure": "Fig 1",
       "hint": "Point at a part · ← → steps · E take apart",
       "stageLabel": "Interactive figure: {{title}}. Use ← and → to step through how it works and E to take it apart.",
-      "step": "Step {{current}} of {{total}}",
       "previous": "Previous step",
       "next": "Next step",
       "play": "Play",
       "pause": "Pause",
       "explode": "Take apart",
       "assemble": "Put together",
-      "about": "About this figure",
-      "pointHint": "Point at a part to read what it does.",
+      "pointHint": "Point at a part in the figure or choose one here to read what it does.",
       "howItWorks": "How it works",
-      "parts_one": "{{count}} part",
-      "parts_other": "{{count}} parts",
       "roles": {
         "base": "Base",
         "structure": "Structure",
         "mechanism": "Mechanism",
         "control": "Control",
         "subject": "Subject"
-      }
+      },
+      "stepShort": "{{current}} / {{total}}",
+      "partsTab": "Parts"
     }
   },
   "viewer": {

@@ -73,10 +73,9 @@
   --anatomy-paper: var(--card);
 }
 
+/* better-vault: the stage sizes the drawing to its box, so no width or height here. */
 .iso-svg {
   display: block;
-  width: 100%;
-  height: auto;
   overflow: visible;
 }
 .iso-svg path,
@@ -372,4 +371,64 @@
 .anatomy-part[data-lit] .anatomy-stroke-group .iso-line,
 .anatomy-part[data-lit] .iso-wire-end {
   stroke: var(--anatomy-lit);
+}
+
+/* The part pointed at or chosen: tinted with Panel's info colour, outlined and pointed to. */
+.anatomy-part[data-active] .iso-fill {
+  fill: color-mix(in oklab, var(--info) 12%, var(--anatomy-paper));
+}
+.anatomy-part[data-active] .iso-top,
+.anatomy-part[data-active] .iso-solid[data-seamless] > .iso-top {
+  fill: color-mix(in oklab, var(--info) 24%, var(--anatomy-top));
+  stroke: none;
+}
+.anatomy-part[data-active] .iso-shade,
+.anatomy-part[data-active] .iso-solid[data-seamless] > .iso-shade {
+  fill: color-mix(in oklab, var(--info) 18%, var(--anatomy-shade-2));
+  stroke: none;
+}
+.anatomy-part[data-active] .iso-edge,
+.anatomy-part[data-active] .anatomy-stroke,
+.anatomy-part[data-active] .anatomy-stroke-group .iso-line,
+.anatomy-part[data-active] .iso-wire-end {
+  stroke: var(--info);
+  stroke-width: 1.2px;
+}
+.anatomy-part[data-active] .iso-crease,
+.anatomy-part[data-active] .iso-bevel {
+  stroke: color-mix(in oklab, var(--info) 55%, transparent);
+}
+.anatomy-leader {
+  fill: none;
+  stroke: var(--info);
+  stroke-width: 1.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.anatomy-leader-dot {
+  fill: var(--info);
+  stroke: var(--card);
+  stroke-width: 1.5px;
+}
+.anatomy-leader-pulse {
+  fill: var(--info);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: anatomy-pulse 1.8s var(--anatomy-ease) infinite;
+}
+@keyframes anatomy-pulse {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anatomy-leader-pulse {
+    animation: none;
+  }
 }

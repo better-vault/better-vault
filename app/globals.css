@@ -33,6 +33,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-chart-1: var(--chart-1);
@@ -71,6 +72,7 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --info: oklch(0.623 0.214 259.815);
+  --info-foreground: oklch(0.985 0 0);
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   /* Panel's series ramp (https://panelui.dev/docs/customization/charts) */
@@ -101,6 +103,7 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --info: oklch(0.623 0.214 259.815);
+  --info-foreground: oklch(0.985 0 0);
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   --chart-1: #fafafa;

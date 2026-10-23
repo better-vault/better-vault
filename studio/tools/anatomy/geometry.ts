@@ -236,12 +236,12 @@ export function poseFor(scene: Scene, stepIndex: number, explode: number): Pose 
   return pose;
 }
 
-/** A camera that keeps every part in view, in every step, together and apart. */
-export function fitFigure(scene: Scene): Projection {
+/** A camera that keeps every part in view in every step: together, or also taken apart. */
+export function fitFigure(scene: Scene, { apart = false }: { apart?: boolean } = {}): Projection {
   const points: P3[] = [];
   const steps = Math.max(1, scene.steps.length);
   for (let step = 0; step < steps; step++) {
-    for (const explode of [0, 1]) {
+    for (const explode of apart ? [0, 1] : [0]) {
       const pose = poseFor(scene, step, explode);
       for (const part of scene.parts) {
         const at = pose.get(part.id)!;
@@ -803,6 +803,21 @@ function partBody(part: Part, projection: Projection, turn: number, lit: boolean
   }
 }
 
+/** Where a leader line meets a part: the middle of its top, in a pose. */
+export function anchorOf(part: Part, at: PartPose): P3 {
+  const g = stretched(part.geometry, at.stretch);
+  if (g.kind === "cable") {
+    const middle = g.points[Math.floor((g.points.length - 1) / 2)];
+    return [middle.x + at.offset[0], middle.y + at.offset[1], middle.z + at.offset[2]];
+  }
+  const { min, max } = boundsOf(g, at.turn);
+  return [
+    (min[0] + max[0]) / 2 + at.offset[0],
+    (min[1] + max[1]) / 2 + at.offset[1],
+    max[2] + at.offset[2],
+  ];
+}
+
 /** One part's drawing where it is drawn, turned and stretched. Moves are applied as a transform. */
 export function partSvg(
   part: Part,
@@ -852,6 +867,20 @@ export function largestFootprint(scene: Scene): number {
   );
 }
 
+/**
+ * The zoom from the camera of the figure put together to the camera of the
+ * figure taken apart, `share` of the way (0 to 1), as an SVG transform. Both
+ * cameras look the same way, so one scale and shift maps one onto the other.
+ */
+export function zoomBetween(together: Projection, apart: Projection, share: number): string {
+  if (share <= 0) return "";
+  const ratio = apart.scale / together.scale;
+  const scale = 1 + (ratio - 1) * share;
+  const dx = (apart.origin[0] - ratio * together.origin[0]) * share;
+  const dy = (apart.origin[1] - ratio * together.origin[1]) * share;
+  return `matrix(${scale} 0 0 ${scale} ${dx} ${dy})`;
+}
+
 export const transformFor = (projection: Projection, offset: P3) =>
   offset[0] || offset[1] || offset[2] ? k.translateAlong(projection, offset) : "";
 
@@ -864,7 +893,7 @@ export function figureSvg(
     theme = "light",
   }: { stepIndex?: number; explode?: number; theme?: k.Theme } = {},
 ): { svg: string; width: number; height: number } {
-  const projection = fitFigure(scene);
+  const projection = fitFigure(scene, { apart: explode > 0 });
   const pose = poseFor(scene, stepIndex, explode);
   const ground = groundOf(scene);
   const largest = largestFootprint(scene);
