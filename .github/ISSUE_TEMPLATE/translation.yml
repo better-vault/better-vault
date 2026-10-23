@@ -1,0 +1,42 @@
+name: 🌍 Translation
+description: Offer or request a translation of the interface.
+labels: ["i18n"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The UI is translated with i18next. See "Translating" in the README for the steps.
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: "e.g. Arabic"
+    validations:
+      required: true
+  - type: input
+    id: code
+    attributes:
+      label: Language code (BCP 47)
+      placeholder: "e.g. ar"
+    validations:
+      required: true
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Writing direction
+      options:
+        - Left to right
+        - Right to left
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I can translate it and open a pull request.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything reviewers should know (terminology, regional variants, …).
