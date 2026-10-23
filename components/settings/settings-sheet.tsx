@@ -8,11 +8,11 @@ import {
   PaintBoardIcon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Sheet } from "@/components/panelui/sheet";
+import { useTheme } from "@/components/providers/theme-provider";
 import { providerIds } from "@/lib/ai/catalog";
 import { isProviderReady, useSettings } from "@/lib/db/settings";
 import { getLanguage } from "@/lib/i18n/config";
@@ -36,7 +36,6 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { theme } = useTheme();
   const settings = useSettings();
   const ready = settings ? providerIds.filter((id) => isProviderReady(settings, id)).length : 0;
-  const themeName = theme === "light" || theme === "dark" ? theme : "system";
 
   return (
     <Sheet side="left" open={open} onOpenChange={onOpenChange}>
@@ -59,7 +58,7 @@ export function SettingsSheet({ open, onOpenChange }: SettingsSheetProps) {
               to="appearance"
               icon={PaintBoardIcon}
               label={t("rows.appearance")}
-              hint={t(`appearance.${themeName}`)}
+              hint={t(`appearance.${theme}`)}
             />
             <SettingsRow
               to="language"

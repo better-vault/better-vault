@@ -1,12 +1,13 @@
 "use client"
 
-import { useTheme } from "next-themes"
+// better-vault: the theme comes from the app's own provider instead of next-themes.
+import { useTheme } from "@/components/providers/theme-provider"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CheckmarkCircle02Icon, InformationCircleIcon, Alert02Icon, MultiplicationSignCircleIcon, Loading03Icon } from "@hugeicons/core-free-icons"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { theme } = useTheme()
 
   return (
     <Sonner

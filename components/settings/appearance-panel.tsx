@@ -1,19 +1,16 @@
 "use client";
 
 import { ComputerIcon, Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
-import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { Sheet } from "@/components/panelui/sheet";
-
-type ThemeChoice = "system" | "light" | "dark";
+import { useTheme, type Theme } from "@/components/providers/theme-provider";
 
 export function AppearancePanel() {
   const { t } = useTranslation("settings");
   const { theme, setTheme } = useTheme();
-  const value: ThemeChoice = theme === "light" || theme === "dark" ? theme : "system";
 
   return (
     <>
@@ -21,9 +18,9 @@ export function AppearancePanel() {
       <Sheet.Body>
         <div className="pb-4">
           <Field label={t("appearance.theme")}>
-            <Segmented<ThemeChoice>
+            <Segmented<Theme>
               aria-label={t("appearance.theme")}
-              value={value}
+              value={theme}
               onValueChange={setTheme}
               className="w-full *:flex-1"
               options={[

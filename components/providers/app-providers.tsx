@@ -1,16 +1,16 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "./i18n-provider";
+import { ThemeProvider } from "./theme-provider";
 
 /** Everything the app needs around every page. */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider>
       <I18nProvider>
         <TooltipProvider>
           {/* The page steps back while a sheet is open. */}

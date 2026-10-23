@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
+import { themeScript } from "@/lib/theme/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,14 +34,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // lang and dir are kept in step with the chosen language by I18nProvider;
-    // next-themes sets the theme class before hydration.
+    // the inline script sets the theme class before the first paint.
     <html
       lang="en"
       dir="ltr"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="h-full overflow-hidden">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      {/* Browser extensions often add attributes to <body>. */}
+      <body className="h-full overflow-hidden" suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
