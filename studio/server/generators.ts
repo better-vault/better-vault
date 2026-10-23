@@ -1,4 +1,5 @@
 import type { StudioToolId } from "@/studio/tools";
+import { generateAnatomy } from "@/studio/tools/anatomy/server";
 import { generateDataTable } from "@/studio/tools/data-table/server";
 import { generateFlashcards } from "@/studio/tools/flashcards/server";
 import { generateMindMap } from "@/studio/tools/mind-map/server";
@@ -14,4 +15,5 @@ export const generators: Partial<Record<StudioToolId, Generator<any, any>>> = {
   quiz: generateQuiz,
   "data-table": generateDataTable,
   "mind-map": generateMindMap,
+  anatomy: generateAnatomy,
 };

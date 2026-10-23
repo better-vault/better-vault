@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     // upstream style and are not linted here.
     "components/panelui/**",
     "components/ui/**",
+    // Anatomy's drawing kit, copied unchanged.
+    "studio/tools/anatomy/kit/**",
   ]),
 ]);
 

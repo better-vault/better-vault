@@ -247,6 +247,45 @@
       "questionRoot": "Discuss what the sources say about “{{topic}}”."
     }
   },
+  "anatomy": {
+    "detail": "Level of detail",
+    "details": {
+      "simple": "Simple",
+      "standard": "Standard",
+      "detailed": "Detailed"
+    },
+    "detailHints": {
+      "simple": "About 20 to 35 parts. Quickest to make.",
+      "standard": "About 35 to 60 parts.",
+      "detailed": "About 60 to 90 parts. Takes longest to make."
+    },
+    "focusLabel": "What should it explain?",
+    "focusPlaceholder": "For example: how a business idea is tested before launch",
+    "viewer": {
+      "figure": "Fig 1",
+      "hint": "Point at a part · ← → steps · E take apart",
+      "stageLabel": "Interactive figure: {{title}}. Use ← and → to step through how it works and E to take it apart.",
+      "step": "Step {{current}} of {{total}}",
+      "previous": "Previous step",
+      "next": "Next step",
+      "play": "Play",
+      "pause": "Pause",
+      "explode": "Take apart",
+      "assemble": "Put together",
+      "about": "About this figure",
+      "pointHint": "Point at a part to read what it does.",
+      "howItWorks": "How it works",
+      "parts_one": "{{count}} part",
+      "parts_other": "{{count}} parts",
+      "roles": {
+        "base": "Base",
+        "structure": "Structure",
+        "mechanism": "Mechanism",
+        "control": "Control",
+        "subject": "Subject"
+      }
+    }
+  },
   "viewer": {
     "back": "All outputs",
     "download": "Download",

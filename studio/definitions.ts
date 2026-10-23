@@ -1,4 +1,5 @@
 import type { StudioToolId } from "./tools";
+import { anatomyTool } from "./tools/anatomy/definition";
 import { dataTableTool } from "./tools/data-table/definition";
 import { flashcardsTool } from "./tools/flashcards/definition";
 import { mindMapTool } from "./tools/mind-map/definition";
@@ -13,4 +14,5 @@ export const toolDefinitions: Partial<Record<StudioToolId, AnyToolDefinition>> =
   quiz: quizTool,
   "data-table": dataTableTool,
   "mind-map": mindMapTool,
+  anatomy: anatomyTool,
 };

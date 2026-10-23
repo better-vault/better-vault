@@ -1,6 +1,7 @@
 # Vendored registry components keep their upstream formatting.
 components/panelui/
 components/ui/
+studio/tools/anatomy/kit/
 package-lock.json
 .next/
 node_modules/

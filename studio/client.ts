@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 import type { ToolFormProps, ToolViewerProps } from "./shared/form";
 import type { StudioToolId } from "./tools";
+import { AnatomyForm } from "./tools/anatomy/dialog";
+import { AnatomyViewer } from "./tools/anatomy/viewer";
 import { DataTableForm } from "./tools/data-table/dialog";
 import { DataTableViewer } from "./tools/data-table/viewer";
 import { FlashcardsForm } from "./tools/flashcards/dialog";
@@ -32,4 +34,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
   quiz: { Form: QuizForm, Viewer: QuizViewer },
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },
   "mind-map": { Form: MindMapForm, Viewer: MindMapViewer, wide: true, fill: true },
+  anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, wideViewer: true },
 };
