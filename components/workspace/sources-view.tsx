@@ -20,7 +20,7 @@ export function SourcesView() {
   const all = sources.length > 0 && selected === sources.length;
 
   return (
-    <div className="h-full overflow-y-auto px-4 pb-40 sm:px-6">
+    <div className="h-full overflow-y-auto px-4 pb-10 sm:px-6">
       <div className="mx-auto max-w-2xl pt-4">
         <div className="flex items-end justify-between gap-4 px-1">
           <div className="min-w-0">

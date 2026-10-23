@@ -11,8 +11,9 @@
  *
  * Adapted for better-vault: colours use Panel theme tokens, icons come from
  * Hugeicons, a source can carry its own `site` label (notebook sources have
- * no web address), the component's words can be translated (`strings`), and
- * pressing a card can be handled (`onSourceSelect`).
+ * no web address), the component's words can be translated (`strings`),
+ * pressing a card can be handled (`onSourceSelect`), and a source without a
+ * favicon shows its type icon (`icon`) instead of an initial.
  */
 
 import {
@@ -39,7 +40,7 @@ import {
   type Variants,
 } from "motion/react";
 import { ArrowDown01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { cn } from "@/lib/utils";
 
 export type WebSearchStatus = "searching" | "done";
@@ -52,6 +53,8 @@ export type WebSource = {
   favicon?: string;
   /** better-vault: a name to show instead of the site taken from `url` (used for notebook sources). */
   site?: string;
+  /** better-vault: the icon shown when there is no favicon, e.g. the file type. Default: a globe. */
+  icon?: IconSvgElement;
 };
 
 const COLUMNS = 4;
@@ -101,14 +104,6 @@ const STROKE = {
 
 const RING_CIRCLE = { ...STROKE, cx: 14, cy: 14, r: 13, strokeWidth: 1.5 };
 
-const hash = (text: string) => {
-  let h = 2166136261;
-  for (let i = 0; i < text.length; i++) {
-    h = Math.imul(h ^ text.charCodeAt(i), 16777619);
-  }
-  return h >>> 0;
-};
-
 const hostOf = (url: string) => {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -151,6 +146,8 @@ export type WebSearchProps = Omit<ComponentProps<"div">, "children"> & {
   strings?: Partial<WebSearchStrings>;
   /** better-vault: called when a source card is pressed, e.g. to open a notebook source. */
   onSourceSelect?: (source: WebSource) => void;
+  /** better-vault: the icon in the round tile at the start of the pill. Default: a globe. */
+  icon?: IconSvgElement;
   status?: WebSearchStatus;
   query?: string;
   label?: string;
@@ -165,6 +162,7 @@ function WebSearch({
   sources,
   strings: stringsProp,
   onSourceSelect,
+  icon,
   status = "done",
   query,
   label,
@@ -253,7 +251,7 @@ function WebSearch({
         aria-expanded={isOpen}
         className="group flex h-10 w-fit max-w-full cursor-pointer items-center gap-2.5 rounded-full bg-muted ps-1.5 pe-3.5 text-start outline-none transition-[background-color,box-shadow] hover:bg-card hover:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_1px_rgba(0,0,0,0.04),0_2px_4px_-1px_rgba(0,0,0,0.08)] dark:hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
-        <GlobeTile searching={searching} progress={ring} reduced={reduced} />
+        <GlobeTile searching={searching} progress={ring} reduced={reduced} icon={icon} />
 
         {/* the label springs between widths, so the icons beside it glide instead of jumping */}
         <motion.span
@@ -616,24 +614,19 @@ function FaviconStack({
   );
 }
 
+// better-vault: without a favicon, the source's type icon (or a globe) instead of its initial.
 function Favicon({ source, size }: { source: WebSource; size: number }) {
   const [broken, setBroken] = useState(false);
-  const name = siteOf(source);
-  const hue = hash(name) % 360;
   const image = source.favicon && !broken;
 
   return (
     <span
       aria-hidden
-      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full font-bold uppercase leading-none text-white"
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.5,
-        background: image
-          ? undefined
-          : `linear-gradient(135deg, oklch(0.72 0.15 ${hue}), oklch(0.58 0.17 ${(hue + 30) % 360}))`,
-      }}
+      className={cn(
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-full",
+        !image && "bg-card text-foreground/75 ring-1 ring-border",
+      )}
+      style={{ width: size, height: size }}
     >
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -645,7 +638,11 @@ function Favicon({ source, size }: { source: WebSource; size: number }) {
           className="size-full object-cover"
         />
       ) : (
-        name.charAt(0)
+        <HugeiconsIcon
+          icon={source.icon ?? Globe02Icon}
+          size={Math.round(size * 0.66)}
+          strokeWidth={2}
+        />
       )}
     </span>
   );
@@ -655,10 +652,12 @@ function GlobeTile({
   searching,
   progress,
   reduced,
+  icon,
 }: {
   searching: boolean;
   progress: number;
   reduced: boolean;
+  icon?: IconSvgElement;
 }) {
   const fill = useMotionValue(searching ? 0 : 1);
 
@@ -687,7 +686,7 @@ function GlobeTile({
 
   return (
     <span className="relative flex size-7 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors group-hover:text-foreground">
-      <HugeiconsIcon aria-hidden icon={Globe02Icon} size={15} strokeWidth={2} />
+      <HugeiconsIcon aria-hidden icon={icon ?? Globe02Icon} size={15} strokeWidth={2} />
       <motion.svg
         aria-hidden
         viewBox="0 0 28 28"

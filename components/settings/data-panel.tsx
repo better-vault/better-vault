@@ -1,28 +1,31 @@
 "use client";
 
 import { Delete02Icon, Download01Icon, Upload01Icon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Icon, type IconSvgElement } from "@/components/icon";
 import { Sheet } from "@/components/panelui/sheet";
-import { deleteAllData, exportBackup, importBackup } from "@/lib/db/backup";
+import { exportBackup, importBackup } from "@/lib/db/backup";
 import { downloadText } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-/** Export, import and delete the data kept in this browser. */
-export function DataPanel({ onDone }: { onDone?: () => void }) {
+/**
+ * Export, import and delete the data kept in this browser. "Delete all" is
+ * confirmed by the settings sheet, which closes first.
+ */
+export function DataPanel({ onDeleteAll }: { onDeleteAll: () => void }) {
   const { t } = useTranslation("settings");
-  const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [confirming, setConfirming] = useState(false);
 
   async function exportData() {
     const backup = await exportBackup();
     const date = new Date().toISOString().slice(0, 10);
-    downloadText(JSON.stringify(backup, null, 2), `better-vault-backup-${date}.json`, "application/json");
+    downloadText(
+      JSON.stringify(backup, null, 2),
+      `better-vault-backup-${date}.json`,
+      "application/json",
+    );
   }
 
   async function importData(file: File) {
@@ -39,7 +42,12 @@ export function DataPanel({ onDone }: { onDone?: () => void }) {
       <Sheet.Header title={t("data.title")} description={t("data.description")} />
       <Sheet.Body>
         <div className="-mx-2 flex flex-col gap-0.5 pb-4">
-          <ActionRow icon={Download01Icon} label={t("data.export")} hint={t("data.exportHint")} onClick={exportData} />
+          <ActionRow
+            icon={Download01Icon}
+            label={t("data.export")}
+            hint={t("data.exportHint")}
+            onClick={exportData}
+          />
           <ActionRow
             icon={Upload01Icon}
             label={t("data.import")}
@@ -62,23 +70,10 @@ export function DataPanel({ onDone }: { onDone?: () => void }) {
             label={t("data.deleteAll")}
             hint={t("data.deleteAllHint")}
             destructive
-            onClick={() => setConfirming(true)}
+            onClick={onDeleteAll}
           />
         </div>
       </Sheet.Body>
-      <ConfirmDialog
-        open={confirming}
-        onOpenChange={setConfirming}
-        title={t("data.deleteAllConfirm.title")}
-        body={t("data.deleteAllConfirm.body")}
-        confirmLabel={t("data.deleteAllConfirm.confirm")}
-        onConfirm={async () => {
-          await deleteAllData();
-          toast.success(t("data.deleted"));
-          onDone?.();
-          router.push("/");
-        }}
-      />
     </>
   );
 }
@@ -100,7 +95,7 @@ function ActionRow({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full cursor-pointer items-start gap-3 rounded-2xl px-2.5 py-2.5 text-start outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex w-full cursor-pointer items-start gap-3 rounded-2xl px-2.5 py-2.5 text-start transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span
         className={cn(
@@ -111,7 +106,9 @@ function ActionRow({
         <Icon icon={icon} />
       </span>
       <span className="min-w-0 flex-1 pt-0.5">
-        <span className={cn("block text-sm font-medium", destructive && "text-destructive")}>{label}</span>
+        <span className={cn("block text-sm font-medium", destructive && "text-destructive")}>
+          {label}
+        </span>
         <span className="block text-xs leading-5 text-muted-foreground">{hint}</span>
       </span>
     </button>

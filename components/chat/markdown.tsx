@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { sourceKindIcons } from "@/components/sources/source-kind";
 import { WebSearchCitation, type WebSource } from "@/components/ui/web-search";
 import type { PassageRef } from "@/lib/chat/types";
 import { linkCitations } from "@/lib/grounding/passages";
@@ -57,6 +58,7 @@ export function Markdown({ text, passages, onCite, className, bare = false }: Ma
               url: "#",
               site: short(passage.title),
               snippet: passage.snippet,
+              icon: sourceKindIcons[passage.kind],
             };
             return (
               <WebSearchCitation

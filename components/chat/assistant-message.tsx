@@ -1,11 +1,12 @@
 "use client";
 
-import { RepeatIcon } from "@hugeicons/core-free-icons";
+import { Book02Icon, RepeatIcon } from "@hugeicons/core-free-icons";
 import { getToolName, isToolUIPart } from "ai";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Message } from "@/components/panelui/message";
+import { sourceKindIcons } from "@/components/sources/source-kind";
 import { WebSearch, type WebSource } from "@/components/ui/web-search";
 import type { ChatMessage, PassageRef } from "@/lib/chat/types";
 import { citedNumbers, stripCitations } from "@/lib/grounding/passages";
@@ -67,6 +68,7 @@ export function AssistantMessage({ message, streaming, isLast, onRetry, onOpenPa
         url: "#",
         site: tSources(`kinds.${passage.kind}`),
         snippet: passage.snippet,
+        icon: sourceKindIcons[passage.kind],
       })),
       firstBySource: new Map(shown.map((passage) => [passage.sourceId, passage])),
     };
@@ -100,6 +102,7 @@ export function AssistantMessage({ message, streaming, isLast, onRetry, onOpenPa
           <WebSearch
             sources={notebook.cards}
             linked={false}
+            icon={Book02Icon}
             label={t("sources.read", { count: notebook.read })}
             defaultOpen={false}
             strings={strings}

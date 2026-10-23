@@ -27,8 +27,9 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 - **Top left:** `+` opens the **Studio sheet** (tools grid and outputs list). The button next to it opens the **Settings sheet**, whose rows open nested sheets (`Sheet.Next`).
 - **Top right:** tabs switch the main view: **Chat · Sources · Studio**.
-- **Bottom centre:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch.
-- Choosing a tool opens a Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.
+- **Bottom centre, in the Chat tab only:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch. It does not appear over the Sources or Studio views.
+- Choosing a tool closes the Studio sheet and opens the tool's Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.
+- **Rule: a choice in a sheet that opens a dialog closes the sheet first.** Such dialogs are rendered outside the sheet (workspace state in `components/workspace/workspace-context.tsx`, or beside the `<Sheet>`), because closing a sheet unmounts its content.
 - Each assistant answer shows its sources and citations with the Rare UI `WebSearch` component, for notebook sources and web results alike.
 
 ## Decisions (do not change without discussing first)
