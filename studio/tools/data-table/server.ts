@@ -6,10 +6,16 @@ import type { DataTableData, DataTableOptions } from "./definition";
 const schema = z.object({
   title: z.string().describe("A short title for the table"),
   columns: z.array(z.string()).describe("The column headings"),
-  rows: z.array(z.array(z.string())).describe("One array per row, with one cell per column, in column order"),
+  rows: z
+    .array(z.array(z.string()))
+    .describe("One array per row, with one cell per column, in column order"),
 });
 
-export const generateDataTable: Generator<DataTableOptions, DataTableData> = async ({ model, abortSignal, ...args }) => {
+export const generateDataTable: Generator<DataTableOptions, DataTableData> = async ({
+  model,
+  abortSignal,
+  ...args
+}) => {
   const { output } = await generateText({
     model,
     output: Output.object({ schema }),

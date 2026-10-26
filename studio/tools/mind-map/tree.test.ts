@@ -31,7 +31,11 @@ describe("parseMindmap", () => {
   it("builds the tree by indentation with path ids", () => {
     const root = parseMindmap(source)!;
     expect(root.label).toBe("Entrepreneurship");
-    expect(root.children.map((child) => child.label)).toEqual(["Opportunity", "Risk and reward", "Growth"]);
+    expect(root.children.map((child) => child.label)).toEqual([
+      "Opportunity",
+      "Risk and reward",
+      "Growth",
+    ]);
     expect(root.children[0].children.map((child) => [child.id, child.label])).toEqual([
       ["0.0.0", "Ideas"],
       ["0.0.1", "Market needs"],
@@ -70,8 +74,11 @@ describe("layoutTree", () => {
 
   it("never overlaps siblings", () => {
     const layout = layoutTree(root, branchIds(root), measure);
-    const sameColumn = layout.nodes.filter((placed) => placed.depth === 2).sort((a, b) => a.y - b.y);
-    for (let i = 1; i < sameColumn.length; i++) expect(sameColumn[i].y).toBeGreaterThanOrEqual(sameColumn[i - 1].y + 44);
+    const sameColumn = layout.nodes
+      .filter((placed) => placed.depth === 2)
+      .sort((a, b) => a.y - b.y);
+    for (let i = 1; i < sameColumn.length; i++)
+      expect(sameColumn[i].y).toBeGreaterThanOrEqual(sameColumn[i - 1].y + 44);
   });
 });
 

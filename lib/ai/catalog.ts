@@ -26,7 +26,17 @@ export interface ProviderInfo {
   suggestedModels: readonly string[];
   /** How much source text, in characters, to send as context by default. */
   contextChars: number;
+  /**
+   * Models that draw pictures (infographics), best first, from the image
+   * model id unions in the installed `@ai-sdk/*` packages. Empty when the
+   * provider has none.
+   */
+  imageModels: readonly string[];
 }
+
+/** Providers with image models. */
+export const imageProviderIds = ["openai", "google"] as const satisfies readonly ProviderId[];
+export type ImageProviderId = (typeof imageProviderIds)[number];
 
 export const providers: Record<ProviderId, ProviderInfo> = {
   openai: {
@@ -38,6 +48,15 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     keyUrl: "https://platform.openai.com/api-keys",
     suggestedModels: ["gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna", "gpt-5.5", "gpt-5.4-mini"],
     contextChars: 400_000,
+    imageModels: [
+      "gpt-image-2",
+      "gpt-image-2.5-sunburst",
+      "gpt-image-2.5-flare",
+      "gpt-image-1.5",
+      "gpt-image-1",
+      "gpt-image-1-mini",
+      "chatgpt-image-latest",
+    ],
   },
   anthropic: {
     id: "anthropic",
@@ -46,8 +65,14 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     needsKey: true,
     webSearch: true,
     keyUrl: "https://console.anthropic.com/settings/keys",
-    suggestedModels: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5", "claude-fable-5-1"],
+    suggestedModels: [
+      "claude-opus-5-5",
+      "claude-sonnet-5-5",
+      "claude-haiku-5-5",
+      "claude-fable-5-1",
+    ],
     contextChars: 400_000,
+    imageModels: [],
   },
   google: {
     id: "google",
@@ -56,8 +81,19 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     needsKey: true,
     webSearch: true,
     keyUrl: "https://aistudio.google.com/apikey",
-    suggestedModels: ["gemini-4-argon", "gemini-3.8-flash", "gemini-pro-latest", "gemini-flash-latest"],
+    suggestedModels: [
+      "gemini-4-argon",
+      "gemini-3.8-flash",
+      "gemini-pro-latest",
+      "gemini-flash-latest",
+    ],
     contextChars: 400_000,
+    imageModels: [
+      "gemini-3-pro-image-preview",
+      "gemini-nano-banana-2.1",
+      "gemini-3.1-flash-image-preview",
+      "gemini-2.5-flash-image",
+    ],
   },
   ollama: {
     id: "ollama",
@@ -68,6 +104,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     webSearch: false,
     suggestedModels: [],
     contextChars: 12_000,
+    imageModels: [],
   },
   lmstudio: {
     id: "lmstudio",
@@ -78,6 +115,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     webSearch: false,
     suggestedModels: [],
     contextChars: 12_000,
+    imageModels: [],
   },
 };
 

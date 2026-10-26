@@ -31,13 +31,23 @@ export function ToolDialog({ notebookId, toolId, onClose }: ToolDialogProps) {
         closeLabel={tCommon("actions.close")}
         className={cn(client?.wide && "max-w-2xl")}
       >
-        {toolId ? <ToolForm key={toolId} notebookId={notebookId} toolId={toolId} onDone={onClose} /> : null}
+        {toolId ? (
+          <ToolForm key={toolId} notebookId={notebookId} toolId={toolId} onDone={onClose} />
+        ) : null}
       </Dialog.Content>
     </Dialog>
   );
 }
 
-function ToolForm({ notebookId, toolId, onDone }: { notebookId: string; toolId: StudioToolId; onDone: () => void }) {
+function ToolForm({
+  notebookId,
+  toolId,
+  onDone,
+}: {
+  notebookId: string;
+  toolId: StudioToolId;
+  onDone: () => void;
+}) {
   const { t } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
   const runner = useStudioRunner();
@@ -51,13 +61,16 @@ function ToolForm({ notebookId, toolId, onDone }: { notebookId: string; toolId: 
   const [language, setLanguage] = useState("auto");
   // Starts with the sources selected in the notebook.
   const [sourceIds, setSourceIds] = useState<string[] | null>(null);
-  const chosen = sourceIds ?? sources?.filter((source) => source.selected).map((source) => source.id) ?? [];
+  const chosen =
+    sourceIds ?? sources?.filter((source) => source.selected).map((source) => source.id) ?? [];
   const [busy, setBusy] = useState(false);
 
   if (!definition || !client) return null;
   const { Form } = client;
-  const customReport = toolId === "report" && (options as { template?: string }).template === "custom";
-  const missingInstructions = customReport && !(options as { instructions: string }).instructions.trim();
+  // The report's own description replaces the shared focus.
+  const customReport =
+    toolId === "report" && (options as { template?: string }).template === "custom";
+  const incomplete = client.canCreate?.(options) === false;
 
   async function create() {
     setBusy(true);
@@ -86,16 +99,28 @@ function ToolForm({ notebookId, toolId, onDone }: { notebookId: string; toolId: 
         description={t(`tools.${toolId}.description`)}
       />
       <Dialog.Body>
-        <Form value={options} onChange={setOptions} focus={focus} onFocusChange={setFocus} sourceIds={chosen} />
+        {Form ? (
+          <Form
+            value={options}
+            onChange={setOptions}
+            focus={focus}
+            onFocusChange={setFocus}
+            sourceIds={chosen}
+          />
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <LanguageField value={language} onChange={setLanguage} />
           <SourcesField sources={sources ?? []} value={chosen} onChange={setSourceIds} />
         </div>
-        {chosen.length === 0 && sources ? <p className="text-sm text-destructive">{t("errors.noSources")}</p> : null}
+        {chosen.length === 0 && sources ? (
+          <p className="text-sm text-destructive">{t("errors.noSources")}</p>
+        ) : null}
       </Dialog.Body>
       <Dialog.Footer>
-        <Dialog.Close render={<Button variant="secondary" />}>{tCommon("actions.cancel")}</Dialog.Close>
-        <Button onClick={create} loading={busy} disabled={chosen.length === 0 || missingInstructions}>
+        <Dialog.Close render={<Button variant="secondary" />}>
+          {tCommon("actions.cancel")}
+        </Dialog.Close>
+        <Button onClick={create} loading={busy} disabled={chosen.length === 0 || incomplete}>
           {t("dialog.create")}
         </Button>
       </Dialog.Footer>

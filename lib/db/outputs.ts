@@ -21,6 +21,27 @@ export async function createOutput(input: NewOutput): Promise<string> {
   return id;
 }
 
+/** Records an output made in the browser, ready at once: a whiteboard, say. */
+export async function createReadyOutput(
+  input: Omit<NewOutput, "model"> & { data: unknown; model?: ModelRef },
+): Promise<string> {
+  const now = Date.now();
+  const id = generateId();
+  await db.outputs.add({ id, ...input, status: "ready", createdAt: now, updatedAt: now });
+  await db.notebooks.update(input.notebookId, { updatedAt: now });
+  return id;
+}
+
+/** Saves edits made in a viewer. False when the output is gone or not ready. */
+export async function updateOutputData(id: string, data: unknown): Promise<boolean> {
+  const changed = await db.outputs
+    .where("id")
+    .equals(id)
+    .and((output) => output.status === "ready")
+    .modify({ data, updatedAt: Date.now() });
+  return changed > 0;
+}
+
 export async function finishOutput(id: string, result: { title: string; data: unknown }) {
   await db.outputs.update(id, {
     status: "ready",

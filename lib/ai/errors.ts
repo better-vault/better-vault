@@ -17,7 +17,8 @@ export function describeError(error: unknown): string {
       message = `${error.statusCode}: ${message}`;
     }
   } else if (error instanceof Error) {
-    message = error.name === "TimeoutError" ? "The provider did not answer in time." : error.message;
+    message =
+      error.name === "TimeoutError" ? "The provider did not answer in time." : error.message;
   } else {
     message = String(error);
   }

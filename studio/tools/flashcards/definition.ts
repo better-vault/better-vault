@@ -28,20 +28,39 @@ export const flashcardsTool = defineTool({
     {
       format: "docx",
       build: async (title, data, text) => {
-        const { isRightToLeft, wordDocument, Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType } =
-          await import("@/studio/exports/docx");
+        const {
+          isRightToLeft,
+          wordDocument,
+          Paragraph,
+          ShadingType,
+          Table,
+          TableCell,
+          TableRow,
+          TextRun,
+          WidthType,
+        } = await import("@/studio/exports/docx");
         const rtl = isRightToLeft(data.cards.map((card) => card.front).join(" "));
         const cell = (value: string, header = false) =>
           new TableCell({
             shading: header ? { type: ShadingType.CLEAR, fill: "EFEFEF" } : undefined,
-            children: [new Paragraph({ bidirectional: rtl, children: [new TextRun({ text: value, bold: header })] })],
+            children: [
+              new Paragraph({
+                bidirectional: rtl,
+                children: [new TextRun({ text: value, bold: header })],
+              }),
+            ],
           });
         const table = new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           visuallyRightToLeft: rtl,
           rows: [
-            new TableRow({ tableHeader: true, children: [cell(text.question, true), cell(text.answer, true)] }),
-            ...data.cards.map((card) => new TableRow({ children: [cell(card.front), cell(card.back)] })),
+            new TableRow({
+              tableHeader: true,
+              children: [cell(text.question, true), cell(text.answer, true)],
+            }),
+            ...data.cards.map(
+              (card) => new TableRow({ children: [cell(card.front), cell(card.back)] }),
+            ),
           ],
         });
         return wordDocument({ title, rtl, children: [table] });

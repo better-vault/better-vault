@@ -39,10 +39,20 @@ export const studioTools: Record<StudioToolId, StudioToolMeta> = {
   report: { id: "report", icon: News01Icon, tint: "text-chart-2", available: true },
   flashcards: { id: "flashcards", icon: Cards01Icon, tint: "text-chart-4", available: true },
   quiz: { id: "quiz", icon: HelpSquareIcon, tint: "text-chart-3", available: true },
-  "mind-map": { id: "mind-map", icon: HierarchySquare02Icon, tint: "text-chart-5", available: true },
+  "mind-map": {
+    id: "mind-map",
+    icon: HierarchySquare02Icon,
+    tint: "text-chart-5",
+    available: true,
+  },
   "data-table": { id: "data-table", icon: Table02Icon, tint: "text-chart-2", available: true },
   anatomy: { id: "anatomy", icon: CubeIcon, tint: "text-chart-3", available: true, isNew: true },
-  "slide-deck": { id: "slide-deck", icon: Presentation01Icon, tint: "text-chart-4", available: false },
+  "slide-deck": {
+    id: "slide-deck",
+    icon: Presentation01Icon,
+    tint: "text-chart-4",
+    available: false,
+  },
   infographic: { id: "infographic", icon: ChartBarBigIcon, tint: "text-chart-5", available: false },
 };
 

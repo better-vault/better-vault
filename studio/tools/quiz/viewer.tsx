@@ -1,6 +1,11 @@
 "use client";
 
-import { BulbIcon, CancelCircleIcon, CheckmarkCircle02Icon, RotateLeft01Icon } from "@hugeicons/core-free-icons";
+import {
+  BulbIcon,
+  CancelCircleIcon,
+  CheckmarkCircle02Icon,
+  RotateLeft01Icon,
+} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
@@ -50,15 +55,18 @@ export function QuizViewer({ data }: ToolViewerProps<QuizData>) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 pb-10">
       <div className="flex flex-col gap-2">
-        <p className="text-sm tabular-nums text-muted-foreground">
+        <p className="text-sm text-muted-foreground tabular-nums">
           {t("quiz.viewer.progress", { current: index + 1, total })}
         </p>
         <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-chart-3 transition-[width]" style={{ width: `${(index / total) * 100}%` }} />
+          <div
+            className="h-full rounded-full bg-chart-3 transition-[width]"
+            style={{ width: `${(index / total) * 100}%` }}
+          />
         </div>
       </div>
 
-      <h3 className="text-xl font-semibold leading-snug">{question.question}</h3>
+      <h3 className="text-xl leading-snug font-semibold">{question.question}</h3>
 
       <div role="radiogroup" aria-label={question.question} className="flex flex-col gap-2">
         {question.options.map((option, at) => {
@@ -71,19 +79,26 @@ export function QuizViewer({ data }: ToolViewerProps<QuizData>) {
               role="radio"
               aria-checked={picked}
               disabled={answered}
-              onClick={() => setAnswers((list) => list.map((value, i) => (i === index ? at : value)))}
+              onClick={() =>
+                setAnswers((list) => list.map((value, i) => (i === index ? at : value)))
+              }
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-start outline-none transition-colors",
+                "flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-start transition-colors outline-none",
                 "hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:bg-transparent",
                 answered && right && "border-success bg-success/10 disabled:hover:bg-success/10",
-                answered && picked && !right && "border-destructive bg-destructive/10 disabled:hover:bg-destructive/10",
+                answered &&
+                  picked &&
+                  !right &&
+                  "border-destructive bg-destructive/10 disabled:hover:bg-destructive/10",
               )}
             >
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
                 {LETTERS[at]}
               </span>
               <span className="min-w-0 flex-1 pt-0.5 text-[0.9375rem] leading-6">{option}</span>
-              {answered && right ? <Icon icon={CheckmarkCircle02Icon} size={18} className="mt-0.5 text-success" /> : null}
+              {answered && right ? (
+                <Icon icon={CheckmarkCircle02Icon} size={18} className="mt-0.5 text-success" />
+              ) : null}
               {answered && picked && !right ? (
                 <Icon icon={CancelCircleIcon} size={18} className="mt-0.5 text-destructive" />
               ) : null}
@@ -94,7 +109,12 @@ export function QuizViewer({ data }: ToolViewerProps<QuizData>) {
 
       {answered ? (
         <div className="rounded-2xl bg-muted/60 px-4 py-3 text-sm leading-6">
-          <p className={cn("font-semibold", chosen === question.answer ? "text-success" : "text-destructive")}>
+          <p
+            className={cn(
+              "font-semibold",
+              chosen === question.answer ? "text-success" : "text-destructive",
+            )}
+          >
             {chosen === question.answer ? t("quiz.viewer.correct") : t("quiz.viewer.incorrect")}
           </p>
           <p className="mt-1">{question.explanation}</p>

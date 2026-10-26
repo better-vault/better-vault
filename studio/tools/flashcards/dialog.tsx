@@ -5,7 +5,12 @@ import { ChoiceField, FocusField } from "@/studio/shared/fields";
 import type { ToolFormProps } from "@/studio/shared/form";
 import { amounts, difficulties, type FlashcardsOptions } from "./definition";
 
-export function FlashcardsForm({ value, onChange, focus, onFocusChange }: ToolFormProps<FlashcardsOptions>) {
+export function FlashcardsForm({
+  value,
+  onChange,
+  focus,
+  onFocusChange,
+}: ToolFormProps<FlashcardsOptions>) {
   const { t } = useTranslation("studio");
   return (
     <>
@@ -20,7 +25,10 @@ export function FlashcardsForm({ value, onChange, focus, onFocusChange }: ToolFo
           label={t("flashcards.difficulty")}
           value={value.difficulty}
           onChange={(difficulty) => onChange({ ...value, difficulty })}
-          options={difficulties.map((difficulty) => ({ value: difficulty, label: t(`choices.${difficulty}`) }))}
+          options={difficulties.map((difficulty) => ({
+            value: difficulty,
+            label: t(`choices.${difficulty}`),
+          }))}
         />
       </div>
       <FocusField

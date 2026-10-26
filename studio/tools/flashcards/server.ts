@@ -39,7 +39,13 @@ export const generateFlashcards: Generator<FlashcardsOptions, FlashcardsData> = 
   const seen = new Set<string>();
   const cards = output.cards
     .map((card) => ({ front: clean(card.front), back: clean(card.back) }))
-    .filter((card) => card.front && card.back && !seen.has(card.front.toLowerCase()) && seen.add(card.front.toLowerCase()))
+    .filter(
+      (card) =>
+        card.front &&
+        card.back &&
+        !seen.has(card.front.toLowerCase()) &&
+        seen.add(card.front.toLowerCase()),
+    )
     .slice(0, count + 5);
   if (cards.length === 0) throw new Error("The model returned no flashcards.");
   return { title: clean(output.title) || "Flashcards", data: { cards } };

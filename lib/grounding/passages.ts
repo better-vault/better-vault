@@ -34,7 +34,8 @@ function fill(chunks: Chunk[], budget: number): Chunk[] {
 /** An even spread of each source's passages, each source getting a share of the budget by its size. */
 function spread(chunks: Chunk[], budget: number): Chunk[] {
   const bySource = new Map<string, Chunk[]>();
-  for (const chunk of chunks) bySource.set(chunk.sourceId, [...(bySource.get(chunk.sourceId) ?? []), chunk]);
+  for (const chunk of chunks)
+    bySource.set(chunk.sourceId, [...(bySource.get(chunk.sourceId) ?? []), chunk]);
   const total = chunks.reduce((sum, chunk) => sum + chunk.text.length, 0);
   const picked: Chunk[] = [];
   for (const list of bySource.values()) {
@@ -49,18 +50,32 @@ function spread(chunks: Chunk[], budget: number): Chunk[] {
 }
 
 /** The passages most related to the query, then an even spread to use what is left. */
-function search(chunks: Chunk[], titles: Map<string, string>, query: string, budget: number): Chunk[] {
+function search(
+  chunks: Chunk[],
+  titles: Map<string, string>,
+  query: string,
+  budget: number,
+): Chunk[] {
   const index = new MiniSearch<{ id: string; text: string; title: string }>({
     fields: ["text", "title"],
     searchOptions: { prefix: true, fuzzy: 0.15, boost: { title: 1.5 } },
   });
-  index.addAll(chunks.map((chunk) => ({ id: chunk.id, text: chunk.text, title: titles.get(chunk.sourceId) ?? "" })));
+  index.addAll(
+    chunks.map((chunk) => ({
+      id: chunk.id,
+      text: chunk.text,
+      title: titles.get(chunk.sourceId) ?? "",
+    })),
+  );
   const byId = new Map(chunks.map((chunk) => [chunk.id, chunk]));
   const ranked = index.search(query).flatMap((result) => byId.get(String(result.id)) ?? []);
   const found = fill(ranked, Math.floor(budget * 0.75));
   const used = found.reduce((sum, chunk) => sum + chunk.text.length, 0);
   const chosen = new Set(found.map((chunk) => chunk.id));
-  const rest = spread(chunks.filter((chunk) => !chosen.has(chunk.id)), budget - used);
+  const rest = spread(
+    chunks.filter((chunk) => !chosen.has(chunk.id)),
+    budget - used,
+  );
   return [...found, ...rest];
 }
 
@@ -100,7 +115,10 @@ export function selectPassages({ sources, chunks, budget, query }: SelectOptions
 export function formatPassages(passages: readonly Passage[]): string {
   if (passages.length === 0) return "<sources>\n(none)\n</sources>";
   const body = passages
-    .map((passage) => `<passage n="${passage.n}" source="${passage.title.replace(/"/g, "'")}">\n${passage.text}\n</passage>`)
+    .map(
+      (passage) =>
+        `<passage n="${passage.n}" source="${passage.title.replace(/"/g, "'")}">\n${passage.text}\n</passage>`,
+    )
     .join("\n");
   return `<sources>\n${body}\n</sources>`;
 }

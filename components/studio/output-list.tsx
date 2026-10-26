@@ -57,7 +57,9 @@ export function OutputRow({ output, onOpen }: { output: StudioOutput; onOpen: ()
       ? t("status.generating")
       : output.status === "error"
         ? (output.error ?? t("status.failed"))
-        : `${tCommon("sourceCount", { count: output.sourceIds.length })} · ${formatRelativeTime(output.createdAt, i18n.language)}`;
+        : output.model
+          ? `${tCommon("sourceCount", { count: output.sourceIds.length })} · ${formatRelativeTime(output.createdAt, i18n.language)}`
+          : t("viewer.metaLocal", { time: formatRelativeTime(output.updatedAt, i18n.language) });
 
   return (
     <div className="group/output flex items-center gap-1 rounded-2xl pe-1 transition-colors hover:bg-muted">
@@ -79,7 +81,11 @@ export function OutputRow({ output, onOpen }: { output: StudioOutput; onOpen: ()
           </span>
         </span>
         {output.status === "generating" ? (
-          <Icon icon={Loading03Icon} size={16} className="shrink-0 animate-spin text-muted-foreground" />
+          <Icon
+            icon={Loading03Icon}
+            size={16}
+            className="shrink-0 animate-spin text-muted-foreground"
+          />
         ) : output.status === "error" ? (
           <Icon icon={Alert02Icon} size={16} className="shrink-0 text-destructive" />
         ) : null}
@@ -99,7 +105,10 @@ export function OutputRow({ output, onOpen }: { output: StudioOutput; onOpen: ()
             <Icon icon={PencilEdit01Icon} />
             {tCommon("actions.rename")}
           </Menu.Item>
-          <Menu.Item variant="destructive" onClick={() => requestOutputAction({ kind: "delete", output })}>
+          <Menu.Item
+            variant="destructive"
+            onClick={() => requestOutputAction({ kind: "delete", output })}
+          >
             <Icon icon={Delete02Icon} />
             {tCommon("actions.delete")}
           </Menu.Item>

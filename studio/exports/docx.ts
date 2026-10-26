@@ -25,7 +25,9 @@ import type { PassageRef } from "@/lib/chat/types";
 /** Mostly Arabic, Hebrew, Persian or Urdu letters: lay the document out right to left. */
 export function isRightToLeft(text: string): boolean {
   const letters = text.match(/\p{L}/gu)?.length ?? 0;
-  const rtl = text.match(/[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}]/gu)?.length ?? 0;
+  const rtl =
+    text.match(/[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}]/gu)
+      ?.length ?? 0;
   return letters > 0 && rtl / letters > 0.3;
 }
 
@@ -51,7 +53,8 @@ const CITATION = /\[(\d{1,4}(?:\s*[,–-]\s*\d{1,4})*)\]/g;
 function citationNumbers(inner: string): number[] {
   return inner.split(/\s*,\s*/).flatMap((part) => {
     const [from, to] = part.split(/\s*[–-]\s*/).map(Number);
-    if (to !== undefined && to >= from && to - from < 50) return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+    if (to !== undefined && to >= from && to - from < 50)
+      return Array.from({ length: to - from + 1 }, (_, i) => from + i);
     return [from];
   });
 }
@@ -63,7 +66,10 @@ function footnoteFor(n: number, context: Context): FootnoteReferenceRun | null {
     children: [
       new Paragraph({
         bidirectional: context.rtl,
-        children: [new TextRun({ text: `${passage.title}: `, bold: true }), new TextRun(`“${passage.snippet}”`)],
+        children: [
+          new TextRun({ text: `${passage.title}: `, bold: true }),
+          new TextRun(`“${passage.snippet}”`),
+        ],
       }),
     ],
   });
@@ -104,7 +110,13 @@ function inline(nodes: PhrasingContent[], style: Style, context: Context): Parag
       case "delete":
         return inline(node.children, { ...style, strike: true }, context);
       case "inlineCode":
-        return [new TextRun({ text: node.value, font: MONO, shading: { type: ShadingType.CLEAR, fill: "F2F2F2" } })];
+        return [
+          new TextRun({
+            text: node.value,
+            font: MONO,
+            shading: { type: ShadingType.CLEAR, fill: "F2F2F2" },
+          }),
+        ];
       case "break":
         return [new TextRun({ text: "", break: 1 })];
       case "link":
@@ -117,7 +129,9 @@ function inline(nodes: PhrasingContent[], style: Style, context: Context): Parag
           }),
         ];
       default:
-        return "value" in node && typeof node.value === "string" ? textRuns(node.value, style, context) : [];
+        return "value" in node && typeof node.value === "string"
+          ? textRuns(node.value, style, context)
+          : [];
     }
   });
 }
@@ -128,7 +142,14 @@ function list(node: List, level: number, context: Context): Paragraph[] {
     item.children.flatMap((child, at) => {
       if (child.type === "list") return list(child, level + 1, context);
       const children = child.type === "paragraph" ? inline(child.children, {}, context) : [];
-      if (at > 0) return [new Paragraph({ children, bidirectional: context.rtl, indent: { start: 720 * (level + 1) } })];
+      if (at > 0)
+        return [
+          new Paragraph({
+            children,
+            bidirectional: context.rtl,
+            indent: { start: 720 * (level + 1) },
+          }),
+        ];
       return [
         new Paragraph({
           children,
@@ -167,7 +188,12 @@ function table(node: MdTable, context: Context): Table {
   });
 }
 
-const HEADINGS = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3, HeadingLevel.HEADING_4];
+const HEADINGS = [
+  HeadingLevel.HEADING_1,
+  HeadingLevel.HEADING_2,
+  HeadingLevel.HEADING_3,
+  HeadingLevel.HEADING_4,
+];
 
 function blocks(nodes: RootContent[], context: Context): (Paragraph | Table)[] {
   return nodes.flatMap((node): (Paragraph | Table)[] => {
@@ -181,7 +207,12 @@ function blocks(nodes: RootContent[], context: Context): (Paragraph | Table)[] {
           }),
         ];
       case "paragraph":
-        return [new Paragraph({ bidirectional: context.rtl, children: inline(node.children, {}, context) })];
+        return [
+          new Paragraph({
+            bidirectional: context.rtl,
+            children: inline(node.children, {}, context),
+          }),
+        ];
       case "list":
         return list(node, 0, context);
       case "table":
@@ -193,7 +224,9 @@ function blocks(nodes: RootContent[], context: Context): (Paragraph | Table)[] {
                 new Paragraph({
                   bidirectional: context.rtl,
                   indent: { start: 360 },
-                  border: { left: { style: BorderStyle.SINGLE, size: 12, color: "BBBBBB", space: 12 } },
+                  border: {
+                    left: { style: BorderStyle.SINGLE, size: 12, color: "BBBBBB", space: 12 },
+                  },
                   children: inline(child.children, { italics: true }, context),
                 }),
               ]
@@ -208,7 +241,11 @@ function blocks(nodes: RootContent[], context: Context): (Paragraph | Table)[] {
             }),
         );
       case "thematicBreak":
-        return [new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC", space: 1 } } })];
+        return [
+          new Paragraph({
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC", space: 1 } },
+          }),
+        ];
       default:
         return [];
     }
@@ -216,8 +253,15 @@ function blocks(nodes: RootContent[], context: Context): (Paragraph | Table)[] {
 }
 
 /** Turns Markdown into Word content. "[n]" citations become footnotes naming the source. */
-export function markdownToBlocks(markdown: string, passages: readonly PassageRef[] = [], rtl = false) {
-  const tree = fromMarkdown(markdown, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] });
+export function markdownToBlocks(
+  markdown: string,
+  passages: readonly PassageRef[] = [],
+  rtl = false,
+) {
+  const tree = fromMarkdown(markdown, {
+    extensions: [gfm()],
+    mdastExtensions: [gfmFromMarkdown()],
+  });
   return blocks(tree.children, {
     rtl,
     passages: new Map(passages.map((passage) => [passage.n, passage])),
@@ -234,17 +278,37 @@ interface DocumentInput {
 }
 
 /** A Word document with a title, the app's styles and list numbering. */
-export async function wordDocument({ title, subtitle, children, rtl = false }: DocumentInput): Promise<Blob> {
+export async function wordDocument({
+  title,
+  subtitle,
+  children,
+  rtl = false,
+}: DocumentInput): Promise<Blob> {
   const document = new Document({
     creator: "better-vault",
     title,
     styles: {
       default: {
-        document: { run: { font: "Calibri", size: 22 }, paragraph: { spacing: { after: 120, line: 300 } } },
-        heading1: { run: { font: "Calibri", size: 32, bold: true }, paragraph: { spacing: { before: 360, after: 120 } } },
-        heading2: { run: { font: "Calibri", size: 28, bold: true }, paragraph: { spacing: { before: 280, after: 100 } } },
-        heading3: { run: { font: "Calibri", size: 24, bold: true }, paragraph: { spacing: { before: 220, after: 80 } } },
-        title: { run: { font: "Calibri", size: 48, bold: true }, paragraph: { spacing: { after: 80 } } },
+        document: {
+          run: { font: "Calibri", size: 22 },
+          paragraph: { spacing: { after: 120, line: 300 } },
+        },
+        heading1: {
+          run: { font: "Calibri", size: 32, bold: true },
+          paragraph: { spacing: { before: 360, after: 120 } },
+        },
+        heading2: {
+          run: { font: "Calibri", size: 28, bold: true },
+          paragraph: { spacing: { before: 280, after: 100 } },
+        },
+        heading3: {
+          run: { font: "Calibri", size: 24, bold: true },
+          paragraph: { spacing: { before: 220, after: 80 } },
+        },
+        title: {
+          run: { font: "Calibri", size: 48, bold: true },
+          paragraph: { spacing: { after: 80 } },
+        },
       },
     },
     numbering: {
@@ -265,9 +329,20 @@ export async function wordDocument({ title, subtitle, children, rtl = false }: D
       {
         properties: {},
         children: [
-          new Paragraph({ heading: HeadingLevel.TITLE, bidirectional: rtl, children: [new TextRun({ text: title, rightToLeft: rtl })] }),
+          new Paragraph({
+            heading: HeadingLevel.TITLE,
+            bidirectional: rtl,
+            children: [new TextRun({ text: title, rightToLeft: rtl })],
+          }),
           ...(subtitle
-            ? [new Paragraph({ bidirectional: rtl, children: [new TextRun({ text: subtitle, color: "777777", size: 20, rightToLeft: rtl })] })]
+            ? [
+                new Paragraph({
+                  bidirectional: rtl,
+                  children: [
+                    new TextRun({ text: subtitle, color: "777777", size: 20, rightToLeft: rtl }),
+                  ],
+                }),
+              ]
             : []),
           ...children,
         ],

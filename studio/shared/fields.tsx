@@ -15,7 +15,13 @@ import { cn } from "@/lib/utils";
 import { languageName, outputLanguages } from "@/studio/languages";
 
 /** The language the output is written in. */
-export function LanguageField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function LanguageField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
   const { t, i18n } = useTranslation("studio");
   const id = useId();
   const items = useMemo(() => {
@@ -27,7 +33,11 @@ export function LanguageField({ value, onChange }: { value: string; onChange: (v
 
   return (
     <Field label={t("dialog.language")} htmlFor={id}>
-      <Select items={items} value={value} onValueChange={(next) => typeof next === "string" && onChange(next)}>
+      <Select
+        items={items}
+        value={value}
+        onValueChange={(next) => typeof next === "string" && onChange(next)}
+      >
         <Select.Trigger id={id} className="w-full">
           <Select.Value />
         </Select.Trigger>
@@ -74,7 +84,9 @@ export function SourcesField({
         <Menu.Content align="start" className="max-h-72 min-w-(--anchor-width)">
           <Menu.CheckboxItem
             checked={all}
-            onCheckedChange={(checked) => onChange(checked ? sources.map((source) => source.id) : [])}
+            onCheckedChange={(checked) =>
+              onChange(checked ? sources.map((source) => source.id) : [])
+            }
           >
             {t("dialog.allSources")}
           </Menu.CheckboxItem>
@@ -150,7 +162,13 @@ export function ChoiceField<Value extends string>({
 }) {
   return (
     <Field label={label}>
-      <Segmented<Value> aria-label={label} value={value} onValueChange={onChange} options={options} className="w-full *:flex-1" />
+      <Segmented<Value>
+        aria-label={label}
+        value={value}
+        onValueChange={onChange}
+        options={options}
+        className="w-full *:flex-1"
+      />
     </Field>
   );
 }
@@ -183,7 +201,10 @@ export function OptionCards<Value extends string>({
       <div
         role="radiogroup"
         aria-label={label}
-        className={cn("grid grid-cols-1 gap-2", columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}
+        className={cn(
+          "grid grid-cols-1 gap-2",
+          columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3",
+        )}
       >
         {options.map((option) => {
           const selected = option.value === value;
@@ -195,19 +216,30 @@ export function OptionCards<Value extends string>({
               aria-checked={selected}
               onClick={() => onChange(option.value)}
               className={cn(
-                "relative flex cursor-pointer items-start gap-2.5 rounded-2xl border p-3 text-start outline-none transition-colors",
+                "relative flex cursor-pointer items-start gap-2.5 rounded-2xl border p-3 text-start transition-colors outline-none",
                 "hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
-                selected && "border-primary bg-primary/[0.04] ring-1 ring-primary hover:bg-primary/[0.06]",
+                selected &&
+                  "border-primary bg-primary/[0.04] ring-1 ring-primary hover:bg-primary/[0.06]",
               )}
             >
-              {option.icon ? <Icon icon={option.icon} size={18} className="mt-0.5 shrink-0 text-muted-foreground" /> : null}
+              {option.icon ? (
+                <Icon
+                  icon={option.icon}
+                  size={18}
+                  className="mt-0.5 shrink-0 text-muted-foreground"
+                />
+              ) : null}
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium">{option.title}</span>
                 {option.description ? (
-                  <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{option.description}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                    {option.description}
+                  </span>
                 ) : null}
               </span>
-              {selected ? <Icon icon={Tick02Icon} size={16} className="shrink-0 text-primary" /> : null}
+              {selected ? (
+                <Icon icon={Tick02Icon} size={16} className="shrink-0 text-primary" />
+              ) : null}
             </button>
           );
         })}

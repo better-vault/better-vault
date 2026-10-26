@@ -21,7 +21,10 @@ export function QuizForm({ value, onChange, focus, onFocusChange }: ToolFormProp
           label={t("quiz.difficulty")}
           value={value.difficulty}
           onChange={(difficulty) => onChange({ ...value, difficulty })}
-          options={difficulties.map((difficulty) => ({ value: difficulty, label: t(`choices.${difficulty}`) }))}
+          options={difficulties.map((difficulty) => ({
+            value: difficulty,
+            label: t(`choices.${difficulty}`),
+          }))}
         />
       </div>
       <FocusField

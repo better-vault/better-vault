@@ -16,8 +16,13 @@ import { ReportViewer } from "./tools/report/viewer";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ToolClient {
-  Form: ComponentType<ToolFormProps<any>>;
+  /** The tool's own fields in its dialog. Local tools have no dialog. */
+  Form?: ComponentType<ToolFormProps<any>>;
   Viewer: ComponentType<ToolViewerProps<any>>;
+  /** Whether these options are complete enough to create the output. */
+  canCreate?: (options: any) => boolean;
+  /** Viewers that run edge to edge, with no page margin or width limit. */
+  bleed?: boolean;
   /** Wider dialogs for tools with grids of cards. */
   wide?: boolean;
   /** Viewers that fill the height of the Studio tab. */
@@ -29,7 +34,15 @@ export interface ToolClient {
 
 /** How each available tool looks in the browser: its dialog form and its viewer. */
 export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
-  report: { Form: ReportForm, Viewer: ReportViewer, wide: true, wideViewer: true },
+  report: {
+    Form: ReportForm,
+    Viewer: ReportViewer,
+    wide: true,
+    wideViewer: true,
+    // "Create your own" needs a description.
+    canCreate: (options: { template: string; instructions: string }) =>
+      options.template !== "custom" || options.instructions.trim() !== "",
+  },
   flashcards: { Form: FlashcardsForm, Viewer: FlashcardsViewer },
   quiz: { Form: QuizForm, Viewer: QuizViewer },
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },

@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
 import { downloadBlob } from "@/lib/download";
 import { fileNameFor } from "@/lib/format";
-import type { ExportOption } from "@/studio/types";
+import { isFileExport, type ExportOption } from "@/studio/types";
 
 /** "Download" with the formats an output can be saved as. */
 export function DownloadMenu<Data>({
@@ -25,14 +25,19 @@ export function DownloadMenu<Data>({
   const [busy, setBusy] = useState(false);
 
   async function save(option: ExportOption<Data>) {
+    if (!isFileExport(option)) {
+      option.print(title);
+      return;
+    }
     setBusy(true);
     try {
       const blob = await option.build(title, data, {
         question: t("export.question"),
         answer: t("export.answer"),
         answerKey: t("export.answerKey"),
+        sources: t("export.sources"),
       });
-      downloadBlob(blob, fileNameFor(title, option.format));
+      downloadBlob(blob, fileNameFor(title, option.extension?.(data) ?? option.format));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
     } finally {
@@ -46,7 +51,11 @@ export function DownloadMenu<Data>({
         disabled={busy}
         className={buttonVariants({ variant: "outline", shape: "pill", size: "sm" })}
       >
-        <Icon icon={busy ? Loading03Icon : Download04Icon} size={16} className={busy ? "animate-spin" : undefined} />
+        <Icon
+          icon={busy ? Loading03Icon : Download04Icon}
+          size={16}
+          className={busy ? "animate-spin" : undefined}
+        />
         {t("viewer.download")}
         <Icon icon={ArrowDown01Icon} size={14} className="text-muted-foreground" />
       </Menu.Trigger>

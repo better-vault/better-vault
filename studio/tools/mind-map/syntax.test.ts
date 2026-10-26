@@ -11,7 +11,9 @@ describe("diagram syntax examples", () => {
 
 describe("diagramProblem", () => {
   it("rejects the wrong kind of diagram", () => {
-    expect(diagramProblem(diagramSyntax.flowchart.example, "mindmap")).toMatch(/must start with "mindmap"/);
+    expect(diagramProblem(diagramSyntax.flowchart.example, "mindmap")).toMatch(
+      /must start with "mindmap"/,
+    );
   });
 
   it("reports parse errors", () => {

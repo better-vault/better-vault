@@ -50,7 +50,11 @@ export function usePanZoom() {
     onPointerMove: (event: PointerEvent) => {
       const start = drag.current;
       if (!start) return;
-      setView((current) => ({ ...current, x: start.x + event.clientX - start.startX, y: start.y + event.clientY - start.startY }));
+      setView((current) => ({
+        ...current,
+        x: start.x + event.clientX - start.startX,
+        y: start.y + event.clientY - start.startY,
+      }));
     },
     onPointerUp: () => {
       drag.current = null;

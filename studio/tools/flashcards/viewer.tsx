@@ -76,7 +76,11 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, [contenteditable], [role=dialog]")) return;
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.closest("input, textarea, [contenteditable], [role=dialog]")
+      )
+        return;
       if (event.key === " ") {
         event.preventDefault();
         if (!finished) setFlipped((value) => !value);
@@ -91,14 +95,20 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
     const missedList = [...missed];
     return (
       <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 py-16 text-center">
-        <p className="text-xl font-semibold">{t("flashcards.viewer.finished", { known: known.size, total: order.length })}</p>
+        <p className="text-xl font-semibold">
+          {t("flashcards.viewer.finished", { known: known.size, total: order.length })}
+        </p>
         <div className="flex flex-wrap justify-center gap-2">
           {missedList.length > 0 ? (
             <Button shape="pill" onClick={() => restart(missedList)}>
               {t("flashcards.viewer.practiceMissed", { count: missedList.length })}
             </Button>
           ) : null}
-          <Button shape="pill" variant="secondary" onClick={() => restart(range(data.cards.length))}>
+          <Button
+            shape="pill"
+            variant="secondary"
+            onClick={() => restart(range(data.cards.length))}
+          >
             <Icon icon={RotateLeft01Icon} size={16} />
             {t("flashcards.viewer.restart")}
           </Button>
@@ -110,9 +120,15 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-5 pb-10">
       <div className="flex w-full items-center justify-between text-sm text-muted-foreground">
-        <span className="tabular-nums">{t("flashcards.viewer.progress", { current: position + 1, total: order.length })}</span>
+        <span className="tabular-nums">
+          {t("flashcards.viewer.progress", { current: position + 1, total: order.length })}
+        </span>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => restart(shuffled(range(data.cards.length)))}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => restart(shuffled(range(data.cards.length)))}
+          >
             <Icon icon={ShuffleIcon} size={16} />
             {t("flashcards.viewer.shuffle")}
           </Button>
@@ -124,7 +140,10 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
       </div>
 
       <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-chart-4 transition-[width]" style={{ width: `${(position / order.length) * 100}%` }} />
+        <div
+          className="h-full rounded-full bg-chart-4 transition-[width]"
+          style={{ width: `${(position / order.length) * 100}%` }}
+        />
       </div>
 
       <button
@@ -139,7 +158,7 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
             flipped && "rotate-y-180",
           )}
         >
-          <div className="col-start-1 row-start-1 flex items-center justify-center rounded-3xl bg-card p-8 text-center text-xl font-semibold leading-snug text-card-foreground shadow-sm ring-1 ring-border backface-hidden group-focus-visible:ring-2 group-focus-visible:ring-ring sm:text-2xl">
+          <div className="col-start-1 row-start-1 flex items-center justify-center rounded-3xl bg-card p-8 text-center text-xl leading-snug font-semibold text-card-foreground shadow-sm ring-1 ring-border backface-hidden group-focus-visible:ring-2 group-focus-visible:ring-ring sm:text-2xl">
             {card.front}
           </div>
           <div className="col-start-1 row-start-1 flex rotate-y-180 items-center justify-center rounded-3xl bg-muted p-8 text-center text-lg leading-relaxed backface-hidden">
@@ -163,12 +182,12 @@ export function FlashcardsViewer({ data }: ToolViewerProps<FlashcardsData>) {
           <Button variant="outline" shape="pill" onClick={() => mark(false)}>
             <Icon icon={CancelCircleIcon} size={16} className="text-destructive" />
             {t("flashcards.viewer.missed")}
-            <span className="tabular-nums text-muted-foreground">{missed.size}</span>
+            <span className="text-muted-foreground tabular-nums">{missed.size}</span>
           </Button>
           <Button variant="outline" shape="pill" onClick={() => mark(true)}>
             <Icon icon={CheckmarkCircle02Icon} size={16} className="text-success" />
             {t("flashcards.viewer.knew")}
-            <span className="tabular-nums text-muted-foreground">{known.size}</span>
+            <span className="text-muted-foreground tabular-nums">{known.size}</span>
           </Button>
         </div>
         <Button

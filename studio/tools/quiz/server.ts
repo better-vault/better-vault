@@ -29,10 +29,19 @@ export function shuffleOptions(question: QuizQuestion, random: () => number): Qu
     const j = Math.floor(random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }
-  return { ...question, options: order.map((at) => question.options[at]), answer: order.indexOf(question.answer) };
+  return {
+    ...question,
+    options: order.map((at) => question.options[at]),
+    answer: order.indexOf(question.answer),
+  };
 }
 
-export const generateQuiz: Generator<QuizOptions, QuizData> = async ({ model, options, abortSignal, ...args }) => {
+export const generateQuiz: Generator<QuizOptions, QuizData> = async ({
+  model,
+  options,
+  abortSignal,
+  ...args
+}) => {
   const count = quizCounts[options.amount];
   const { output } = await generateText({
     model,
@@ -53,7 +62,9 @@ export const generateQuiz: Generator<QuizOptions, QuizData> = async ({ model, op
       explanation: clean(q.explanation),
       hint: clean(q.hint),
     }))
-    .filter((q) => q.question && q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length)
+    .filter(
+      (q) => q.question && q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length,
+    )
     .map((q) => shuffleOptions(q, random));
   if (questions.length === 0) throw new Error("The model returned no usable questions.");
   return { title: clean(output.title) || "Quiz", data: { questions } };

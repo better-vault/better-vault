@@ -8,10 +8,18 @@ export interface MindNode {
 
 /** The text of a Mermaid mindmap node: `root((Text))`, `id[Text]`, `id(Text)`, `id{{Text}}`, or plain text. */
 export function nodeLabel(line: string): string {
-  let text = line.trim().replace(/:::[\w-]+\s*$/, "").trim();
-  const shaped = text.match(/^[^\s([{)]*?(\(\(|\)\)|\{\{|\(|\)|\[)([\s\S]*?)(\)\)|\(\(|\}\}|\)|\(|\])$/);
+  let text = line
+    .trim()
+    .replace(/:::[\w-]+\s*$/, "")
+    .trim();
+  const shaped = text.match(
+    /^[^\s([{)]*?(\(\(|\)\)|\{\{|\(|\)|\[)([\s\S]*?)(\)\)|\(\(|\}\}|\)|\(|\])$/,
+  );
   if (shaped) text = shaped[2];
-  return text.replace(/^["'`]+|["'`]+$/g, "").replace(/\s+/g, " ").trim();
+  return text
+    .replace(/^["'`]+|["'`]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Reads Mermaid `mindmap` source into a tree, by indentation. Returns null if there is no root. */
@@ -100,15 +108,24 @@ export interface Layout {
  * on its children, siblings stacked with a gap, curves from each parent's
  * toggle to its children.
  */
-export function layoutTree(root: MindNode, expanded: ReadonlySet<string>, measure: (text: string) => number): Layout {
-  const widthOf = (node: MindNode) => Math.min(MAX_NODE_WIDTH, Math.max(56, Math.ceil(measure(node.label)) + PAD_X * 2));
+export function layoutTree(
+  root: MindNode,
+  expanded: ReadonlySet<string>,
+  measure: (text: string) => number,
+): Layout {
+  const widthOf = (node: MindNode) =>
+    Math.min(MAX_NODE_WIDTH, Math.max(56, Math.ceil(measure(node.label)) + PAD_X * 2));
   const open = (node: MindNode) => expanded.has(node.id) && node.children.length > 0;
   const heights = new Map<string, number>();
   const heightOf = (node: MindNode): number => {
     const known = heights.get(node.id);
     if (known !== undefined) return known;
     const height = open(node)
-      ? Math.max(NODE_HEIGHT, node.children.reduce((sum, child) => sum + heightOf(child), 0) + GAP_Y * (node.children.length - 1))
+      ? Math.max(
+          NODE_HEIGHT,
+          node.children.reduce((sum, child) => sum + heightOf(child), 0) +
+            GAP_Y * (node.children.length - 1),
+        )
       : NODE_HEIGHT;
     heights.set(node.id, height);
     return height;
@@ -127,7 +144,9 @@ export function layoutTree(root: MindNode, expanded: ReadonlySet<string>, measur
     if (!open(node)) return;
     const fromX = x + width + TOGGLE_GAP + TOGGLE;
     const childX = fromX + GAP_X;
-    const span = node.children.reduce((sum, child) => sum + heightOf(child), 0) + GAP_Y * (node.children.length - 1);
+    const span =
+      node.children.reduce((sum, child) => sum + heightOf(child), 0) +
+      GAP_Y * (node.children.length - 1);
     let cursor = top + (height - span) / 2;
     for (const child of node.children) {
       const childHeight = heightOf(child);
@@ -154,14 +173,21 @@ const escapeXml = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** The whole map as a standalone SVG image. */
-export function mindMapSvg(root: MindNode, measure: (text: string) => number, font: string): { svg: string; width: number; height: number } {
+export function mindMapSvg(
+  root: MindNode,
+  measure: (text: string) => number,
+  font: string,
+): { svg: string; width: number; height: number } {
   const layout = layoutTree(root, branchIds(root), measure);
   const margin = 24;
   const width = Math.ceil(layout.width + margin * 2);
   const height = Math.ceil(layout.height + margin * 2);
   const colour = (depth: number) => EXPORT_COLOURS[depth % EXPORT_COLOURS.length];
   const edges = layout.edges
-    .map((edge) => `<path d="${edge.d}" fill="none" stroke="${colour(edge.depth)}" stroke-opacity="0.55" stroke-width="1.6"/>`)
+    .map(
+      (edge) =>
+        `<path d="${edge.d}" fill="none" stroke="${colour(edge.depth)}" stroke-opacity="0.55" stroke-width="1.6"/>`,
+    )
     .join("");
   const nodes = layout.nodes
     .map(({ node, depth, x, y, width: w }) => {

@@ -108,6 +108,13 @@ export function availableModels(settings: AppSettings): ModelRef[] {
     });
 }
 
+/** Every image model the user can pick: those of ready providers that draw pictures. */
+export function availableImageModels(settings: AppSettings): ModelRef[] {
+  return providerIds
+    .filter((id) => isProviderReady(settings, id))
+    .flatMap((id) => providers[id].imageModels.map((modelId) => ({ provider: id, modelId })));
+}
+
 /** The chosen model if it is still available, else the first one that is. */
 export function activeModel(settings: AppSettings): ModelRef | null {
   const models = availableModels(settings);

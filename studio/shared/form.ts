@@ -10,8 +10,13 @@ export interface ToolFormProps<Options> {
 
 /** What a tool's viewer receives. */
 export interface ToolViewerProps<Data> {
+  outputId: string;
   title: string;
   data: Data;
+  /** Saves edits made in the viewer, e.g. drawing on a whiteboard. */
+  onDataChange?: (data: Data) => Promise<void>;
+  /** Opens the output's picture on a new whiteboard, to draw on it. */
+  onAnnotate?: () => void;
   /** The element the viewer scrolls in, for parts that follow the reading. */
   scrollRef?: import("react").RefObject<HTMLElement | null>;
   /** Opens a cited passage in the source reader. */

@@ -23,13 +23,23 @@ function answering(...texts: string[]) {
 }
 
 const args = { language: "auto", focus: "", passages: [] };
-const good = JSON.stringify({ title: "Ventures", mermaid: "mindmap\n  root((Ventures))\n    Ideas\n    Risk" });
-const broken = JSON.stringify({ title: "Ventures", mermaid: "mindmap\n  root((Ventures))\n    (((" });
+const good = JSON.stringify({
+  title: "Ventures",
+  mermaid: "mindmap\n  root((Ventures))\n    Ideas\n    Risk",
+});
+const broken = JSON.stringify({
+  title: "Ventures",
+  mermaid: "mindmap\n  root((Ventures))\n    (((",
+});
 
 describe("generateMindMap", () => {
   it("returns a valid diagram on the first try", async () => {
     const { model, calls } = answering(good);
-    const result = await generateMindMap({ ...args, model, options: { diagram: "mindmap", detail: "concise" } });
+    const result = await generateMindMap({
+      ...args,
+      model,
+      options: { diagram: "mindmap", detail: "concise" },
+    });
     expect(result.title).toBe("Ventures");
     expect(result.data.mermaid.startsWith("mindmap")).toBe(true);
     expect(calls).toHaveLength(1);
@@ -37,7 +47,11 @@ describe("generateMindMap", () => {
 
   it("asks the model to repair a diagram that does not parse", async () => {
     const { model, calls } = answering(broken, good);
-    const result = await generateMindMap({ ...args, model, options: { diagram: "mindmap", detail: "concise" } });
+    const result = await generateMindMap({
+      ...args,
+      model,
+      options: { diagram: "mindmap", detail: "concise" },
+    });
     expect(result.data.mermaid).toContain("Risk");
     expect(calls).toHaveLength(2);
   });

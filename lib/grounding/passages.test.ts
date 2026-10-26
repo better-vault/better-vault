@@ -15,7 +15,13 @@ const sources = [
 ];
 
 function chunks(sourceId: string, texts: string[]): Chunk[] {
-  return texts.map((text, index) => ({ id: `${sourceId}:${index}`, notebookId: "n", sourceId, index, text }));
+  return texts.map((text, index) => ({
+    id: `${sourceId}:${index}`,
+    notebookId: "n",
+    sourceId,
+    index,
+    text,
+  }));
 }
 
 describe("selectPassages", () => {
@@ -30,22 +36,40 @@ describe("selectPassages", () => {
   });
 
   it("prefers passages that match the question when over budget", () => {
-    const filler = Array.from({ length: 20 }, (_, i) => `filler text number ${i} about nothing in particular`);
-    const all = [...chunks("a", [...filler, "the feasibility analysis checks the market"]), ...chunks("b", filler)];
-    const passages = selectPassages({ sources, chunks: all, budget: 200, query: "feasibility analysis" });
+    const filler = Array.from(
+      { length: 20 },
+      (_, i) => `filler text number ${i} about nothing in particular`,
+    );
+    const all = [
+      ...chunks("a", [...filler, "the feasibility analysis checks the market"]),
+      ...chunks("b", filler),
+    ];
+    const passages = selectPassages({
+      sources,
+      chunks: all,
+      budget: 200,
+      query: "feasibility analysis",
+    });
     expect(passages.some((p) => p.text.includes("feasibility"))).toBe(true);
     expect(passages.reduce((sum, p) => sum + p.text.length, 0)).toBeLessThanOrEqual(200);
   });
 
   it("spreads over every source without a question", () => {
-    const all = [...chunks("a", Array(30).fill("a".repeat(50))), ...chunks("b", Array(30).fill("b".repeat(50)))];
+    const all = [
+      ...chunks("a", Array(30).fill("a".repeat(50))),
+      ...chunks("b", Array(30).fill("b".repeat(50))),
+    ];
     const passages = selectPassages({ sources, chunks: all, budget: 1000 });
     expect(new Set(passages.map((p) => p.sourceId))).toEqual(new Set(["a", "b"]));
     expect(passages.reduce((sum, p) => sum + p.text.length, 0)).toBeLessThanOrEqual(1000);
   });
 
   it("ignores chunks of unselected sources", () => {
-    const passages = selectPassages({ sources: [sources[0]], chunks: [...chunks("a", ["x"]), ...chunks("b", ["y"])], budget: 100 });
+    const passages = selectPassages({
+      sources: [sources[0]],
+      chunks: [...chunks("a", ["x"]), ...chunks("b", ["y"])],
+      budget: 100,
+    });
     expect(passages.map((p) => p.sourceId)).toEqual(["a"]);
   });
 });
@@ -66,11 +90,17 @@ describe("citations", () => {
   });
 
   it("strips citations from old answers", () => {
-    expect(stripCitations("Growth matters [1][2]. Risk [3], too.")).toBe("Growth matters. Risk, too.");
+    expect(stripCitations("Growth matters [1][2]. Risk [3], too.")).toBe(
+      "Growth matters. Risk, too.",
+    );
   });
 
   it("formats passages and shortens snippets", () => {
-    const passages = selectPassages({ sources, chunks: chunks("a", ["x".repeat(400)]), budget: 1000 });
+    const passages = selectPassages({
+      sources,
+      chunks: chunks("a", ["x".repeat(400)]),
+      budget: 1000,
+    });
     expect(formatPassages(passages)).toContain('<passage n="1" source="Alpha">');
     expect(toPassageRefs(passages)[0].snippet.length).toBeLessThanOrEqual(278);
   });

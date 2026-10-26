@@ -21,7 +21,10 @@ type View = "tree" | "diagram";
  */
 export function MindMapViewer({ data }: ToolViewerProps<MindMapData>) {
   const { t } = useTranslation("studio");
-  const root = useMemo(() => (data.diagram === "mindmap" ? parseMindmap(data.mermaid) : null), [data]);
+  const root = useMemo(
+    () => (data.diagram === "mindmap" ? parseMindmap(data.mermaid) : null),
+    [data],
+  );
   const [view, setView] = useState<View>("tree");
 
   return (
@@ -53,7 +56,11 @@ export function MindMapViewer({ data }: ToolViewerProps<MindMapData>) {
           {t("mind-map.viewer.copyCode")}
         </Button>
       </div>
-      {root && view === "tree" ? <MindMapTree root={root} /> : <DiagramView mermaid={data.mermaid} />}
+      {root && view === "tree" ? (
+        <MindMapTree root={root} />
+      ) : (
+        <DiagramView mermaid={data.mermaid} />
+      )}
     </div>
   );
 }

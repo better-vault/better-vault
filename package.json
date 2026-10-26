@@ -53,11 +53,14 @@
     "minisearch": "^7.2.0",
     "next": "16.4.3",
     "pele": "^1.9.0",
+    "perfect-freehand": "^1.2.3",
+    "pptxgenjs": "^4.0.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-i18next": "^17.1.4",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "roughjs": "^4.6.6",
     "shadcn": "^4.22.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
@@ -75,10 +78,14 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "fake-indexeddb": "^6.2.6",
+    "jszip": "^3.10.2",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "image-size": "^2.0.4"
   }
 }

@@ -9,14 +9,14 @@ import {
   PencilEdit01Icon,
   RepeatIcon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWorkspace } from "@/components/workspace/workspace-context";
-import { useOutput } from "@/lib/db/outputs";
+import { updateOutputData, useOutput } from "@/lib/db/outputs";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toolClients } from "@/studio/client";
@@ -33,6 +33,12 @@ export function OutputViewer({ id }: { id: string }) {
   const runner = useStudioRunner();
   const output = useOutput(id);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const saveData = useCallback(
+    async (data: unknown) => {
+      await updateOutputData(id, data);
+    },
+    [id],
+  );
   const gone = output === null || (output !== undefined && !isStudioToolId(output.toolId));
 
   // A deleted output, here or in another tab, goes back to the list.
@@ -46,14 +52,26 @@ export function OutputViewer({ id }: { id: string }) {
   const client = toolClients[output.toolId];
   const definition = toolDefinitions[output.toolId];
   const parsed = output.status === "ready" ? definition?.data.safeParse(output.data) : undefined;
+  const local = definition?.local !== undefined;
 
   return (
     <ScrollArea className="h-full" viewportRef={scrollRef}>
-      <div className="flex min-h-full flex-col px-4 pb-6 sm:px-6">
+      <div
+        className={cn(
+          "flex min-h-full flex-col",
+          client?.bleed ? "px-3 pb-3" : "px-4 pb-6 sm:px-6",
+        )}
+      >
         <div
           className={cn(
             "mx-auto flex w-full flex-1 flex-col pt-2",
-            client?.wideViewer ? "max-w-7xl" : client?.fill ? "max-w-6xl" : "max-w-4xl",
+            client?.bleed
+              ? "max-w-none"
+              : client?.wideViewer
+                ? "max-w-7xl"
+                : client?.fill
+                  ? "max-w-6xl"
+                  : "max-w-4xl",
           )}
         >
           <header className="flex flex-wrap items-center gap-3 pb-5">
@@ -68,11 +86,15 @@ export function OutputViewer({ id }: { id: string }) {
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-xl font-semibold tracking-tight">{output.title}</h2>
                 <p className="truncate text-xs text-muted-foreground">
-                  {t("viewer.meta", {
-                    sources: tCommon("sourceCount", { count: output.sourceIds.length }),
-                    model: output.model?.modelId ?? "",
-                    time: formatRelativeTime(output.createdAt, i18n.language),
-                  })}
+                  {output.model
+                    ? t("viewer.meta", {
+                        sources: tCommon("sourceCount", { count: output.sourceIds.length }),
+                        model: output.model.modelId,
+                        time: formatRelativeTime(output.createdAt, i18n.language),
+                      })
+                    : t("viewer.metaLocal", {
+                        time: formatRelativeTime(output.updatedAt, i18n.language),
+                      })}
                 </p>
               </div>
               {parsed?.success && definition?.exports?.length ? (
@@ -119,13 +141,17 @@ export function OutputViewer({ id }: { id: string }) {
               {output.error ? (
                 <p className="max-w-md text-sm text-muted-foreground">{output.error}</p>
               ) : null}
-              <Button shape="pill" className="mt-2" onClick={() => void runner.retry(output)}>
-                <Icon icon={RepeatIcon} size={16} />
-                {t("view.retry")}
-              </Button>
+              {local ? null : (
+                <Button shape="pill" className="mt-2" onClick={() => void runner.retry(output)}>
+                  <Icon icon={RepeatIcon} size={16} />
+                  {t("view.retry")}
+                </Button>
+              )}
             </div>
           ) : (
             <client.Viewer
+              outputId={output.id}
+              onDataChange={saveData}
               title={output.title}
               data={parsed.data}
               scrollRef={scrollRef}

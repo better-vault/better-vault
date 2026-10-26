@@ -74,7 +74,8 @@
   "errors": {
     "noModel": "Set up a model in Settings first.",
     "noSources": "Choose at least one source.",
-    "failed": "Could not create it: {{error}}"
+    "failed": "Could not create it: {{error}}",
+    "noImageModel": "Add an OpenAI or Google key in Settings to draw pictures."
   },
   "choices": {
     "fewer": "Fewer",
@@ -300,12 +301,19 @@
       "md": "Markdown (.md)",
       "svg": "SVG image (.svg)",
       "png": "PNG image (.png)",
-      "mmd": "Mermaid code (.mmd)"
-    }
+      "mmd": "Mermaid code (.mmd)",
+      "pptx": "PowerPoint (.pptx)",
+      "pdf": "PDF (print)",
+      "json": "Board file (.json)",
+      "image": "Original image"
+    },
+    "metaLocal": "Edited {{time}}"
   },
   "export": {
     "question": "Question",
     "answer": "Answer",
-    "answerKey": "Answer key"
-  }
+    "answerKey": "Answer key",
+    "sources": "Sources"
+  },
+  "needsKey": "Needs a key"
 }

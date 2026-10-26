@@ -62,7 +62,11 @@ export async function ingestFile(notebookId: string, file: File): Promise<Source
     try {
       parsed = await postForText(form);
     } catch (error) {
-      throw new IngestError("read", file.name, error instanceof Error ? error.message : String(error));
+      throw new IngestError(
+        "read",
+        file.name,
+        error instanceof Error ? error.message : String(error),
+      );
     }
     return save({ ...base, kind: "pdf", text: parsed.text });
   }
@@ -79,11 +83,19 @@ export async function ingestFile(notebookId: string, file: File): Promise<Source
 export async function ingestUrl(notebookId: string, address: string): Promise<Source> {
   let parsed;
   try {
-    parsed = await postForText(JSON.stringify({ url: address }), { "content-type": "application/json" });
+    parsed = await postForText(JSON.stringify({ url: address }), {
+      "content-type": "application/json",
+    });
   } catch (error) {
     throw new IngestError("read", address, error instanceof Error ? error.message : String(error));
   }
-  return save({ notebookId, title: parsed.title, kind: parsed.kind, text: parsed.text, url: parsed.url ?? address });
+  return save({
+    notebookId,
+    title: parsed.title,
+    kind: parsed.kind,
+    text: parsed.text,
+    url: parsed.url ?? address,
+  });
 }
 
 export function ingestText(notebookId: string, title: string, text: string): Promise<Source> {

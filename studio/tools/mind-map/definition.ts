@@ -43,7 +43,10 @@ export const mindMapTool = defineTool({
     {
       format: "png",
       build: async (_title, data) => {
-        const [{ exportSvg }, { svgToPng }] = await Promise.all([import("./render"), import("@/studio/exports/image")]);
+        const [{ exportSvg }, { svgToPng }] = await Promise.all([
+          import("./render"),
+          import("@/studio/exports/image"),
+        ]);
         const image = await exportSvg(data);
         return svgToPng(image.svg, image.width, image.height);
       },

@@ -1,4 +1,5 @@
-import type { LanguageModel } from "ai";
+import type { ImageModel, LanguageModel } from "ai";
+import type { ModelRef } from "@/lib/ai/catalog";
 import { formatPassages, type Passage } from "@/lib/grounding/passages";
 import { languageName } from "@/studio/languages";
 
@@ -9,6 +10,8 @@ export interface GenerateArgs<Options> {
   language: string;
   focus: string;
   passages: Passage[];
+  /** The image model chosen for the output, for tools that draw pictures. */
+  image?: { model: ImageModel; ref: ModelRef };
   abortSignal?: AbortSignal;
 }
 
@@ -26,7 +29,10 @@ export function languageRule(language: string): string {
 }
 
 /** The system prompt every Studio tool starts from. */
-export function studioSystem(task: string, args: Pick<GenerateArgs<unknown>, "language" | "focus" | "passages">) {
+export function studioSystem(
+  task: string,
+  args: Pick<GenerateArgs<unknown>, "language" | "focus" | "passages">,
+) {
   return [
     "You are better-vault's Studio. You turn the user's sources into study material.",
     task,

@@ -107,7 +107,8 @@ export const diagramSyntax: Record<DiagramKind, Syntax> = {
   },
   ishikawa: {
     header: /^ishikawa(-beta)?\b/,
-    purpose: "a cause-and-effect (fishbone) diagram: the problem, categories of causes, and the causes",
+    purpose:
+      "a cause-and-effect (fishbone) diagram: the problem, categories of causes, and the causes",
     example: `ishikawa
   Venture failure
     People

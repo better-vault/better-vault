@@ -34,7 +34,12 @@ export const diagramIcons: Record<DiagramKind, typeof HierarchySquare02Icon> = {
   gantt: Calendar03Icon,
 };
 
-export function MindMapForm({ value, onChange, focus, onFocusChange }: ToolFormProps<MindMapOptions>) {
+export function MindMapForm({
+  value,
+  onChange,
+  focus,
+  onFocusChange,
+}: ToolFormProps<MindMapOptions>) {
   const { t } = useTranslation("studio");
   return (
     <>
@@ -54,7 +59,10 @@ export function MindMapForm({ value, onChange, focus, onFocusChange }: ToolFormP
         label={t("mind-map.detail")}
         value={value.detail}
         onChange={(detail) => onChange({ ...value, detail })}
-        options={details.map((detail) => ({ value: detail, label: t(`mind-map.details.${detail}`) }))}
+        options={details.map((detail) => ({
+          value: detail,
+          label: t(`mind-map.details.${detail}`),
+        }))}
       />
       <FocusField
         label={t("mind-map.focusLabel")}

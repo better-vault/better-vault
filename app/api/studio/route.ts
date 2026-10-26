@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { describeError } from "@/lib/ai/errors";
-import { createLanguageModel } from "@/lib/ai/providers";
+import { createImageModel, createLanguageModel } from "@/lib/ai/providers";
 import { credentialsSchema, modelRefSchema } from "@/lib/ai/request";
 import type { Passage } from "@/lib/grounding/passages";
 import { toolDefinitions } from "@/studio/definitions";
@@ -24,7 +24,12 @@ const bodySchema = z.object({
   passages: z.array(passageSchema).min(1).max(2000),
   model: modelRefSchema,
   credentials: credentialsSchema,
+  /** The image model's credentials, for tools that draw pictures. */
+  imageCredentials: credentialsSchema.optional(),
 });
+
+/** A brief and then a picture can take a few minutes. */
+export const maxDuration = 300;
 
 /** Generates one Studio output with the user's model. Nothing is stored here. */
 export async function POST(request: Request) {
@@ -34,10 +39,16 @@ export async function POST(request: Request) {
 
   const definition = toolDefinitions[tool];
   const generate = generators[tool];
-  if (!definition || !generate) return Response.json({ error: "This tool is not available yet." }, { status: 400 });
+  if (!definition || !generate || definition.local) {
+    return Response.json({ error: "This tool is not available yet." }, { status: 400 });
+  }
 
   const options = definition.options.safeParse(parsed.data.options);
-  if (!options.success) return Response.json({ error: "Invalid options for this tool." }, { status: 400 });
+  if (!options.success)
+    return Response.json({ error: "Invalid options for this tool." }, { status: 400 });
+  const imageRef = definition.imageModel?.(options.data) ?? null;
+  if (definition.imageModel && !imageRef)
+    return Response.json({ error: "Choose an image model." }, { status: 400 });
 
   try {
     const result = await generate({
@@ -46,6 +57,9 @@ export async function POST(request: Request) {
       language,
       focus,
       passages: parsed.data.passages as Passage[],
+      image: imageRef
+        ? { ref: imageRef, model: createImageModel(imageRef, parsed.data.imageCredentials ?? {}) }
+        : undefined,
       abortSignal: request.signal,
     });
     const data = definition.data.safeParse(result.data);

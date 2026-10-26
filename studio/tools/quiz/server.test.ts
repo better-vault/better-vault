@@ -18,8 +18,13 @@ describe("shuffleOptions", () => {
   it("does not always leave the answer first", () => {
     const random = seededRandom("spread");
     const places = new Set(
-      Array.from({ length: 30 }, () =>
-        shuffleOptions({ question: "q", options: ["r", "a", "b", "c"], answer: 0, explanation: "", hint: "" }, random).answer,
+      Array.from(
+        { length: 30 },
+        () =>
+          shuffleOptions(
+            { question: "q", options: ["r", "a", "b", "c"], answer: 0, explanation: "", hint: "" },
+            random,
+          ).answer,
       ),
     );
     expect(places.size).toBeGreaterThan(1);

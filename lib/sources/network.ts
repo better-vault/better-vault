@@ -39,10 +39,13 @@ export async function assertPublicUrl(url: URL): Promise<void> {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error("Only http and https addresses can be added.");
   }
-  if (url.username || url.password) throw new Error("Addresses with a user name or password are not allowed.");
+  if (url.username || url.password)
+    throw new Error("Addresses with a user name or password are not allowed.");
   if (privateAllowed()) return;
   const host = url.hostname.replace(/^\[|\]$/g, "");
-  const addresses = isIP(host) ? [host] : (await lookup(host, { all: true })).map((entry) => entry.address);
+  const addresses = isIP(host)
+    ? [host]
+    : (await lookup(host, { all: true })).map((entry) => entry.address);
   if (addresses.length === 0 || addresses.some(isPrivateAddress)) {
     throw new Error("That address points to a private network and can't be added.");
   }
@@ -68,7 +71,8 @@ export async function fetchPublic(
       url = new URL(response.headers.get("location")!, url);
       continue;
     }
-    if (!response.ok) throw new Error(`The page answered ${response.status} ${response.statusText}.`);
+    if (!response.ok)
+      throw new Error(`The page answered ${response.status} ${response.statusText}.`);
     const declared = Number(response.headers.get("content-length") ?? 0);
     if (declared > maxBytes) throw new Error("The page is too large.");
     const body = new Uint8Array(await response.arrayBuffer());

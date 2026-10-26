@@ -35,7 +35,8 @@ export const quizTool = defineTool({
     {
       format: "docx",
       build: async (title, data, text) => {
-        const { HeadingLevel, isRightToLeft, Paragraph, TextRun, wordDocument } = await import("@/studio/exports/docx");
+        const { HeadingLevel, isRightToLeft, Paragraph, TextRun, wordDocument } =
+          await import("@/studio/exports/docx");
         const rtl = isRightToLeft(data.questions.map((q) => q.question).join(" "));
         const questions = data.questions.flatMap((q, at) => [
           new Paragraph({
@@ -45,17 +46,35 @@ export const quizTool = defineTool({
           }),
           ...q.options.map(
             (option, i) =>
-              new Paragraph({ bidirectional: rtl, indent: { start: 360 }, children: [new TextRun(`${LETTERS[i]}. ${option}`)] }),
+              new Paragraph({
+                bidirectional: rtl,
+                indent: { start: 360 },
+                children: [new TextRun(`${LETTERS[i]}. ${option}`)],
+              }),
           ),
         ]);
         const key = [
-          new Paragraph({ heading: HeadingLevel.HEADING_1, pageBreakBefore: true, bidirectional: rtl, children: [new TextRun(text.answerKey)] }),
+          new Paragraph({
+            heading: HeadingLevel.HEADING_1,
+            pageBreakBefore: true,
+            bidirectional: rtl,
+            children: [new TextRun(text.answerKey)],
+          }),
           ...data.questions.flatMap((q, at) => [
             new Paragraph({
               bidirectional: rtl,
-              children: [new TextRun({ text: `${at + 1}. ${LETTERS[q.answer]}. ${q.options[q.answer] ?? ""}`, bold: true })],
+              children: [
+                new TextRun({
+                  text: `${at + 1}. ${LETTERS[q.answer]}. ${q.options[q.answer] ?? ""}`,
+                  bold: true,
+                }),
+              ],
             }),
-            new Paragraph({ bidirectional: rtl, indent: { start: 360 }, children: [new TextRun(q.explanation)] }),
+            new Paragraph({
+              bidirectional: rtl,
+              indent: { start: 360 },
+              children: [new TextRun(q.explanation)],
+            }),
           ]),
         ];
         return wordDocument({ title, rtl, children: [...questions, ...key] });
@@ -68,10 +87,15 @@ export const quizTool = defineTool({
           [
             `# ${title}`,
             ...data.questions.map((q, at) =>
-              [`## ${at + 1}. ${q.question}`, ...q.options.map((option, i) => `- ${LETTERS[i]}. ${option}`)].join("\n"),
+              [
+                `## ${at + 1}. ${q.question}`,
+                ...q.options.map((option, i) => `- ${LETTERS[i]}. ${option}`),
+              ].join("\n"),
             ),
             `## ${text.answerKey}`,
-            ...data.questions.map((q, at) => `${at + 1}. **${LETTERS[q.answer]}.** ${q.explanation}`),
+            ...data.questions.map(
+              (q, at) => `${at + 1}. **${LETTERS[q.answer]}.** ${q.explanation}`,
+            ),
           ].join("\n\n"),
           "text/markdown",
         ),

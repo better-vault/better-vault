@@ -26,7 +26,11 @@ export function cleanMermaid(source: string): string {
 
 /** Why Pele cannot draw this source as the asked kind of diagram, or null when it can. */
 export function diagramProblem(source: string, kind: DiagramKind): string | null {
-  const firstLine = source.split("\n").find((line) => line.trim() && !line.trim().startsWith("%%"))?.trim() ?? "";
+  const firstLine =
+    source
+      .split("\n")
+      .find((line) => line.trim() && !line.trim().startsWith("%%"))
+      ?.trim() ?? "";
   if (!diagramSyntax[kind].header.test(firstLine)) {
     return `The code must start with "${diagramSyntax[kind].example.split("\n")[0]}".`;
   }
@@ -40,7 +44,12 @@ export function diagramProblem(source: string, kind: DiagramKind): string | null
 
 const REPAIRS = 2;
 
-export const generateMindMap: Generator<MindMapOptions, MindMapData> = async ({ model, options, abortSignal, ...args }) => {
+export const generateMindMap: Generator<MindMapOptions, MindMapData> = async ({
+  model,
+  options,
+  abortSignal,
+  ...args
+}) => {
   const syntax = diagramSyntax[options.diagram];
   const system = studioSystem(
     `Draw ${syntax.purpose} of the sources, as Mermaid code. ${DETAIL[options.detail]}\n\nExample of the syntax:\n${syntax.example}\n\n${RULES}`,
