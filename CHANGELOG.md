@@ -9,6 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Citations are small numbered marks with a preview of the passage, answers list their references as footnotes, and reports have a new contents panel with reading progress. These replace the Rare UI components, which are no longer used.
 
+- The top left is Panel's button group: Settings and Create (formerly Add), with History on the Chat tab.
+- About no longer lists the libraries better-vault is built with; they are credited in the README.
+
 ### Fixed
 
 - The contents of a long report can be scrolled to the end.
@@ -16,6 +19,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Mind maps show their tree and diagram again.
 
 ### Added
+
+- Several chats per notebook: History lists them by day, with New chat, rename and delete. Existing chats become each notebook's first conversation.
 
 - Anatomy in the Studio: the model designs a real object whose working explains your sources and builds it part by part, drawn in isometric with Anatomy's kit. Point at a part to read what it does, step through how it works, take it apart, and download it as PNG or SVG.
 

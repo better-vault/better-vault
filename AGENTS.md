@@ -16,7 +16,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 | Concept              | Meaning                                                                                                                                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Notebook**         | A workspace with its own sources, chat and Studio outputs.                                                                                                                                                                           |
+| **Notebook**         | A workspace with its own sources, chats (conversations, listed in History) and Studio outputs.                                                                                                                                       |
 | **Source**           | A document added to a notebook: pasted text, a TXT/MD/PDF file or a web page. It is stored as plain text and split into **chunks** for retrieval. A source can be selected or deselected; only selected sources are used as context. |
 | **Chat mode**        | **Sources** (default): the model answers only from the notebook's selected sources and cites passages as `[n]`. **Web**: the model may also use its provider's own web search.                                                       |
 | **Studio**           | The sheet opened by **Add**. It holds **tools** (Report, Flashcards, Quiz, Data table, Mind map, and later Slide deck, Infographic, Anatomy). Each tool opens a **dialog** of options.                                               |
@@ -25,7 +25,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ## Interface
 
-- **Top left:** a shadcn `ButtonGroup` with the **Settings** button (gear, opens the Settings sheet, whose rows open nested sheets with `Sheet.Next`) followed by **Add** (opens the **Studio sheet**: tools grid and outputs list).
+- **Top left:** Panel's `ButtonGroup` (small buttons): **Settings** (opens the Settings sheet, whose rows open nested sheets with `Sheet.Next`) and **Create** (opens the **Studio sheet**: tools grid and outputs list) share a track; on the Chat tab, the white **History** button follows in a track of its own and opens the History sheet (the notebook's chats).
 - **Top right:** tabs switch the main view: **Chat · Sources · Studio**.
 - **Bottom centre, in the Chat tab only:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch. It does not appear over the Sources or Studio views.
 - Choosing a tool closes the Studio sheet and opens the tool's Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.
@@ -34,7 +34,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ## Decisions (do not change without discussing first)
 
-1. **Local-first.** All user data lives in the browser's IndexedDB (Dexie, `lib/db`). There is no server database and no auth. API routes are stateless.
+1. **Local-first.** All user data lives in the browser's IndexedDB (Dexie, `lib/db`). There is no server database and no auth. API routes are stateless. A database change needs a new Dexie version with an upgrade, and a backup format change keeps old backups importable (`lib/db/backup.ts`).
 2. **Bring your own key.** Keys are stored in the browser and sent with each request in the JSON body. Routes never log or store them. Error messages must never echo a key.
 3. **Web search uses only the provider's built-in tool** (`openai.tools.webSearch`, `anthropic.tools.webSearch_*`, `google.tools.googleSearch`). No third-party search APIs. Models without one (Ollama, LM Studio) cannot use Web mode; the toggle is disabled.
 4. **AI calls go through the Vercel AI SDK** (`ai` v7 and `@ai-sdk/*`). Never call provider HTTP APIs for generation directly. (Listing models is the exception; see `app/api/models`.)
