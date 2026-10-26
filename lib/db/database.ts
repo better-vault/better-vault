@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
 import type { ModelRef } from "@/lib/ai/catalog";
 import type { ChatMessage } from "@/lib/chat/types";
+import { cleanText } from "@/lib/grounding/clean";
 
 /**
  * Everything better-vault stores lives in the browser, in this IndexedDB
@@ -91,6 +92,23 @@ export class BetterVaultDatabase extends Dexie {
       messages: "id, notebookId, [notebookId+createdAt]",
       outputs: "id, notebookId, status, [notebookId+createdAt]",
       settings: "key",
+    });
+    // Version 2: sources saved before text cleaning lose the characters no
+    // font can draw. Passages are cleaned in place, so citations keep working.
+    this.version(2).upgrade(async (tx) => {
+      await tx
+        .table<Source>("sources")
+        .toCollection()
+        .modify((source) => {
+          source.text = cleanText(source.text);
+          source.charCount = source.text.length;
+        });
+      await tx
+        .table<Chunk>("chunks")
+        .toCollection()
+        .modify((chunk) => {
+          chunk.text = cleanText(chunk.text);
+        });
     });
   }
 }

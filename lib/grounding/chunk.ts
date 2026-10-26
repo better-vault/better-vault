@@ -1,10 +1,11 @@
+import { cleanText } from "./clean";
+
 /** Passages aim for about this many characters. */
 export const CHUNK_SIZE = 1200;
 
-/** Normalises line endings and collapses runs of blank lines and spaces. */
+/** Cleans the text, normalises line endings and collapses runs of blank lines and spaces. */
 export function normaliseText(text: string): string {
-  return text
-    .replace(/\r\n?/g, "\n")
+  return cleanText(text.replace(/\r\n?/g, "\n"))
     .replace(/[\t\f\v ]+/g, " ")
     .replace(/ *\n */g, "\n")
     .replace(/\n{3,}/g, "\n\n")

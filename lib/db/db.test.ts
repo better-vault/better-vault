@@ -72,8 +72,22 @@ describe("outputs", () => {
   it("marks abandoned generations as interrupted", async () => {
     const notebookId = await createNotebook("Test");
     const model = { provider: "openai" as const, modelId: "m" };
-    const running = await createOutput({ notebookId, toolId: "quiz", title: "Q", options: {}, sourceIds: [], model });
-    const stale = await createOutput({ notebookId, toolId: "quiz", title: "Q", options: {}, sourceIds: [], model });
+    const running = await createOutput({
+      notebookId,
+      toolId: "quiz",
+      title: "Q",
+      options: {},
+      sourceIds: [],
+      model,
+    });
+    const stale = await createOutput({
+      notebookId,
+      toolId: "quiz",
+      title: "Q",
+      options: {},
+      sourceIds: [],
+      model,
+    });
     await markInterruptedOutputs(new Set([running]), "interrupted");
     expect((await db.outputs.get(running))?.status).toBe("generating");
     expect((await db.outputs.get(stale))?.status).toBe("error");
@@ -117,10 +131,58 @@ describe("settings", () => {
 
   it("falls back to the first available model when the chosen one is gone", () => {
     const settings = defaultSettings();
-    settings.providers.anthropic = { ...settings.providers.anthropic, enabled: true, apiKey: "k", models: ["x", "y"] };
+    settings.providers.anthropic = {
+      ...settings.providers.anthropic,
+      enabled: true,
+      apiKey: "k",
+      models: ["x", "y"],
+    };
     settings.model = { provider: "openai", modelId: "gone" };
     expect(activeModel(settings)).toEqual({ provider: "anthropic", modelId: "x" });
     settings.model = { provider: "anthropic", modelId: "y" };
     expect(activeModel(settings)).toEqual({ provider: "anthropic", modelId: "y" });
+  });
+});
+
+describe("version 2 upgrade", () => {
+  it("cleans sources and passages saved before text cleaning, keeping their ids", async () => {
+    const { default: Dexie } = await import("dexie");
+    const name = "better-vault-upgrade-test";
+    const old = new Dexie(name);
+    old.version(1).stores({
+      notebooks: "id, updatedAt",
+      sources: "id, notebookId, createdAt",
+      chunks: "id, notebookId, sourceId, [sourceId+index]",
+      messages: "id, notebookId, [notebookId+createdAt]",
+      outputs: "id, notebookId, status, [notebookId+createdAt]",
+      settings: "key",
+    });
+    await old.open();
+    await old
+      .table("sources")
+      .add({
+        id: "s1",
+        notebookId: "n1",
+        title: "PDF",
+        kind: "pdf",
+        text: "Q What CO5?",
+        charCount: 18,
+        selected: true,
+        createdAt: 1,
+      });
+    await old
+      .table("chunks")
+      .add({ id: "s1:0", notebookId: "n1", sourceId: "s1", index: 0, text: "Q What CO5?" });
+    old.close();
+
+    const { BetterVaultDatabase } = await import("./database");
+    const upgraded = new BetterVaultDatabase(name);
+    const source = await upgraded.sources.get("s1");
+    const chunk = await upgraded.chunks.get("s1:0");
+    expect(source?.text).toBe("Q What CO5?");
+    expect(source?.charCount).toBe("Q What CO5?".length);
+    expect(chunk?.text).toBe("Q What CO5?");
+    upgraded.close();
+    await Dexie.delete(name);
   });
 });
