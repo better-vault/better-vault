@@ -58,20 +58,26 @@ export function MindMapTree({ root }: { root: MindNode }) {
     const placed = layout.nodes.find((entry) => entry.node.id === held.id);
     const box = frame.current?.getBoundingClientRect();
     if (!placed || !box) return;
-    const children = layout.nodes.filter((entry) => entry.node.id.startsWith(`${held.id}.`) && entry.depth === placed.depth + 1);
+    const children = layout.nodes.filter(
+      (entry) => entry.node.id.startsWith(`${held.id}.`) && entry.depth === placed.depth + 1,
+    );
     const margin = 32;
     setView((current) => {
       let x = current.x - (placed.x - held.x) * current.zoom;
       let y = current.y - (placed.y - held.y) * current.zoom;
       if (children.length > 0) {
         const z = current.zoom;
-        const right = Math.max(...children.map((child) => child.x + child.width + TOGGLE + 8)) * z + x;
+        const right =
+          Math.max(...children.map((child) => child.x + child.width + TOGGLE + 8)) * z + x;
         const nodeLeft = placed.x * z + x;
-        if (right > box.width - margin) x -= Math.min(right - (box.width - margin), Math.max(0, nodeLeft - margin));
+        if (right > box.width - margin)
+          x -= Math.min(right - (box.width - margin), Math.max(0, nodeLeft - margin));
         const top = Math.min(...children.map((child) => child.y)) * z + y;
         const bottom = Math.max(...children.map((child) => child.y + NODE_HEIGHT)) * z + y;
-        if (bottom > box.height - margin) y -= Math.min(bottom - (box.height - margin), Math.max(0, top - margin));
-        else if (top < margin) y += Math.min(margin - top, Math.max(0, box.height - margin - bottom));
+        if (bottom > box.height - margin)
+          y -= Math.min(bottom - (box.height - margin), Math.max(0, top - margin));
+        else if (top < margin)
+          y += Math.min(margin - top, Math.max(0, box.height - margin - bottom));
       }
       return { ...current, x, y };
     });
@@ -88,7 +94,15 @@ export function MindMapTree({ root }: { root: MindNode }) {
     if (!element) return;
     const observer = new ResizeObserver(() => fit(size.current.width, size.current.height, 1));
     observer.observe(element);
-    return () => observer.disconnect();
+    // Labels are measured again once the web font loads, which can change the layout.
+    let live = true;
+    void document.fonts?.ready.then(() => {
+      if (live) fit(size.current.width, size.current.height, 1);
+    });
+    return () => {
+      live = false;
+      observer.disconnect();
+    };
   }, [fit, frame]);
 
   function toggle(id: string) {
@@ -112,7 +126,11 @@ export function MindMapTree({ root }: { root: MindNode }) {
         ? t("mind-map.viewer.question", { topic, parents: path.slice(0, -1).join(" › ") })
         : t("mind-map.viewer.questionRoot", { topic });
     setTab("chat");
-    chat.send(question).catch((error: unknown) => toast.error(error instanceof Error ? error.message : String(error)));
+    chat
+      .send(question)
+      .catch((error: unknown) =>
+        toast.error(error instanceof Error ? error.message : String(error)),
+      );
   }
 
   const control =
@@ -121,17 +139,37 @@ export function MindMapTree({ root }: { root: MindNode }) {
   return (
     <Canvas viewport={view} className="min-h-[460px] flex-1 rounded-3xl ring-1 ring-border">
       <Canvas.Pattern variant="dots" fade="edges" />
-      <Canvas.Content>
-        <div ref={frame} className="absolute inset-0 cursor-grab touch-none overflow-hidden active:cursor-grabbing" {...handlers}>
+      {/* Absolute: the viewer's height is a minimum, so a percentage height would be 0. */}
+      <Canvas.Content className="absolute inset-0">
+        <div
+          ref={frame}
+          className="absolute inset-0 cursor-grab touch-none overflow-hidden active:cursor-grabbing"
+          {...handlers}
+        >
           <div
-            className="absolute left-0 top-0 origin-top-left"
-            style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`, width: layout.width, height: layout.height }}
+            className="absolute top-0 left-0 origin-top-left"
+            style={{
+              transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
+              width: layout.width,
+              height: layout.height,
+            }}
           >
-            <svg aria-hidden className="absolute left-0 top-0 overflow-visible" width={layout.width} height={layout.height}>
+            <svg
+              aria-hidden
+              className="absolute top-0 left-0 overflow-visible"
+              width={layout.width}
+              height={layout.height}
+            >
               {layout.edges.map((edge) => (
                 <path
                   key={edge.id}
-                  className={cn("fill-none stroke-chart-5/55 [stroke-width:1.6] transition-[d]", MOTION)}
+                  // The attribute draws the edge everywhere; the CSS property lets it
+                  // animate where browsers support it (not Safari).
+                  d={edge.d}
+                  className={cn(
+                    "fill-none stroke-chart-5/55 [stroke-width:1.6] transition-[d]",
+                    MOTION,
+                  )}
                   style={{ d: `path("${edge.d}")` } as CSSProperties}
                 />
               ))}
@@ -141,7 +179,10 @@ export function MindMapTree({ root }: { root: MindNode }) {
               return (
                 <div
                   key={placed.node.id}
-                  className={cn("absolute left-0 top-0 flex items-center gap-2 transition-transform animate-in fade-in-0", MOTION)}
+                  className={cn(
+                    "absolute top-0 left-0 flex animate-in items-center gap-2 transition-transform fade-in-0",
+                    MOTION,
+                  )}
                   style={{ transform: `translate(${placed.x}px, ${placed.y}px)` }}
                 >
                   <button
@@ -149,8 +190,8 @@ export function MindMapTree({ root }: { root: MindNode }) {
                     title={t("mind-map.viewer.ask", { label: placed.node.label })}
                     onClick={() => ask(placed.node.id)}
                     className={cn(
-                      "cursor-pointer truncate rounded-xl px-4 text-start text-[15px] font-medium text-foreground ring-1 outline-none transition-[filter,box-shadow]",
-                      "hover:brightness-110 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring dark:hover:brightness-125",
+                      "cursor-pointer truncate rounded-xl px-4 text-start text-[15px] font-medium text-foreground ring-1 transition-[filter,box-shadow] outline-none",
+                      "hover:shadow-md hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring dark:hover:brightness-125",
                       DEPTH_STYLES[placed.depth % DEPTH_STYLES.length],
                     )}
                     style={{ width: placed.width, height: NODE_HEIGHT }}
@@ -167,10 +208,14 @@ export function MindMapTree({ root }: { root: MindNode }) {
                           : t("mind-map.viewer.expand", { label: placed.node.label })
                       }
                       onClick={() => toggle(placed.node.id)}
-                      className="flex shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted text-foreground ring-1 ring-border outline-none transition-colors hover:bg-foreground/15 focus-visible:ring-2 focus-visible:ring-ring"
+                      className="flex shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted text-foreground ring-1 ring-border transition-colors outline-none hover:bg-foreground/15 focus-visible:ring-2 focus-visible:ring-ring"
                       style={{ width: TOGGLE, height: TOGGLE }}
                     >
-                      <Icon icon={placed.expanded ? ArrowLeft01Icon : ArrowRight01Icon} size={13} strokeWidth={2.4} />
+                      <Icon
+                        icon={placed.expanded ? ArrowLeft01Icon : ArrowRight01Icon}
+                        size={13}
+                        strokeWidth={2.4}
+                      />
                     </button>
                   ) : null}
                 </div>
@@ -179,14 +224,18 @@ export function MindMapTree({ root }: { root: MindNode }) {
           </div>
         </div>
 
-        <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-muted-foreground">{t("mind-map.viewer.hint")}</p>
+        <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-muted-foreground">
+          {t("mind-map.viewer.hint")}
+        </p>
 
-        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+        <div className="absolute right-4 bottom-4 flex flex-col gap-2">
           <div className="overflow-hidden rounded-full bg-popover shadow-sm ring-1 ring-border">
             <button
               type="button"
               className={control}
-              aria-label={allOpen ? t("mind-map.viewer.collapseAll") : t("mind-map.viewer.expandAll")}
+              aria-label={
+                allOpen ? t("mind-map.viewer.collapseAll") : t("mind-map.viewer.expandAll")
+              }
               title={allOpen ? t("mind-map.viewer.collapseAll") : t("mind-map.viewer.expandAll")}
               onClick={() => setExpanded(allOpen ? new Set(["0"]) : new Set(allIds))}
             >
@@ -194,13 +243,31 @@ export function MindMapTree({ root }: { root: MindNode }) {
             </button>
           </div>
           <div className="flex flex-col overflow-hidden rounded-full bg-popover shadow-sm ring-1 ring-border">
-            <button type="button" className={control} aria-label={t("mind-map.viewer.zoomIn")} title={t("mind-map.viewer.zoomIn")} onClick={() => zoomAt(1.25)}>
+            <button
+              type="button"
+              className={control}
+              aria-label={t("mind-map.viewer.zoomIn")}
+              title={t("mind-map.viewer.zoomIn")}
+              onClick={() => zoomAt(1.25)}
+            >
               <Icon icon={PlusSignIcon} size={16} />
             </button>
-            <button type="button" className={control} aria-label={t("mind-map.viewer.zoomOut")} title={t("mind-map.viewer.zoomOut")} onClick={() => zoomAt(1 / 1.25)}>
+            <button
+              type="button"
+              className={control}
+              aria-label={t("mind-map.viewer.zoomOut")}
+              title={t("mind-map.viewer.zoomOut")}
+              onClick={() => zoomAt(1 / 1.25)}
+            >
               <Icon icon={MinusSignIcon} size={16} />
             </button>
-            <button type="button" className={control} aria-label={t("mind-map.viewer.fit")} title={t("mind-map.viewer.fit")} onClick={() => fit(layout.width, layout.height, 1)}>
+            <button
+              type="button"
+              className={control}
+              aria-label={t("mind-map.viewer.fit")}
+              title={t("mind-map.viewer.fit")}
+              onClick={() => fit(layout.width, layout.height, 1)}
+            >
               <Icon icon={FitToScreenIcon} size={16} />
             </button>
           </div>

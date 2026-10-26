@@ -31,28 +31,57 @@ export function DiagramView({ mermaid }: { mermaid: string }) {
   return (
     <Canvas viewport={view} className="min-h-[460px] flex-1 rounded-3xl ring-1 ring-border">
       <Canvas.Pattern variant="dots" fade="edges" />
-      <Canvas.Content>
+      {/* Absolute: the viewer's height is a minimum, so a percentage height would be 0. */}
+      <Canvas.Content className="absolute inset-0">
         {"error" in drawn ? (
-          <p className="p-6 text-sm text-destructive">{t("mind-map.viewer.renderError", { error: drawn.error })}</p>
+          <p className="p-6 text-sm text-destructive">
+            {t("mind-map.viewer.renderError", { error: drawn.error })}
+          </p>
         ) : (
           <>
-            <div ref={frame} className="absolute inset-0 cursor-grab touch-none overflow-hidden active:cursor-grabbing" {...handlers}>
+            <div
+              ref={frame}
+              className="absolute inset-0 cursor-grab touch-none overflow-hidden active:cursor-grabbing"
+              {...handlers}
+            >
               <div
                 // Physical left: the pan and zoom maths work in screen coordinates.
-                className="pele absolute left-0 top-0 origin-top-left [&_svg]:block"
-                style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`, width: drawn.width, height: drawn.height }}
+                className="pele absolute top-0 left-0 origin-top-left [&_svg]:block"
+                style={{
+                  transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
+                  width: drawn.width,
+                  height: drawn.height,
+                }}
                 // Pele escapes every label it draws; links and images are off.
                 dangerouslySetInnerHTML={{ __html: drawn.svg }}
               />
             </div>
-            <div className="absolute bottom-4 right-4 flex flex-col overflow-hidden rounded-full bg-popover shadow-sm ring-1 ring-border">
-              <button type="button" className={control} aria-label={t("mind-map.viewer.zoomIn")} title={t("mind-map.viewer.zoomIn")} onClick={() => zoomAt(1.25)}>
+            <div className="absolute right-4 bottom-4 flex flex-col overflow-hidden rounded-full bg-popover shadow-sm ring-1 ring-border">
+              <button
+                type="button"
+                className={control}
+                aria-label={t("mind-map.viewer.zoomIn")}
+                title={t("mind-map.viewer.zoomIn")}
+                onClick={() => zoomAt(1.25)}
+              >
                 <Icon icon={PlusSignIcon} size={16} />
               </button>
-              <button type="button" className={control} aria-label={t("mind-map.viewer.zoomOut")} title={t("mind-map.viewer.zoomOut")} onClick={() => zoomAt(1 / 1.25)}>
+              <button
+                type="button"
+                className={control}
+                aria-label={t("mind-map.viewer.zoomOut")}
+                title={t("mind-map.viewer.zoomOut")}
+                onClick={() => zoomAt(1 / 1.25)}
+              >
                 <Icon icon={MinusSignIcon} size={16} />
               </button>
-              <button type="button" className={control} aria-label={t("mind-map.viewer.fit")} title={t("mind-map.viewer.fit")} onClick={() => fit(size.current.width, size.current.height)}>
+              <button
+                type="button"
+                className={control}
+                aria-label={t("mind-map.viewer.fit")}
+                title={t("mind-map.viewer.fit")}
+                onClick={() => fit(size.current.width, size.current.height)}
+              >
                 <Icon icon={FitToScreenIcon} size={16} />
               </button>
             </div>
