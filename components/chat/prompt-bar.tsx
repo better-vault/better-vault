@@ -3,14 +3,13 @@
 import {
   Add01Icon,
   Book02Icon,
-  Delete02Icon,
+  PencilEdit02Icon,
   FileAddIcon,
   Globe02Icon,
 } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
@@ -32,7 +31,6 @@ export function PromptBar() {
   const settings = useSettings();
   const sources = useSources(notebook.id);
   const [draft, setDraft] = useState("");
-  const [clearing, setClearing] = useState(false);
   // Set while a send is refused, so the prompt does not clear what was written.
   const keepDraft = useRef(false);
 
@@ -98,12 +96,9 @@ export function PromptBar() {
                     <Icon icon={FileAddIcon} />
                     {t("addSource")}
                   </Menu.Item>
-                  <Menu.Item
-                    disabled={chat.messages.length === 0}
-                    onClick={() => setClearing(true)}
-                  >
-                    <Icon icon={Delete02Icon} />
-                    {t("clearChat")}
+                  <Menu.Item disabled={chat.messages.length === 0} onClick={() => chat.startNew()}>
+                    <Icon icon={PencilEdit02Icon} />
+                    {t("newChat")}
                   </Menu.Item>
                 </Prompt.Menu>
                 <Segmented<ChatMode>
@@ -155,14 +150,6 @@ export function PromptBar() {
           </Prompt.Context>
         </Prompt>
       </div>
-      <ConfirmDialog
-        open={clearing}
-        onOpenChange={setClearing}
-        title={t("clear.title")}
-        body={t("clear.body")}
-        confirmLabel={t("clear.confirm")}
-        onConfirm={() => chat.clear()}
-      />
     </div>
   );
 }

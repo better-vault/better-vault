@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/panelui/button";
 import { ChatProvider } from "@/components/chat/chat-provider";
+import { ConversationActionDialogs } from "@/components/chat/conversation-action-dialogs";
 import { PromptBar } from "@/components/chat/prompt-bar";
 import { Tabs } from "@/components/panelui/tabs";
 import { OutputActionDialogs } from "@/components/studio/output-action-dialogs";
@@ -36,8 +37,17 @@ export function Workspace({ notebookId }: { notebookId: string }) {
 }
 
 function WorkspaceLayout() {
-  const { notebook, tab, setTab, addSourceOpen, setAddSourceOpen, reading, closeReader, activeTool, closeTool } =
-    useWorkspace();
+  const {
+    notebook,
+    tab,
+    setTab,
+    addSourceOpen,
+    setAddSourceOpen,
+    reading,
+    closeReader,
+    activeTool,
+    closeTool,
+  } = useWorkspace();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -64,10 +74,15 @@ function WorkspaceLayout() {
           <StudioView />
         </Tabs.Content>
       </div>
-      <AddSourceDialog notebookId={notebook.id} open={addSourceOpen} onOpenChange={setAddSourceOpen} />
+      <AddSourceDialog
+        notebookId={notebook.id}
+        open={addSourceOpen}
+        onOpenChange={setAddSourceOpen}
+      />
       <SourceReader reading={reading} onClose={closeReader} />
       <ToolDialog notebookId={notebook.id} toolId={activeTool} onClose={closeTool} />
       <OutputActionDialogs />
+      <ConversationActionDialogs />
     </Tabs>
   );
 }

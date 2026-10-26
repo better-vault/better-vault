@@ -112,7 +112,10 @@ export function availableModels(settings: AppSettings): ModelRef[] {
 export function activeModel(settings: AppSettings): ModelRef | null {
   const models = availableModels(settings);
   const chosen = settings.model;
-  if (chosen && models.some((m) => m.provider === chosen.provider && m.modelId === chosen.modelId)) {
+  if (
+    chosen &&
+    models.some((m) => m.provider === chosen.provider && m.modelId === chosen.modelId)
+  ) {
     return chosen;
   }
   return models[0] ?? null;

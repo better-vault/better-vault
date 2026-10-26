@@ -1,14 +1,12 @@
 {
-  "add": "Add",
-  "toolbar": "Studio and settings",
+  "toolbar": "Settings, Create and History",
   "tabs": {
     "label": "View",
     "chat": "Chat",
     "sources": "Sources",
     "studio": "Studio"
   },
-  "openStudio": "Open Studio",
-  "openSettings": "Open settings",
+  "openStudio": "Create study material in the Studio",
   "notebookMenu": "Notebook options",
   "allNotebooks": "All notebooks",
   "newNotebook": "New notebook",
@@ -27,5 +25,6 @@
     "title": "Notebook not found",
     "body": "It may have been deleted, or it was created in another browser.",
     "action": "Back to notebooks"
-  }
+  },
+  "create": "Create"
 }

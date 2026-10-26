@@ -1,57 +1,76 @@
 "use client";
 
-import { Book02Icon, BubbleChatIcon, DashboardSquare01Icon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  Book02Icon,
+  BubbleChatIcon,
+  DashboardSquare01Icon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Tabs } from "@/components/panelui/tabs";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
 import { StudioSheet } from "@/components/studio/studio-sheet";
 import { Button } from "@/components/panelui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
+import { ButtonGroup } from "@/components/panelui/button-group";
+import { HistorySheet } from "@/components/chat/history-sheet";
 import { useSources } from "@/lib/db/sources";
 import { NotebookMenu } from "./notebook-menu";
 import { useWorkspace } from "./workspace-context";
 
 /**
- * Top left: a button group with Settings, then "Add", which opens the
- * Studio; then the notebook's name. Top right: the tabs that switch the main
- * view.
+ * Top left: Settings and Create (which opens the Studio sheet), and on the
+ * Chat tab, History; then the notebook's name. Top right: the tabs that
+ * switch the main view.
  */
 export function TopBar() {
   const { t } = useTranslation("workspace");
   const { t: tSettings } = useTranslation("settings");
-  const { notebook, studioOpen, setStudioOpen, settingsOpen, setSettingsOpen } = useWorkspace();
+  const { t: tChat } = useTranslation("chat");
+  const { notebook, tab, studioOpen, setStudioOpen, settingsOpen, setSettingsOpen } =
+    useWorkspace();
   const sources = useSources(notebook.id);
   const selected = sources?.filter((source) => source.selected).length ?? 0;
 
   return (
     <header className="flex items-center gap-3 px-3 pt-3 pb-2 sm:px-4">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
-        {/* shadcn's ButtonGroup holding Panel buttons: Panel's outline look,
-            with the group's two ends rounded into one pill. */}
+        {/* Panel's ButtonGroup: Settings and Create share a track; on the Chat
+            tab, History follows, split off and filled. */}
         <ButtonGroup aria-label={t("toolbar")}>
-          <SettingsSheet
-            open={settingsOpen}
-            onOpenChange={setSettingsOpen}
-            trigger={
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={tSettings("title")}
-                title={tSettings("title")}
-                className="w-10 rounded-s-full! ps-0.5"
-              />
-            }
-          />
-          <StudioSheet
-            open={studioOpen}
-            onOpenChange={setStudioOpen}
-            trigger={
-              <Button variant="outline" size="md" title={t("openStudio")} className="rounded-e-full! ps-3 pe-4">
-                {t("add")}
-              </Button>
-            }
-          />
+          <ButtonGroup aria-label={t("toolbar")}>
+            <SettingsSheet
+              open={settingsOpen}
+              onOpenChange={setSettingsOpen}
+              trigger={
+                <Button variant="outline" title={tSettings("title")}>
+                  <Icon icon={Settings01Icon} size={16} />
+                  <span className="max-sm:sr-only">{tSettings("title")}</span>
+                </Button>
+              }
+            />
+            <StudioSheet
+              open={studioOpen}
+              onOpenChange={setStudioOpen}
+              trigger={
+                <Button variant="outline" title={t("openStudio")}>
+                  <Icon icon={Add01Icon} size={16} />
+                  <span className="max-sm:sr-only">{t("create")}</span>
+                </Button>
+              }
+            />
+          </ButtonGroup>
+          {tab === "chat" ? (
+            <HistorySheet
+              trigger={
+                <Button size="lg" title={tChat("history.title")} className="rounded-xl">
+                  <Icon icon={BubbleChatIcon} size={16} />
+                  <span className="max-sm:sr-only">{tChat("history.open")}</span>
+                </Button>
+              }
+            />
+          ) : null}
         </ButtonGroup>
         <NotebookMenu />
       </div>

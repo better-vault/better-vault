@@ -4,7 +4,14 @@ import { deleteAllData, exportBackup, importBackup } from "./backup";
 import { db } from "./database";
 import { createNotebook, deleteNotebook } from "./notebooks";
 import { createOutput, markInterruptedOutputs } from "./outputs";
-import { loadChat, saveChat } from "./messages";
+import { conversationTitle } from "@/lib/chat/title";
+import {
+  deleteConversation,
+  latestConversation,
+  loadChat,
+  renameConversation,
+  saveChat,
+} from "./messages";
 import {
   activeModel,
   availableModels,
@@ -46,25 +53,67 @@ describe("notebooks", () => {
   it("deletes a notebook with everything in it", async () => {
     const notebookId = await createNotebook("Test");
     await addSource({ notebookId, title: "a", kind: "text", text: "hello" });
-    await saveChat(notebookId, [{ id: "m1", role: "user", parts: [{ type: "text", text: "hi" }] }]);
+    await saveChat({ id: "c1", notebookId }, [
+      { id: "m1", role: "user", parts: [{ type: "text", text: "hi" }] },
+    ]);
     await deleteNotebook(notebookId);
     expect(await db.sources.count()).toBe(0);
     expect(await db.chunks.count()).toBe(0);
     expect(await db.messages.count()).toBe(0);
+    expect(await db.conversations.count()).toBe(0);
     expect(await db.notebooks.count()).toBe(0);
   });
+});
+
+const userMessage = (id: string, text = id) => ({
+  id,
+  role: "user" as const,
+  parts: [{ type: "text" as const, text }],
 });
 
 describe("chat", () => {
   it("keeps message order", async () => {
     const notebookId = await createNotebook("Test");
-    const messages = ["a", "b", "c"].map((id) => ({
-      id,
-      role: "user" as const,
-      parts: [{ type: "text" as const, text: id }],
-    }));
-    await saveChat(notebookId, messages);
-    expect((await loadChat(notebookId)).map((m) => m.id)).toEqual(["a", "b", "c"]);
+    await saveChat(
+      { id: "c1", notebookId },
+      ["a", "b", "c"].map((id) => userMessage(id)),
+    );
+    expect((await loadChat("c1")).map((m) => m.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("keeps conversations apart, titled by their first question", async () => {
+    const notebookId = await createNotebook("Test");
+    await saveChat({ id: "c1", notebookId }, [userMessage("a", "What is a  cache?")]);
+    await saveChat({ id: "c2", notebookId }, [userMessage("b", "Summarise the key ideas")]);
+    expect((await loadChat("c1")).map((m) => m.id)).toEqual(["a"]);
+    expect((await db.conversations.get("c1"))?.title).toBe("What is a cache?");
+    expect((await latestConversation(notebookId))?.id).toBe("c2");
+  });
+
+  it("keeps a renamed title when the chat goes on, and deletes a conversation", async () => {
+    const notebookId = await createNotebook("Test");
+    await saveChat({ id: "c1", notebookId }, [userMessage("a", "First")]);
+    await renameConversation("c1", "  Mine ");
+    await saveChat({ id: "c1", notebookId }, [
+      userMessage("a", "First"),
+      userMessage("b", "Second"),
+    ]);
+    expect((await db.conversations.get("c1"))?.title).toBe("Mine");
+    await deleteConversation("c1");
+    expect(await db.conversations.count()).toBe(0);
+    expect(await db.messages.count()).toBe(0);
+  });
+});
+
+describe("conversation titles", () => {
+  it("shortens long questions at a word", () => {
+    const title = conversationTitle([userMessage("a", "word ".repeat(40))]);
+    expect(title.length).toBeLessThanOrEqual(73);
+    expect(title.endsWith("…")).toBe(true);
+  });
+
+  it("is empty without a question", () => {
+    expect(conversationTitle([])).toBe("");
   });
 });
 
@@ -105,6 +154,33 @@ describe("backup", () => {
     expect(await importBackup(JSON.parse(JSON.stringify(backup)))).toBe(1);
     expect((await db.notebooks.toArray())[0].title).toBe("Kept");
     expect(await db.chunks.count()).toBe(1);
+  });
+
+  it("round-trips conversations", async () => {
+    const notebookId = await createNotebook("Kept");
+    await saveChat({ id: "backup-c", notebookId }, [userMessage("a", "Hello there")]);
+    const backup = await exportBackup();
+    expect(backup.format).toBe(2);
+    await deleteAllData();
+    await importBackup(JSON.parse(JSON.stringify(backup)));
+    expect((await db.conversations.get("backup-c"))?.title).toBe("Hello there");
+    expect((await loadChat("backup-c")).map((m) => m.id)).toEqual(["a"]);
+  });
+
+  it("imports a format 1 backup, turning each notebook's chat into a conversation", async () => {
+    await importBackup({
+      app: "better-vault",
+      format: 1,
+      exportedAt: 1,
+      notebooks: [{ id: "n1", title: "Old", createdAt: 1, updatedAt: 1 }],
+      sources: [],
+      messages: [
+        { id: "n1:a", notebookId: "n1", createdAt: 5, message: userMessage("a", "Old question") },
+      ],
+      outputs: [],
+    });
+    expect((await db.conversations.get("n1"))?.title).toBe("Old question");
+    expect((await loadChat("n1")).map((m) => m.id)).toEqual(["a"]);
   });
 
   it("rejects files that are not backups", async () => {
@@ -158,18 +234,16 @@ describe("version 2 upgrade", () => {
       settings: "key",
     });
     await old.open();
-    await old
-      .table("sources")
-      .add({
-        id: "s1",
-        notebookId: "n1",
-        title: "PDF",
-        kind: "pdf",
-        text: "Q What CO5?",
-        charCount: 18,
-        selected: true,
-        createdAt: 1,
-      });
+    await old.table("sources").add({
+      id: "s1",
+      notebookId: "n1",
+      title: "PDF",
+      kind: "pdf",
+      text: "Q What CO5?",
+      charCount: 18,
+      selected: true,
+      createdAt: 1,
+    });
     await old
       .table("chunks")
       .add({ id: "s1:0", notebookId: "n1", sourceId: "s1", index: 0, text: "Q What CO5?" });
@@ -182,6 +256,65 @@ describe("version 2 upgrade", () => {
     expect(source?.text).toBe("Q What CO5?");
     expect(source?.charCount).toBe("Q What CO5?".length);
     expect(chunk?.text).toBe("Q What CO5?");
+    upgraded.close();
+    await Dexie.delete(name);
+  });
+});
+
+describe("version 3 upgrade", () => {
+  it("turns each notebook's chat into its first conversation", async () => {
+    const { default: Dexie } = await import("dexie");
+    const name = "better-vault-upgrade-3-test";
+    const old = new Dexie(name);
+    old.version(2).stores({
+      notebooks: "id, updatedAt",
+      sources: "id, notebookId, createdAt",
+      chunks: "id, notebookId, sourceId, [sourceId+index]",
+      messages: "id, notebookId, [notebookId+createdAt]",
+      outputs: "id, notebookId, status, [notebookId+createdAt]",
+      settings: "key",
+    });
+    await old.open();
+    await old.table("messages").bulkAdd([
+      {
+        id: "n1:a",
+        notebookId: "n1",
+        createdAt: 10,
+        message: userMessage("a", "Why is the sky blue?"),
+      },
+      {
+        id: "n1:b",
+        notebookId: "n1",
+        createdAt: 11,
+        message: { id: "b", role: "assistant", parts: [] },
+      },
+    ]);
+    await old.table("sources").add({
+      id: "s1",
+      notebookId: "n1",
+      title: "PDF",
+      kind: "pdf",
+      text: "Contents\n Course outcome",
+      charCount: 25,
+      selected: true,
+      createdAt: 1,
+    });
+    old.close();
+
+    const { BetterVaultDatabase } = await import("./database");
+    const upgraded = new BetterVaultDatabase(name);
+    const conversation = await upgraded.conversations.get("n1");
+    expect(conversation).toMatchObject({
+      notebookId: "n1",
+      title: "Why is the sky blue?",
+      createdAt: 10,
+      updatedAt: 11,
+    });
+    expect((await upgraded.messages.toArray()).map((row) => row.conversationId)).toEqual([
+      "n1",
+      "n1",
+    ]);
+    expect((await upgraded.sources.get("s1"))?.text).toBe("Contents\nCourse outcome");
     upgraded.close();
     await Dexie.delete(name);
   });

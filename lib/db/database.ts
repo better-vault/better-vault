@@ -1,6 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
 import type { ModelRef } from "@/lib/ai/catalog";
 import type { ChatMessage } from "@/lib/chat/types";
+import { conversationTitle } from "@/lib/chat/title";
 import { cleanText } from "@/lib/grounding/clean";
 
 /**
@@ -43,9 +44,21 @@ export interface Chunk {
   text: string;
 }
 
+/** One chat in a notebook. A notebook can have many. */
+export interface Conversation {
+  id: string;
+  notebookId: string;
+  /** The first question, shortened, until the user renames it. */
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface StoredMessage {
   id: string;
   notebookId: string;
+  conversationId: string;
+  /** The message's place in its conversation. */
   createdAt: number;
   message: ChatMessage;
 }
@@ -80,6 +93,7 @@ export class BetterVaultDatabase extends Dexie {
   sources!: EntityTable<Source, "id">;
   chunks!: EntityTable<Chunk, "id">;
   messages!: EntityTable<StoredMessage, "id">;
+  conversations!: EntityTable<Conversation, "id">;
   outputs!: EntityTable<StudioOutput, "id">;
   settings!: EntityTable<SettingRow, "key">;
 
@@ -110,6 +124,53 @@ export class BetterVaultDatabase extends Dexie {
           chunk.text = cleanText(chunk.text);
         });
     });
+    // Version 3: a notebook can hold several chats. Each notebook's existing
+    // chat becomes its first conversation, with the notebook's id. Spaces
+    // left at the start of lines by the version 2 cleaning are removed too.
+    this.version(3)
+      .stores({
+        conversations: "id, notebookId, [notebookId+updatedAt]",
+        messages: "id, notebookId, conversationId, [conversationId+createdAt]",
+      })
+      .upgrade(async (tx) => {
+        const rows = await tx.table<StoredMessage>("messages").toArray();
+        const byNotebook = new Map<string, StoredMessage[]>();
+        for (const row of rows)
+          byNotebook.set(row.notebookId, [...(byNotebook.get(row.notebookId) ?? []), row]);
+        const conversations: Conversation[] = [...byNotebook].map(([notebookId, messages]) => {
+          const times = messages.map((row) => row.createdAt);
+          return {
+            id: notebookId,
+            notebookId,
+            title: conversationTitle(
+              messages.sort((a, b) => a.createdAt - b.createdAt).map((row) => row.message),
+            ),
+            createdAt: Math.min(...times),
+            updatedAt: Math.max(...times),
+          };
+        });
+        await tx.table<Conversation>("conversations").bulkPut(conversations);
+        await tx
+          .table<StoredMessage>("messages")
+          .toCollection()
+          .modify((row) => {
+            row.conversationId = row.notebookId;
+          });
+        const tidy = (text: string) => text.replace(/[^\S\n]*\n[^\S\n]*/g, "\n").trim();
+        await tx
+          .table<Source>("sources")
+          .toCollection()
+          .modify((source) => {
+            source.text = tidy(source.text);
+            source.charCount = source.text.length;
+          });
+        await tx
+          .table<Chunk>("chunks")
+          .toCollection()
+          .modify((chunk) => {
+            chunk.text = tidy(chunk.text);
+          });
+      });
   }
 }
 

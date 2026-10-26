@@ -18,15 +18,16 @@ export async function touchNotebook(id: string) {
   await db.notebooks.update(id, { updatedAt: Date.now() });
 }
 
-/** Deletes a notebook with its sources, chat and Studio outputs. */
+/** Deletes a notebook with its sources, chats and Studio outputs. */
 export async function deleteNotebook(id: string) {
   await db.transaction(
     "rw",
-    [db.notebooks, db.sources, db.chunks, db.messages, db.outputs],
+    [db.notebooks, db.sources, db.chunks, db.messages, db.conversations, db.outputs],
     async () => {
       await db.sources.where("notebookId").equals(id).delete();
       await db.chunks.where("notebookId").equals(id).delete();
       await db.messages.where("notebookId").equals(id).delete();
+      await db.conversations.where("notebookId").equals(id).delete();
       await db.outputs.where("notebookId").equals(id).delete();
       await db.notebooks.delete(id);
     },

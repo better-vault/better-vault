@@ -32,7 +32,7 @@ import { SettingsRow } from "./settings-row";
 interface SettingsSheetProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** The button that opens the sheet; it gets the gear icon. Default: a round ghost button. */
+  /** The button that opens the sheet, with its own content. Default: a round ghost button with the gear. */
   trigger?: ReactElement;
 }
 
@@ -58,11 +58,15 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
   return (
     <>
       <Sheet side="left" open={open} onOpenChange={setOpen}>
-        <Sheet.Trigger
-          render={trigger ?? <Button variant="ghost" shape="pill" size="icon" aria-label={t("title")} />}
-        >
-          <Icon icon={Settings01Icon} />
-        </Sheet.Trigger>
+        {trigger ? (
+          <Sheet.Trigger render={trigger} />
+        ) : (
+          <Sheet.Trigger
+            render={<Button variant="ghost" shape="pill" size="icon" aria-label={t("title")} />}
+          >
+            <Icon icon={Settings01Icon} />
+          </Sheet.Trigger>
+        )}
         <Sheet.Content closeLabel={tCommon("actions.close")}>
           <Sheet.Header title={t("title")} description={t("description")} />
           <Sheet.Body>

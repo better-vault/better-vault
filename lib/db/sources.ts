@@ -72,7 +72,10 @@ export function useSources(notebookId: string): Source[] | undefined {
 
 /** The passages of the given sources, in reading order. */
 export async function getChunks(sourceIds: readonly string[]): Promise<Chunk[]> {
-  const chunks = await db.chunks.where("sourceId").anyOf([...sourceIds]).toArray();
+  const chunks = await db.chunks
+    .where("sourceId")
+    .anyOf([...sourceIds])
+    .toArray();
   const order = new Map(sourceIds.map((id, at) => [id, at]));
   return chunks.sort(
     (a, b) => (order.get(a.sourceId) ?? 0) - (order.get(b.sourceId) ?? 0) || a.index - b.index,

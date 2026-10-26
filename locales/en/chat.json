@@ -16,7 +16,6 @@
   "stop": "Stop",
   "menu": "More",
   "addSource": "Add a source",
-  "clearChat": "Clear chat",
   "setup": {
     "banner": "Add an API key or a local model to start.",
     "action": "Set up"
@@ -62,9 +61,30 @@
     "retry": "Try again"
   },
   "error": "The answer could not be completed: {{error}}",
-  "clear": {
-    "title": "Clear this chat?",
-    "body": "The conversation in this notebook will be deleted. Sources and Studio outputs are kept.",
-    "confirm": "Clear chat"
+  "newChat": "New chat",
+  "history": {
+    "open": "History",
+    "title": "History",
+    "description": "Chats in this notebook",
+    "newChat": "New chat",
+    "empty": "No chats yet. Ask a question to start one.",
+    "untitled": "New chat",
+    "current": "Open now",
+    "actions": "Chat actions",
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "Previous 7 days",
+      "older": "Older"
+    },
+    "rename": {
+      "title": "Rename chat",
+      "label": "Name"
+    },
+    "delete": {
+      "title": "Delete this chat?",
+      "body": "“{{title}}” and its answers will be removed from this browser. This can’t be undone.",
+      "confirm": "Delete chat"
+    }
   }
 }

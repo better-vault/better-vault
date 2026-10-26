@@ -1,10 +1,16 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { Notebook, StudioOutput } from "@/lib/db/database";
+import type { Conversation, Notebook, StudioOutput } from "@/lib/db/database";
 import type { StudioToolId } from "@/studio/tools";
 
 export type WorkspaceTab = "chat" | "sources" | "studio";
+
+/** A rename or delete asked for on a conversation in History. */
+export interface ConversationAction {
+  kind: "rename" | "delete";
+  conversation: Conversation;
+}
 
 /** A rename or delete asked for on a Studio output. */
 export interface OutputAction {
@@ -26,6 +32,13 @@ interface WorkspaceState {
   setSettingsOpen: (open: boolean) => void;
   addSourceOpen: boolean;
   setAddSourceOpen: (open: boolean) => void;
+  /** The History sheet: the notebook's chats. */
+  historyOpen: boolean;
+  setHistoryOpen: (open: boolean) => void;
+  conversationAction: ConversationAction | null;
+  /** Closes the History sheet and asks to rename or delete a conversation. */
+  requestConversationAction: (action: ConversationAction) => void;
+  clearConversationAction: () => void;
   /** The Studio tool whose dialog is open. */
   activeTool: StudioToolId | null;
   /** Closes the Studio sheet and opens a tool's dialog. */
@@ -47,12 +60,20 @@ const WorkspaceContext = createContext<WorkspaceState | null>(null);
  * The notebook screen's state. Dialogs opened from a sheet live here, outside
  * the sheet, so the sheet can close as its dialog opens.
  */
-export function WorkspaceProvider({ notebook, children }: { notebook: Notebook; children: ReactNode }) {
+export function WorkspaceProvider({
+  notebook,
+  children,
+}: {
+  notebook: Notebook;
+  children: ReactNode;
+}) {
   const [tab, setTab] = useState<WorkspaceTab>("chat");
   const [openOutputId, setOpenOutputId] = useState<string | null>(null);
   const [studioOpen, setStudioOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [conversationAction, setConversationAction] = useState<ConversationAction | null>(null);
   const [activeTool, setActiveTool] = useState<StudioToolId | null>(null);
   const [outputAction, setOutputAction] = useState<OutputAction | null>(null);
   const [reading, setReading] = useState<WorkspaceState["reading"]>(null);
@@ -75,6 +96,14 @@ export function WorkspaceProvider({ notebook, children }: { notebook: Notebook; 
       setSettingsOpen,
       addSourceOpen,
       setAddSourceOpen,
+      historyOpen,
+      setHistoryOpen,
+      conversationAction,
+      requestConversationAction: (action) => {
+        setHistoryOpen(false);
+        setConversationAction(action);
+      },
+      clearConversationAction: () => setConversationAction(null),
       activeTool,
       openTool: (id) => {
         setStudioOpen(false);
@@ -91,7 +120,19 @@ export function WorkspaceProvider({ notebook, children }: { notebook: Notebook; 
       readSource: (sourceId, passage) => setReading({ sourceId, passage }),
       closeReader: () => setReading(null),
     }),
-    [notebook, tab, openOutputId, studioOpen, settingsOpen, addSourceOpen, activeTool, outputAction, reading],
+    [
+      notebook,
+      tab,
+      openOutputId,
+      studioOpen,
+      settingsOpen,
+      addSourceOpen,
+      historyOpen,
+      conversationAction,
+      activeTool,
+      outputAction,
+      reading,
+    ],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

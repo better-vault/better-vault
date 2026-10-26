@@ -1,20 +1,21 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { Chat, useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, generateId } from "ai";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { providers } from "@/lib/ai/catalog";
 import type { ChatMessage, ChatMode } from "@/lib/chat/types";
 import { db } from "@/lib/db/database";
-import { clearChat, loadChat, saveChat } from "@/lib/db/messages";
+import { latestConversation, loadChat, saveChat } from "@/lib/db/messages";
 import { activeModel, contextCharsFor, credentialsFor, getSettings } from "@/lib/db/settings";
 import { getChunks } from "@/lib/db/sources";
 import { selectPassages } from "@/lib/grounding/passages";
@@ -23,6 +24,8 @@ import { selectPassages } from "@/lib/grounding/passages";
 const HISTORY = 24;
 
 interface ChatSession {
+  /** The conversation shown; it is saved once it has an answer. */
+  conversationId: string;
   messages: ChatMessage[];
   status: "submitted" | "streaming" | "ready" | "error";
   error: Error | undefined;
@@ -31,12 +34,36 @@ interface ChatSession {
   send: (text: string) => Promise<void>;
   retry: () => Promise<void>;
   stop: () => void;
-  clear: () => Promise<void>;
+  /** Starts an empty conversation. */
+  startNew: () => void;
+  /** Shows a saved conversation. */
+  open: (conversationId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatSession | null>(null);
 
-/** Loads the notebook's saved chat, then runs it. */
+const transport = new DefaultChatTransport<ChatMessage>({
+  api: "/api/chat",
+  prepareSendMessagesRequest: ({ messages, body }) => ({
+    body: { ...body, messages: messages.slice(-HISTORY) },
+  }),
+});
+
+/**
+ * One Chat per conversation. Each saves only into its own conversation, so
+ * an answer that is stopped by switching never lands in another one.
+ */
+function chatFor(notebookId: string, conversationId: string, messages: ChatMessage[]) {
+  return new Chat<ChatMessage>({
+    id: conversationId,
+    messages,
+    transport,
+    onFinish: ({ messages: finished }) =>
+      void saveChat({ id: conversationId, notebookId }, finished),
+  });
+}
+
+/** Opens the notebook's most recent conversation (or a new one), and runs it. */
 export function ChatProvider({
   notebookId,
   children,
@@ -44,19 +71,56 @@ export function ChatProvider({
   notebookId: string;
   children: ReactNode;
 }) {
-  const [initial, setInitial] = useState<{ id: string; messages: ChatMessage[] } | null>(null);
+  const [current, setCurrent] = useState<{ notebookId: string; chat: Chat<ChatMessage> } | null>(
+    null,
+  );
+  const [mode, setMode] = useState<ChatMode>("sources");
+
   useEffect(() => {
     let alive = true;
-    void loadChat(notebookId).then((messages) => {
-      if (alive) setInitial({ id: notebookId, messages });
-    });
+    void (async () => {
+      const latest = await latestConversation(notebookId);
+      const id = latest?.id ?? generateId();
+      const messages = latest ? await loadChat(id) : [];
+      if (alive) setCurrent({ notebookId, chat: chatFor(notebookId, id, messages) });
+    })();
     return () => {
       alive = false;
     };
   }, [notebookId]);
-  if (!initial || initial.id !== notebookId) return null;
+
+  // The chat shown, so switching can stop its answer first. That answer is
+  // still saved, into its own conversation.
+  const shown = useRef<Chat<ChatMessage> | null>(null);
+  useEffect(() => {
+    shown.current = current?.chat ?? null;
+  }, [current]);
+
+  const startNew = useCallback(() => {
+    void shown.current?.stop();
+    setCurrent({ notebookId, chat: chatFor(notebookId, generateId(), []) });
+  }, [notebookId]);
+
+  const open = useCallback(
+    async (conversationId: string) => {
+      if (shown.current?.id === conversationId) return;
+      const messages = await loadChat(conversationId);
+      void shown.current?.stop();
+      setCurrent({ notebookId, chat: chatFor(notebookId, conversationId, messages) });
+    },
+    [notebookId],
+  );
+
+  if (!current || current.notebookId !== notebookId) return null;
   return (
-    <ChatRunner notebookId={notebookId} initial={initial.messages}>
+    <ChatRunner
+      notebookId={notebookId}
+      chat={current.chat}
+      mode={mode}
+      setMode={setMode}
+      startNew={startNew}
+      open={open}
+    >
       {children}
     </ChatRunner>
   );
@@ -70,30 +134,22 @@ function textOf(message: ChatMessage | undefined): string {
 
 function ChatRunner({
   notebookId,
-  initial,
+  chat: instance,
+  mode,
+  setMode,
+  startNew,
+  open,
   children,
 }: {
   notebookId: string;
-  initial: ChatMessage[];
+  chat: Chat<ChatMessage>;
+  mode: ChatMode;
+  setMode: (mode: ChatMode) => void;
+  startNew: () => void;
+  open: (conversationId: string) => Promise<void>;
   children: ReactNode;
 }) {
-  const [mode, setMode] = useState<ChatMode>("sources");
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport<ChatMessage>({
-        api: "/api/chat",
-        prepareSendMessagesRequest: ({ messages, body }) => ({
-          body: { ...body, messages: messages.slice(-HISTORY) },
-        }),
-      }),
-    [],
-  );
-  const chat = useChat<ChatMessage>({
-    id: notebookId,
-    messages: initial,
-    transport,
-    onFinish: ({ messages }) => void saveChat(notebookId, messages),
-  });
+  const chat = useChat<ChatMessage>({ chat: instance });
 
   /** The model, the key and the passages for a question, read fresh each time. */
   const requestFor = useCallback(
@@ -121,10 +177,11 @@ function ChatRunner({
     [notebookId, mode],
   );
 
-  const { sendMessage, regenerate, setMessages, stop, messages, status, error } = chat;
+  const { sendMessage, regenerate, stop, messages, status, error } = chat;
 
   const value = useMemo<ChatSession>(
     () => ({
+      conversationId: instance.id,
       messages,
       status,
       error,
@@ -139,23 +196,22 @@ function ChatRunner({
         await regenerate({ body: await requestFor(question) });
       },
       stop: () => void stop(),
-      clear: async () => {
-        await stop();
-        setMessages([]);
-        await clearChat(notebookId);
-      },
+      startNew,
+      open,
     }),
     [
+      instance.id,
       messages,
       status,
       error,
       mode,
+      setMode,
       requestFor,
       sendMessage,
       regenerate,
-      setMessages,
       stop,
-      notebookId,
+      startNew,
+      open,
     ],
   );
 
