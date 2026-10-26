@@ -44,7 +44,7 @@ export function TopBar() {
               open={settingsOpen}
               onOpenChange={setSettingsOpen}
               trigger={
-                <Button variant="outline" title={tSettings("title")}>
+                <Button variant="outline" size="sm" title={tSettings("title")}>
                   <Icon icon={Settings01Icon} size={16} />
                   <span className="max-sm:sr-only">{tSettings("title")}</span>
                 </Button>
@@ -54,7 +54,7 @@ export function TopBar() {
               open={studioOpen}
               onOpenChange={setStudioOpen}
               trigger={
-                <Button variant="outline" title={t("openStudio")}>
+                <Button variant="outline" size="sm" title={t("openStudio")}>
                   <Icon icon={Add01Icon} size={16} />
                   <span className="max-sm:sr-only">{t("create")}</span>
                 </Button>
@@ -62,14 +62,17 @@ export function TopBar() {
             />
           </ButtonGroup>
           {tab === "chat" ? (
-            <HistorySheet
-              trigger={
-                <Button size="lg" title={tChat("history.title")} className="rounded-xl">
-                  <Icon icon={BubbleChatIcon} size={16} />
-                  <span className="max-sm:sr-only">{tChat("history.open")}</span>
-                </Button>
-              }
-            />
+            // A track of its own, so it lines up with the one beside it.
+            <ButtonGroup aria-label={tChat("history.title")}>
+              <HistorySheet
+                trigger={
+                  <Button size="sm" title={tChat("history.title")}>
+                    <Icon icon={BubbleChatIcon} size={16} />
+                    <span className="max-sm:sr-only">{tChat("history.open")}</span>
+                  </Button>
+                }
+              />
+            </ButtonGroup>
           ) : null}
         </ButtonGroup>
         <NotebookMenu />
