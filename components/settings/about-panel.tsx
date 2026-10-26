@@ -7,16 +7,6 @@ import { Icon } from "@/components/icon";
 import { Sheet } from "@/components/panelui/sheet";
 import { appVersion, repositoryUrl } from "@/lib/version";
 
-const credits = [
-  { name: "Panel UI", href: "https://panelui.dev", key: "panel" },
-  // Required by Rare UI's license: a visible link to rareui.com.
-  { name: "Rare UI", href: "https://rareui.com", key: "rare" },
-  { name: "Pele", href: "https://pele.run", key: "pele" },
-  { name: "Hugeicons", href: "https://hugeicons.com", key: "hugeicons" },
-  { name: "Anatomy", href: "https://skills.wheresryan.sh/anatomy", key: "anatomy" },
-  { name: "Vercel AI SDK", href: "https://ai-sdk.dev", key: "aiSdk" },
-] as const;
-
 export function AboutPanel() {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation();
@@ -39,17 +29,6 @@ export function AboutPanel() {
             <ExternalLink href={`${repositoryUrl}/issues/new/choose`}>{t("about.issues")}</ExternalLink>
             <ExternalLink href={`${repositoryUrl}/blob/main/LICENSE`}>{t("about.license")}</ExternalLink>
           </div>
-          <section>
-            <h3 className="mb-2 text-xs font-medium text-muted-foreground">{t("about.credits")}</h3>
-            <ul className="flex flex-col gap-2 text-sm">
-              {credits.map((credit) => (
-                <li key={credit.key} className="flex items-baseline justify-between gap-3">
-                  <ExternalLink href={credit.href}>{credit.name}</ExternalLink>
-                  <span className="text-end text-xs text-muted-foreground">{t(`about.${credit.key}`)}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
         </div>
       </Sheet.Body>
     </>

@@ -78,13 +78,6 @@
     "description": "An open-source, bring-your-own-model alternative to NotebookLM.",
     "github": "Source code",
     "issues": "Report a problem",
-    "license": "MIT license",
-    "credits": "Built with",
-    "panel": "Interface components",
-    "rare": "Web search, citations and the contents rail",
-    "pele": "Diagrams",
-    "hugeicons": "Icons",
-    "anatomy": "The drawing kit behind Anatomy figures",
-    "aiSdk": "Model access"
+    "license": "MIT license"
   }
 }
