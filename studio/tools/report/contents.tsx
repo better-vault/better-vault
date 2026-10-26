@@ -106,10 +106,10 @@ export function ReportContents({ items, containerRef, minutes, offset = 32 }: Re
   return (
     <nav
       aria-label={t("report.viewer.contents")}
-      className="flex flex-col overflow-hidden rounded-3xl bg-card p-2 ring-1 ring-border"
+      className="flex flex-col overflow-hidden rounded-3xl bg-card p-2.5 ring-1 ring-border"
       style={{ maxHeight }}
     >
-      <div className="px-2.5 pt-2 pb-3">
+      <div className="px-3 pt-2 pb-3.5">
         <div className="flex items-baseline justify-between gap-3 text-xs">
           <span className="font-medium">{t("report.viewer.contents")}</span>
           <span className="text-muted-foreground tabular-nums">
@@ -146,8 +146,8 @@ export function ReportContents({ items, containerRef, minutes, offset = 32 }: Re
                   go(index);
                 }}
                 className={cn(
-                  "relative flex gap-2.5 rounded-xl py-1.5 pe-2.5 text-start transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  item.depth === 0 ? "ps-2.5 text-sm" : "ps-10 text-[0.8125rem]",
+                  "relative flex gap-3 rounded-xl py-2 pe-3 text-start leading-snug transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  item.depth === 0 ? "ps-3 text-sm" : "ps-11 text-[0.8125rem]",
                   current
                     ? "bg-muted text-foreground"
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

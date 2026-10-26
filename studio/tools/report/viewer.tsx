@@ -29,7 +29,7 @@ export function ReportViewer({ data, onOpenPassage, scrollRef }: ToolViewerProps
   return (
     <div className="flex items-start gap-8 pb-10">
       {items.length > 1 ? (
-        <aside className="sticky top-4 hidden w-64 shrink-0 lg:block">
+        <aside className="sticky top-4 hidden w-80 shrink-0 lg:block">
           <ReportContents items={items} containerRef={scrollRef} minutes={minutes} />
         </aside>
       ) : null}
