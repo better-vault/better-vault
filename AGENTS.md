@@ -30,7 +30,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 - **Bottom centre, in the Chat tab only:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch. It does not appear over the Sources or Studio views.
 - Choosing a tool closes the Studio sheet and opens the tool's Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.
 - **Rule: a choice in a sheet that opens a dialog closes the sheet first.** Such dialogs are rendered outside the sheet (workspace state in `components/workspace/workspace-context.tsx`, or beside the `<Sheet>`), because closing a sheet unmounts its content.
-- Each assistant answer shows its sources and citations with the Rare UI `WebSearch` component, for notebook sources and web results alike.
+- Each assistant answer cites passages with small numbered marks (`components/chat/citation.tsx`, a preview card on hover or focus) and lists its references as footnotes under the answer (`components/chat/answer-references.tsx`), for notebook sources and web results alike.
 
 ## Decisions (do not change without discussing first)
 
@@ -44,7 +44,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ## UI rules
 
-- **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not hand-edit vendored components unless necessary, and note why in the file.
+- **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not add other component libraries (Rare UI was removed on purpose); build what is missing from Panel and shadcn parts, with a design of our own. Do not hand-edit vendored components unless necessary, and note why in the file.
 - **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `app/globals.css`, which holds the Panel palette. Never use raw colours like `bg-neutral-800` or hex values in app code.
 - **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship.
 - **Text:** every user-facing string goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error.
@@ -62,7 +62,7 @@ app/                      Next.js App Router (pages and API routes)
   api/models              list a provider's models with the user's key
   api/sources/parse       PDF / web page → plain text
 components/panelui        Panel UI (vendored registry code)
-components/ui             shadcn fallbacks + Rare UI web-search (vendored)
+components/ui             shadcn fallbacks (vendored)
 components/providers      app-wide providers (theme, i18n, Sheet.Stage)
 components/workspace      the notebook screen: top bar, sheets, tabs, prompt, views
 studio/                   Studio tools: registry, shared dialog fields, one folder per tool

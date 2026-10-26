@@ -21,7 +21,13 @@ const ICONS = {
   custom: PencilEdit02Icon,
 };
 
-export function ReportForm({ value, onChange, focus, onFocusChange, sourceIds }: ToolFormProps<ReportOptions>) {
+export function ReportForm({
+  value,
+  onChange,
+  focus,
+  onFocusChange,
+  sourceIds,
+}: ToolFormProps<ReportOptions>) {
   const { t, i18n } = useTranslation("studio");
   const suggestions = useReportSuggestions(sourceIds, i18n.language);
   const suggested = suggestions.items.findIndex(
@@ -34,7 +40,13 @@ export function ReportForm({ value, onChange, focus, onFocusChange, sourceIds }:
       <OptionCards
         label={t("report.format")}
         value={selected}
-        onChange={(template) => onChange({ ...value, template, instructions: template === "custom" ? "" : value.instructions })}
+        onChange={(template) =>
+          onChange({
+            ...value,
+            template,
+            instructions: template === "custom" ? "" : value.instructions,
+          })
+        }
         options={(["custom", "briefing", "study-guide", "blog-post"] as const).map((template) => ({
           value: template,
           title: t(`report.templates.${template}.name`),
@@ -93,7 +105,10 @@ export function ReportForm({ value, onChange, focus, onFocusChange, sourceIds }:
         label={t("report.length")}
         value={value.length}
         onChange={(length) => onChange({ ...value, length })}
-        options={reportLengths.map((length) => ({ value: length, label: t(`report.lengths.${length}`) }))}
+        options={reportLengths.map((length) => ({
+          value: length,
+          label: t(`report.lengths.${length}`),
+        }))}
       />
     </>
   );

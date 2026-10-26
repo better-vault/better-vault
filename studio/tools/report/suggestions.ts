@@ -40,7 +40,10 @@ export function useReportSuggestions(sourceIds: string[], language: string) {
           body: JSON.stringify({ ...request, language }),
         });
         const body = (await response.json()) as { suggestions?: ReportSuggestion[] };
-        next = response.ok && body.suggestions ? { status: "ready", items: body.suggestions } : { status: "error" };
+        next =
+          response.ok && body.suggestions
+            ? { status: "ready", items: body.suggestions }
+            : { status: "error" };
       } catch {
         next = { status: "error" };
       }
@@ -57,5 +60,7 @@ export function useReportSuggestions(sourceIds: string[], language: string) {
 
   if (sourceIds.length === 0) return { status: "error" as const, items: [] };
   if (!result) return { status: "loading" as const, items: [] };
-  return result.status === "ready" ? { status: "ready" as const, items: result.items } : { status: "error" as const, items: [] };
+  return result.status === "ready"
+    ? { status: "ready" as const, items: result.items }
+    : { status: "error" as const, items: [] };
 }

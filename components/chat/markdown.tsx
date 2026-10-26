@@ -3,15 +3,14 @@
 import { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { sourceKindIcons } from "@/components/sources/source-kind";
-import { WebSearchCitation, type WebSource } from "@/components/ui/web-search";
 import type { PassageRef } from "@/lib/chat/types";
 import { linkCitations } from "@/lib/grounding/passages";
 import { cn } from "@/lib/utils";
+import { Citation } from "./citation";
 
 const CITE_RUN = /(?:\[\d+\]\(#cite-\d+\))+/g;
 
-/** Joins runs like [1][2] that point into the same source into one chip. */
+/** Joins runs like [1][2] that point into the same source into one mark. */
 function groupCitations(markdown: string, byN: Map<number, PassageRef>): string {
   return markdown.replace(CITE_RUN, (run) => {
     const numbers = [...run.matchAll(/#cite-(\d+)/g)].map((match) => Number(match[1]));
@@ -24,8 +23,6 @@ function groupCitations(markdown: string, byN: Map<number, PassageRef>): string 
     return groups.map((group) => `[${group[0]}](#cite-${group.join("-")})`).join("");
   });
 }
-
-const short = (title: string) => (title.length > 22 ? `${title.slice(0, 20).trimEnd()}…` : title);
 
 interface MarkdownProps {
   text: string;
@@ -61,8 +58,18 @@ export function headingsOf(markdown: string): { level: 2 | 3; text: string; id: 
 }
 
 /** Model-written Markdown, with "[n]" citations drawn as source chips. */
-export function Markdown({ text, passages, onCite, className, bare = false, anchorHeadings = false }: MarkdownProps) {
-  const byN = useMemo(() => new Map((passages ?? []).map((passage) => [passage.n, passage])), [passages]);
+export function Markdown({
+  text,
+  passages,
+  onCite,
+  className,
+  bare = false,
+  anchorHeadings = false,
+}: MarkdownProps) {
+  const byN = useMemo(
+    () => new Map((passages ?? []).map((passage) => [passage.n, passage])),
+    [passages],
+  );
   const source = useMemo(
     () => (byN.size > 0 ? groupCitations(linkCitations(text, new Set(byN.keys())), byN) : text),
     [text, byN],
@@ -72,33 +79,20 @@ export function Markdown({ text, passages, onCite, className, bare = false, anch
     () => ({
       ...(anchorHeadings
         ? {
-            h2: ({ node, children }) => <h2 id={headingId(node?.position?.start.line)}>{children}</h2>,
-            h3: ({ node, children }) => <h3 id={headingId(node?.position?.start.line)}>{children}</h3>,
+            h2: ({ node, children }) => (
+              <h2 id={headingId(node?.position?.start.line)}>{children}</h2>
+            ),
+            h3: ({ node, children }) => (
+              <h3 id={headingId(node?.position?.start.line)}>{children}</h3>
+            ),
           }
         : {}),
       a: ({ href, children }) => {
         const cite = href?.match(/^#cite-([\d-]+)$/);
         if (cite) {
-          const passage = byN.get(Number(cite[1].split("-")[0]));
-          if (passage) {
-            const webSource: WebSource = {
-              id: passage.chunkId,
-              title: passage.title,
-              url: "#",
-              site: short(passage.title),
-              snippet: passage.snippet,
-              icon: sourceKindIcons[passage.kind],
-            };
-            return (
-              <WebSearchCitation
-                source={webSource}
-                index={passage.n}
-                linked={false}
-                className={cn("mx-0.5", onCite && "cursor-pointer")}
-                onClick={() => onCite?.(passage)}
-              />
-            );
-          }
+          const numbers = cite[1].split("-").map(Number);
+          const passage = byN.get(numbers[0]);
+          if (passage) return <Citation passage={passage} numbers={numbers} onOpen={onCite} />;
         }
         return (
           <a href={href} target="_blank" rel="noreferrer">

@@ -31,14 +31,20 @@ export const reportTool = defineTool({
     {
       format: "docx",
       build: async (title, data) => {
-        const { isRightToLeft, markdownToBlocks, wordDocument } = await import("@/studio/exports/docx");
+        const { isRightToLeft, markdownToBlocks, wordDocument } =
+          await import("@/studio/exports/docx");
         const rtl = isRightToLeft(data.markdown);
-        return wordDocument({ title, rtl, children: markdownToBlocks(data.markdown, data.passages, rtl) });
+        return wordDocument({
+          title,
+          rtl,
+          children: markdownToBlocks(data.markdown, data.passages, rtl),
+        });
       },
     },
     {
       format: "md",
-      build: async (title, data) => textBlob(`# ${title}\n\n${stripCitations(data.markdown)}\n`, "text/markdown"),
+      build: async (title, data) =>
+        textBlob(`# ${title}\n\n${stripCitations(data.markdown)}\n`, "text/markdown"),
     },
   ],
 });

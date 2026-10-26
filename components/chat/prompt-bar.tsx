@@ -74,16 +74,23 @@ export function PromptBar() {
             }
             setTab("chat");
             chat.send(text).catch((error: unknown) => {
-              toast.error(t("error", { error: error instanceof Error ? error.message : String(error) }));
+              toast.error(
+                t("error", { error: error instanceof Error ? error.message : String(error) }),
+              );
             });
           }}
         >
           <Prompt.Banner open={settings !== undefined && !model}>
             {t("setup.banner")}
-            <Prompt.BannerAction onClick={() => setSettingsOpen(true)}>{t("setup.action")}</Prompt.BannerAction>
+            <Prompt.BannerAction onClick={() => setSettingsOpen(true)}>
+              {t("setup.action")}
+            </Prompt.BannerAction>
           </Prompt.Banner>
           <Prompt.Field>
-            <Prompt.Textarea placeholder={t(`placeholder.${mode}`)} aria-label={t(`placeholder.${mode}`)} />
+            <Prompt.Textarea
+              placeholder={t(`placeholder.${mode}`)}
+              aria-label={t(`placeholder.${mode}`)}
+            />
             <Prompt.Footer>
               <Prompt.Tools>
                 <Prompt.Menu label={t("menu")} icon={<Icon icon={Add01Icon} />}>
@@ -91,7 +98,10 @@ export function PromptBar() {
                     <Icon icon={FileAddIcon} />
                     {t("addSource")}
                   </Menu.Item>
-                  <Menu.Item disabled={chat.messages.length === 0} onClick={() => setClearing(true)}>
+                  <Menu.Item
+                    disabled={chat.messages.length === 0}
+                    onClick={() => setClearing(true)}
+                  >
                     <Icon icon={Delete02Icon} />
                     {t("clearChat")}
                   </Menu.Item>

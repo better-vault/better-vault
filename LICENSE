@@ -24,11 +24,6 @@ SOFTWARE.
 
 Third-party code included in this repository keeps its own license:
 
-- components/ui/web-search.tsx and components/ui/rail-toc.tsx: Rare UI,
-  MIT + Commons Clause License
-  Condition v1.0 + Attribution (https://github.com/swamimalode07/rare-ui).
-  Any project shipping it must credit Rare UI with a visible link to
-  https://rareui.com.
 - studio/tools/anatomy/kit/iso-kit.ts: Anatomy's kit by Ryan, MIT
   (https://github.com/wheresryan22/anatomy). Its notice is kept at the top of
   the file, and studio/tools/anatomy/anatomy.css uses the kit's CSS.

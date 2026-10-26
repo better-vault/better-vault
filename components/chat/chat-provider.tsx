@@ -2,7 +2,15 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { providers } from "@/lib/ai/catalog";
 import type { ChatMessage, ChatMode } from "@/lib/chat/types";
 import { db } from "@/lib/db/database";
@@ -29,7 +37,13 @@ interface ChatSession {
 const ChatContext = createContext<ChatSession | null>(null);
 
 /** Loads the notebook's saved chat, then runs it. */
-export function ChatProvider({ notebookId, children }: { notebookId: string; children: ReactNode }) {
+export function ChatProvider({
+  notebookId,
+  children,
+}: {
+  notebookId: string;
+  children: ReactNode;
+}) {
   const [initial, setInitial] = useState<{ id: string; messages: ChatMessage[] } | null>(null);
   useEffect(() => {
     let alive = true;
@@ -49,7 +63,9 @@ export function ChatProvider({ notebookId, children }: { notebookId: string; chi
 }
 
 function textOf(message: ChatMessage | undefined): string {
-  return message?.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n") ?? "";
+  return (
+    message?.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("\n") ?? ""
+  );
 }
 
 function ChatRunner({
@@ -85,9 +101,9 @@ function ChatRunner({
       const settings = await getSettings();
       const model = activeModel(settings);
       if (!model) throw new Error("No model is set up.");
-      const sources = (await db.sources.where("notebookId").equals(notebookId).sortBy("createdAt")).filter(
-        (source) => source.selected,
-      );
+      const sources = (
+        await db.sources.where("notebookId").equals(notebookId).sortBy("createdAt")
+      ).filter((source) => source.selected);
       const chunks = await getChunks(sources.map((source) => source.id));
       const passages = selectPassages({
         sources,
@@ -129,7 +145,18 @@ function ChatRunner({
         await clearChat(notebookId);
       },
     }),
-    [messages, status, error, mode, requestFor, sendMessage, regenerate, setMessages, stop, notebookId],
+    [
+      messages,
+      status,
+      error,
+      mode,
+      requestFor,
+      sendMessage,
+      regenerate,
+      setMessages,
+      stop,
+      notebookId,
+    ],
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

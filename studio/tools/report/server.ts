@@ -39,10 +39,18 @@ export function splitTitle(markdown: string, fallback: string): { title: string;
   const text = markdown.replace(/^\s*```(?:markdown|md)?\s*\n([\s\S]*?)\n```\s*$/, "$1").trim();
   const match = text.match(/^#\s+(.+?)\s*#*\s*(?:\n|$)/);
   if (!match) return { title: fallback, body: text };
-  return { title: match[1].replace(/\[\d+\]/g, "").trim() || fallback, body: text.slice(match[0].length).trim() };
+  return {
+    title: match[1].replace(/\[\d+\]/g, "").trim() || fallback,
+    body: text.slice(match[0].length).trim(),
+  };
 }
 
-export const generateReport: Generator<ReportOptions, ReportData> = async ({ model, options, abortSignal, ...args }) => {
+export const generateReport: Generator<ReportOptions, ReportData> = async ({
+  model,
+  options,
+  abortSignal,
+  ...args
+}) => {
   const task =
     options.template === "custom"
       ? `Write the document the user describes:\n"""${options.instructions.trim() || "A clear overview of the sources."}"""\nUnless they ask for something else, give it sections with "##" headings and end with a short summary.`

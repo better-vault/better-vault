@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- Citations are small numbered marks with a preview of the passage, answers list their references as footnotes, and reports have a new contents panel with reading progress. These replace the Rare UI components, which are no longer used.
+
+### Fixed
+
+- The contents of a long report can be scrolled to the end.
+- PDF text no longer shows boxes for characters the file gives no text for; sources added earlier are cleaned too.
+- Mind maps show their tree and diagram again.
+
 ### Added
 
 - Anatomy in the Studio: the model designs a real object whose working explains your sources and builds it part by part, drawn in isometric with Anatomy's kit. Point at a part to read what it does, step through how it works, take it apart, and download it as PNG or SVG.

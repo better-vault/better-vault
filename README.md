@@ -94,7 +94,7 @@ Two optional environment variables tighten a public deployment:
 
 ## 🧱 Tech stack
 
-[Next.js 16](https://nextjs.org) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Rare UI](https://rareui.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Tailwind CSS 4](https://tailwindcss.com)
+[Next.js 16](https://nextjs.org) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Tailwind CSS 4](https://tailwindcss.com)
 
 ## 🤝 Contributing
 
@@ -132,7 +132,6 @@ Please search existing issues first, and **never paste API keys** into an issue.
 ## 🙏 Credits
 
 - [Panel UI](https://panelui.dev) for the sheets, dialogs, prompt and the rest of the interface.
-- [Rare UI](https://rareui.com) for the web search, citation and contents-rail components.
 - [Pele](https://pele.run) for rendering Mermaid diagrams.
 - [Anatomy](https://skills.wheresryan.sh/anatomy) by Ryan, whose MIT drawing kit draws the anatomy figures.
 - [Hugeicons](https://hugeicons.com) for icons.
@@ -140,4 +139,4 @@ Please search existing issues first, and **never paste API keys** into an issue.
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 the better-vault contributors. Third-party components keep their own licenses. The Rare UI components are MIT + Commons Clause with an attribution requirement (see `components/ui/web-search.tsx` and `components/ui/rail-toc.tsx`).
+[MIT](LICENSE) © 2026 the better-vault contributors. Third-party code keeps its own license (see [LICENSE](LICENSE)).

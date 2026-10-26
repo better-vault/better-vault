@@ -116,8 +116,9 @@
     "loadingSuggestions": "Finding formats that suit your sources…",
     "viewer": {
       "contents": "Contents",
-      "readingTime_one": "{{count}} min read",
-      "readingTime_other": "{{count}} min read"
+      "progress_one": "{{percent}}% · {{count}} min",
+      "progress_other": "{{percent}}% · {{count}} min",
+      "progressLabel": "Reading progress"
     }
   },
   "flashcards": {

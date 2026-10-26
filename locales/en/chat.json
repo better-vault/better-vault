@@ -40,16 +40,20 @@
     }
   },
   "sources": {
+    "title": "References",
     "read_one": "Read {{count}} source",
     "read_other": "Read {{count}} sources",
     "searched_one": "Searched {{count}} site",
     "searched_other": "Searched {{count}} sites",
     "searching": "Searching the web",
-    "searchingFor": "Searching “{{query}}”",
-    "more_one": "more source",
-    "more_other": "more sources",
-    "showMore": "Show {{count}} more sources",
-    "showLess": "Show less"
+    "searchingFor": "Searching the web for “{{query}}”",
+    "fromSources": "From your sources",
+    "fromWeb": "From the web",
+    "showAll": "Show all {{count}}",
+    "showFewer": "Show fewer",
+    "openPage": "Opens in a new tab",
+    "cited_one": "cited once",
+    "cited_other": "cited {{count}} times"
   },
   "actions": {
     "label": "Message actions",

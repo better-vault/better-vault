@@ -12,7 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Vendored registry components (Panel UI, shadcn, Rare UI) follow their
+    // Vendored registry components (Panel UI, shadcn) follow their
     // upstream style and are not linted here.
     "components/panelui/**",
     "components/ui/**",

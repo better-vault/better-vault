@@ -31,5 +31,10 @@
     "soon": "Soon"
   },
   "sourceCount_one": "{{count}} source",
-  "sourceCount_other": "{{count}} sources"
+  "sourceCount_other": "{{count}} sources",
+  "citation": {
+    "label": "Source {{numbers}}: {{title}}",
+    "passage": "passage {{numbers}}",
+    "open": "Open in source"
+  }
 }
