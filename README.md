@@ -10,6 +10,8 @@
 **An open-source, bring-your-own-model alternative to NotebookLM.**
 Chat with your sources, and turn them into reports, flashcards, quizzes, tables and diagrams, using the AI model you choose.
 
+[Website](https://better-vault.dev) · [Open the app](https://better-vault.dev/app) · [Docs](https://better-vault.dev/docs) · [Roadmap](ROADMAP.md)
+
 [![Version](https://img.shields.io/github/package-json/v/better-vault/better-vault?style=flat-square&color=262626&label=version)](https://github.com/better-vault/better-vault/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/better-vault/better-vault/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/better-vault/better-vault/actions/workflows/ci.yml)
@@ -29,7 +31,7 @@ Chat with your sources, and turn them into reports, flashcards, quizzes, tables 
 
 ## ✨ What it does
 
-better-vault is a research notebook. You add **sources** (PDFs, web pages, notes, text files) to a **notebook**, then:
+better-vault is a free, open-source alternative to Google NotebookLM (now Gemini Notebook). It is a research notebook: you add **sources** (PDFs, web pages, notes, text files) to a **notebook**, then:
 
 - **Chat with your sources.** Answers cite the passages they came from. Switch to **Web** to let the model search the internet with its provider's built-in search.
 - **Create study material** in the **Studio**: reports, flashcards, quizzes, data tables, mind maps, slide decks, infographics and Anatomy figures. Each one opens a dialog of options, much like NotebookLM.
@@ -62,7 +64,7 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>, then **Settings → AI providers** and paste an API key, or point it at a local model. No `.env` file is needed.
+Open <http://localhost:3000/app>, then **Settings → AI providers** and paste an API key, or point it at a local model. No `.env` file is needed.
 
 ### Production build
 

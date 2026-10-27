@@ -25,6 +25,8 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ## Interface
 
+The domain (better-vault.dev) is one Next.js app with two root layouts: the **site** (`app/(site)`: landing page at `/`, Fumadocs docs at `/docs`) and the **app** (`app/(workspace)`: notebooks at `/app`, a notebook at `/app/notebook/[id]`). Moving between them is a full page load. App paths come from `lib/routes.ts`. The rest of this section describes the app.
+
 - **Top left:** Panel's `ButtonGroup` (small buttons): **Settings** (opens the Settings sheet, whose rows open nested sheets with `Sheet.Next`) and **Create** (opens the **Studio sheet**: tools grid and outputs list) share a track; on the Chat tab, the white **History** button follows in a track of its own and opens the History sheet (the notebook's chats).
 - **Top centre:** the notebook's name, opening a menu to switch, create, rename or delete notebooks.
 - **Top right:** tabs switch the main view: **Chat · Sources · Studio**.
@@ -49,9 +51,9 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 ## UI rules
 
 - **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not add other component libraries (Rare UI was removed on purpose); build what is missing from Panel and shadcn parts, with a design of our own. Do not hand-edit vendored components unless necessary, and note why in the file.
-- **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `app/globals.css`, which holds the Panel palette. Never use raw colours like `bg-neutral-800` or hex values in app code.
+- **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `app/tokens.css`, which holds the Panel palette and is shared by the app (`globals.css`) and the site (`site.css`). Never use raw colours like `bg-neutral-800` or hex values in app code.
 - **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship.
-- **Text:** every user-facing string goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error.
+- **Text:** every user-facing string in the app goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error. The website and docs are English only: landing copy lives in `lib/site/copy.ts` and docs in `content/docs/*.mdx`.
 - **Direction:** use logical utilities (`ms-*`, `pe-*`, `start-*`, `text-start`) so right-to-left languages work.
 - **CSS:** keep a single `@layer components` block in `app/globals.css`; the Turbopack Tailwind loader drops any later one.
 - **Scrolling:** pages scroll in shadcn's `ScrollArea` (`components/ui/scroll-area.tsx`), never the browser's bar. Panel sheet and dialog bodies have their own.
@@ -61,6 +63,9 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 
 ```
 app/                      Next.js App Router (pages and API routes)
+  (site)                  website root layout: landing page, docs (Fumadocs), /og cards
+  (workspace)/app         the notebook app at /app (its own root layout)
+  sitemap.ts, robots.txt, llms*.txt, llms.mdx   SEO and files for AI agents
   api/chat                streamText: Sources (grounded) or Web (provider search)
   api/studio              one Studio generation, validated against the tool's schema
   api/models              list a provider's models with the user's key
@@ -75,6 +80,11 @@ lib/db                    Dexie schema and data hooks
 lib/grounding             chunking, retrieval and citations
 lib/i18n                  language registry and i18next setup
 locales/<lng>/*.json      translations
+content/docs              the documentation, as MDX (sidebar order in meta.json)
+lib/site                  site name, URL, description, landing copy, llms.txt, social card
+components/site           landing page and site chrome
+lib/dither, components/dithercn   the hero's dither engine, copied unchanged from its registry
+proxy.ts                  serves Markdown to agents that ask for text/markdown
 ```
 
 ## How to…
@@ -83,6 +93,8 @@ locales/<lng>/*.json      translations
 - **Add a local tool** (made in the browser, like the Whiteboard): give its `definition.ts` a `local: { blank }` and no `server.ts` or dialog; its viewer receives `onDataChange` to save edits. Mark its client `immersive` to give the viewer the whole tab: the page drops its header and passes the title, downloads, rename and delete as `chrome` for the viewer to show. Register it in `studio/client.ts` and `studio/definitions.ts`; the Studio sheet creates it at once and opens it.
 - **Add a UI language:** copy `locales/en/` to `locales/<code>/`, import it in `lib/i18n/resources.ts`, add it to `lib/i18n/config.ts`, run `npm run i18n:check`.
 - **Add a provider:** add it to the catalog in `lib/ai/catalog.ts` and handle it in `lib/ai/providers.ts` (model factory, optional web-search tool, model listing).
+
+- **Add a docs page:** add `content/docs/<slug>.mdx` with a `title` and a 150–160 character `description` (quoted in the frontmatter), and list it in the folder's `meta.json`. Open with a plain sentence that says what the page is about. The sitemap, llms.txt, search and social card pick it up automatically.
 
 ## Commands
 
@@ -107,6 +119,4 @@ npm run build      # production build
 
 ## Roadmap
 
-- **v0.1.0:** app shell, notebooks and sources, chat (Sources/Web), Reports, Flashcards, Quiz, Data table, Mind map (Pele).
-- **v0.2.0:** Slide deck, Infographic (provider image models), Anatomy diagrams, Whiteboard (with Annotate).
-- **Later:** notebook overview and suggested questions, notes, embedding-based retrieval, more source types (DOCX, YouTube), more providers (OpenRouter, AI Gateway), more UI languages.
+The roadmap lives in [ROADMAP.md](ROADMAP.md) and on the site at `/docs/roadmap` (`content/docs/roadmap.mdx`). Keep the two in step.
