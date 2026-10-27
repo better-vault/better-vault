@@ -1,0 +1,51 @@
+---
+title: "Architecture"
+description: "How better-vault is built, the decisions behind it and where the code lives, for contributors and AI coding agents."
+---
+
+better-vault is a Next.js 16 App Router app that uses the Vercel AI SDK for every model call and Dexie (IndexedDB) for storage. This page is a short tour; [AGENTS.md](https://github.com/better-vault/better-vault/blob/main/AGENTS.md) in the repository holds the full rules.
+
+## Design decisions
+
+1. **Local-first.** All user data lives in the browser's IndexedDB. There is no server database and no auth; API routes are stateless.
+2. **Bring your own key.** Keys are stored in the browser and sent in each request's body. Routes never log or store them.
+3. **Web search uses only the provider's built-in tool.** No third-party search APIs.
+4. **AI calls go through the Vercel AI SDK**, never provider HTTP APIs directly (listing models is the exception).
+5. **No audio or video overviews.**
+6. **Mind maps and diagrams** are Mermaid text, validated and rendered with Pele.
+7. **Anatomy figures are generated every time**, never shipped ready-made.
+8. **Pictures come from the provider's image model** through the AI SDK.
+9. **Local tools** (the Whiteboard) are made in the browser with no route or model.
+
+## Code map
+
+```text
+app/(site)                landing page and these docs (Fumadocs)
+app/(workspace)/app       the notebook app at /app
+app/api/chat              streamText: Sources (grounded) or Web (provider search)
+app/api/studio            one Studio generation, validated against the tool's schema
+app/api/models            list a provider's models with the user's key
+app/api/sources/parse     PDF / web page → plain text
+components/workspace      the notebook screen: top bar, sheets, tabs, prompt, views
+studio/                   Studio tools: registry, shared dialog fields, one folder per tool
+lib/ai                    providers, model catalog, web-search tools, prompts
+lib/db                    Dexie schema and data hooks
+lib/grounding             chunking, retrieval and citations
+content/docs              this documentation, as MDX
+locales/<lng>/*.json      interface translations
+```
+
+## Rules the code follows
+
+- **Panel UI first**, shadcn only for what Panel lacks. Colours come from theme tokens only.
+- **Icons from Hugeicons only.**
+- **No hard-coded interface text** in the app: every string goes through i18next and lives in `locales/en/*.json`.
+- **Logical CSS** (`ms-*`, `pe-*`, `text-start`) so right-to-left languages work.
+
+## Checks
+
+```bash
+npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
+```
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org).

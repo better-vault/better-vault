@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/better-vault/better-vault.git"
   },
-  "homepage": "https://github.com/better-vault/better-vault#readme",
+  "homepage": "https://better-vault.dev",
   "bugs": {
     "url": "https://github.com/better-vault/better-vault/issues"
   },
@@ -20,6 +20,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "fumadocs-mdx",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
@@ -45,6 +46,9 @@
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "docx": "^9.14.0",
+    "fumadocs-core": "^16.17.8",
+    "fumadocs-mdx": "^15.4.10",
+    "fumadocs-ui": "^16.17.8",
     "i18next": "^26.5.6",
     "linkedom": "^0.18.14",
     "mdast-util-from-markdown": "^2.1.0",
@@ -72,6 +76,7 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",

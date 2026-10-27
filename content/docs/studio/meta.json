@@ -1,0 +1,15 @@
+{
+  "title": "Studio",
+  "pages": [
+    "index",
+    "report",
+    "flashcards",
+    "quiz",
+    "data-table",
+    "mind-map",
+    "slide-deck",
+    "infographic",
+    "anatomy",
+    "whiteboard"
+  ]
+}

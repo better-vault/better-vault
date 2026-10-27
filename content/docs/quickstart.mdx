@@ -1,0 +1,65 @@
+---
+title: "Quickstart"
+description: "Open better-vault in your browser or run it on your own machine, add an API key and make your first notebook."
+---
+
+better-vault runs in the browser. You can use the hosted app at [better-vault.dev/app](/app) or run your own copy with Node.js. Either way your notebooks stay in your browser.
+
+## Use the hosted app
+
+<Steps>
+<Step>
+
+### Open the app
+
+Go to [better-vault.dev/app](/app). There is nothing to sign up for.
+
+</Step>
+<Step>
+
+### Add a provider
+
+Open **Settings → AI providers** and paste an API key for OpenAI, Anthropic or Google. See [Providers](/docs/providers) for where to get one.
+
+</Step>
+<Step>
+
+### Create a notebook and add sources
+
+Choose **New notebook**, then add sources: paste text, upload a TXT, Markdown or PDF file, or add a web page by its address.
+
+</Step>
+<Step>
+
+### Ask a question
+
+Type in the prompt bar at the bottom of the **Chat** tab. Answers cite your sources with numbered marks; point at one to read the passage.
+
+</Step>
+</Steps>
+
+<Callout title="Local models need a local install">
+The hosted app cannot reach an Ollama or LM Studio server on your computer. To use local models, run better-vault on the same machine (below).
+</Callout>
+
+## Run it on your machine
+
+**Requirements:** [Node.js](https://nodejs.org) 20.9 or newer, with npm 10.
+
+```bash
+git clone https://github.com/better-vault/better-vault.git
+cd better-vault
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000/app](http://localhost:3000/app). No `.env` file is needed: keys are entered in **Settings**.
+
+For a production build:
+
+```bash
+npm run build
+npm start
+```
+
+To host it for other people, read [Self-hosting](/docs/self-hosting).

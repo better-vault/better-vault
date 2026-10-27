@@ -1,0 +1,26 @@
+---
+title: "Privacy and your data"
+description: "better-vault is local-first. Notebooks, sources, chats and keys are stored in your browser, and nothing is kept on a server."
+---
+
+**better-vault stores everything in your browser.** Notebooks, sources, chats, Studio outputs and API keys live in your browser's IndexedDB. There is no account and no server database.
+
+## What leaves your browser?
+
+Only what a request needs:
+
+- **When you chat or create in the Studio**, the relevant passages from your selected sources, your question and your key are sent to better-vault's API route, which forwards them to the provider you picked and streams the answer back. The route does not store or log them.
+- **When you add a PDF or web page**, the file or address is sent to the parse route, which returns plain text. Nothing is kept.
+- **When you load the model list**, your key is used to ask the provider which models you can use.
+
+With Ollama or LM Studio, those requests go to a server on your own machine.
+
+## Backups
+
+Open **Settings → Data** to export all notebooks as a JSON file and to import one. Older backups stay importable when the app's storage format changes.
+
+Clearing your browser's site data deletes your notebooks, so export a backup first.
+
+## Hosting for others
+
+If you host better-vault, your users' notebooks and keys stay in their own browsers; you never receive them. See [Self-hosting](/docs/self-hosting) for the settings that harden a public deployment.

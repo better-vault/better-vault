@@ -1,0 +1,44 @@
+---
+title: "FAQ"
+description: "Answers to common questions about better-vault, the open-source NotebookLM alternative."
+---
+
+## What is better-vault?
+
+better-vault is a free, open-source alternative to Google NotebookLM. You add PDFs, web pages, notes and text files to a notebook, chat with them with cited answers, and turn them into reports, flashcards, quizzes, data tables, mind maps, slide decks and infographics, using the AI model you choose.
+
+## Is better-vault free?
+
+Yes. better-vault is MIT-licensed and free to use and host. You pay your AI provider for what you use with your own key, or nothing at all with a local model through Ollama or LM Studio.
+
+## Can I use NotebookLM features with Claude or ChatGPT models?
+
+Yes. better-vault works with Anthropic's Claude models, OpenAI's GPT models and Google's Gemini models with your own API key. You can switch models for each question.
+
+## Can I run it with local models?
+
+Yes. Run better-vault on your computer and connect Ollama or LM Studio in **Settings → AI providers**. Your sources then never leave your machine. See [Providers](/docs/providers).
+
+## Where is my data stored?
+
+In your browser's IndexedDB. There is no account and no server database. API routes only forward each request to the provider you picked, and never store or log keys or content. See [Privacy](/docs/privacy).
+
+## Can I self-host better-vault?
+
+Yes. It is a Next.js app with no database: `npm run build && npm start` on any Node.js 20.9+ host, or deploy it to Vercel. See [Self-hosting](/docs/self-hosting).
+
+## Does better-vault make audio overviews?
+
+No. Audio and video overviews are out of scope. better-vault focuses on cited chat and written and visual outputs.
+
+## What file types can I add?
+
+PDF, Markdown and text files (up to 20 MB each), web pages by address, and pasted text. DOCX, EPUB, YouTube transcripts, images and audio are on the [roadmap](/docs/roadmap).
+
+## Is there a desktop app?
+
+Not yet. An Electron desktop app for macOS, Windows and Linux is planned. See the [roadmap](/docs/roadmap).
+
+## How do I contribute or translate it?
+
+Read [Architecture](/docs/contributing) and the [contributing guide](https://github.com/better-vault/better-vault/blob/main/CONTRIBUTING.md) on GitHub. The interface is fully translatable; see [Translations](/docs/contributing/translations).

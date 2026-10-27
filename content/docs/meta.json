@@ -1,0 +1,22 @@
+{
+  "pages": [
+    "---Get started---",
+    "index",
+    "quickstart",
+    "providers",
+    "privacy",
+    "self-hosting",
+    "---Using better-vault---",
+    "notebooks",
+    "sources",
+    "chat",
+    "---Studio---",
+    "...studio",
+    "---Project---",
+    "comparison",
+    "faq",
+    "roadmap",
+    "...contributing",
+    "[llms.txt](/llms.txt)"
+  ]
+}

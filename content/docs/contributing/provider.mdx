@@ -1,0 +1,16 @@
+---
+title: "Add a provider"
+description: "Add a new AI provider to better-vault's model catalog and provider factory."
+---
+
+Providers are wired in two files:
+
+1. **`lib/ai/catalog.ts`**: add the provider to the catalog (id, name, whether it needs a key, image models if any).
+2. **`lib/ai/providers.ts`**: create its AI SDK model factory, its built-in web-search tool if it has one, and how to list its models.
+
+Rules:
+
+- Calls go through the Vercel AI SDK provider package, not the provider's HTTP API (listing models is the exception).
+- Web mode is only offered when the provider has a built-in search tool.
+- Model ids come from the provider package's types or its models endpoint, never from memory.
+- Keys arrive in the request body and must never appear in logs or error messages.
