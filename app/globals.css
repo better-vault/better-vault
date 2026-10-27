@@ -51,7 +51,9 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+:root,
+/* Light colours inside dark mode, for exports and printing. */
+.theme-light {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -238,5 +240,29 @@
   }
   .markdown-document tbody tr:nth-child(even) {
     @apply bg-muted/30;
+  }
+}
+
+/* Slide decks print one slide per page, in light colours (studio/tools/slide-deck/print.tsx). */
+@page deck {
+  size: 13.333in 7.5in;
+  margin: 0;
+}
+@media print {
+  body:has(> [data-print-deck]) {
+    height: auto;
+    overflow: visible;
+  }
+  body:has(> [data-print-deck]) > :not([data-print-deck]) {
+    display: none !important;
+  }
+  [data-print-deck] .slide-page {
+    page: deck;
+    break-after: page;
+    width: 13.333in;
+    height: 7.5in;
+    overflow: hidden;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

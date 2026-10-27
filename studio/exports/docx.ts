@@ -21,15 +21,9 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { gfmFromMarkdown } from "mdast-util-gfm";
 import { gfm } from "micromark-extension-gfm";
 import type { PassageRef } from "@/lib/chat/types";
+import { isRightToLeft } from "@/lib/text/direction";
 
-/** Mostly Arabic, Hebrew, Persian or Urdu letters: lay the document out right to left. */
-export function isRightToLeft(text: string): boolean {
-  const letters = text.match(/\p{L}/gu)?.length ?? 0;
-  const rtl =
-    text.match(/[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Syriac}\p{Script=Thaana}]/gu)
-      ?.length ?? 0;
-  return letters > 0 && rtl / letters > 0.3;
-}
+export { isRightToLeft };
 
 const MONO = "Consolas";
 const ORDERED = "better-vault-ordered";

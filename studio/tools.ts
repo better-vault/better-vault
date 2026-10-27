@@ -51,7 +51,7 @@ export const studioTools: Record<StudioToolId, StudioToolMeta> = {
     id: "slide-deck",
     icon: Presentation01Icon,
     tint: "text-chart-4",
-    available: false,
+    available: true,
   },
   infographic: { id: "infographic", icon: ChartBarBigIcon, tint: "text-chart-5", available: false },
 };

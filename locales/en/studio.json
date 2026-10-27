@@ -286,6 +286,39 @@
       "partsTab": "Parts"
     }
   },
+  "slide-deck": {
+    "format": "Format",
+    "formats": {
+      "detailed": {
+        "name": "Detailed deck",
+        "description": "Full sentences and the key facts, to read without a speaker."
+      },
+      "presenter": {
+        "name": "Presenter slides",
+        "description": "Short points on the slides, and what to say in the speaker notes."
+      }
+    },
+    "length": "Length",
+    "lengths": {
+      "short": "Short",
+      "default": "Default"
+    },
+    "focusLabel": "Describe the slide deck you want",
+    "focusPlaceholder": "For example: a 10-minute talk for first-year students on the main risks",
+    "viewer": {
+      "slides": "Slides",
+      "slide": "slide",
+      "slideLabel": "Slide {{current}} of {{total}}: {{title}}",
+      "previous": "Previous slide",
+      "next": "Next slide",
+      "keys": "← → to move · F to present · N for notes",
+      "notes": "Notes",
+      "noNotes": "No notes for this slide.",
+      "present": "Present",
+      "presenting": "Presenting",
+      "exit": "Leave the presentation"
+    }
+  },
   "viewer": {
     "back": "All outputs",
     "download": "Download",

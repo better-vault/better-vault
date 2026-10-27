@@ -13,6 +13,8 @@ import { QuizForm } from "./tools/quiz/dialog";
 import { QuizViewer } from "./tools/quiz/viewer";
 import { ReportForm } from "./tools/report/dialog";
 import { ReportViewer } from "./tools/report/viewer";
+import { SlideDeckForm } from "./tools/slide-deck/dialog";
+import { SlideDeckViewer } from "./tools/slide-deck/viewer";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ToolClient {
@@ -48,4 +50,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },
   "mind-map": { Form: MindMapForm, Viewer: MindMapViewer, wide: true, fill: true },
   anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, fill: true },
+  "slide-deck": { Form: SlideDeckForm, Viewer: SlideDeckViewer, wide: true, fill: true },
 };

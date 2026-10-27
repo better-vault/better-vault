@@ -5,6 +5,7 @@ import { generateFlashcards } from "@/studio/tools/flashcards/server";
 import { generateMindMap } from "@/studio/tools/mind-map/server";
 import { generateQuiz } from "@/studio/tools/quiz/server";
 import { generateReport } from "@/studio/tools/report/server";
+import { generateSlideDeck } from "@/studio/tools/slide-deck/server";
 import type { Generator } from "./shared";
 
 /** How each available tool is generated on the server. */
@@ -16,4 +17,5 @@ export const generators: Partial<Record<StudioToolId, Generator<any, any>>> = {
   "data-table": generateDataTable,
   "mind-map": generateMindMap,
   anatomy: generateAnatomy,
+  "slide-deck": generateSlideDeck,
 };

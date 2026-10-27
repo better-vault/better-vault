@@ -145,6 +145,19 @@ function numbersIn(inner: string): number[] {
   return out;
 }
 
+/** A text cut into plain runs and citations, to draw citations as marks. */
+export function splitCitations(text: string): Array<{ text: string } | { cite: number[] }> {
+  const out: Array<{ text: string } | { cite: number[] }> = [];
+  let last = 0;
+  for (const match of text.matchAll(CITATION)) {
+    if (match.index > last) out.push({ text: text.slice(last, match.index) });
+    out.push({ cite: numbersIn(match[1]) });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last) });
+  return out;
+}
+
 /** Every passage number cited in a text, in order of first use. */
 export function citedNumbers(text: string): number[] {
   const seen = new Set<number>();
