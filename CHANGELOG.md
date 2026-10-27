@@ -5,11 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-27
+
 ### Added
 
 - A website at better-vault.dev, its own project in `site/`: a landing page, and documentation built with Fumadocs (getting started, providers, privacy, self-hosting, every Studio tool, a comparison with NotebookLM, FAQ, roadmap and contributor guides), with search and "Copy Markdown" on every page.
 - Search engine and AI assistant support: page titles, descriptions and canonical links, social cards, structured data (JSON-LD), a sitemap, robots.txt, `llms.txt`, `llms-full.txt`, and Markdown versions of the docs for agents that ask for them.
 - A roadmap (ROADMAP.md and `/docs/roadmap`), including a desktop app.
+
+### Changed
+
+- The website deploys only when a maintainer starts the Deploy site workflow, not on every push.
 
 ## [0.2.0] - 2026-10-27
 
@@ -48,6 +54,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/better-vault/better-vault/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/better-vault/better-vault/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/better-vault/better-vault/releases/tag/v0.1.0

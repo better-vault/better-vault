@@ -36,7 +36,7 @@ body:
     attributes:
       label: better-vault version
       description: Shown in Settings → About, or the commit you are running.
-      placeholder: "0.2.0"
+      placeholder: "0.3.0"
     validations:
       required: true
   - type: dropdown
