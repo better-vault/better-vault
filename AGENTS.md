@@ -80,7 +80,7 @@ locales/<lng>/*.json      translations
 ## How to…
 
 - **Add a Studio tool:** create `studio/tools/<id>/` with `definition.ts` (id, icon, tint, option schema and defaults), `server.ts` (prompt and output schema), `dialog.tsx` (options form) and `viewer.tsx` (output view). Register it in the client and server registries and add its strings under `studio` in `locales/en/studio.json`.
-- **Add a local tool** (made in the browser, like the Whiteboard): give its `definition.ts` a `local: { blank }` and no `server.ts` or dialog; its viewer receives `onDataChange` to save edits. Register it in `studio/client.ts` and `studio/definitions.ts`; the Studio sheet creates it at once and opens it.
+- **Add a local tool** (made in the browser, like the Whiteboard): give its `definition.ts` a `local: { blank }` and no `server.ts` or dialog; its viewer receives `onDataChange` to save edits. Mark its client `immersive` to give the viewer the whole tab: the page drops its header and passes the title, downloads, rename and delete as `chrome` for the viewer to show. Register it in `studio/client.ts` and `studio/definitions.ts`; the Studio sheet creates it at once and opens it.
 - **Add a UI language:** copy `locales/en/` to `locales/<code>/`, import it in `lib/i18n/resources.ts`, add it to `lib/i18n/config.ts`, run `npm run i18n:check`.
 - **Add a provider:** add it to the catalog in `lib/ai/catalog.ts` and handle it in `lib/ai/providers.ts` (model factory, optional web-search tool, model listing).
 

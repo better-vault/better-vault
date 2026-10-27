@@ -2,10 +2,15 @@
 
 import {
   Delete02Icon,
+  Download04Icon,
+  EraserIcon,
   FitToScreenIcon,
+  GridIcon,
   KeyboardIcon,
   MinusSignIcon,
   MoreHorizontalIcon,
+  Loading03Icon,
+  PencilEdit01Icon,
   PlusSignIcon,
   Redo02Icon,
   SquareUnlock01Icon,
@@ -18,6 +23,8 @@ import { Button } from "@/components/panelui/button";
 import { ButtonGroup } from "@/components/panelui/button-group";
 import { Dialog } from "@/components/panelui/dialog";
 import { Menu } from "@/components/panelui/menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import type { OutputChrome } from "@/studio/shared/form";
 import { clearBoard, fitContent, resetZoom, unlockAll, zoomBy, type Size } from "./actions";
 import { BoardButton } from "./board-button";
 import { backgrounds, type Background } from "./schema";
@@ -90,7 +97,41 @@ export function ViewControls({ board, size }: { board: BoardModel; size: () => S
 }
 
 /** The board menu, bottom end: background, unlock, clear and the shortcuts. */
-export function BoardMenu({ board }: { board: BoardModel }) {
+/**
+ * The board's icon, top start: pointing at it (or tapping it) shows the
+ * board's name and when it was last edited.
+ */
+export function BoardInfo({ chrome }: { chrome: OutputChrome }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <HoverCard open={open} onOpenChange={setOpen}>
+      <HoverCardTrigger
+        delay={150}
+        closeDelay={100}
+        render={
+          <button
+            type="button"
+            aria-label={`${chrome.title} · ${chrome.meta}`}
+            onClick={() => setOpen(true)}
+            className="pointer-events-auto flex size-10 cursor-pointer items-center justify-center rounded-2xl border bg-background/95 shadow-sm backdrop-blur transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-[popup-open]:bg-muted"
+          />
+        }
+      >
+        <Icon icon={chrome.icon} size={18} className={chrome.tint} />
+      </HoverCardTrigger>
+      <HoverCardContent side="bottom" align="start" sideOffset={8} className="w-72 rounded-2xl p-3">
+        <p className="text-sm font-semibold break-words">{chrome.title}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{chrome.meta}</p>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
+/**
+ * The board menu, bottom end: downloads, background, rename, unlock, the
+ * shortcuts, clearing and deleting the board.
+ */
+export function BoardMenu({ board, chrome }: { board: BoardModel; chrome?: OutputChrome }) {
   const { t } = useTranslation("studio");
   const [shortcuts, setShortcuts] = useState(false);
   const locked = board.elements.some((element) => element.locked);
@@ -108,23 +149,53 @@ export function BoardMenu({ board }: { board: BoardModel }) {
             />
           }
         >
-          <Icon icon={MoreHorizontalIcon} size={18} />
+          <Icon
+            icon={chrome?.busy ? Loading03Icon : MoreHorizontalIcon}
+            size={18}
+            className={chrome?.busy ? "animate-spin" : undefined}
+          />
         </Menu.Trigger>
         <Menu.Content side="top" align="end" className="min-w-52">
-          <Menu.Group>
-            <Menu.GroupLabel>{t("whiteboard.background")}</Menu.GroupLabel>
-            <Menu.RadioGroup
-              value={board.background}
-              onValueChange={(value) => board.setBackground(value as Background)}
-            >
-              {backgrounds.map((background) => (
-                <Menu.RadioItem key={background} value={background}>
-                  {t(`whiteboard.backgrounds.${background}`)}
-                </Menu.RadioItem>
-              ))}
-            </Menu.RadioGroup>
-          </Menu.Group>
+          {chrome && chrome.downloads.length > 0 ? (
+            <Menu.Sub>
+              <Menu.SubTrigger disabled={chrome.busy}>
+                <Icon icon={Download04Icon} />
+                {t("whiteboard.actions.download")}
+              </Menu.SubTrigger>
+              <Menu.SubContent side="inline-start">
+                {chrome.downloads.map((download) => (
+                  <Menu.Item key={download.format} onClick={download.onSelect}>
+                    {download.label}
+                  </Menu.Item>
+                ))}
+              </Menu.SubContent>
+            </Menu.Sub>
+          ) : null}
+          <Menu.Sub>
+            <Menu.SubTrigger>
+              <Icon icon={GridIcon} />
+              {t("whiteboard.background")}
+            </Menu.SubTrigger>
+            <Menu.SubContent side="inline-start">
+              <Menu.RadioGroup
+                value={board.background}
+                onValueChange={(value) => board.setBackground(value as Background)}
+              >
+                {backgrounds.map((background) => (
+                  <Menu.RadioItem key={background} value={background}>
+                    {t(`whiteboard.backgrounds.${background}`)}
+                  </Menu.RadioItem>
+                ))}
+              </Menu.RadioGroup>
+            </Menu.SubContent>
+          </Menu.Sub>
           <Menu.Separator />
+          {chrome ? (
+            <Menu.Item onClick={chrome.onRename}>
+              <Icon icon={PencilEdit01Icon} />
+              {t("whiteboard.actions.rename")}
+            </Menu.Item>
+          ) : null}
           <Menu.Item disabled={!locked} onClick={() => unlockAll(board)}>
             <Icon icon={SquareUnlock01Icon} />
             {t("whiteboard.actions.unlockAll")}
@@ -134,14 +205,16 @@ export function BoardMenu({ board }: { board: BoardModel }) {
             {t("whiteboard.actions.shortcuts")}
           </Menu.Item>
           <Menu.Separator />
-          <Menu.Item
-            variant="destructive"
-            disabled={board.elements.length === 0}
-            onClick={() => clearBoard(board)}
-          >
-            <Icon icon={Delete02Icon} />
+          <Menu.Item disabled={board.elements.length === 0} onClick={() => clearBoard(board)}>
+            <Icon icon={EraserIcon} />
             {t("whiteboard.actions.clear")}
           </Menu.Item>
+          {chrome ? (
+            <Menu.Item variant="destructive" onClick={chrome.onDelete}>
+              <Icon icon={Delete02Icon} />
+              {t("whiteboard.actions.deleteBoard")}
+            </Menu.Item>
+          ) : null}
         </Menu.Content>
       </Menu>
       <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />

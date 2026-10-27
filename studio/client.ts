@@ -32,6 +32,11 @@ export interface ToolClient {
   wide?: boolean;
   /** Viewers that fill the height of the Studio tab. */
   fill?: boolean;
+  /**
+   * Viewers that fill the whole tab and show the title, downloads and other
+   * actions themselves (from `chrome`): the page has no header or back button.
+   */
+  immersive?: boolean;
   /** Viewers that use a wider page, e.g. a document with its table of contents. */
   wideViewer?: boolean;
 }
@@ -61,5 +66,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
     fill: true,
     canCreate: (options: { imageModel: unknown }) => options.imageModel !== null,
   },
-  whiteboard: { Viewer: WhiteboardViewer, fill: true, bleed: true },
+  whiteboard: { Viewer: WhiteboardViewer, fill: true, bleed: true, immersive: true },
 };

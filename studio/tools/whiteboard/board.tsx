@@ -22,7 +22,8 @@ import {
   type Size,
 } from "./actions";
 import { BoardCanvas } from "./board-canvas";
-import { BoardMenu, ViewControls } from "./controls";
+import type { OutputChrome } from "@/studio/shared/form";
+import { BoardInfo, BoardMenu, ViewControls } from "./controls";
 import type { Point } from "./geometry";
 import { placedSize, prepareImage } from "./images";
 import { PropertiesPanel } from "./properties-panel";
@@ -48,9 +49,12 @@ const TYPING =
 export function Board({
   initial,
   onSave,
+  chrome,
 }: {
   initial: BoardData;
   onSave: (data: BoardData) => void;
+  /** The board's name and actions, shown on the board. */
+  chrome?: OutputChrome;
 }) {
   const { t } = useTranslation("studio");
   const board = useBoard(initial);
@@ -406,7 +410,13 @@ export function Board({
         <Toolbar board={board} onChoose={chooseTool} />
       </div>
 
-      <div className="pointer-events-none absolute start-3 top-18 bottom-18 flex flex-col items-start max-sm:top-3 max-sm:bottom-32">
+      {chrome ? (
+        <div className="pointer-events-none absolute start-3 top-3">
+          <BoardInfo chrome={chrome} />
+        </div>
+      ) : null}
+
+      <div className="pointer-events-none absolute start-3 top-18 bottom-18 flex flex-col items-start max-sm:bottom-32">
         <PropertiesPanel board={board} />
       </div>
 
@@ -414,7 +424,7 @@ export function Board({
         <ViewControls board={board} size={size} />
       </div>
       <div className="pointer-events-none absolute end-3 bottom-3">
-        <BoardMenu board={board} />
+        <BoardMenu board={board} chrome={chrome} />
       </div>
 
       <input

@@ -21,7 +21,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- Whiteboard in the Studio: an Excalidraw-like board with its tools and shortcuts (shapes, arrows, lines, pen, text, pictures, eraser), a style panel, layers, groups, locking, undo, copy and paste, and zoom. Boards save as you draw and download as PNG, SVG or JSON. **Annotate** opens a mind map, Anatomy figure or infographic on a new board to draw over it.
+- Whiteboard in the Studio: an Excalidraw-like board with its tools and shortcuts (shapes, arrows, lines, pen, text, pictures, eraser), a style panel, layers, groups, locking, undo, copy and paste, and zoom. Boards fill the Studio tab: the name and last edit show on the board's icon, and downloads, rename and delete are in its menu. They save as you draw and download as PNG, SVG or JSON. **Annotate** opens a mind map, Anatomy figure or infographic on a new board to draw over it.
 - Infographics in the Studio, drawn by your provider's image model (OpenAI GPT Image or Google Gemini) from a brief written from your sources, with its citations beside the picture. Choose the orientation, style, detail and image model.
 - Slide decks in the Studio: detailed or presenter decks with speaker notes, a slide rail, full-screen presenting, and downloads as PowerPoint (editable) or PDF.
 - Several chats per notebook: History lists them by day, with New chat, rename and delete. Existing chats become each notebook's first conversation.

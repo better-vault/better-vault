@@ -538,7 +538,10 @@
       "copy": "Copy",
       "paste": "Paste",
       "history": "History",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "download": "Download",
+      "rename": "Rename",
+      "deleteBoard": "Delete whiteboard"
     },
     "background": "Background",
     "backgrounds": {

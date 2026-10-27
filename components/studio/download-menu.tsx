@@ -1,15 +1,12 @@
 "use client";
 
 import { ArrowDown01Icon, Download04Icon, Loading03Icon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { Icon } from "@/components/icon";
 import { buttonVariants } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
-import { downloadBlob } from "@/lib/download";
-import { fileNameFor } from "@/lib/format";
-import { isFileExport, type ExportOption } from "@/studio/types";
+import type { ExportOption } from "@/studio/types";
+import { useExporter } from "./use-exporter";
 
 /** "Download" with the formats an output can be saved as. */
 export function DownloadMenu<Data>({
@@ -22,29 +19,7 @@ export function DownloadMenu<Data>({
   options: readonly ExportOption<Data>[];
 }) {
   const { t } = useTranslation("studio");
-  const [busy, setBusy] = useState(false);
-
-  async function save(option: ExportOption<Data>) {
-    if (!isFileExport(option)) {
-      option.print(title);
-      return;
-    }
-    setBusy(true);
-    try {
-      const blob = await option.build(title, data, {
-        question: t("export.question"),
-        answer: t("export.answer"),
-        answerKey: t("export.answerKey"),
-        sources: t("export.sources"),
-      });
-      downloadBlob(blob, fileNameFor(title, option.extension?.(data) ?? option.format));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
+  const { busy, save } = useExporter();
   return (
     <Menu>
       <Menu.Trigger
@@ -63,7 +38,7 @@ export function DownloadMenu<Data>({
         <Menu.Group>
           <Menu.GroupLabel>{t("viewer.downloadAs")}</Menu.GroupLabel>
           {options.map((option) => (
-            <Menu.Item key={option.format} onClick={() => void save(option)}>
+            <Menu.Item key={option.format} onClick={() => void save(title, data, option)}>
               {t(`viewer.formats.${option.format}`)}
             </Menu.Item>
           ))}

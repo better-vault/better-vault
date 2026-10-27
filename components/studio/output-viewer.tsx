@@ -25,8 +25,10 @@ import { toolClients } from "@/studio/client";
 import { toolDefinitions } from "@/studio/definitions";
 import { isStudioToolId, studioTools } from "@/studio/tools";
 import { isFileExport } from "@/studio/types";
+import type { OutputChrome } from "@/studio/shared/form";
 import { DownloadMenu } from "./download-menu";
 import { useStudioRunner } from "./studio-runner";
+import { useExporter } from "./use-exporter";
 
 /** One Studio output, full size in the Studio tab. */
 export function OutputViewer({ id }: { id: string }) {
@@ -43,6 +45,7 @@ export function OutputViewer({ id }: { id: string }) {
     [id],
   );
   const [annotating, setAnnotating] = useState(false);
+  const exporter = useExporter();
   const gone = output === null || (output !== undefined && !isStudioToolId(output.toolId));
 
   // A deleted output, here or in another tab, goes back to the list.
@@ -97,6 +100,37 @@ export function OutputViewer({ id }: { id: string }) {
         }
       : undefined;
 
+  const meta = output.model
+    ? t("viewer.meta", {
+        sources: tCommon("sourceCount", { count: output.sourceIds.length }),
+        model: output.model.modelId,
+        time: formatRelativeTime(output.createdAt, i18n.language),
+      })
+    : t("viewer.metaLocal", { time: formatRelativeTime(output.updatedAt, i18n.language) });
+  // Shown only when the viewer is: a board that can't be read keeps the header, to delete it.
+  const immersive = client?.immersive === true && parsed?.success === true;
+
+  // An immersive viewer shows the title and actions itself.
+  const chrome: OutputChrome | undefined = immersive
+    ? {
+        icon: tool.icon,
+        tint: tool.tint,
+        title: output.title,
+        meta,
+        busy: exporter.busy,
+        downloads:
+          parsed?.success && definition?.exports
+            ? definition.exports.map((option) => ({
+                format: option.format,
+                label: t(`viewer.formats.${option.format}`),
+                onSelect: () => void exporter.save(output.title, parsed.data, option),
+              }))
+            : [],
+        onRename: () => requestOutputAction({ kind: "rename", output }),
+        onDelete: () => requestOutputAction({ kind: "delete", output }),
+      }
+    : undefined;
+
   return (
     <ScrollArea className="h-full" viewportRef={scrollRef}>
       <div
@@ -117,65 +151,57 @@ export function OutputViewer({ id }: { id: string }) {
                   : "max-w-4xl",
           )}
         >
-          <header className="flex flex-wrap items-center gap-3 pb-5">
-            <Button variant="ghost" size="sm" className="-ms-2" onClick={closeOutput}>
-              <Icon icon={ArrowLeft01Icon} size={16} className="rtl:rotate-180" />
-              {t("viewer.back")}
-            </Button>
-            <div className="flex min-w-0 basis-full items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
-                <Icon icon={tool.icon} size={20} className={tool.tint} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h2 className="truncate text-xl font-semibold tracking-tight">{output.title}</h2>
-                <p className="truncate text-xs text-muted-foreground">
-                  {output.model
-                    ? t("viewer.meta", {
-                        sources: tCommon("sourceCount", { count: output.sourceIds.length }),
-                        model: output.model.modelId,
-                        time: formatRelativeTime(output.createdAt, i18n.language),
-                      })
-                    : t("viewer.metaLocal", {
-                        time: formatRelativeTime(output.updatedAt, i18n.language),
-                      })}
-                </p>
-              </div>
-              {parsed?.success && definition?.exports?.length ? (
-                <DownloadMenu
-                  title={output.title}
-                  data={parsed.data}
-                  options={definition.exports}
-                />
-              ) : null}
-              <Menu>
-                <Menu.Trigger
-                  aria-label={t("viewer.actions")}
-                  className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <Icon icon={MoreVerticalIcon} size={16} />
-                </Menu.Trigger>
-                <Menu.Content align="end">
-                  {annotate ? (
-                    <Menu.Item disabled={annotating} onClick={() => void annotate()}>
-                      <Icon icon={WhiteboardIcon} />
-                      {t("viewer.annotate")}
-                    </Menu.Item>
-                  ) : null}
-                  <Menu.Item onClick={() => requestOutputAction({ kind: "rename", output })}>
-                    <Icon icon={PencilEdit01Icon} />
-                    {tCommon("actions.rename")}
-                  </Menu.Item>
-                  <Menu.Item
-                    variant="destructive"
-                    onClick={() => requestOutputAction({ kind: "delete", output })}
+          {immersive ? null : (
+            <header className="flex flex-wrap items-center gap-3 pb-5">
+              <Button variant="ghost" size="sm" className="-ms-2" onClick={closeOutput}>
+                <Icon icon={ArrowLeft01Icon} size={16} className="rtl:rotate-180" />
+                {t("viewer.back")}
+              </Button>
+              <div className="flex min-w-0 basis-full items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
+                  <Icon icon={tool.icon} size={20} className={tool.tint} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate text-xl font-semibold tracking-tight">{output.title}</h2>
+                  <p className="truncate text-xs text-muted-foreground">{meta}</p>
+                </div>
+                {parsed?.success && definition?.exports?.length ? (
+                  <DownloadMenu
+                    title={output.title}
+                    data={parsed.data}
+                    options={definition.exports}
+                  />
+                ) : null}
+                <Menu>
+                  <Menu.Trigger
+                    aria-label={t("viewer.actions")}
+                    className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <Icon icon={Delete02Icon} />
-                    {tCommon("actions.delete")}
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu>
-            </div>
-          </header>
+                    <Icon icon={MoreVerticalIcon} size={16} />
+                  </Menu.Trigger>
+                  <Menu.Content align="end">
+                    {annotate ? (
+                      <Menu.Item disabled={annotating} onClick={() => void annotate()}>
+                        <Icon icon={WhiteboardIcon} />
+                        {t("viewer.annotate")}
+                      </Menu.Item>
+                    ) : null}
+                    <Menu.Item onClick={() => requestOutputAction({ kind: "rename", output })}>
+                      <Icon icon={PencilEdit01Icon} />
+                      {tCommon("actions.rename")}
+                    </Menu.Item>
+                    <Menu.Item
+                      variant="destructive"
+                      onClick={() => requestOutputAction({ kind: "delete", output })}
+                    >
+                      <Icon icon={Delete02Icon} />
+                      {tCommon("actions.delete")}
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu>
+              </div>
+            </header>
+          )}
 
           {output.status === "generating" ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20 text-center">
@@ -202,6 +228,7 @@ export function OutputViewer({ id }: { id: string }) {
               outputId={output.id}
               onDataChange={saveData}
               onAnnotate={annotate ? () => void annotate() : undefined}
+              chrome={chrome}
               title={output.title}
               data={parsed.data}
               scrollRef={scrollRef}
