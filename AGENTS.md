@@ -26,6 +26,7 @@ better-vault is an open-source, bring-your-own-model alternative to Google's Not
 ## Interface
 
 - **Top left:** Panel's `ButtonGroup` (small buttons): **Settings** (opens the Settings sheet, whose rows open nested sheets with `Sheet.Next`) and **Create** (opens the **Studio sheet**: tools grid and outputs list) share a track; on the Chat tab, the white **History** button follows in a track of its own and opens the History sheet (the notebook's chats).
+- **Top centre:** the notebook's name, opening a menu to switch, create, rename or delete notebooks.
 - **Top right:** tabs switch the main view: **Chat · Sources · Studio**.
 - **Bottom centre, in the Chat tab only:** the **prompt bar** (Panel `Prompt`) with the model picker and the Sources/Web switch. It does not appear over the Sources or Studio views.
 - Choosing a tool closes the Studio sheet and opens the tool's Panel `Dialog`. Choosing an output closes the sheet, switches to the Studio tab and shows its viewer.

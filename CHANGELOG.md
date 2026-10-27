@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Citations are small numbered marks with a preview of the passage, answers list their references as footnotes, and reports have a new contents panel with reading progress. These replace the Rare UI components, which are no longer used.
 
-- The top left is Panel's button group: Settings and Create (formerly Add), with History on the Chat tab.
+- The top left is Panel's button group: Settings and Create (formerly Add), with History on the Chat tab. The notebook's name moves to the top centre.
 - About no longer lists the libraries better-vault is built with; they are credited in the README.
 
 ### Fixed

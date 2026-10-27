@@ -21,8 +21,8 @@ import { useWorkspace } from "./workspace-context";
 
 /**
  * Top left: Settings and Create (which opens the Studio sheet), and on the
- * Chat tab, History; then the notebook's name. Top right: the tabs that
- * switch the main view.
+ * Chat tab, History. Top centre: the notebook's name. Top right: the tabs
+ * that switch the main view.
  */
 export function TopBar() {
   const { t } = useTranslation("workspace");
@@ -34,8 +34,10 @@ export function TopBar() {
   const selected = sources?.filter((source) => source.selected).length ?? 0;
 
   return (
-    <header className="flex items-center gap-3 px-3 pt-3 pb-2 sm:px-4">
-      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+    // Three columns: the sides share what is left equally, so the name sits in
+    // the middle; on a narrow screen it gives way first and is shortened.
+    <header className="grid grid-cols-[1fr_minmax(0,auto)_1fr] items-center gap-3 px-3 pt-3 pb-2 sm:px-4">
+      <div className="flex items-center justify-self-start">
         {/* Panel's ButtonGroup: Settings and Create share a track; on the Chat
             tab, History follows, split off and filled. */}
         <ButtonGroup aria-label={t("toolbar")}>
@@ -75,9 +77,11 @@ export function TopBar() {
             </ButtonGroup>
           ) : null}
         </ButtonGroup>
+      </div>
+      <div className="flex max-w-[min(24rem,50vw)] min-w-0 justify-center">
         <NotebookMenu />
       </div>
-      <Tabs.List aria-label={t("tabs.label")} className="shrink-0">
+      <Tabs.List aria-label={t("tabs.label")} className="justify-self-end">
         <Tabs.Trigger value="chat">
           <Icon icon={BubbleChatIcon} size={16} />
           <span className="max-sm:sr-only">{t("tabs.chat")}</span>

@@ -31,12 +31,12 @@ export function NotebookMenu() {
       <Menu>
         <Menu.Trigger
           aria-label={t("notebookMenu")}
-          className="ms-1 flex min-w-0 cursor-pointer items-center gap-1 rounded-lg px-2 py-1.5 text-start outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex max-w-full min-w-0 cursor-pointer items-center gap-1 rounded-lg px-2 py-1.5 text-start outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="truncate text-[0.9375rem] font-semibold">{notebook.title}</span>
           <Icon icon={ArrowDown01Icon} size={16} className="shrink-0 text-muted-foreground" />
         </Menu.Trigger>
-        <Menu.Content align="start">
+        <Menu.Content align="center">
           <Menu.Item onClick={() => router.push("/")}>
             <Icon icon={GridViewIcon} />
             {t("allNotebooks")}
