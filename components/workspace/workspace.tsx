@@ -19,6 +19,7 @@ import { SourcesView } from "./sources-view";
 import { StudioView } from "./studio-view";
 import { TopBar } from "./top-bar";
 import { WorkspaceProvider, useWorkspace, type WorkspaceTab } from "./workspace-context";
+import { routes } from "@/lib/routes";
 
 /** The notebook screen. */
 export function Workspace({ notebookId }: { notebookId: string }) {
@@ -94,7 +95,7 @@ function NotebookNotFound() {
       <div className="max-w-sm text-center">
         <h1 className="text-xl font-semibold">{t("notFound.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("notFound.body")}</p>
-        <Link href="/" className={buttonVariants({ className: "mt-6" })}>
+        <Link href={routes.home} className={buttonVariants({ className: "mt-6" })}>
           {t("notFound.action")}
         </Link>
       </div>

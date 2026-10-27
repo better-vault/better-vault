@@ -28,6 +28,7 @@ import { DataPanel } from "./data-panel";
 import { LanguagePanel } from "./language-panel";
 import { ProvidersPanel } from "./providers-panel";
 import { SettingsRow } from "./settings-row";
+import { routes } from "@/lib/routes";
 
 interface SettingsSheetProps {
   open?: boolean;
@@ -132,7 +133,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
         onConfirm={async () => {
           await deleteAllData();
           toast.success(t("data.deleted"));
-          router.push("/");
+          router.push(routes.home);
         }}
       />
     </>

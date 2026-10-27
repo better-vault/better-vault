@@ -27,6 +27,7 @@ import {
   useNotebooks,
 } from "@/lib/db/notebooks";
 import { formatRelativeTime } from "@/lib/format";
+import { routes } from "@/lib/routes";
 
 /** The list of notebooks. */
 export function NotebookHome() {
@@ -42,7 +43,7 @@ export function NotebookHome() {
 
   async function create() {
     const id = await createNotebook(t("untitled"));
-    router.push(`/notebook/${id}`);
+    router.push(routes.notebook(id));
   }
 
   return (
@@ -103,7 +104,7 @@ function NotebookCard({ notebook, sources }: { notebook: Notebook; sources: numb
   return (
     <div className="group relative flex h-40 flex-col rounded-3xl bg-card p-5 text-card-foreground ring-1 ring-border transition-shadow hover:shadow-md">
       <Link
-        href={`/notebook/${notebook.id}`}
+        href={routes.notebook(notebook.id)}
         className="absolute inset-0 rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={notebook.title}
       />

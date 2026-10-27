@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Workspace } from "@/components/workspace/workspace";
 
-export default function NotebookPage({ params }: PageProps<"/notebook/[id]">) {
+export default function NotebookPage({ params }: PageProps<"/app/notebook/[id]">) {
   return (
     // With Cache Components, route params are request-time data and are read
     // inside a Suspense boundary.
@@ -11,7 +11,7 @@ export default function NotebookPage({ params }: PageProps<"/notebook/[id]">) {
   );
 }
 
-async function NotebookFromParams({ params }: Pick<PageProps<"/notebook/[id]">, "params">) {
+async function NotebookFromParams({ params }: Pick<PageProps<"/app/notebook/[id]">, "params">) {
   const { id } = await params;
   return <Workspace notebookId={id} />;
 }

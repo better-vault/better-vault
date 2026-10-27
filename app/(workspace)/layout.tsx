@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { themeScript } from "@/lib/theme/script";
-import "./globals.css";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   description:
     "An open-source, bring-your-own-model alternative to NotebookLM: chat with your sources and turn them into reports, flashcards, quizzes, tables and diagrams.",
   applicationName: "better-vault",
+  // The app holds nothing to index: notebooks live in each visitor's browser.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

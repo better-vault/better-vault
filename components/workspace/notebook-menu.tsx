@@ -16,6 +16,7 @@ import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
 import { createNotebook, deleteNotebook, renameNotebook } from "@/lib/db/notebooks";
 import { useWorkspace } from "./workspace-context";
+import { routes } from "@/lib/routes";
 
 /** The notebook's name, opening a menu to switch, rename or delete it. */
 export function NotebookMenu() {
@@ -37,14 +38,14 @@ export function NotebookMenu() {
           <Icon icon={ArrowDown01Icon} size={16} className="shrink-0 text-muted-foreground" />
         </Menu.Trigger>
         <Menu.Content align="center">
-          <Menu.Item onClick={() => router.push("/")}>
+          <Menu.Item onClick={() => router.push(routes.home)}>
             <Icon icon={GridViewIcon} />
             {t("allNotebooks")}
           </Menu.Item>
           <Menu.Item
             onClick={async () => {
               const id = await createNotebook(tHome("untitled"));
-              router.push(`/notebook/${id}`);
+              router.push(routes.notebook(id));
             }}
           >
             <Icon icon={NoteAddIcon} />
@@ -76,7 +77,7 @@ export function NotebookMenu() {
         body={t("delete.body")}
         confirmLabel={t("delete.confirm")}
         onConfirm={async () => {
-          router.push("/");
+          router.push(routes.home);
           await deleteNotebook(notebook.id);
         }}
       />
