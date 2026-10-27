@@ -5,10 +5,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
+### Added
+
+- Slide decks in the Studio: detailed or presenter decks with speaker notes, a slide rail, full-screen presenting, and downloads as PowerPoint (editable) or PDF.
+- Infographics in the Studio, drawn by your provider's image model (OpenAI GPT Image or Google Gemini) from a brief written from your sources, with its citations beside the picture. Choose the orientation, style, detail and image model.
+- Anatomy in the Studio: the model designs a real object whose working explains your sources and builds it part by part, drawn in isometric with Anatomy's kit. Point at a part to read what it does, step through how it works, take it apart, and download it as PNG or SVG.
+- Whiteboard in the Studio: an Excalidraw-like board with its tools and shortcuts (shapes, arrows, lines, pen, text, pictures, eraser), a style panel, layers, groups, locking, undo, copy and paste, and zoom. Boards fill the Studio tab: the name and last edit show on the board's icon, and downloads, rename and delete are in its menu. They save as you draw and download as PNG, SVG or JSON. **Annotate** opens a mind map, Anatomy figure or infographic on a new board to draw over it.
+- Several chats per notebook: History lists them by day, with New chat, rename and delete. Existing chats become each notebook's first conversation.
+
 ### Changed
 
 - Citations are small numbered marks with a preview of the passage, answers list their references as footnotes, and reports have a new contents panel with reading progress. These replace the Rare UI components, which are no longer used.
-
 - The top left is Panel's button group: Settings and Create (formerly Add), with History on the Chat tab. The notebook's name moves to the top centre.
 - About no longer lists the libraries better-vault is built with; they are credited in the README.
 
@@ -17,16 +26,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The contents of a long report can be scrolled to the end.
 - PDF text no longer shows boxes for characters the file gives no text for; sources added earlier are cleaned too.
 - Mind maps show their tree and diagram again.
-- Presenting a slide deck no longer stops at the first slide change; ← → and the new on-screen arrows move between slides.
-
-### Added
-
-- Whiteboard in the Studio: an Excalidraw-like board with its tools and shortcuts (shapes, arrows, lines, pen, text, pictures, eraser), a style panel, layers, groups, locking, undo, copy and paste, and zoom. Boards fill the Studio tab: the name and last edit show on the board's icon, and downloads, rename and delete are in its menu. They save as you draw and download as PNG, SVG or JSON. **Annotate** opens a mind map, Anatomy figure or infographic on a new board to draw over it.
-- Infographics in the Studio, drawn by your provider's image model (OpenAI GPT Image or Google Gemini) from a brief written from your sources, with its citations beside the picture. Choose the orientation, style, detail and image model.
-- Slide decks in the Studio: detailed or presenter decks with speaker notes, a slide rail, full-screen presenting, and downloads as PowerPoint (editable) or PDF.
-- Several chats per notebook: History lists them by day, with New chat, rename and delete. Existing chats become each notebook's first conversation.
-
-- Anatomy in the Studio: the model designs a real object whose working explains your sources and builds it part by part, drawn in isometric with Anatomy's kit. Point at a part to read what it does, step through how it works, take it apart, and download it as PNG or SVG.
 
 ## [0.1.0] - 2026-10-24
 
@@ -43,5 +42,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/better-vault/better-vault/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/better-vault/better-vault/releases/tag/v0.1.0
