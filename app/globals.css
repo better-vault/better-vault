@@ -4,6 +4,9 @@
 
 @import "./tokens.css";
 
+/* The website in site/ is a separate project with its own styles. */
+@source not "../site";
+
 @custom-variant dark (&:is(.dark *));
 
 /* Pele (Mermaid → SVG) draws with these variables; map them onto Panel tokens. */

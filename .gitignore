@@ -46,5 +46,8 @@ next-env.d.ts
 # claude code local settings
 .claude/settings.local.json
 
-# fumadocs-mdx output
-/.source
+# the website (site/) is its own project
+/site/node_modules
+/site/.next/
+/site/.source
+/site/next-env.d.ts

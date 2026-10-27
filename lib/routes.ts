@@ -1,8 +1,5 @@
-/**
- * Paths of the notebook app. The app lives under /app; the site (landing
- * page and docs) owns the root of the domain.
- */
+/** Paths of the notebook app. */
 export const routes = {
-  home: "/app",
-  notebook: (id: string) => `/app/notebook/${id}`,
+  home: "/",
+  notebook: (id: string) => `/notebook/${id}`,
 } as const;
