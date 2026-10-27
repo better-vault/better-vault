@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Canvas } from "@/components/panelui/canvas";
-import { usePanZoom } from "./pan-zoom";
+import { usePanZoom } from "@/studio/shared/pan-zoom";
 import { renderDiagram } from "./render";
 
 /** A Mermaid diagram drawn by Pele, on a dotted canvas you can drag and zoom. */

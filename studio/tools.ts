@@ -53,7 +53,7 @@ export const studioTools: Record<StudioToolId, StudioToolMeta> = {
     tint: "text-chart-4",
     available: true,
   },
-  infographic: { id: "infographic", icon: ChartBarBigIcon, tint: "text-chart-5", available: false },
+  infographic: { id: "infographic", icon: ChartBarBigIcon, tint: "text-chart-5", available: true },
 };
 
 export function isStudioToolId(value: unknown): value is StudioToolId {

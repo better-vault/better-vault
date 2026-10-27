@@ -2,6 +2,7 @@ import type { StudioToolId } from "@/studio/tools";
 import { generateAnatomy } from "@/studio/tools/anatomy/server";
 import { generateDataTable } from "@/studio/tools/data-table/server";
 import { generateFlashcards } from "@/studio/tools/flashcards/server";
+import { generateInfographic } from "@/studio/tools/infographic/server";
 import { generateMindMap } from "@/studio/tools/mind-map/server";
 import { generateQuiz } from "@/studio/tools/quiz/server";
 import { generateReport } from "@/studio/tools/report/server";
@@ -18,4 +19,5 @@ export const generators: Partial<Record<StudioToolId, Generator<any, any>>> = {
   "mind-map": generateMindMap,
   anatomy: generateAnatomy,
   "slide-deck": generateSlideDeck,
+  infographic: generateInfographic,
 };

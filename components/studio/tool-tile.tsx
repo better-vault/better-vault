@@ -1,11 +1,12 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { Key01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/icon";
 import { cn } from "@/lib/utils";
 import type { StudioToolMeta } from "@/studio/tools";
 
-/** One Studio tool in the sheet's grid: a tinted icon and its name, and a note such as "Needs a key". */
+/** One Studio tool in the sheet's grid: a tinted icon and its name, and a key mark when it needs one. */
 export function ToolTile({
   tool,
   onSelect,
@@ -37,8 +38,12 @@ export function ToolTile({
         {t(`tools.${tool.id}.name`)}
       </span>
       {badge ? (
-        <span className="shrink-0 rounded-full bg-background px-1.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
-          {badge}
+        <span
+          title={badge}
+          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground"
+        >
+          <Icon icon={Key01Icon} size={13} />
+          <span className="sr-only">{badge}</span>
         </span>
       ) : !tool.available ? (
         <span className="shrink-0 rounded-full bg-background px-1.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">

@@ -2,6 +2,7 @@ import type { StudioToolId } from "./tools";
 import { anatomyTool } from "./tools/anatomy/definition";
 import { dataTableTool } from "./tools/data-table/definition";
 import { flashcardsTool } from "./tools/flashcards/definition";
+import { infographicTool } from "./tools/infographic/definition";
 import { mindMapTool } from "./tools/mind-map/definition";
 import { quizTool } from "./tools/quiz/definition";
 import { reportTool } from "./tools/report/definition";
@@ -17,4 +18,5 @@ export const toolDefinitions: Partial<Record<StudioToolId, AnyToolDefinition>> =
   "mind-map": mindMapTool,
   anatomy: anatomyTool,
   "slide-deck": slideDeckTool,
+  infographic: infographicTool,
 };

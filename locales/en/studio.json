@@ -319,6 +319,68 @@
       "exit": "Leave the presentation"
     }
   },
+  "infographic": {
+    "orientation": "Orientation",
+    "orientations": {
+      "landscape": "Landscape",
+      "portrait": "Portrait",
+      "square": "Square"
+    },
+    "detail": "Level of detail",
+    "details": {
+      "concise": "Concise",
+      "standard": "Standard",
+      "detailed": "Detailed"
+    },
+    "style": "Visual style",
+    "styles": {
+      "auto": {
+        "name": "Auto",
+        "description": "Whatever suits the subject"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Clean, corporate, restrained"
+      },
+      "editorial": {
+        "name": "Editorial",
+        "description": "Bold type, like a magazine"
+      },
+      "sketch-note": {
+        "name": "Sketch note",
+        "description": "Hand drawn, with doodles"
+      },
+      "playful": {
+        "name": "Playful",
+        "description": "Bright and friendly"
+      },
+      "scientific": {
+        "name": "Scientific",
+        "description": "Precise, like a poster"
+      },
+      "minimal": {
+        "name": "Minimal",
+        "description": "Few colours, lots of space"
+      }
+    },
+    "imageModel": "Image model",
+    "who": "{{chat}} writes the brief from your sources; {{image}} draws the picture. Pictures use your provider's image credits.",
+    "focusLabel": "What should it show?",
+    "focusPlaceholder": "For example: the five risk domains and what each one threatens",
+    "noKey": {
+      "title": "Infographics need an image model",
+      "body": "They are drawn by OpenAI (GPT Image) or Google (Gemini image) models. Add either key in Settings; your chat model can stay as it is.",
+      "action": "Open Settings"
+    },
+    "viewer": {
+      "brief": "Brief",
+      "details": "Details",
+      "spelling": "Image models can misspell words. The brief below is the reliable text, with its sources.",
+      "model": "Image model",
+      "size": "Size",
+      "prompt": "Prompt"
+    }
+  },
   "viewer": {
     "back": "All outputs",
     "download": "Download",
@@ -340,7 +402,8 @@
       "json": "Board file (.json)",
       "image": "Original image"
     },
-    "metaLocal": "Edited {{time}}"
+    "metaLocal": "Edited {{time}}",
+    "annotate": "Annotate"
   },
   "export": {
     "question": "Question",

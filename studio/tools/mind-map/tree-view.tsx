@@ -18,7 +18,7 @@ import { Canvas } from "@/components/panelui/canvas";
 import { useWorkspace } from "@/components/workspace/workspace-context";
 import { cn } from "@/lib/utils";
 import { useTextMeasurer } from "./measure";
-import { usePanZoom } from "./pan-zoom";
+import { usePanZoom } from "@/studio/shared/pan-zoom";
 import { branchIds, layoutTree, NODE_HEIGHT, pathTo, TOGGLE, type MindNode } from "./tree";
 
 /** Each depth in its own colour from Panel's chart ramp, as NotebookLM tints its levels. */

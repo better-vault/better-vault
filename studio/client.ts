@@ -7,6 +7,8 @@ import { DataTableForm } from "./tools/data-table/dialog";
 import { DataTableViewer } from "./tools/data-table/viewer";
 import { FlashcardsForm } from "./tools/flashcards/dialog";
 import { FlashcardsViewer } from "./tools/flashcards/viewer";
+import { InfographicForm } from "./tools/infographic/dialog";
+import { InfographicViewer } from "./tools/infographic/viewer";
 import { MindMapForm } from "./tools/mind-map/dialog";
 import { MindMapViewer } from "./tools/mind-map/viewer";
 import { QuizForm } from "./tools/quiz/dialog";
@@ -51,4 +53,11 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
   "mind-map": { Form: MindMapForm, Viewer: MindMapViewer, wide: true, fill: true },
   anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, fill: true },
   "slide-deck": { Form: SlideDeckForm, Viewer: SlideDeckViewer, wide: true, fill: true },
+  infographic: {
+    Form: InfographicForm,
+    Viewer: InfographicViewer,
+    wide: true,
+    fill: true,
+    canCreate: (options: { imageModel: unknown }) => options.imageModel !== null,
+  },
 };
