@@ -8,9 +8,11 @@ import {
   MoreVerticalIcon,
   PencilEdit01Icon,
   RepeatIcon,
+  WhiteboardIcon,
 } from "@hugeicons/core-free-icons";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
@@ -22,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { toolClients } from "@/studio/client";
 import { toolDefinitions } from "@/studio/definitions";
 import { isStudioToolId, studioTools } from "@/studio/tools";
+import { isFileExport } from "@/studio/types";
 import { DownloadMenu } from "./download-menu";
 import { useStudioRunner } from "./studio-runner";
 
@@ -29,7 +32,7 @@ import { useStudioRunner } from "./studio-runner";
 export function OutputViewer({ id }: { id: string }) {
   const { t, i18n } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
-  const { closeOutput, readSource, requestOutputAction } = useWorkspace();
+  const { closeOutput, openOutput, readSource, requestOutputAction } = useWorkspace();
   const runner = useStudioRunner();
   const output = useOutput(id);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -39,6 +42,7 @@ export function OutputViewer({ id }: { id: string }) {
     },
     [id],
   );
+  const [annotating, setAnnotating] = useState(false);
   const gone = output === null || (output !== undefined && !isStudioToolId(output.toolId));
 
   // A deleted output, here or in another tab, goes back to the list.
@@ -53,6 +57,45 @@ export function OutputViewer({ id }: { id: string }) {
   const definition = toolDefinitions[output.toolId];
   const parsed = output.status === "ready" ? definition?.data.safeParse(output.data) : undefined;
   const local = definition?.local !== undefined;
+  const png = local
+    ? undefined
+    : definition?.exports?.filter(isFileExport).find((option) => option.format === "png");
+
+  // Annotate: the output's picture, locked on a new whiteboard, to draw over it.
+  const annotate =
+    png && parsed?.success
+      ? async () => {
+          if (annotating) return;
+          setAnnotating(true);
+          const toastId = toast.loading(t("whiteboard.annotating"));
+          try {
+            const [{ prepareImage, boardFromImage }, blob] = await Promise.all([
+              import("@/studio/tools/whiteboard/images"),
+              png.build(output.title, parsed.data, {
+                question: t("export.question"),
+                answer: t("export.answer"),
+                answerKey: t("export.answerKey"),
+                sources: t("export.sources"),
+              }),
+            ]);
+            const data = boardFromImage(await prepareImage(blob), {
+              outputId: output.id,
+              toolId: output.toolId,
+            });
+            const id = await runner.createLocal("whiteboard", {
+              title: t("whiteboard.annotateTitle", { title: output.title }),
+              data,
+              sourceIds: output.sourceIds,
+            });
+            toast.dismiss(toastId);
+            openOutput(id);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : String(error), { id: toastId });
+          } finally {
+            setAnnotating(false);
+          }
+        }
+      : undefined;
 
   return (
     <ScrollArea className="h-full" viewportRef={scrollRef}>
@@ -112,6 +155,12 @@ export function OutputViewer({ id }: { id: string }) {
                   <Icon icon={MoreVerticalIcon} size={16} />
                 </Menu.Trigger>
                 <Menu.Content align="end">
+                  {annotate ? (
+                    <Menu.Item disabled={annotating} onClick={() => void annotate()}>
+                      <Icon icon={WhiteboardIcon} />
+                      {t("viewer.annotate")}
+                    </Menu.Item>
+                  ) : null}
                   <Menu.Item onClick={() => requestOutputAction({ kind: "rename", output })}>
                     <Icon icon={PencilEdit01Icon} />
                     {tCommon("actions.rename")}
@@ -152,6 +201,7 @@ export function OutputViewer({ id }: { id: string }) {
             <client.Viewer
               outputId={output.id}
               onDataChange={saveData}
+              onAnnotate={annotate ? () => void annotate() : undefined}
               title={output.title}
               data={parsed.data}
               scrollRef={scrollRef}

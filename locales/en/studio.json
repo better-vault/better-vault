@@ -50,6 +50,10 @@
     "infographic": {
       "name": "Infographic",
       "description": "A one-page visual summary."
+    },
+    "whiteboard": {
+      "name": "Whiteboard",
+      "description": "A blank board to sketch, diagram and draw on pictures."
     }
   },
   "view": {
@@ -411,5 +415,200 @@
     "answerKey": "Answer key",
     "sources": "Sources"
   },
-  "needsKey": "Needs a key"
+  "needsKey": "Needs a key",
+  "whiteboard": {
+    "label": "Whiteboard",
+    "toolbar": "Drawing tools",
+    "toolLock": "Keep the tool after drawing",
+    "keyHint": "{{tool}} · {{keys}}",
+    "or": "or",
+    "tools": {
+      "hand": "Hand",
+      "selection": "Select",
+      "rectangle": "Rectangle",
+      "diamond": "Diamond",
+      "ellipse": "Ellipse",
+      "arrow": "Arrow",
+      "line": "Line",
+      "freedraw": "Pen",
+      "text": "Text",
+      "image": "Picture",
+      "eraser": "Eraser"
+    },
+    "colors": {
+      "ink": "Ink",
+      "grey": "Grey",
+      "red": "Red",
+      "green": "Green",
+      "blue": "Blue",
+      "amber": "Amber",
+      "violet": "Violet"
+    },
+    "properties": {
+      "title": "Style",
+      "stroke": "Stroke",
+      "background": "Background",
+      "none": "None",
+      "fillStyle": "Fill",
+      "fillStyles": {
+        "hachure": "Hachure",
+        "cross-hatch": "Cross-hatch",
+        "solid": "Solid"
+      },
+      "strokeWidth": "Stroke width",
+      "strokeWidths": {
+        "1": "Thin",
+        "2": "Bold",
+        "4": "Extra bold"
+      },
+      "strokeStyle": "Stroke style",
+      "strokeStyles": {
+        "solid": "Solid",
+        "dashed": "Dashed",
+        "dotted": "Dotted"
+      },
+      "sloppiness": "Sloppiness",
+      "roughness": {
+        "0": "Architect",
+        "1": "Artist",
+        "2": "Cartoonist"
+      },
+      "edges": "Edges",
+      "edgeKinds": {
+        "sharp": "Sharp",
+        "round": "Round"
+      },
+      "arrowheads": "Arrowheads",
+      "start": "Start",
+      "end": "End",
+      "arrowheadKinds": {
+        "none": "None",
+        "arrow": "Arrow",
+        "triangle": "Triangle",
+        "bar": "Bar",
+        "dot": "Dot"
+      },
+      "font": "Font",
+      "fonts": {
+        "hand": "Hand-drawn",
+        "normal": "Normal",
+        "code": "Code"
+      },
+      "fontSize": "Size",
+      "fontSizes": {
+        "16": "Small",
+        "20": "Medium",
+        "28": "Large",
+        "36": "Extra large"
+      },
+      "align": "Align",
+      "aligns": {
+        "start": "Start",
+        "center": "Centre",
+        "end": "End"
+      },
+      "opacity": "Opacity",
+      "layers": "Layers",
+      "layerMoves": {
+        "back": "Send to back",
+        "backward": "Send backward",
+        "forward": "Bring forward",
+        "front": "Bring to front"
+      },
+      "actions": "Actions"
+    },
+    "actions": {
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "group": "Group",
+      "ungroup": "Ungroup",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "undo": "Undo",
+      "redo": "Redo",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset zoom",
+      "fit": "Zoom to fit",
+      "menu": "Board menu",
+      "shortcuts": "Keyboard shortcuts",
+      "unlockAll": "Unlock everything",
+      "clear": "Clear the board",
+      "selectAll": "Select all",
+      "copy": "Copy",
+      "paste": "Paste",
+      "history": "History",
+      "zoom": "Zoom"
+    },
+    "background": "Background",
+    "backgrounds": {
+      "dots": "Dots",
+      "grid": "Grid",
+      "none": "Plain"
+    },
+    "empty": {
+      "title": "Draw anything",
+      "body": "Pick a tool, or press a key: R for a rectangle, P for the pen, T for text. Drop or paste a picture to draw on it."
+    },
+    "imageError": "That file can't go on the board. Use a PNG, JPEG or WebP picture.",
+    "textLabel": "Text",
+    "announce": {
+      "tool": "{{tool}} tool",
+      "selected_one": "{{count}} item selected",
+      "selected_other": "{{count}} items selected",
+      "deleted_one": "{{count}} item deleted",
+      "deleted_other": "{{count}} items deleted"
+    },
+    "annotateTitle": "{{title}}, annotated",
+    "annotating": "Opening a whiteboard…",
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "description": "⌘ is Ctrl on Windows and Linux.",
+      "tools": "Tools",
+      "editing": "Editing",
+      "view": "View",
+      "items": {
+        "toolLock": "Keep the tool after drawing",
+        "undo": "Undo",
+        "redo": "Redo",
+        "selectAll": "Select all",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "copy": "Copy",
+        "paste": "Paste",
+        "group": "Group",
+        "ungroup": "Ungroup",
+        "lock": "Lock or unlock",
+        "forward": "Bring forward",
+        "backward": "Send backward",
+        "front": "Bring to front",
+        "back": "Send to back",
+        "nudge": "Nudge (Shift: 10 steps)",
+        "editText": "Edit text",
+        "copyDrag": "Drag a copy",
+        "keepShape": "Keep proportions, snap angles",
+        "fromCenter": "Resize from the centre",
+        "deselect": "Deselect",
+        "pan": "Pan",
+        "zoom": "Zoom",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "resetZoom": "Zoom to 100 %",
+        "fit": "Zoom to fit everything",
+        "fitSelection": "Zoom to the selection"
+      },
+      "keys": {
+        "drag": "drag",
+        "wheel": "wheel",
+        "space": "Space",
+        "arrows": "Arrows",
+        "pinch": "pinch"
+      }
+    },
+    "groups": {
+      "navigate": "Move around",
+      "shapes": "Shapes",
+      "draw": "Draw and write"
+    }
+  }
 }

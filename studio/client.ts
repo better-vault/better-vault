@@ -17,6 +17,7 @@ import { ReportForm } from "./tools/report/dialog";
 import { ReportViewer } from "./tools/report/viewer";
 import { SlideDeckForm } from "./tools/slide-deck/dialog";
 import { SlideDeckViewer } from "./tools/slide-deck/viewer";
+import { WhiteboardViewer } from "./tools/whiteboard/viewer";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ToolClient {
@@ -60,4 +61,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
     fill: true,
     canCreate: (options: { imageModel: unknown }) => options.imageModel !== null,
   },
+  whiteboard: { Viewer: WhiteboardViewer, fill: true, bleed: true },
 };

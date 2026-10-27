@@ -87,8 +87,9 @@ function roundedBoxDistance(
 }
 
 /** The radius of a round rectangle's corners, as it is drawn. */
+/** Excalidraw's adaptive radius: a quarter of the shorter side, at most 32. */
 export const cornerRadius = (width: number, height: number) =>
-  Math.min(Math.abs(width), Math.abs(height)) * 0.2;
+  Math.min(Math.min(Math.abs(width), Math.abs(height)) * 0.25, 32);
 
 /**
  * Whether a world point is on an element. A filled shape is hit anywhere
