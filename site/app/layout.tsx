@@ -41,6 +41,8 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
   category: "technology",
+  // Google Search Console ownership check for better-vault.dev.
+  verification: { google: "KsxzbFvgTHVl5kr30ZFpYZCj8EdA-03FG34E_BgLhLQ" },
 };
 
 export const viewport: Viewport = {
