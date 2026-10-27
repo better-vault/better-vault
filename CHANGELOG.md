@@ -7,13 +7,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
-- A website at better-vault.dev: a landing page, and documentation built with Fumadocs (getting started, providers, privacy, self-hosting, every Studio tool, a comparison with NotebookLM, FAQ, roadmap and contributor guides), with search and "Copy Markdown" on every page.
+- A website at better-vault.dev, its own project in `site/`: a landing page, and documentation built with Fumadocs (getting started, providers, privacy, self-hosting, every Studio tool, a comparison with NotebookLM, FAQ, roadmap and contributor guides), with search and "Copy Markdown" on every page.
 - Search engine and AI assistant support: page titles, descriptions and canonical links, social cards, structured data (JSON-LD), a sitemap, robots.txt, `llms.txt`, `llms-full.txt`, and Markdown versions of the docs for agents that ask for them.
 - A roadmap (ROADMAP.md and `/docs/roadmap`), including a desktop app.
-
-### Changed
-
-- The notebook app moved to `/app`; the landing page now owns `/`. Old `/notebook/…` links redirect.
 
 ## [0.2.0] - 2026-10-27
 

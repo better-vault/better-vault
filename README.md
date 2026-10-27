@@ -10,7 +10,7 @@
 **An open-source, bring-your-own-model alternative to NotebookLM.**
 Chat with your sources, and turn them into reports, flashcards, quizzes, tables and diagrams, using the AI model you choose.
 
-[Website](https://better-vault.dev) · [Open the app](https://better-vault.dev/app) · [Docs](https://better-vault.dev/docs) · [Roadmap](ROADMAP.md)
+[Website](https://better-vault.dev) · [Get started](https://better-vault.dev/docs/quickstart) · [Docs](https://better-vault.dev/docs) · [Roadmap](ROADMAP.md)
 
 [![Version](https://img.shields.io/github/package-json/v/better-vault/better-vault?style=flat-square&color=262626&label=version)](https://github.com/better-vault/better-vault/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
@@ -64,7 +64,7 @@ npm install
 npm run dev
 ```
 
-Open <http://localhost:3000/app>, then **Settings → AI providers** and paste an API key, or point it at a local model. No `.env` file is needed.
+Open <http://localhost:3000>, then **Settings → AI providers** and paste an API key, or point it at a local model. No `.env` file is needed.
 
 ### Production build
 
