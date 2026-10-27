@@ -7,7 +7,7 @@ import {
   Note01Icon,
   PlayIcon,
 } from "@hugeicons/core-free-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Markdown } from "@/components/chat/markdown";
@@ -30,6 +30,7 @@ export function SlideDeckViewer({ title, data, onOpenPassage }: ToolViewerProps<
   const hasNotes = slides.some((slide) => slide.notes.trim());
   const [notesOpen, setNotesOpen] = useState(data.format === "presenter" && hasNotes);
   const [presenting, setPresenting] = useState(false);
+  const stopPresenting = useCallback(() => setPresenting(false), []);
   const thumbs = useRef<HTMLOListElement>(null);
   const slide = slides[Math.min(index, slides.length - 1)];
 
@@ -197,20 +198,17 @@ export function SlideDeckViewer({ title, data, onOpenPassage }: ToolViewerProps<
       </div>
 
       {presenting ? (
-        <Presenter
-          {...common}
-          slides={slides}
-          index={index}
-          onIndex={go}
-          onExit={() => setPresenting(false)}
-        />
+        <Presenter {...common} slides={slides} index={index} onIndex={go} onExit={stopPresenting} />
       ) : null}
       <DeckPrintView title={title} data={data} />
     </div>
   );
 }
 
-/** Full screen: click, Space or → for the next slide; N shows the notes; Esc leaves. */
+/**
+ * Full screen: click, Space or → for the next slide, ← to go back, N shows
+ * the notes, Esc leaves. The arrows at the bottom do the same.
+ */
 function Presenter({
   slides,
   index,
@@ -231,7 +229,9 @@ function Presenter({
   const stage = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState(false);
   const slide = slides[index];
+  const exit = useEffectEvent(onExit);
 
+  // Once, when presenting starts: changing slides must not leave full screen.
   useEffect(() => {
     const element = stage.current;
     element?.focus();
@@ -239,16 +239,20 @@ function Presenter({
     if (element?.requestFullscreen && !document.fullscreenElement)
       element.requestFullscreen().catch(() => {});
     const onChange = () => {
-      if (!document.fullscreenElement) onExit();
+      if (!document.fullscreenElement) exit();
     };
     document.addEventListener("fullscreenchange", onChange);
     return () => {
       document.removeEventListener("fullscreenchange", onChange);
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
     };
-  }, [onExit]);
+  }, []);
 
-  const onKey = (event: React.KeyboardEvent) => {
+  // Keys on the whole page, so they work wherever the focus went.
+  const onKey = useEffectEvent((event: KeyboardEvent) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const onButton = event.target instanceof HTMLElement && event.target.closest("button");
+    if (onButton && (event.key === " " || event.key === "Enter")) return;
     const next = ["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"];
     const back = ["ArrowLeft", "ArrowUp", "PageUp", "Backspace"];
     if (next.includes(event.key)) onIndex(index + 1);
@@ -259,7 +263,15 @@ function Presenter({
     else if (event.key === "Escape") onExit();
     else return;
     event.preventDefault();
-  };
+  });
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onKey(event);
+    document.addEventListener("keydown", listener);
+    return () => document.removeEventListener("keydown", listener);
+  }, []);
+
+  const control =
+    "text-foreground opacity-50 hover:opacity-100 focus-visible:opacity-100 disabled:opacity-20";
 
   return createPortal(
     <div
@@ -268,7 +280,6 @@ function Presenter({
       role="dialog"
       aria-modal="true"
       aria-label={t("slide-deck.viewer.presenting")}
-      onKeyDown={onKey}
       onClick={(event) => {
         if ((event.target as HTMLElement).closest("button, a")) return;
         onIndex(index + 1);
@@ -279,10 +290,50 @@ function Presenter({
         <SlideView {...common} slide={slide} index={index} mode="present" />
       </div>
       {notes && slide.notes.trim() ? (
-        <div className="absolute inset-x-4 bottom-4 max-h-[35dvh] overflow-y-auto rounded-2xl bg-popover/95 px-5 py-4 text-base text-popover-foreground shadow-lg ring-1 ring-border">
+        <div className="absolute inset-x-4 bottom-16 max-h-[35dvh] overflow-y-auto rounded-2xl bg-popover/95 px-5 py-4 text-base text-popover-foreground shadow-lg ring-1 ring-border">
           <Markdown text={slide.notes} passages={common.passages} />
         </div>
       ) : null}
+      <div className="absolute inset-x-0 bottom-4 mx-auto flex w-fit items-center gap-1 rounded-full bg-background/80 p-1 backdrop-blur">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          shape="pill"
+          aria-label={t("slide-deck.viewer.previous")}
+          disabled={index === 0}
+          className={control}
+          onClick={() => onIndex(index - 1)}
+        >
+          <Icon icon={ArrowLeft01Icon} size={16} className="rtl:rotate-180" />
+        </Button>
+        <span className="min-w-14 text-center font-mono text-xs text-muted-foreground tabular-nums">
+          {index + 1} / {slides.length}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          shape="pill"
+          aria-label={t("slide-deck.viewer.next")}
+          disabled={index >= slides.length - 1}
+          className={control}
+          onClick={() => onIndex(index + 1)}
+        >
+          <Icon icon={ArrowRight01Icon} size={16} className="rtl:rotate-180" />
+        </Button>
+        {slides.some((item) => item.notes.trim()) ? (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            shape="pill"
+            aria-label={t("slide-deck.viewer.notes")}
+            aria-pressed={notes}
+            className={cn(control, notes && "opacity-100")}
+            onClick={() => setNotes((open) => !open)}
+          >
+            <Icon icon={Note01Icon} size={16} />
+          </Button>
+        ) : null}
+      </div>
       <Button
         variant="secondary"
         size="icon-sm"

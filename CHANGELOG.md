@@ -17,6 +17,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The contents of a long report can be scrolled to the end.
 - PDF text no longer shows boxes for characters the file gives no text for; sources added earlier are cleaned too.
 - Mind maps show their tree and diagram again.
+- Presenting a slide deck no longer stops at the first slide change; ← → and the new on-screen arrows move between slides.
 
 ### Added
 
