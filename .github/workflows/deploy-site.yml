@@ -1,0 +1,58 @@
+# Deploys better-vault.dev (the website and docs in site/).
+#
+# Pushes and pull requests never build the site: `site/vercel.json` sets
+# `git.deploymentEnabled: false`, so this workflow is the only thing that
+# deploys. It fires a Vercel Deploy Hook rather than building here; the build
+# stays on Vercel, and the repository holds a single secret.
+#
+# ## When it runs
+#
+# Only when started by hand, never on its own. After each release, the
+# maintainer is asked whether the site should be updated (see CLAUDE.md); on a
+# yes it is started with:
+#
+#   gh workflow run deploy-site.yml -R better-vault/better-vault
+#
+# or from the Actions tab ("Deploy site" → Run workflow). The same goes for a
+# docs fix that should not wait for a release.
+#
+# ## One-time setup
+#
+#   Vercel → the site project → Settings → Git → Deploy Hooks
+#     Name:   release
+#     Branch: main
+#   Then: gh secret set VERCEL_DEPLOY_HOOK -R better-vault/better-vault
+#
+# The hook is bound to `main` when it is created, so the branch picked in the
+# Actions UI has no say in what Vercel builds. Deploy hooks are unaffected by
+# `deploymentEnabled: false`, which gates the Git integration only.
+name: Deploy site
+
+on:
+  workflow_dispatch:
+
+# Nothing is read from the repository and nothing is written back to it. The
+# hook URL is the only capability this job has.
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the production deployment
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          # An unset secret expands to an empty string, and `curl ""` fails with
+          # a URL error that reads like a network problem. Say which it is.
+          if [ -z "$HOOK" ]; then
+            echo '::error::VERCEL_DEPLOY_HOOK is not set. Create a deploy hook in the Vercel project and add it as a repository secret.'
+            exit 1
+          fi
+
+          # --fail turns a 4xx or 5xx into a non-zero exit, so a deleted hook
+          # returning 404 fails the run instead of going green.
+          response="$(curl --fail --silent --show-error -X POST "$HOOK")"
+          echo "$response"
+          echo "Deployment queued. Watch it in the Vercel dashboard (marked as from a Deploy Hook)."

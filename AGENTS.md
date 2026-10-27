@@ -121,6 +121,7 @@ npm run lint && npm run typecheck && npm run build
 - **Push** to GitHub when a set of tasks is complete.
 - **Versioning:** SemVer, starting at 0.1.0. The version lives in `package.json`, and `CHANGELOG.md` collects changes under "Unreleased".
 - **Releases:** when a phase is complete, **ask the maintainer whether to release**. Only on a yes: bump the version, move "Unreleased" under the new version in the changelog, tag `vX.Y.Z` and create a GitHub release.
+- **Website:** better-vault.dev does not deploy on push (`site/vercel.json` sets `git.deploymentEnabled: false`). It deploys only through the **Deploy site** workflow (`.github/workflows/deploy-site.yml`), which fires a Vercel deploy hook stored as the `VERCEL_DEPLOY_HOOK` secret. After each release, ask the maintainer whether to update the site, and run the workflow only on a yes.
 - Before pushing: `npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build`, and the website's checks in `site/` when it changed.
 
 ## Roadmap
