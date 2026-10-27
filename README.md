@@ -32,20 +32,22 @@ Chat with your sources, and turn them into reports, flashcards, quizzes, tables 
 better-vault is a research notebook. You add **sources** (PDFs, web pages, notes, text files) to a **notebook**, then:
 
 - **Chat with your sources.** Answers cite the passages they came from. Switch to **Web** to let the model search the internet with its provider's built-in search.
-- **Create study material** in the **Studio**: reports, flashcards, quizzes, data tables and mind maps. Each one opens a dialog of options, much like NotebookLM.
+- **Create study material** in the **Studio**: reports, flashcards, quizzes, data tables, mind maps, slide decks, infographics and Anatomy figures. Each one opens a dialog of options, much like NotebookLM.
+- **Sketch on a whiteboard.** An Excalidraw-style board for your own diagrams, or to draw over a figure or infographic.
 - **Choose your model.** OpenAI, Anthropic, Google, or a local model through Ollama or LM Studio. You bring the key; nothing is locked to one vendor.
 - **Keep your data.** Everything is stored in your browser (IndexedDB). There is no account and no database, and your keys never leave your browser except to reach the model you picked.
 
-| Studio tool    | What you get                                                                                                                                                                                                                           | Download as       |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| **Reports**    | Briefing doc, study guide, blog post, your own format, or a format suggested for your sources; read as a document with a table of contents and citations                                                                               | Word, Markdown    |
-| **Flashcards** | Flip cards with keyboard shortcuts, shuffle and "knew it / still learning" tallies                                                                                                                                                     | Word, CSV (Anki)  |
-| **Quiz**       | Multiple-choice questions with hints, explanations and a score                                                                                                                                                                         | Word, Markdown    |
-| **Data table** | Facts from your sources in rows and columns                                                                                                                                                                                            | Excel, CSV        |
-| **Mind map**   | An interactive tree like NotebookLM's: open branches, click a topic to ask about it in the chat. Plus 11 more diagram kinds (flowchart, timeline, cause and effect, …) drawn with [Pele](https://pele.run)                             | PNG, SVG, Mermaid |
-| Slide deck     | planned for v0.2                                                                                                                                                                                                                       |                   |
-| Infographic    | planned for v0.2                                                                                                                                                                                                                       |                   |
-| **Anatomy**    | An interactive isometric figure of a real object whose working explains your sources, drawn with [Anatomy](https://skills.wheresryan.sh/anatomy)'s kit: point at a part to read what it does, step through how it works, take it apart | PNG, SVG          |
+| Studio tool     | What you get                                                                                                                                                                                                                           | Download as         |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| **Reports**     | Briefing doc, study guide, blog post, your own format, or a format suggested for your sources; read as a document with a table of contents and citations                                                                               | Word, Markdown      |
+| **Flashcards**  | Flip cards with keyboard shortcuts, shuffle and "knew it / still learning" tallies                                                                                                                                                     | Word, CSV (Anki)    |
+| **Quiz**        | Multiple-choice questions with hints, explanations and a score                                                                                                                                                                         | Word, Markdown      |
+| **Data table**  | Facts from your sources in rows and columns                                                                                                                                                                                            | Excel, CSV          |
+| **Mind map**    | An interactive tree like NotebookLM's: open branches, click a topic to ask about it in the chat. Plus 11 more diagram kinds (flowchart, timeline, cause and effect, …) drawn with [Pele](https://pele.run)                             | PNG, SVG, Mermaid   |
+| **Slide deck**  | A presentation from your sources: a detailed deck to read, or a presenter deck with speaker notes. Present it full screen                                                                                                              | PowerPoint, PDF     |
+| **Infographic** | A one-page picture drawn by your provider's image model (OpenAI GPT Image or Google Gemini), from a cited brief written from your sources                                                                                              | PNG, original image |
+| **Anatomy**     | An interactive isometric figure of a real object whose working explains your sources, drawn with [Anatomy](https://skills.wheresryan.sh/anatomy)'s kit: point at a part to read what it does, step through how it works, take it apart | PNG, SVG            |
+| **Whiteboard**  | A blank board with Excalidraw's tools and shortcuts: shapes, arrows, pen, text and pictures, in a hand-drawn style. **Annotate** opens a mind map, Anatomy figure or infographic on a board to draw over it. No model needed           | PNG, SVG, JSON      |
 
 Audio and video overviews are out of scope.
 
@@ -135,6 +137,7 @@ Please search existing issues first, and **never paste API keys** into an issue.
 - [Pele](https://pele.run) for rendering Mermaid diagrams.
 - [Anatomy](https://skills.wheresryan.sh/anatomy) by Ryan, whose MIT drawing kit draws the anatomy figures.
 - [Hugeicons](https://hugeicons.com) for icons.
+- [Excalidraw](https://excalidraw.com), whose whiteboard inspired ours, for Excalifont (SIL Open Font License 1.1); [Rough.js](https://roughjs.com) and [perfect-freehand](https://github.com/steveruizok/perfect-freehand) draw the sketchy shapes and pen strokes.
 - Inspired by Google's NotebookLM.
 
 ## 📄 License
