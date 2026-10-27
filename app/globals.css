@@ -12,6 +12,8 @@
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* The whiteboard's hand-drawn font; other scripts fall back to the sans font. */
+  --font-hand: "Excalifont", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-sans);
 
   --color-background: var(--background);
@@ -265,4 +267,55 @@
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+}
+
+/* Excalifont (SIL Open Font License 1.1, see public/fonts/excalifont/OFL.txt): the whiteboard's hand-drawn font. */
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-latin.woff2") format("woff2");
+  font-display: swap;
+  unicode-range:
+    U+20-7e, U+a0-a3, U+a5-a6, U+a8-ab, U+ad-b1, U+b4, U+b6-b8, U+ba-ff, U+131, U+152-153, U+2bc,
+    U+2c6, U+2da, U+2dc, U+304, U+308, U+2013-2014, U+2018-201a, U+201c-201e, U+2020, U+2022,
+    U+2024-2026, U+2030, U+2039-203a, U+20ac, U+2122, U+2212;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-latin-ext.woff2") format("woff2");
+  font-display: swap;
+  unicode-range:
+    U+100-130, U+132-137, U+139-149, U+14c-151, U+154-17e, U+192, U+1fc-1ff, U+218-21b, U+237,
+    U+1e80-1e85, U+1ef2-1ef3, U+2113;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-cyrillic.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+400-45f, U+490-491, U+2116;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-greek.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+37e, U+384-38a, U+38c, U+38e-393, U+395-3a1, U+3a3-3a8, U+3aa-3cf, U+3d7;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-marks.woff2") format("woff2");
+  font-display: swap;
+  unicode-range:
+    U+2c7, U+2d8-2d9, U+2db, U+2dd, U+302, U+306-307, U+30a-30c, U+326-328, U+212e, U+2211,
+    U+fb01-fb02;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-cyrillic-ext.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+462-463, U+472-475, U+4d8-4d9, U+4e2-4e3, U+4e6-4e9, U+4ee-4ef;
+}
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-combining.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+300-301, U+303;
 }
