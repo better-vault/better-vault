@@ -1,4 +1,4 @@
-import { ComputerIcon, Notebook01Icon, SourceCodeIcon } from "@hugeicons/core-free-icons";
+import { Notebook01Icon, PencilEdit02Icon, SourceCodeIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { IsoFigureKind } from "@/components/site/iso-figures";
 
@@ -20,7 +20,7 @@ export const features: Feature[] = [
   { figure: "web", title: "Web mode", body: "Your provider's own search, when you want it." },
   { figure: "studio", title: "Nine Studio tools", body: "From reports to slide decks." },
   { figure: "providers", title: "Your key, your model", body: "OpenAI, Claude, Gemini or local." },
-  { figure: "vault", title: "Local-first", body: "Notebooks stay in your browser." },
+  { figure: "vault", title: "Local-first", body: "Notebooks stay on your device." },
   { figure: "exports", title: "Real exports", body: "Word, PowerPoint, Anki, Excel, SVG." },
 ];
 
@@ -53,9 +53,9 @@ export const roadmapTeaser: { icon: IconSvgElement; title: string; body: string 
     body: "DOCX, EPUB, YouTube, images and audio, plus web research that adds sources for you.",
   },
   {
-    icon: ComputerIcon,
-    title: "A desktop app",
-    body: "macOS, Windows and Linux, with notebooks as files on disk and offline local models.",
+    icon: PencilEdit02Icon,
+    title: "Edit outputs with a prompt",
+    body: "Change one slide, one section of a report or one branch of a mind map, and review a deck's outline first.",
   },
 ];
 
@@ -83,7 +83,7 @@ export const faq: { question: string; answer: string }[] = [
   {
     question: "Where is my data stored?",
     answer:
-      "In your browser's IndexedDB. There is no account and no server database. Requests are forwarded to the provider you pick, and keys and content are never stored or logged.",
+      "On your device: in your browser's IndexedDB on the web, or in a SQLite file on your computer in the desktop app. There is no account and no server database. Requests are forwarded to the provider you pick, and keys and content are never stored or logged.",
   },
   {
     question: "Can I self-host it?",
@@ -98,6 +98,6 @@ export const faq: { question: string; answer: string }[] = [
   {
     question: "Is there a desktop app?",
     answer:
-      "Not yet. An Electron app for macOS, Windows and Linux is on the roadmap, with notebooks stored as files and offline local models.",
+      "Yes. better-vault runs as a desktop app on macOS, Windows and Linux, with the same interface as the web app. It keeps notebooks in a file on your computer and updates itself.",
   },
 ];

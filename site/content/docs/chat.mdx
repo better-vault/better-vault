@@ -1,32 +1,26 @@
 ---
 title: "Chat and citations"
-description: "Ask questions about your sources and get answers with numbered citations, or switch to Web mode to let the model search the internet."
+description: "Ask questions about your sources in better-vault and get answers with numbered citations, or switch to Web mode to let the model search the internet for you."
 ---
 
-The **Chat** tab answers questions about your notebook. Every answer shows where its claims came from.
+The Chat tab answers questions about your notebook, and every answer shows where its claims came from.
 
-## Sources mode (default)
+## Sources mode
 
-In **Sources** mode the model answers **only from your selected sources**. better-vault finds the passages most relevant to your question, sends them to the model, and asks it to cite each claim with a number like `[1]`.
+Sources mode is the default. The model answers only from your selected sources: better-vault finds the passages most relevant to your question, sends them to the model, and asks it to cite each claim with a number like `[1]`.
 
-- Point at or focus a **citation mark** to preview the passage it refers to.
-- Each answer lists its **references** as footnotes underneath, so you can check them.
-- If no source is selected, select one or switch to Web.
+Point at or focus a citation mark to preview the passage it refers to. Each answer also lists its references as footnotes underneath, so you can check them. If no source is selected, select one or switch to Web mode.
 
 ## Web mode
 
-In **Web** mode the model may also search the internet using **its provider's own built-in search** (OpenAI, Anthropic or Google). Web results are cited the same way, with links to the pages. better-vault does not use any third-party search service.
+In Web mode the model may also search the internet with its provider's own built-in search, from OpenAI, Anthropic or Google. Web results are cited the same way, with links to the pages. better-vault uses no third-party search service.
 
-Web mode isn't available with Ollama or LM Studio, which have no built-in search.
+Ollama and LM Studio have no built-in search, so Web mode is not available with them.
 
 ## Choose the model
 
-Use the model picker in the prompt bar to switch provider and model at any time. Your choice applies to the next question.
+The model picker in the prompt bar switches provider and model at any time. Your choice applies to the next question.
 
-## Starter questions
+## Starter questions and actions
 
-An empty chat suggests a few starting points: summarize the key ideas, list the questions your sources answer, explain important terms, or make a study plan.
-
-## Actions
-
-Copy an answer, or try it again with the same or another model.
+An empty chat suggests a few ways to begin, such as summarizing the key ideas, explaining important terms or making a study plan. Under each answer you can copy it, or try it again with the same or another model.

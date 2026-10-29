@@ -17,17 +17,13 @@ The app runs at <http://localhost:3000>. Add an API key in **Settings → AI pro
 
 ## Before you start
 
-- Read [AGENTS.md](AGENTS.md). It explains the concepts (notebooks, sources, Studio tools, outputs) and the decisions behind the code.
-- For anything larger than a small fix, open an issue first so we can agree on the approach.
+Read [AGENTS.md](AGENTS.md) first. It explains the concepts, such as notebooks, sources, Studio tools and outputs, and the decisions behind the code. For anything larger than a small fix, open an issue so we can agree on the approach before you write it.
 
 ## Rules the code follows
 
-- **Panel UI first**, shadcn only for what Panel lacks. Colours come from theme tokens only.
-- **Icons from Hugeicons only.**
-- **No hard-coded UI text.** Every string goes through `t()` and lives in `locales/en/*.json`.
-- **Logical CSS** (`ms-*`, `pe-*`, `text-start`) so right-to-left languages work.
-- **AI calls through the Vercel AI SDK.** Web search uses only the provider's built-in tool.
-- **Local-first.** User data stays in the browser. API routes do not store anything and never log keys.
+The interface uses Panel UI first and shadcn only for what Panel lacks, with colours from theme tokens and icons from Hugeicons. No interface text is hard-coded: every string goes through `t()` and lives in `locales/en/*.json`. Layout uses logical CSS such as `ms-*`, `pe-*` and `text-start`, so right-to-left languages work.
+
+Every AI call goes through the Vercel AI SDK, and web search uses only the provider's built-in tool. User data stays on the device, in the browser or the desktop app's SQLite file. API routes store nothing and never log keys.
 
 ## Making a change
 
@@ -38,6 +34,22 @@ The app runs at <http://localhost:3000>. Add an API key in **Settings → AI pro
    npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
    ```
 4. Open a pull request and fill in the template. Add screenshots for UI changes, in light and dark mode.
+
+## The desktop app
+
+The desktop app in `desktop/` is the same web app inside Electron, so most changes reach it without extra work. Data goes through `lib/db`, which has an IndexedDB store for the browser and a SQLite store for the desktop; `npm test` runs the database tests against both.
+
+If your change touches the server, storage, environment variables, new windows, downloads or files, check the desktop app as well:
+
+```bash
+cd desktop
+npm install
+npm run typecheck
+npm run build:server
+npm run pack
+```
+
+`npm run pack` builds an unpacked app in `desktop/release/` that you can open. To work on the desktop app with hot reload, run `npm run dev` at the root and `npm run dev` in `desktop/` at the same time.
 
 ## Adding a language
 

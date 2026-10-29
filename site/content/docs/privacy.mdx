@@ -1,26 +1,26 @@
 ---
 title: "Privacy and your data"
-description: "better-vault is local-first. Notebooks, sources, chats and keys are stored in your browser, and nothing is kept on a server."
+description: "better-vault is local-first. Notebooks, sources, chats and keys stay in your browser or in a file on your computer, and nothing is ever kept on a server."
 ---
 
-**better-vault stores everything in your browser.** Notebooks, sources, chats, Studio outputs and API keys live in your browser's IndexedDB. There is no account and no server database.
+better-vault keeps everything on your device, and nothing is stored on a server.
 
-## What leaves your browser?
+In the web app, notebooks, sources, chats, Studio outputs and API keys live in your browser's IndexedDB. In the [desktop app](/docs/desktop) they live in one SQLite file in the app's data folder on your computer. Either way there is no account and no server database.
 
-Only what a request needs:
+## What leaves your device?
 
-- **When you chat or create in the Studio**, the relevant passages from your selected sources, your question and your key are sent to better-vault's API route, which forwards them to the provider you picked and streams the answer back. The route does not store or log them.
-- **When you add a PDF or web page**, the file or address is sent to the parse route, which returns plain text. Nothing is kept.
-- **When you load the model list**, your key is used to ask the provider which models you can use.
+Only what a request needs. When you chat or create in the Studio, better-vault sends the relevant passages from your selected sources, your question and your key to its API route. The route forwards them to the provider you picked and streams the answer back, without storing or logging them.
 
-With Ollama or LM Studio, those requests go to a server on your own machine.
+When you add a PDF or a web page, the file or address goes to the parse route, which returns plain text and keeps nothing. When the model list loads, your key is used to ask the provider which models you can use.
+
+With Ollama or LM Studio, all of these requests stay on your own machine. In the desktop app, the API routes also run on your computer.
 
 ## Backups
 
-Open **Settings → Data** to export all notebooks as a JSON file and to import one. Older backups stay importable when the app's storage format changes.
+Open **Settings → Data** to export all your notebooks as a JSON file, or to import one. Backups never contain your API keys. Older backups stay importable when the storage format changes, and a backup from the web app imports into the desktop app.
 
-Clearing your browser's site data deletes your notebooks, so export a backup first.
+Clearing your browser's site data deletes the web app's notebooks, so export a backup first.
 
 ## Hosting for others
 
-If you host better-vault, your users' notebooks and keys stay in their own browsers; you never receive them. See [Self-hosting](/docs/self-hosting) for the settings that harden a public deployment.
+If you host better-vault for other people, their notebooks and keys stay in their own browsers and never reach you. [Self-hosting](/docs/self-hosting) lists the settings that harden a public deployment.

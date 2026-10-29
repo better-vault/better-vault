@@ -1,18 +1,22 @@
 ---
 title: "Get started"
-description: "Install better-vault on your computer, connect an AI model, and make your first notebook: add sources, ask questions and create study material."
+description: "Install better-vault as a desktop app or run it from source, connect an AI model, and make your first notebook with sources, cited answers and study material."
 ---
 
-better-vault is an app you run yourself: on your own computer, or on a server you control. It opens in your browser and keeps your notebooks there. This guide takes you from nothing to your first cited answer in a few minutes.
+This guide takes you from nothing to your first cited answer in a few minutes.
 
-## Install and run
+## Install better-vault
 
-**You need:** [Node.js](https://nodejs.org) 20.9 or newer (it includes npm) and [Git](https://git-scm.com).
+The quickest way is the desktop app for macOS, Windows or Linux. Download it from [Desktop app](/docs/desktop), install it and open it. It needs no other setup.
+
+You can also run the web app yourself. It opens in your browser and keeps your notebooks there.
 
 <Steps>
 <Step>
 
-### Download better-vault
+### Download the code
+
+You need [Node.js](https://nodejs.org) 20.9 or newer, which includes npm, and [Git](https://git-scm.com). Clone the repository and move into it:
 
 ```bash
 git clone https://github.com/better-vault/better-vault.git
@@ -24,29 +28,23 @@ cd better-vault
 
 ### Install and start it
 
+Install the dependencies and start the app:
+
 ```bash
 npm install
 npm run dev
 ```
 
-</Step>
-<Step>
-
-### Open it
-
-Go to [http://localhost:3000](http://localhost:3000) in your browser. No account, no `.env` file.
+The app now runs at [http://localhost:3000](http://localhost:3000). It needs no account and no `.env` file.
 
 </Step>
 </Steps>
 
-For a faster production build, run `npm run build` and then `npm start`. To run it for other people, see [Self-hosting](/docs/self-hosting). A desktop app is on the [roadmap](/docs/roadmap).
+For a faster production server, run `npm run build` and then `npm start`. To run it for other people, read [Self-hosting](/docs/self-hosting).
 
 ## Connect a model
 
-Open **Settings → AI providers** and choose one:
-
-- **An API key** from OpenAI, Anthropic (Claude) or Google (Gemini). Paste it, and the model list loads from the provider.
-- **A local model** with Ollama or LM Studio running on the same computer. Nothing leaves your machine.
+Open **Settings → AI providers** and choose a provider. With an API key from OpenAI, Anthropic (Claude) or Google (Gemini), paste the key and the model list loads from the provider. With Ollama or LM Studio running on the same computer, turn the provider on and nothing leaves your machine.
 
 [Providers and models](/docs/providers) explains where to get keys and which models suit which tools.
 
@@ -57,32 +55,32 @@ Open **Settings → AI providers** and choose one:
 
 ### Create a notebook
 
-On the notebooks page, choose **New notebook**. Rename it from the name at the top centre.
+On the notebooks page, choose **New notebook**. You can rename it from its name at the top centre.
 
 </Step>
 <Step>
 
 ### Add sources
 
-Choose **Add a source**: upload PDF, Markdown or text files, add a web page by its address, or paste text. Only selected sources are used. See [Sources](/docs/sources).
+Choose **Add a source** to upload PDF, Markdown or text files, add a web page by its address, or paste text. Only selected sources are used. [Sources](/docs/sources) covers the details.
 
 </Step>
 <Step>
 
 ### Ask a question
 
-Type in the prompt bar. Answers come from your sources with numbered citations; point at one to read the passage. Switch to **Web** to let the model search the internet too. See [Chat and citations](/docs/chat).
+Type in the prompt bar. Answers come from your sources with numbered citations; point at one to read its passage. Switch to **Web** to let the model search the internet too. [Chat and citations](/docs/chat) explains both modes.
 
 </Step>
 <Step>
 
 ### Create something
 
-Choose **Create** at the top left and pick a tool: a report, flashcards, a quiz, a mind map, a slide deck and more. Outputs open in the **Studio** tab, ready to download. See [the Studio](/docs/studio).
+Choose **Create** at the top left and pick a tool, such as a report, flashcards, a quiz, a mind map or a slide deck. The output opens in the **Studio** tab, ready to download. [The Studio](/docs/studio) describes every tool.
 
 </Step>
 </Steps>
 
 ## Keep your work
 
-Notebooks live in your browser. Export a backup from **Settings → Data** now and then, especially before clearing site data. See [Privacy and your data](/docs/privacy).
+Your notebooks stay on your device. Export a backup from **Settings → Data** now and then, and always before clearing your browser's site data. [Privacy and your data](/docs/privacy) explains where everything is kept.

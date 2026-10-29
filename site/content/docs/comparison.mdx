@@ -1,43 +1,41 @@
 ---
 title: "better-vault vs NotebookLM"
-description: "How better-vault compares with Google NotebookLM (Gemini Notebook) on models, privacy, price, features and self-hosting."
+description: "How better-vault compares with Google NotebookLM (Gemini Notebook) on AI models, privacy, price, features, desktop apps and self-hosting, and when to pick each."
 ---
 
-**better-vault is an open-source alternative to Google NotebookLM**, which Google renamed Gemini Notebook in 2026. Both let you chat with your sources with citations and turn them into study material. They differ in who runs the model, where your data lives and what you can change.
+better-vault is an open-source alternative to Google NotebookLM, which Google renamed Gemini Notebook in 2026. Both let you chat with your sources with citations and turn them into study material. They differ in who runs the model, where your data lives and what you can change.
 
 ## At a glance
 
-|                              | better-vault                                         | NotebookLM (Gemini Notebook)              |
-| ---------------------------- | ---------------------------------------------------- | ----------------------------------------- |
-| License                      | Open source (MIT)                                    | Proprietary                               |
-| AI models                    | OpenAI, Anthropic (Claude), Google (Gemini), Ollama, LM Studio | Google Gemini only               |
-| Local / offline models       | Yes, with Ollama or LM Studio                        | No                                        |
-| Account                      | None                                                 | Google account                            |
-| Where notebooks are stored   | Your browser (IndexedDB), exportable as a file       | Google's servers                          |
-| Self-hosting                 | Yes, any Node.js host                                | No                                        |
-| Price                        | Free; you pay your provider for usage, or nothing with local models | Free tier with limits; paid plans for more |
-| Cited chat answers           | Yes                                                  | Yes                                       |
-| Web search in chat           | Yes, with the provider's built-in search             | Yes (Discover sources, Deep Research)     |
-| Reports, flashcards, quizzes | Yes                                                  | Yes                                       |
-| Mind maps                    | Yes, plus 11 other diagram kinds                     | Yes                                       |
-| Data tables, slide decks, infographics | Yes                                        | Yes                                       |
-| Anatomy figures, whiteboard  | Yes                                                  | No                                        |
-| Audio and video overviews    | No (out of scope)                                    | Yes                                       |
-| Sharing notebooks            | Export and import a backup file                      | Shared and public notebooks               |
-| Source types                 | PDF, Markdown, text, web pages                       | Also Google Docs/Slides/Sheets, YouTube, audio, images and more |
-| Mobile apps                  | Works in mobile browsers                             | iOS and Android apps                      |
+|                                        | better-vault                                                         | NotebookLM (Gemini Notebook)                                   |
+| -------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| License                                | Open source (MIT)                                                    | Proprietary                                                    |
+| AI models                              | OpenAI, Anthropic (Claude), Google (Gemini), Ollama, LM Studio       | Google Gemini only                                             |
+| Local and offline models               | Yes, with Ollama or LM Studio                                        | No                                                             |
+| Account                                | None                                                                 | Google account                                                 |
+| Where notebooks are stored             | Your browser, or a file on your computer in the desktop app          | Google's servers                                               |
+| Desktop apps                           | macOS, Windows and Linux                                             | No                                                             |
+| Self-hosting                           | Yes, on any Node.js host                                             | No                                                             |
+| Price                                  | Free; you pay your provider for usage, or nothing with local models | Free tier with limits; paid plans for more                     |
+| Cited chat answers                     | Yes                                                                  | Yes                                                            |
+| Web search in chat                     | Yes, with the provider's built-in search                             | Yes (Discover sources, Deep Research)                          |
+| Reports, flashcards, quizzes           | Yes                                                                  | Yes                                                            |
+| Mind maps                              | Yes, plus 11 other diagram kinds                                     | Yes                                                            |
+| Data tables, slide decks, infographics | Yes                                                                  | Yes                                                            |
+| Anatomy figures, whiteboard            | Yes                                                                  | No                                                             |
+| Audio and video overviews              | No (out of scope)                                                    | Yes                                                            |
+| Sharing notebooks                      | Export and import a backup file                                      | Shared and public notebooks                                    |
+| Source types                           | PDF, Markdown, text, web pages                                       | Also Google Docs, Slides and Sheets, YouTube, audio, images and more |
+| Mobile apps                            | Works in mobile browsers                                             | iOS and Android apps                                           |
 
 ## When should I choose better-vault?
 
-- You want to use **Claude, GPT or a local model** instead of Gemini.
-- You don't want your documents stored by a third party, or you need **no account**.
-- You want to **self-host** it for a class, a team or yourself, or change how it works.
-- You want exports such as **Anki CSV, PowerPoint with speaker notes, Excel and SVG**.
+Choose better-vault when you want to use Claude, GPT or a local model instead of Gemini, or when you don't want a third party to store your documents. It needs no account, and you can self-host it for a class, a team or yourself, or change how it works.
+
+It also exports to formats NotebookLM doesn't offer, such as Anki CSV, PowerPoint with speaker notes, Excel and SVG.
 
 ## When is NotebookLM a better fit?
 
-- You want **audio or video overviews** (podcast-style summaries).
-- You need **Google Drive** sources, YouTube links or collaborative sharing today.
-- You prefer a hosted service with no API key to manage.
+NotebookLM is the better choice if you want audio or video overviews, or need Google Drive sources, YouTube links or shared notebooks today. It also suits people who prefer a hosted service with no API key to manage.
 
-Several of NotebookLM's other features, such as notes, a notebook guide, more source types and a desktop app, are on [better-vault's roadmap](/docs/roadmap).
+Notes, a notebook guide and more source types are on [better-vault's roadmap](/docs/roadmap).

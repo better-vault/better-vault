@@ -1,31 +1,38 @@
 ---
 title: "Translations"
-description: "Translate the better-vault interface into a new language with i18next."
+description: "Translate the better-vault interface into a new language with i18next: copy the English files, register the language, and check that no keys are missing."
 ---
 
-The interface is fully translatable with [i18next](https://www.i18next.com). English in `locales/en/` is the source of truth.
+The interface is fully translatable with [i18next](https://www.i18next.com), and English in `locales/en/` is the source of truth.
 
 <Steps>
 <Step>
 
-Copy `locales/en/` to `locales/<code>/` (for example `locales/fr/`) and translate the values, not the keys.
+### Copy the English files
+
+Copy `locales/en/` to `locales/<code>/`, for example `locales/fr/`, and translate the values but not the keys.
 
 </Step>
 <Step>
 
-Import the new files in `lib/i18n/resources.ts`.
+### Register the language
+
+Import the new files in `lib/i18n/resources.ts`, then add the language to `lib/i18n/config.ts`. Give right-to-left scripts `dir: "rtl"`.
 
 </Step>
 <Step>
 
-Add the language to `lib/i18n/config.ts`, with `dir: "rtl"` for right-to-left scripts.
+### Check it
 
-</Step>
-<Step>
+Run the locale check, which lists missing or extra keys:
 
-Run `npm run i18n:check` to find missing or extra keys, then open a pull request.
+```bash
+npm run i18n:check
+```
+
+When it passes, open a pull request.
 
 </Step>
 </Steps>
 
-This website and the documentation are in English for now.
+The website and the documentation are in English for now.

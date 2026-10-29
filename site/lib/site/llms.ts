@@ -34,7 +34,7 @@ const KEY_FACTS = [
   "Chat answers cite numbered passages from the user's sources; Web mode uses the provider's built-in web search.",
   "Studio tools: Report, Flashcards, Quiz, Data table, Mind map (plus 11 diagram kinds), Slide deck, Infographic, Anatomy, Whiteboard.",
   "Sources: PDF, Markdown and text files, web pages and pasted text.",
-  "Local-first: notebooks are stored in the browser (IndexedDB); no account, no server database.",
+  "Local-first: notebooks are stored on the device (IndexedDB in the browser, SQLite in the desktop app); no account, no server database.",
   "No audio or video overviews.",
   `Runs on your own machine (npm run dev) or your own server; there is no hosted service. Source code: ${site.repo}.`,
   "Built with Next.js 16 and the Vercel AI SDK.",

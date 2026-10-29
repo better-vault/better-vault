@@ -16,7 +16,7 @@ export const site = {
     "Chat with your PDFs, notes and web pages with cited answers, and turn them into reports, flashcards, quizzes and mind maps. Use your own API key or local models.",
   /** One plain sentence that says what better-vault is, for answer engines. */
   definition:
-    "better-vault is a free, open-source alternative to Google NotebookLM (now Gemini Notebook): you add your sources, chat with them with cited answers, and turn them into study and work material, using your own OpenAI, Anthropic or Google API key or local models through Ollama and LM Studio. Everything is stored in your browser.",
+    "better-vault is a free, open-source alternative to Google NotebookLM (now Gemini Notebook): you add your sources, chat with them with cited answers, and turn them into study and work material, using your own OpenAI, Anthropic or Google API key or local models through Ollama and LM Studio. Everything stays on your device, in your browser or the desktop app.",
   repo: "https://github.com/better-vault/better-vault",
   license: "MIT",
   author: "Khalid Abdi",

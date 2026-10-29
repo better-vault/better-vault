@@ -1,9 +1,9 @@
 ---
 title: "Add a Studio tool"
-description: "Create a new Studio tool in better-vault with a definition, server prompt, options dialog and viewer."
+description: "Create a new Studio tool in better-vault: a definition, a server prompt and output schema, an options dialog and a viewer, registered on client and server."
 ---
 
-A Studio tool is one folder under `studio/tools/<id>/`.
+A Studio tool is one folder under `studio/tools/<id>/`, with four parts and a registration.
 
 <Steps>
 <Step>
@@ -39,3 +39,5 @@ Add the tool to the client and server registries (`studio/client.ts`, `studio/de
 ## Local tools
 
 A tool made in the browser, like the Whiteboard, gives its `definition.ts` a `local: { blank }` and has no `server.ts` or dialog. Its viewer receives `onDataChange` to save edits. Mark its client `immersive` to give the viewer the whole tab.
+
+Local tools save through the same data functions as everything else, so they work in the desktop app unchanged.

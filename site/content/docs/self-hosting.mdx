@@ -1,11 +1,13 @@
 ---
 title: "Self-hosting"
-description: "Deploy your own copy of better-vault on any Node.js host or Vercel, with optional settings for public deployments."
+description: "Deploy your own copy of the better-vault web app on any Node.js host or on Vercel, with optional environment variables that harden public deployments."
 ---
 
-better-vault is a standard Next.js app with stateless API routes and no database, so it runs anywhere Node.js 20.9+ runs.
+better-vault is a standard Next.js app with stateless API routes and no database, so it runs anywhere Node.js 20.9+ runs. For a single computer, the [desktop app](/docs/desktop) is simpler.
 
 ## Build and start
+
+Install the dependencies, build the app and start the server:
 
 ```bash
 npm install
@@ -13,7 +15,7 @@ npm run build
 npm start
 ```
 
-The app is served at the root of its address, for example `http://localhost:3000`. This website is a separate project and is not part of the app.
+The app is then served at the root of its address, for example `http://localhost:3000`. This website is a separate project and is not part of the app.
 
 ## Vercel
 
@@ -21,7 +23,7 @@ Import the repository in Vercel. No environment variables or storage are require
 
 ## Environment variables
 
-Both are optional.
+All of them are optional.
 
 | Variable                             | Default | Effect                                                                                                                    |
 | ------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |

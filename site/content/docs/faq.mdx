@@ -1,6 +1,6 @@
 ---
 title: "FAQ"
-description: "Answers to common questions about better-vault, the open-source NotebookLM alternative."
+description: "Answers to common questions about better-vault, the open-source NotebookLM alternative: its price, AI models, local AI, data storage, the desktop app and more."
 ---
 
 ## What is better-vault?
@@ -17,15 +17,15 @@ Yes. better-vault works with Anthropic's Claude models, OpenAI's GPT models and 
 
 ## Can I run it with local models?
 
-Yes. Run better-vault on your computer and connect Ollama or LM Studio in **Settings → AI providers**. Your sources then never leave your machine. See [Providers](/docs/providers).
+Yes. Use the desktop app or run better-vault on your computer, then connect Ollama or LM Studio in **Settings → AI providers**. Your sources then never leave your machine. [Providers](/docs/providers) walks through it.
 
 ## Where is my data stored?
 
-In your browser's IndexedDB. There is no account and no server database. API routes only forward each request to the provider you picked, and never store or log keys or content. See [Privacy](/docs/privacy).
+On your device. The web app keeps notebooks in your browser's IndexedDB, and the desktop app keeps them in a SQLite file on your computer. There is no account and no server database, and the API routes only forward each request to the provider you picked, without storing or logging keys or content. [Privacy](/docs/privacy) has the details.
 
 ## Can I self-host better-vault?
 
-Yes. It is a Next.js app with no database: `npm run build && npm start` on any Node.js 20.9+ host, or deploy it to Vercel. See [Self-hosting](/docs/self-hosting).
+Yes. It is a Next.js app with no database, so it runs on any Node.js 20.9+ host with `npm run build && npm start`, or on Vercel. [Self-hosting](/docs/self-hosting) explains the options.
 
 ## Does better-vault make audio overviews?
 
@@ -37,8 +37,8 @@ PDF, Markdown and text files (up to 20 MB each), web pages by address, and paste
 
 ## Is there a desktop app?
 
-Not yet. An Electron desktop app for macOS, Windows and Linux is planned. See the [roadmap](/docs/roadmap).
+Yes. better-vault runs as a desktop app on macOS, Windows and Linux, with the same interface as the web app, and updates itself. [Desktop app](/docs/desktop) has the downloads.
 
 ## How do I contribute or translate it?
 
-Read [Architecture](/docs/contributing) and the [contributing guide](https://github.com/better-vault/better-vault/blob/main/CONTRIBUTING.md) on GitHub. The interface is fully translatable; see [Translations](/docs/contributing/translations).
+Start with [Architecture](/docs/contributing) and the [contributing guide](https://github.com/better-vault/better-vault/blob/main/CONTRIBUTING.md) on GitHub. The interface is fully translatable, and [Translations](/docs/contributing/translations) shows how to add a language.

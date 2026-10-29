@@ -31,13 +31,15 @@ Chat with your sources, and turn them into reports, flashcards, quizzes, tables 
 
 ## ✨ What it does
 
-better-vault is a free, open-source alternative to Google NotebookLM (now Gemini Notebook). It is a research notebook: you add **sources** (PDFs, web pages, notes, text files) to a **notebook**, then:
+better-vault is a free, open-source alternative to Google NotebookLM (now Gemini Notebook). It is a research notebook: you add **sources** such as PDFs, web pages, notes and text files to a **notebook**, and work with them using the AI model you choose.
 
-- **Chat with your sources.** Answers cite the passages they came from. Switch to **Web** to let the model search the internet with its provider's built-in search.
-- **Create study material** in the **Studio**: reports, flashcards, quizzes, data tables, mind maps, slide decks, infographics and Anatomy figures. Each one opens a dialog of options, much like NotebookLM.
-- **Sketch on a whiteboard.** An Excalidraw-style board for your own diagrams, or to draw over a figure or infographic.
-- **Choose your model.** OpenAI, Anthropic, Google, or a local model through Ollama or LM Studio. You bring the key; nothing is locked to one vendor.
-- **Keep your data.** Everything is stored in your browser (IndexedDB). There is no account and no database, and your keys never leave your browser except to reach the model you picked.
+**Chat with your sources** and get answers that cite the passages they came from. Switch to **Web** mode to let the model search the internet with its provider's built-in search.
+
+**Create study material** in the **Studio**: reports, flashcards, quizzes, data tables, mind maps, slide decks, infographics and Anatomy figures, each with a dialog of options much like NotebookLM's. A **whiteboard** in the style of Excalidraw is there for your own diagrams, or for drawing over a figure or an infographic.
+
+**Choose your model** from OpenAI, Anthropic and Google with your own key, or run a local model through Ollama or LM Studio. Nothing is locked to one vendor.
+
+**Keep your data on your device.** The web app stores everything in your browser's IndexedDB, and the **desktop app** for macOS, Windows and Linux keeps it in a SQLite file on your computer. There is no account and no server database, and your keys only leave your device to reach the model you picked.
 
 | Studio tool     | What you get                                                                                                                                                                                                                           | Download as         |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
@@ -54,6 +56,12 @@ better-vault is a free, open-source alternative to Google NotebookLM (now Gemini
 Audio and video overviews are out of scope.
 
 ## 🚀 Getting started
+
+### Desktop app
+
+Download the installer for macOS, Windows or Linux from the [latest release](https://github.com/better-vault/better-vault/releases/latest), install it and open it. It updates itself when a new version comes out. The [desktop docs](https://better-vault.dev/docs/desktop) cover installing and moving your notebooks over.
+
+### Run from source
 
 **Requirements:** [Node.js](https://nodejs.org) 20.9 or newer, with npm 10 (included with Node.js).
 
@@ -83,9 +91,9 @@ Local models work when better-vault runs on the same machine as the model server
 
 ## 🔐 Where your data lives
 
-- Notebooks, sources, chats and Studio outputs are stored in your browser's IndexedDB. **Settings → Data** exports and imports them as a JSON file.
-- API keys are stored in your browser. Each request sends the key to this app's own API route, which passes it to the provider and never stores or logs it.
-- If you host better-vault for other people, they use their own keys in their own browsers.
+Notebooks, sources, chats, Studio outputs and API keys stay on your device: in your browser's IndexedDB in the web app, or in `better-vault.sqlite` in the app's data folder in the desktop app. **Settings → Data** exports and imports notebooks as a JSON file, which also moves them between the two.
+
+Each request sends your key to the app's own API route, which passes it to the provider and never stores or logs it. If you host better-vault for other people, they use their own keys in their own browsers.
 
 ### Hosting for others
 
@@ -98,7 +106,7 @@ Two optional environment variables tighten a public deployment:
 
 ## 🧱 Tech stack
 
-[Next.js 16](https://nextjs.org) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Tailwind CSS 4](https://tailwindcss.com)
+[Next.js 16](https://nextjs.org) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Electron](https://www.electronjs.org) · [Tailwind CSS 4](https://tailwindcss.com)
 
 ## 🤝 Contributing
 
@@ -110,6 +118,7 @@ Contributions are welcome, from typo fixes to new Studio tools. Please read [CON
    ```bash
    npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
    ```
+   If your change touches the server, storage or anything else the desktop app depends on, run the checks in `desktop/` too (see [CONTRIBUTING.md](CONTRIBUTING.md#the-desktop-app)).
 4. Open a pull request and fill in the template.
 
 Contributors and AI coding agents should also read [AGENTS.md](AGENTS.md), which explains the project's concepts and rules.
@@ -127,9 +136,7 @@ The UI is fully translatable with [i18next](https://www.i18next.com). English is
 
 Found a bug or have an idea? [Open an issue](https://github.com/better-vault/better-vault/issues/new/choose) and pick a template:
 
-- **Bug report**: what happened, the steps to reproduce it, your browser and the provider/model you used.
-- **Feature request**: the problem you want solved and how you imagine it working.
-- **Translation**: offer or request a new language.
+A **bug report** asks what happened, the steps to reproduce it, your browser or desktop system, and the provider and model you used. A **feature request** asks for the problem you want solved and how you imagine it working. The **translation** template is for offering or requesting a new language.
 
 Please search existing issues first, and **never paste API keys** into an issue. Security problems should be reported privately, as described in [SECURITY.md](SECURITY.md).
 
