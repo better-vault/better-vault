@@ -31,7 +31,8 @@ function lastModifiedByFile(paths: string[]): Map<string, Date> {
 /** The landing page and every docs page. Canonical URLs only; the app is not listed. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const home = "app/(home)/page.tsx";
-  const dates = lastModifiedByFile(["content/docs", home]);
+  const download = "app/(home)/download/page.tsx";
+  const dates = lastModifiedByFile(["content/docs", home, download]);
   const entry = (url: string, file: string) => {
     const lastModified = dates.get(file);
     return lastModified ? { url: absoluteUrl(url), lastModified } : { url: absoluteUrl(url) };
@@ -39,6 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     entry("/", home),
+    entry("/download", download),
     ...source.getPages().map((page) => entry(page.url, `content/docs/${page.path}`)),
   ];
 }

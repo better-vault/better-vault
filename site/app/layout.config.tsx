@@ -35,6 +35,14 @@ const roadmapLink: LinkItemType = {
   active: "url",
 };
 
+/** The desktop app's download page. */
+const downloadLink: LinkItemType = {
+  type: "main",
+  text: "Download",
+  url: "/download",
+  active: "url",
+};
+
 /** The call to action: the guide to installing and using better-vault. */
 const startLink: LinkItemType = { type: "button", text: "Get started", url: "/docs/quickstart", secondary: true };
 
@@ -80,10 +88,10 @@ const githubMenuLink: LinkItemType = {
 export const baseOptions: BaseLayoutProps = {
   nav: { title: navTitle, url: "/" },
   githubUrl: undefined,
-  links: [docsLink, roadmapLink, githubDocsLink, startLink],
+  links: [docsLink, roadmapLink, downloadLink, githubDocsLink, startLink],
 };
 
 export const homeOptions: BaseLayoutProps = {
   ...baseOptions,
-  links: [docsLink, roadmapLink, githubHomeLink, githubMenuLink, startLink],
+  links: [docsLink, roadmapLink, downloadLink, githubHomeLink, githubMenuLink, startLink],
 };
