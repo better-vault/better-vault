@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
-  Download04Icon,
-  PlayIcon,
-} from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, ArrowRight01Icon, Download04Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { usePrefersReducedMotion } from "@/lib/dither";
 import { tools } from "@/lib/site/tools";
@@ -17,9 +12,10 @@ import { SCENES, type Beat } from "./scenes";
 /*
  * The Studio on the landing page, one tool at a time on a stage, after
  * Darkroom's Scaena. Arrows and the dots step through the tools, and each
- * scene can be played with. "Walkthrough" plays every tool in turn on the
- * same stage: a cursor goes to a control, the rest dims, a handwritten note
- * draws its line to the control, and the cursor clicks it.
+ * scene can be played with. While the section is on screen, a walkthrough
+ * plays every tool in turn, again and again: a cursor goes to a control, the
+ * rest dims, a handwritten note draws its line to the control, and the cursor
+ * clicks it. A visitor's first click hands the stage over to them.
  */
 
 interface Box {
@@ -73,13 +69,23 @@ export function StudioStage() {
   const reduced = usePrefersReducedMotion();
   const [index, setIndex] = useState(0);
   const [step, setStep] = useState(0);
-  const [walking, setWalking] = useState(false);
+  const [inView, setInView] = useState(false);
+  /** Set once the visitor uses the stage themselves; the tour then stays off. */
+  const [handsOn, setHandsOn] = useState(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [ring, setRing] = useState(0);
   const [note, setNote] = useState<Note | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const stageRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
+  /** The tool shown, for the tour to resume from. */
+  const indexRef = useRef(0);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+  // The tour plays only on screen, until the visitor takes over, and never
+  // for people who asked for less motion.
+  const walking = inView && !handsOn && !reduced;
 
   const tool = tools[index];
   const { View } = SCENES[tool.id];
@@ -107,13 +113,21 @@ export function StudioStage() {
     };
   }, []);
 
-  const stop = useCallback(() => {
-    setWalking(false);
-    setCursor(null);
-    setNote(null);
+  /** The visitor's own click or key: the tour stops for good. */
+  const takeOver = useCallback(() => setHandsOn(true), []);
+
+  // Whether the stage is on screen.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.6,
+    });
+    observer.observe(stage);
+    return () => observer.disconnect();
   }, []);
 
-  // The walkthrough: every tool, beat by beat, then back to the page.
+  // The walkthrough: every tool, beat by beat, round and round, from the one shown.
   useEffect(() => {
     if (!walking) return;
     let stopped = false;
@@ -126,7 +140,7 @@ export function StudioStage() {
         setSize({ width: stage.width, height: stage.height });
         setCursor({ x: stage.width / 2, y: stage.height - 72 });
       }
-      for (let at = 0; at < tools.length; at++) {
+      for (let at = indexRef.current; ; at = (at + 1) % tools.length) {
         if (stopped) return;
         setIndex(at);
         setStep(0);
@@ -152,55 +166,39 @@ export function StudioStage() {
           await pace(250);
         }
       }
-      if (!stopped) stop();
     })();
 
     return () => {
       stopped = true;
     };
-  }, [walking, reduced, measure, stop]);
+  }, [walking, reduced, measure]);
 
-  // While walking: Esc leaves, and notes follow the stage's size.
-
+  // While walking, notes follow the stage's size.
   useEffect(() => {
     if (!walking) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") stop();
-    };
     const onResize = () => {
       const stage = stageRef.current?.getBoundingClientRect();
       if (stage) setSize({ width: stage.width, height: stage.height });
     };
-    window.addEventListener("keydown", onKey);
     window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [walking, stop]);
-
-  const start = () => {
-    stageRef.current?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
-    setIndex(0);
-    setStep(0);
-    setWalking(true);
-  };
+    return () => window.removeEventListener("resize", onResize);
+  }, [walking]);
 
   const onKeyDown = (event: React.KeyboardEvent) => {
-    if (walking) return;
     if (event.key === "ArrowRight") show(index + 1);
     else if (event.key === "ArrowLeft") show(index - 1);
-    else if (event.key.toLowerCase() === "w" && !event.metaKey && !event.ctrlKey) start();
     else return;
+    takeOver();
     event.preventDefault();
   };
 
-  const layout = note && size.width ? noteLayout(note, size) : null;
-  const spotlight: CSSProperties | undefined = note
+  const shown = walking ? note : null;
+  const layout = shown && size.width ? noteLayout(shown, size) : null;
+  const spotlight: CSSProperties | undefined = shown
     ? {
-        background: `radial-gradient(ellipse ${note.box.width / 2 + 70}px ${note.box.height / 2 + 60}px at ${
-          note.box.x + note.box.width / 2
-        }px ${note.box.y + note.box.height / 2}px, transparent 55%, color-mix(in oklab, var(--background) 70%, transparent) 100%)`,
+        background: `radial-gradient(ellipse ${shown.box.width / 2 + 70}px ${shown.box.height / 2 + 60}px at ${
+          shown.box.x + shown.box.width / 2
+        }px ${shown.box.y + shown.box.height / 2}px, transparent 55%, color-mix(in oklab, var(--background) 70%, transparent) 100%)`,
       }
     : undefined;
 
@@ -218,10 +216,11 @@ export function StudioStage() {
           ref={stageRef}
           className={cn("overflow-hidden rounded-2xl border bg-card", "absolute inset-0")}
         >
-          <div className="absolute inset-0 flex items-center justify-center p-6 pb-16">
+          <div className="absolute inset-0 flex items-center justify-center p-6 pb-6">
             <div
               key={tool.id}
               ref={sceneRef}
+              onPointerDownCapture={takeOver}
               className={cn(
                 // Phones get the scene a little smaller, rather than cut off.
                 "stage-note transition-transform duration-500 max-sm:scale-[0.82]",
@@ -237,13 +236,17 @@ export function StudioStage() {
             aria-hidden="true"
             className={cn(
               "pointer-events-none absolute inset-0 transition-opacity duration-300",
-              note ? "opacity-100" : "opacity-0",
+              shown ? "opacity-100" : "opacity-0",
             )}
             style={spotlight}
           />
 
-          {note && layout ? (
-            <div key={note.key} aria-live="polite" className="pointer-events-none absolute inset-0">
+          {shown && layout ? (
+            <div
+              key={shown.key}
+              aria-live="polite"
+              className="pointer-events-none absolute inset-0"
+            >
               <svg
                 className="absolute inset-0 size-full overflow-visible text-foreground"
                 aria-hidden="true"
@@ -271,7 +274,7 @@ export function StudioStage() {
                 className="stage-note absolute -translate-x-1/2 -translate-y-1/2 font-[Excalifont] text-xl whitespace-nowrap sm:text-2xl"
                 style={{ left: layout.textX, top: layout.textY }}
               >
-                {note.beat.note}
+                {shown.beat.note}
               </p>
             </div>
           ) : null}
@@ -303,54 +306,38 @@ export function StudioStage() {
             </div>
           ) : null}
 
-          {walking ? (
+          <>
             <button
               type="button"
-              onClick={stop}
-              className="absolute end-4 top-4 z-20 flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                takeOver();
+                show(index - 1);
+              }}
+              aria-label="Previous tool"
+              className="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
             >
-              <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">Esc</kbd>
-              Exit
+              <HugeiconsIcon
+                icon={ArrowLeft01Icon}
+                className="size-4 rtl:-scale-x-100"
+                aria-hidden="true"
+              />
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => show(index - 1)}
-                aria-label="Previous tool"
-                className="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
-              >
-                <HugeiconsIcon
-                  icon={ArrowLeft01Icon}
-                  className="size-4 rtl:-scale-x-100"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                type="button"
-                onClick={() => show(index + 1)}
-                aria-label="Next tool"
-                className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
-              >
-                <HugeiconsIcon
-                  icon={ArrowRight01Icon}
-                  className="size-4 rtl:-scale-x-100"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                type="button"
-                onClick={start}
-                className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-sm shadow-xs hover:bg-accent"
-              >
-                <HugeiconsIcon icon={PlayIcon} className="size-3.5" aria-hidden="true" />
-                Walkthrough
-                <kbd className="rounded border bg-muted px-1 font-mono text-[10px] text-muted-foreground">
-                  W
-                </kbd>
-              </button>
-            </>
-          )}
+            <button
+              type="button"
+              onClick={() => {
+                takeOver();
+                show(index + 1);
+              }}
+              aria-label="Next tool"
+              className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
+            >
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                className="size-4 rtl:-scale-x-100"
+                aria-hidden="true"
+              />
+            </button>
+          </>
         </div>
       </div>
 
@@ -393,7 +380,10 @@ export function StudioStage() {
             <button
               key={item.id}
               type="button"
-              onClick={() => show(at)}
+              onClick={() => {
+                takeOver();
+                show(at);
+              }}
               aria-label={item.name}
               aria-current={at === index}
               className={cn(

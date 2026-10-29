@@ -169,7 +169,7 @@ export default function HomePage() {
       <Section
         id="studio"
         title="Nine ways to learn from your sources"
-        intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. Step through the tools, try them, or press Walkthrough."
+        intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. A short tour plays when you get here; click anything to take over."
       >
         <StudioStage />
       </Section>
