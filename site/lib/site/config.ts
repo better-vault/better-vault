@@ -7,7 +7,7 @@
 export const site = {
   name: "better-vault",
   /** Override to point a preview deploy at its own host. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://better-vault.dev",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.better-vault.dev",
   /** For the <title> of the home page (with the name: 52 characters). */
   titleTagline: "The open-source NotebookLM alternative",
   /** For social cards, which have more room. */
