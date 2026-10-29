@@ -1,4 +1,3 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import {
   providerIds,
   providers,
@@ -6,7 +5,8 @@ import {
   type ProviderCredentials,
   type ProviderId,
 } from "@/lib/ai/catalog";
-import { db } from "./database";
+import { useStoreQuery } from "./live";
+import { store } from "./store";
 
 export interface ProviderSettings {
   enabled: boolean;
@@ -55,17 +55,15 @@ function withDefaults(saved: Partial<AppSettings> | undefined): AppSettings {
 }
 
 export async function getSettings(): Promise<AppSettings> {
-  const row = await db.settings.get(SETTINGS_KEY);
-  return withDefaults(row?.value as Partial<AppSettings> | undefined);
+  const value = await store().getSetting(SETTINGS_KEY);
+  return withDefaults(value as Partial<AppSettings> | undefined);
 }
 
 /** Applies a change to the saved settings. */
 export async function updateSettings(change: (settings: AppSettings) => void): Promise<void> {
-  await db.transaction("rw", db.settings, async () => {
-    const settings = await getSettings();
-    change(settings);
-    await db.settings.put({ key: SETTINGS_KEY, value: settings });
-  });
+  const settings = await getSettings();
+  change(settings);
+  await store().putSetting(SETTINGS_KEY, settings);
 }
 
 export async function updateProvider(id: ProviderId, patch: Partial<ProviderSettings>) {
@@ -76,7 +74,7 @@ export async function updateProvider(id: ProviderId, patch: Partial<ProviderSett
 
 /** The saved settings, live. `undefined` while loading. */
 export function useSettings(): AppSettings | undefined {
-  return useLiveQuery(getSettings, []);
+  return useStoreQuery(getSettings, [], ["settings"]);
 }
 
 /** A provider can be used once it is enabled and has a key (cloud) or an address (local). */

@@ -1,5 +1,4 @@
 import { providers, type ModelRef, type ProviderCredentials } from "@/lib/ai/catalog";
-import { db } from "@/lib/db/database";
 import {
   activeModel,
   contextCharsFor,
@@ -7,7 +6,7 @@ import {
   getSettings,
   isProviderReady,
 } from "@/lib/db/settings";
-import { getChunks } from "@/lib/db/sources";
+import { getChunks, getSources } from "@/lib/db/sources";
 import { selectPassages, type Passage } from "@/lib/grounding/passages";
 
 export interface ModelRequest {
@@ -45,9 +44,7 @@ export async function modelRequestFor(
   const settings = await getSettings();
   const model = activeModel(settings);
   if (!model) throw new NoModelError();
-  const sources = (await db.sources.bulkGet([...sourceIds])).filter(
-    (source) => source !== undefined,
-  );
+  const sources = await getSources(sourceIds);
   const chunks = await getChunks(sources.map((source) => source.id));
   const limit = contextCharsFor(settings, model.provider);
   const passages = selectPassages({

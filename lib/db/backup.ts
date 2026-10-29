@@ -1,15 +1,8 @@
 import { z } from "zod";
 import { chunkText } from "@/lib/grounding/chunk";
 import { conversationTitle } from "@/lib/chat/title";
-import {
-  db,
-  type Chunk,
-  type Conversation,
-  type Notebook,
-  type Source,
-  type StoredMessage,
-  type StudioOutput,
-} from "./database";
+import { store } from "./store";
+import type { Chunk, Conversation, Notebook, Source, StoredMessage, StudioOutput } from "./types";
 
 /**
  * A backup holds notebooks, sources, chats and Studio outputs. It never holds
@@ -39,23 +32,8 @@ const backupSchema = z.object({
 });
 
 export async function exportBackup(): Promise<Backup> {
-  const [notebooks, sources, conversations, messages, outputs] = await Promise.all([
-    db.notebooks.toArray(),
-    db.sources.toArray(),
-    db.conversations.toArray(),
-    db.messages.toArray(),
-    db.outputs.toArray(),
-  ]);
-  return {
-    app: "better-vault",
-    format: 2,
-    exportedAt: Date.now(),
-    notebooks,
-    sources,
-    conversations,
-    messages,
-    outputs,
-  };
+  const content = await store().exportAll();
+  return { app: "better-vault", format: 2, exportedAt: Date.now(), ...content };
 }
 
 /** Adds the backup's content, replacing items with the same id. Returns how many notebooks it held. */
@@ -77,21 +55,15 @@ export async function importBackup(raw: unknown): Promise<number> {
       text,
     })),
   );
-  await db.transaction(
-    "rw",
-    [db.notebooks, db.sources, db.chunks, db.conversations, db.messages, db.outputs],
-    async () => {
-      await db.notebooks.bulkPut(backup.notebooks);
-      await db.conversations.bulkPut(backup.conversations);
-      await db.sources.bulkPut(backup.sources);
-      await db.chunks
-        .where("sourceId")
-        .anyOf(backup.sources.map((s) => s.id))
-        .delete();
-      await db.chunks.bulkPut(chunks);
-      await db.messages.bulkPut(backup.messages);
-      await db.outputs.bulkPut(backup.outputs);
+  await store().importAll(
+    {
+      notebooks: backup.notebooks,
+      sources: backup.sources,
+      conversations: backup.conversations,
+      messages: backup.messages,
+      outputs: backup.outputs,
     },
+    chunks,
   );
   return backup.notebooks.length;
 }
@@ -132,18 +104,5 @@ function upgradeBackup(
 
 /** Deletes every notebook, source, chat and output. Settings and keys are kept. */
 export async function deleteAllData() {
-  await db.transaction(
-    "rw",
-    [db.notebooks, db.sources, db.chunks, db.conversations, db.messages, db.outputs],
-    async () => {
-      await Promise.all([
-        db.notebooks.clear(),
-        db.sources.clear(),
-        db.chunks.clear(),
-        db.conversations.clear(),
-        db.messages.clear(),
-        db.outputs.clear(),
-      ]);
-    },
-  );
+  await store().clearAll();
 }

@@ -2,13 +2,14 @@
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { db, type StudioOutput } from "@/lib/db/database";
+import type { StudioOutput } from "@/lib/db/database";
 import {
   createOutput,
   createReadyOutput,
   failOutput,
   finishOutput,
   markInterruptedOutputs,
+  restartOutput,
 } from "@/lib/db/outputs";
 import { activeModel, getSettings } from "@/lib/db/settings";
 import {
@@ -134,11 +135,7 @@ export function StudioRunnerProvider({
         });
       },
       retry: async (output) => {
-        await db.outputs.update(output.id, {
-          status: "generating",
-          error: undefined,
-          updatedAt: Date.now(),
-        });
+        await restartOutput(output.id);
         void run(output.id, output.toolId as StudioToolId, output.options as SavedOptions);
       },
     };

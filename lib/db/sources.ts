@@ -1,7 +1,8 @@
 import { generateId } from "ai";
-import { useLiveQuery } from "dexie-react-hooks";
 import { chunkText, normaliseText } from "@/lib/grounding/chunk";
-import { db, type Chunk, type Source, type SourceKind } from "./database";
+import { useStoreQuery } from "./live";
+import { store } from "./store";
+import type { Chunk, Source, SourceKind } from "./types";
 
 export interface NewSource {
   notebookId: string;
@@ -35,49 +36,57 @@ export async function addSource(input: NewSource): Promise<Source> {
     index,
     text: piece,
   }));
-  await db.transaction("rw", [db.sources, db.chunks, db.notebooks], async () => {
-    await db.sources.add(source);
-    await db.chunks.bulkAdd(chunks);
-    await db.notebooks.update(source.notebookId, { updatedAt: Date.now() });
-  });
+  await store().addSource(source, chunks, Date.now());
   return source;
 }
 
 export async function setSourceSelected(id: string, selected: boolean) {
-  await db.sources.update(id, { selected });
+  await store().patchSource(id, { selected });
 }
 
 export async function setAllSourcesSelected(notebookId: string, selected: boolean) {
-  await db.sources.where("notebookId").equals(notebookId).modify({ selected });
+  await store().patchNotebookSources(notebookId, { selected });
 }
 
 export async function renameSource(id: string, title: string) {
-  await db.sources.update(id, { title });
+  await store().patchSource(id, { title });
 }
 
 export async function deleteSource(id: string) {
-  await db.transaction("rw", [db.sources, db.chunks], async () => {
-    await db.chunks.where("sourceId").equals(id).delete();
-    await db.sources.delete(id);
-  });
+  await store().deleteSource(id);
 }
 
 /** A notebook's sources, oldest first. `undefined` while loading. */
 export function useSources(notebookId: string): Source[] | undefined {
-  return useLiveQuery(
-    () => db.sources.where("notebookId").equals(notebookId).sortBy("createdAt"),
-    [notebookId],
-  );
+  return useStoreQuery(() => store().listSources(notebookId), [notebookId], ["sources"]);
 }
 
 /** The passages of the given sources, in reading order. */
 export async function getChunks(sourceIds: readonly string[]): Promise<Chunk[]> {
-  const chunks = await db.chunks
-    .where("sourceId")
-    .anyOf([...sourceIds])
-    .toArray();
+  const chunks = await store().getChunks([...sourceIds]);
   const order = new Map(sourceIds.map((id, at) => [id, at]));
   return chunks.sort(
     (a, b) => (order.get(a.sourceId) ?? 0) - (order.get(b.sourceId) ?? 0) || a.index - b.index,
+  );
+}
+
+/** A notebook's sources, oldest first. */
+export function listSources(notebookId: string): Promise<Source[]> {
+  return store().listSources(notebookId);
+}
+
+/** The sources that still exist among `ids`, in that order. */
+export function getSources(ids: readonly string[]): Promise<Source[]> {
+  return store().getSources([...ids]);
+}
+
+/** One source, live, with its passages in reading order. `undefined` while loading. */
+export function useSourceWithChunks(
+  id: string,
+): { source: Source | undefined; chunks: Chunk[] } | undefined {
+  return useStoreQuery(
+    async () => ({ source: await store().getSource(id), chunks: await getChunks([id]) }),
+    [id],
+    ["sources", "chunks"],
   );
 }

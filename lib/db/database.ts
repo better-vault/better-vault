@@ -1,93 +1,22 @@
 import Dexie, { type EntityTable } from "dexie";
-import type { ModelRef } from "@/lib/ai/catalog";
-import type { ChatMessage } from "@/lib/chat/types";
 import { conversationTitle } from "@/lib/chat/title";
 import { cleanText } from "@/lib/grounding/clean";
+import type {
+  Chunk,
+  Conversation,
+  Notebook,
+  SettingRow,
+  Source,
+  StoredMessage,
+  StudioOutput,
+} from "./types";
+
+export type * from "./types";
 
 /**
- * Everything better-vault stores lives in the browser, in this IndexedDB
- * database. There is no server-side database.
+ * The web app's store: an IndexedDB database in the browser. The desktop app
+ * uses SQLite instead (`./sqlite`). Both sit behind `Backend` (`./backend`).
  */
-
-export interface Notebook {
-  id: string;
-  title: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export type SourceKind = "text" | "markdown" | "pdf" | "url";
-
-export interface Source {
-  id: string;
-  notebookId: string;
-  title: string;
-  kind: SourceKind;
-  /** The page a web source was read from. */
-  url?: string;
-  /** The name of an uploaded file. */
-  fileName?: string;
-  /** The source as plain text. */
-  text: string;
-  charCount: number;
-  /** Only selected sources are given to the model. */
-  selected: boolean;
-  createdAt: number;
-}
-
-/** A passage of a source, used for retrieval and citations. */
-export interface Chunk {
-  id: string;
-  notebookId: string;
-  sourceId: string;
-  index: number;
-  text: string;
-}
-
-/** One chat in a notebook. A notebook can have many. */
-export interface Conversation {
-  id: string;
-  notebookId: string;
-  /** The first question, shortened, until the user renames it. */
-  title: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface StoredMessage {
-  id: string;
-  notebookId: string;
-  conversationId: string;
-  /** The message's place in its conversation. */
-  createdAt: number;
-  message: ChatMessage;
-}
-
-export type OutputStatus = "generating" | "ready" | "error";
-
-/** One Studio result, such as a quiz or a mind map. */
-export interface StudioOutput {
-  id: string;
-  notebookId: string;
-  toolId: string;
-  title: string;
-  status: OutputStatus;
-  /** The options chosen in the tool's dialog. */
-  options: unknown;
-  sourceIds: string[];
-  /** The tool's output, shaped by its schema. Set when `status` is `ready`. */
-  data?: unknown;
-  error?: string;
-  model?: ModelRef;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface SettingRow {
-  key: string;
-  value: unknown;
-}
-
 export class BetterVaultDatabase extends Dexie {
   notebooks!: EntityTable<Notebook, "id">;
   sources!: EntityTable<Source, "id">;
@@ -173,5 +102,3 @@ export class BetterVaultDatabase extends Dexie {
       });
   }
 }
-
-export const db = new BetterVaultDatabase();

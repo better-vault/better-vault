@@ -14,10 +14,9 @@ import {
 } from "react";
 import { providers } from "@/lib/ai/catalog";
 import type { ChatMessage, ChatMode } from "@/lib/chat/types";
-import { db } from "@/lib/db/database";
 import { latestConversation, loadChat, saveChat } from "@/lib/db/messages";
 import { activeModel, contextCharsFor, credentialsFor, getSettings } from "@/lib/db/settings";
-import { getChunks } from "@/lib/db/sources";
+import { getChunks, listSources } from "@/lib/db/sources";
 import { selectPassages } from "@/lib/grounding/passages";
 
 /** How many earlier messages are sent with each question. */
@@ -157,9 +156,7 @@ function ChatRunner({
       const settings = await getSettings();
       const model = activeModel(settings);
       if (!model) throw new Error("No model is set up.");
-      const sources = (
-        await db.sources.where("notebookId").equals(notebookId).sortBy("createdAt")
-      ).filter((source) => source.selected);
+      const sources = (await listSources(notebookId)).filter((source) => source.selected);
       const chunks = await getChunks(sources.map((source) => source.id));
       const passages = selectPassages({
         sources,

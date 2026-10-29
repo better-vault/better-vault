@@ -1,13 +1,11 @@
 "use client";
 
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Sheet } from "@/components/panelui/sheet";
-import { db } from "@/lib/db/database";
-import { getChunks } from "@/lib/db/sources";
+import { useSourceWithChunks } from "@/lib/db/sources";
 import { countWords } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -33,8 +31,9 @@ export function SourceReader({ reading, onClose }: SourceReaderProps) {
 
 function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string }) {
   const { t, i18n } = useTranslation("sources");
-  const source = useLiveQuery(() => db.sources.get(sourceId), [sourceId]);
-  const chunks = useLiveQuery(() => getChunks([sourceId]), [sourceId]);
+  const read = useSourceWithChunks(sourceId);
+  const source = read?.source;
+  const chunks = read?.chunks;
   const highlighted = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
