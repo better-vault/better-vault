@@ -5,6 +5,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-30
+
+### Added
+
+- The first desktop installers: a signed and notarized DMG for macOS (Apple silicon and Intel), an installer for Windows, and an AppImage and a .deb for Linux, available from better-vault.dev/download and this release.
+
 ## [0.4.0] - 2026-10-30
 
 ### Added
@@ -72,7 +78,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/better-vault/better-vault/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/better-vault/better-vault/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/better-vault/better-vault/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/better-vault/better-vault/compare/v0.1.0...v0.2.0
