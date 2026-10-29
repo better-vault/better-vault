@@ -1,0 +1,75 @@
+---
+title: "Desktop app"
+description: "Install the better-vault desktop app for macOS, Windows or Linux. It has the same interface as the web app, keeps notebooks in a local file and updates itself."
+---
+
+The desktop app is better-vault for macOS, Windows and Linux, with the same interface as the web app and no setup.
+
+It runs the whole app on your computer, including the server that talks to your AI provider. Your notebooks are kept in a file on your disk instead of in a browser, and the app updates itself when a new version is released.
+
+## Download
+
+Every release on GitHub has installers for each system. Open the [latest release](https://github.com/better-vault/better-vault/releases/latest) and download the file for your computer.
+
+| System  | File                                                                             |
+| ------- | -------------------------------------------------------------------------------- |
+| macOS   | `.dmg`: `arm64` for Apple silicon (M1 and later), `x64` for Intel Macs          |
+| Windows | `.exe` installer for 64-bit Windows 10 and 11                                   |
+| Linux   | `.AppImage`, which runs on most distributions, or `.deb` for Debian and Ubuntu  |
+
+## Install
+
+<Steps>
+<Step>
+
+### macOS
+
+Open the `.dmg` and drag **better-vault** onto **Applications**. Then open it from Applications or Launchpad.
+
+</Step>
+<Step>
+
+### Windows
+
+Run the installer. It installs better-vault for your user account and opens it.
+
+</Step>
+<Step>
+
+### Linux
+
+Make the AppImage executable and run it:
+
+```bash
+chmod +x better-vault-*.AppImage
+./better-vault-*.AppImage
+```
+
+On Debian or Ubuntu you can install the `.deb` with `sudo apt install ./better-vault-*.deb` instead.
+
+</Step>
+</Steps>
+
+## Updates
+
+The app checks for a new version when it starts and every few hours after that. It downloads the update in the background and asks whether to restart now; if you choose later, the update is installed when you quit. You can also choose **Check for Updates…** in the app menu on macOS, or in the Help menu on Windows and Linux.
+
+## Where your data lives
+
+Notebooks, sources, chats, Studio outputs and settings are kept in one SQLite file, `better-vault.sqlite`, in the app's data folder.
+
+| System  | Data folder                                  |
+| ------- | -------------------------------------------- |
+| macOS   | `~/Library/Application Support/better-vault` |
+| Windows | `%APPDATA%\better-vault`                     |
+| Linux   | `~/.config/better-vault`                     |
+
+Uninstalling the app leaves this folder in place, so your notebooks are still there if you install it again.
+
+## Move notebooks from the browser
+
+The web app and the desktop app keep separate data. To bring your browser notebooks over, open **Settings → Data** in the web app and export a backup. Then open the same screen in the desktop app and import it. Backups never contain API keys, so paste your keys again in **Settings → AI providers**.
+
+## Local models
+
+The desktop app works well with Ollama and LM Studio. Start the model server, turn the provider on in **Settings → AI providers**, and your sources never leave your computer. [Providers and models](/docs/providers) has the steps.

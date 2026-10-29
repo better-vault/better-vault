@@ -5,6 +5,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- A desktop app for macOS, Windows and Linux, built with Electron. It shows the same interface as the web app, runs the app's server on your computer, and keeps notebooks in a SQLite file (`better-vault.sqlite` in the app's data folder) instead of the browser. Backups from the web app import into it.
+- Automatic updates for the desktop app from GitHub releases, with **Check for Updates…** in the menu. macOS builds are signed and notarized.
+- A macOS installer window with its own background (designed with Dmgly).
+- A Desktop workflow that builds the installers for every release tag and attaches them to the release.
+- A desktop app page in the documentation.
+
+### Changed
+
+- Storage goes through one interface with two stores, IndexedDB in the browser and SQLite on the desktop, and the database tests run against both.
+- The documentation, README and contributing guide are rewritten in plain prose, with tables for options and steps for procedures.
+- The roadmap moves the desktop app to shipped and renumbers the next milestones.
+
 ## [0.3.0] - 2026-10-27
 
 ### Added
