@@ -47,3 +47,26 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+
+  # The desktop app wraps the web app, so a web change can break it. This
+  # builds the standalone server and an unpacked Linux app on every push.
+  desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: desktop
+      - run: npm run typecheck
+        working-directory: desktop
+      - run: npm run build:server
+        working-directory: desktop
+      - run: npm run pack -- --linux
+        working-directory: desktop

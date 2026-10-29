@@ -1,0 +1,116 @@
+# Builds the desktop app (desktop/) for macOS, Windows and Linux and attaches
+# the installers to a GitHub release.
+#
+# ## When it runs
+#
+# When a release is published (the release step in AGENTS.md creates it), and
+# by hand from the Actions tab with a tag, to rebuild a release's installers:
+#
+#   gh workflow run desktop.yml -R better-vault/better-vault -f tag=v0.4.0
+#
+# The installers are uploaded with the `latest*.yml` files that electron-updater
+# reads, so installed apps update to the newest release.
+#
+# ## macOS signing and notarization (one-time setup)
+#
+# Without these secrets the macOS build is unsigned, and macOS will neither
+# open it without a warning nor install its updates.
+#
+#   CSC_LINK                      the "Developer ID Application" certificate and
+#                                 key exported from Keychain Access as .p12,
+#                                 base64-encoded: base64 -i cert.p12 | pbcopy
+#   CSC_KEY_PASSWORD              the password chosen for that .p12
+#   APPLE_ID                      the Apple ID of the developer account
+#   APPLE_APP_SPECIFIC_PASSWORD   an app-specific password for it (appleid.apple.com)
+#   APPLE_TEAM_ID                 the 10-character team id (developer.apple.com → Membership)
+#
+#   gh secret set CSC_LINK -R better-vault/better-vault < cert.p12.base64
+#   (and the same for the others)
+name: Desktop
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and upload to (for example v0.4.0)
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: --mac
+          - os: windows-latest
+            platform: --win
+          - os: ubuntu-latest
+            platform: --linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: desktop
+      - run: npm run build:server
+        working-directory: desktop
+      - name: Build the installers
+        working-directory: desktop
+        run: npm run build && npx electron-builder --config electron-builder.config.mjs ${{ matrix.platform }} --publish never
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ runner.os }}
+          if-no-files-found: error
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.zip
+            desktop/release/*.exe
+            desktop/release/*.AppImage
+            desktop/release/*.deb
+            desktop/release/*.blockmap
+            desktop/release/latest*.yml
+
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Attach the installers to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l installers
+          gh release upload "$TAG" installers/* --clobber -R "$GITHUB_REPOSITORY"
