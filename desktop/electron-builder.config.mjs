@@ -75,9 +75,12 @@ const config = {
     background: "build/dmgly/assets/dmg-background.png",
     window: { width: 761, height: 406 },
     iconSize: 128,
+    // Dmgly's positions were 225,125 and 535,143. Finder draws the names a
+    // few points lower than its preview, so both icons sit 4 points higher
+    // to centre the names on the label backgrounds in the image.
     contents: [
-      { x: 225, y: 125, type: "file" },
-      { x: 535, y: 143, type: "link", path: "/Applications" },
+      { x: 225, y: 121, type: "file" },
+      { x: 535, y: 139, type: "link", path: "/Applications" },
     ],
   },
 
