@@ -5,12 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-30
+
 ### Added
 
 - A desktop app for macOS, Windows and Linux, built with Electron. It shows the same interface as the web app, runs the app's server on your computer, and keeps notebooks in a SQLite file (`better-vault.sqlite` in the app's data folder) instead of the browser. Backups from the web app import into it.
 - Automatic updates for the desktop app from GitHub releases, with **Check for Updates…** in the menu. macOS builds are signed and notarized.
 - A macOS installer window with a sharp Retina background, an arrow and an instruction to drag the app to Applications.
-- A Desktop workflow that builds the installers for every release tag and attaches them to the release.
+- A Desktop workflow that builds the installers for every published release and attaches them to it.
 - A desktop app page in the documentation.
 - A download page on the website (better-vault.dev/download) that offers the installer for your system, with the Download link next to Roadmap.
 - Root scripts for the website and the desktop app: `setup`, `site:dev`, `site:check`, `desktop:dev`, `desktop:start`, `desktop:check` and more.
@@ -70,7 +72,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/better-vault/better-vault/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/better-vault/better-vault/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/better-vault/better-vault/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/better-vault/better-vault/releases/tag/v0.1.0
