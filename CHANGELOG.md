@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - A desktop app for macOS, Windows and Linux, built with Electron. It shows the same interface as the web app, runs the app's server on your computer, and keeps notebooks in a SQLite file (`better-vault.sqlite` in the app's data folder) instead of the browser. Backups from the web app import into it.
 - Automatic updates for the desktop app from GitHub releases, with **Check for Updates…** in the menu. macOS builds are signed and notarized.
-- A macOS installer window with its own background (designed with Dmgly).
+- A macOS installer window with a sharp Retina background, an arrow and an instruction to drag the app to Applications.
 - A Desktop workflow that builds the installers for every release tag and attaches them to the release.
 - A desktop app page in the documentation.
 

@@ -53,7 +53,7 @@ The repository holds two Next.js projects and a desktop shell. The **app** is th
 
 The desktop app is the web app, not a copy of it. `desktop/scripts/build-server.mjs` builds the root app with `BETTER_VAULT_STANDALONE=1` (Next's `output: "standalone"`, set in `next.config.ts`) and copies the server into `desktop/server/`. The main process (`desktop/src/main.ts`) starts that server on a free local port in a utility process and serves it to the window as `app://better-vault`, so the origin, and with it localStorage, stays the same across launches.
 
-Data goes to `<userData>/better-vault.sqlite` through Node's built-in `node:sqlite`. The preload script (`desktop/src/preload.ts`) exposes `window.betterVault`; `lib/db/store.ts` picks the desktop backend when it exists, and `lib/db/live.ts` re-runs live queries when the main process reports changed tables. Updates come from GitHub releases through `electron-updater`. Packaging is `desktop/electron-builder.config.mjs`, including the DMG design in `desktop/build/dmgly/`.
+Data goes to `<userData>/better-vault.sqlite` through Node's built-in `node:sqlite`. The preload script (`desktop/src/preload.ts`) exposes `window.betterVault`; `lib/db/store.ts` picks the desktop backend when it exists, and `lib/db/live.ts` re-runs live queries when the main process reports changed tables. Updates come from GitHub releases through `electron-updater`. Packaging is `desktop/electron-builder.config.mjs`, including the installer window (`desktop/build/dmg/`, rendered by `desktop/scripts/dmg-background.py`).
 
 **Rule: every change to the web app must keep working in the desktop app.** Interface changes reach it on their own. In the same change, update `desktop/` and run its checks when you:
 
@@ -97,7 +97,7 @@ locales/<lng>/*.json      translations
 desktop/                  the desktop app: its own npm project (Electron, electron-builder)
   src/                    main process (server, app:// protocol, SQLite over IPC, menu, updates) and preload
   scripts/                build-server.mjs (standalone server → server/), bundle.mjs (esbuild)
-  build/                  app icon, macOS entitlements, Dmgly DMG background
+  build/                  app icon, macOS entitlements, DMG background (1x, 2x and its source)
 site/                     the website: its own Next.js project (see below)
   app/(home), app/docs    landing page, and the Fumadocs docs layout and pages
   content/docs            the documentation, as MDX (sidebar order in meta.json)
