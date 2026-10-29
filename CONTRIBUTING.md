@@ -39,17 +39,18 @@ Every AI call goes through the Vercel AI SDK, and web search uses only the provi
 
 The desktop app in `desktop/` is the same web app inside Electron, so most changes reach it without extra work. Data goes through `lib/db`, which has an IndexedDB store for the browser and a SQLite store for the desktop; `npm test` runs the database tests against both.
 
-If your change touches the server, storage, environment variables, new windows, downloads or files, check the desktop app as well:
+If your change touches the server, storage, environment variables, new windows, downloads or files, check the desktop app as well. From the repository root, install the website and desktop projects once, then run the desktop checks:
 
 ```bash
-cd desktop
-npm install
-npm run typecheck
-npm run build:server
-npm run pack
+npm run setup
+npm run desktop:check
 ```
 
-`npm run pack` builds an unpacked app in `desktop/release/` that you can open. To work on the desktop app with hot reload, run `npm run dev` at the root and `npm run dev` in `desktop/` at the same time.
+This builds an unpacked app in `desktop/release/` that you can open. To work on the desktop app with hot reload, run `npm run desktop:dev`, which starts the app's dev server and opens the desktop app on it.
+
+## The website
+
+The website and documentation live in `site/`. Run `npm run site:dev` to open it at <http://localhost:3001>, and `npm run site:check` before you send a change to it.
 
 ## Adding a language
 

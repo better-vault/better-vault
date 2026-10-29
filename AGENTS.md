@@ -68,7 +68,7 @@ Keep the desktop shell thin: desktop-only behaviour belongs in `desktop/src/`, a
 
 - **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not add other component libraries (Rare UI was removed on purpose); build what is missing from Panel and shadcn parts, with a design of our own. Do not hand-edit vendored components unless necessary, and note why in the file.
 - **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `app/tokens.css`, which holds the Panel palette (`site/app/tokens.css` is a copy; keep the two in step). Never use raw colours like `bg-neutral-800` or hex values in app code.
-- **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship. The one exception is the providers' own logos on the website (`site/public/providers`, see its README).
+- **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship. The exceptions are brand marks on the website: the providers' logos (`site/public/providers`) and the desktop systems' logos on the download page (`site/public/platforms`), each with a README.
 - **Text:** every user-facing string in the app goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error. The website and docs are English only: landing copy lives in `site/lib/site/copy.ts` and docs in `site/content/docs/*.mdx`.
 - **Direction:** use logical utilities (`ms-*`, `pe-*`, `start-*`, `text-start`) so right-to-left languages work.
 - **CSS:** keep a single `@layer components` block in `app/globals.css`; the Turbopack Tailwind loader drops any later one.
@@ -155,7 +155,18 @@ npm run dev        # start on http://localhost:3001
 npm run lint && npm run typecheck && npm run build
 ```
 
-The desktop app has its own commands, run inside `desktop/` (`npm install` there first):
+The root `package.json` runs all three projects. `npm run setup` installs them; then:
+
+```bash
+npm run site:dev       # the website on http://localhost:3001
+npm run site:check     # the website's lint, typecheck and build
+npm run desktop:dev    # the app's dev server and the desktop app on it, with hot reload
+npm run desktop:start  # the desktop app on a production build of the server
+npm run desktop:check  # the desktop typecheck and an unpacked app in desktop/release/
+npm run desktop:dist   # installers for this system
+```
+
+The same desktop commands also exist inside `desktop/` (`npm install` there first):
 
 ```bash
 npm run build:server  # build the web app as a standalone server into desktop/server

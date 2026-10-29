@@ -25,7 +25,7 @@ better-vault also ships as a desktop app for macOS, Windows and Linux, in `deskt
 - New windows, `target="_blank"` links, downloads, file pickers, clipboard or permissions must be tried in the desktop app (`npm run dev` at the root and in `desktop/`).
 - Desktop-only behaviour stays in `desktop/src/`; the page learns it is on desktop only through `lib/desktop/bridge.ts`.
 
-**Checks.** In `desktop/`, run `npm run typecheck && npm run build:server && npm run pack`. CI runs them on every push.
+**Checks.** From the root, run `npm run desktop:check` (after `npm run setup` once). CI runs the same checks on every push. `npm run desktop:dev` opens the desktop app on the app's dev server.
 
 **Releases.** The desktop version is the root `package.json` version. Publishing the GitHub release starts `.github/workflows/desktop.yml`, which builds the installers on all three systems and attaches them, with the updater's `latest*.yml`, to the release. Check that run after each release. macOS signing and notarization need the `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` and `APPLE_TEAM_ID` secrets. Never put certificates or passwords in the repository.
 

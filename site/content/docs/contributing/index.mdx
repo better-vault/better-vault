@@ -55,10 +55,13 @@ Run the app's checks before you open a pull request:
 npm run lint && npm run typecheck && npm test && npm run i18n:check && npm run build
 ```
 
-When you change the server, storage or anything the desktop app depends on, also run its checks in `desktop/`:
+When you change the server, storage or anything the desktop app depends on, also run the desktop checks. The first command installs the website and desktop projects once:
 
 ```bash
-npm install && npm run typecheck && npm run build:server && npm run pack
+npm run setup
+npm run desktop:check
 ```
+
+`npm run desktop:dev` opens the desktop app on the app's dev server, and `npm run site:dev` opens this website.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org).

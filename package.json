@@ -26,7 +26,16 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "i18n:check": "node scripts/check-locales.mjs"
+    "i18n:check": "node scripts/check-locales.mjs",
+    "setup": "npm install && npm install --prefix site && npm install --prefix desktop",
+    "site:dev": "npm run dev --prefix site",
+    "site:build": "npm run build --prefix site",
+    "site:check": "npm run lint --prefix site && npm run typecheck --prefix site && npm run build --prefix site",
+    "desktop:dev": "node scripts/desktop-dev.mjs",
+    "desktop:start": "npm run build:server --prefix desktop && npm start --prefix desktop",
+    "desktop:pack": "npm run build:server --prefix desktop && npm run pack --prefix desktop",
+    "desktop:dist": "npm run build:server --prefix desktop && npm run dist --prefix desktop",
+    "desktop:check": "npm run typecheck --prefix desktop && npm run desktop:pack"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.87",

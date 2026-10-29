@@ -12,6 +12,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A macOS installer window with a sharp Retina background, an arrow and an instruction to drag the app to Applications.
 - A Desktop workflow that builds the installers for every release tag and attaches them to the release.
 - A desktop app page in the documentation.
+- A download page on the website (better-vault.dev/download) that offers the installer for your system, with the Download link next to Roadmap.
+- Root scripts for the website and the desktop app: `setup`, `site:dev`, `site:check`, `desktop:dev`, `desktop:start`, `desktop:check` and more.
 
 ### Changed
 
