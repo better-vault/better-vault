@@ -4,7 +4,6 @@ import {
   ArrowRight01Icon,
   ArrowUpRight01Icon,
   Cancel01Icon,
-  Download04Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -15,9 +14,9 @@ import { IsoFigure } from "@/components/site/iso-figures";
 import { LayoutLink } from "@/components/site/layout-link";
 import { ModelHub } from "@/components/site/model-hub";
 import { ProductPreview } from "@/components/site/product-preview";
+import { StudioStage } from "@/components/site/studio-stage/studio-stage";
 import { absoluteUrl, site } from "@/lib/site/config";
 import { comparison, faq, features, roadmapTeaser, type Cell } from "@/lib/site/copy";
-import { tools } from "@/lib/site/tools";
 
 export const metadata: Metadata = {
   // The layout's template would add the brand a second time.
@@ -59,7 +58,8 @@ function jsonLd() {
         applicationCategory: "EducationalApplication",
         applicationSubCategory: "AI research notebook",
         operatingSystem: "macOS, Windows, Linux",
-        softwareRequirements: "macOS 12, Windows 10 or a 64-bit Linux for the desktop app; or Node.js 20.9 and a web browser",
+        softwareRequirements:
+          "macOS 12, Windows 10 or a 64-bit Linux for the desktop app; or Node.js 20.9 and a web browser",
         isAccessibleForFree: true,
         license: "https://opensource.org/licenses/MIT",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -137,8 +137,6 @@ function Mark({ value }: { value: Cell }) {
   );
 }
 
-const STEPS = ["Pick a tool", "Choose its options", "Read, study or download"];
-
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
@@ -171,66 +169,9 @@ export default function HomePage() {
       <Section
         id="studio"
         title="Nine ways to learn from your sources"
-        intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file."
+        intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. Step through the tools, try them, or press Walkthrough."
       >
-        <ol className="grid gap-3 sm:grid-cols-3">
-          {STEPS.map((step, i) => (
-            <li key={step} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-xs">
-                {i + 1}
-              </span>
-              <span className="text-sm font-medium">{step}</span>
-            </li>
-          ))}
-        </ol>
-
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool) => (
-            <li key={tool.id}>
-              <Link
-                href={`/docs/studio/${tool.id}`}
-                className="group flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-foreground/20"
-              >
-                <div className="relative flex h-28 items-center justify-center border-b bg-muted/40 [background-image:radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:14px_14px]">
-                  <span className="flex size-14 items-center justify-center rounded-2xl border bg-background shadow-xs transition-transform duration-200 group-hover:-translate-y-0.5">
-                    <HugeiconsIcon icon={tool.icon} className={`size-7 ${tool.tint}`} aria-hidden="true" />
-                  </span>
-                  {tool.isNew ? (
-                    <span className="absolute end-3 top-3 rounded-full border bg-background px-2 py-0.5 text-[11px] font-medium text-info">
-                      Not in NotebookLM
-                    </span>
-                  ) : null}
-                </div>
-                <div className="flex flex-1 flex-col gap-1 p-4">
-                  <span className="flex items-center gap-1 font-medium">
-                    {tool.name}
-                    <HugeiconsIcon
-                      icon={ArrowRight01Icon}
-                      className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span className="text-sm text-muted-foreground">{tool.body}</span>
-                  <span className="mt-auto flex flex-wrap items-center gap-1.5 pt-3">
-                    <HugeiconsIcon
-                      icon={Download04Icon}
-                      className="size-3.5 text-muted-foreground"
-                      aria-label="Downloads as"
-                    />
-                    {tool.formats.map((format) => (
-                      <span
-                        key={format}
-                        className="rounded-md border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
-                      >
-                        {format}
-                      </span>
-                    ))}
-                  </span>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <StudioStage />
       </Section>
 
       <Section

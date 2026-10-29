@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- The landing page shows the Studio tools one at a time on a stage built from the app's own viewers, with a walkthrough in which a cursor uses each tool and handwritten notes explain it. Anatomy draws a real figure with the app's renderer.
+
 ## [0.4.1] - 2026-10-30
 
 ### Added

@@ -102,7 +102,8 @@ site/                     the website: its own Next.js project (see below)
   app/(home), app/docs    landing page, and the Fumadocs docs layout and pages
   content/docs            the documentation, as MDX (sidebar order in meta.json)
   lib/site                site name, URL, description, landing copy, tool list, llms.txt, social card
-  components/site         landing page parts: hero, isometric figures, provider diagram
+  components/site         landing page parts: hero, isometric figures, provider diagram, Studio stage
+  components/site/studio-stage   the Studio walkthrough; its scenes follow the app's viewers, and anatomy/ is a copy of studio/tools/anatomy's renderer (copy it again when that changes)
   app/sitemap.ts, robots.txt, llms*.txt, llms.mdx, proxy.ts   SEO and files for AI agents
   lib/dither, components/dithercn   the hero's dither engine, copied unchanged from its registry
 ```

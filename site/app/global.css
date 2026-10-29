@@ -124,3 +124,75 @@
     display: none;
   }
 }
+
+/*
+ * The Studio stage on the landing page (components/site/studio-stage).
+ * Excalifont (SIL Open Font License 1.1, public/fonts/excalifont/OFL.txt)
+ * writes the walkthrough's notes; a note's line draws itself, then its
+ * arrowhead appears; the cursor's click leaves a ring.
+ */
+@font-face {
+  font-family: "Excalifont";
+  src: url("/fonts/excalifont/excalifont-latin.woff2") format("woff2");
+  font-display: swap;
+}
+
+@keyframes stage-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stage-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes stage-ring {
+  from {
+    opacity: 0.6;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+.stage-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: stage-draw 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards;
+}
+
+.stage-arrowhead,
+.stage-note {
+  opacity: 0;
+  animation: stage-appear 0.35s ease-out forwards;
+}
+
+.stage-arrowhead {
+  animation-delay: 0.8s;
+}
+
+.stage-ring {
+  animation: stage-ring 0.55s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-line,
+  .stage-arrowhead,
+  .stage-note,
+  .stage-ring {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  .stage-ring {
+    display: none;
+  }
+}
