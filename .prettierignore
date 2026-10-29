@@ -7,3 +7,7 @@ package-lock.json
 node_modules/
 coverage/
 public/
+desktop/node_modules/
+desktop/dist/
+desktop/server/
+desktop/release/

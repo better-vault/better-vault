@@ -8,6 +8,6 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.test.ts", "**/*.test.tsx"],
-    exclude: ["node_modules/**", ".next/**", "site/**"],
+    exclude: ["node_modules/**", ".next/**", "site/**", "desktop/**"],
   },
 });
