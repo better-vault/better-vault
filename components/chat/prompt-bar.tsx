@@ -18,7 +18,13 @@ import { Prompt, type PromptState } from "@/components/panelui/prompt";
 import { useWorkspace } from "@/components/workspace/workspace-context";
 import { modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
 import type { ChatMode } from "@/lib/chat/types";
-import { activeModel, availableModels, updateSettings, useSettings } from "@/lib/db/settings";
+import {
+  activeModel,
+  availableModels,
+  updateSettings,
+  usesChatGPT,
+  useSettings,
+} from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
 import { useChatSession } from "./chat-provider";
 
@@ -26,6 +32,7 @@ import { useChatSession } from "./chat-provider";
 export function PromptBar() {
   const { t } = useTranslation("chat");
   const { t: tCommon } = useTranslation();
+  const { t: tSettings } = useTranslation("settings");
   const { notebook, setTab, setSettingsOpen, setAddSourceOpen } = useWorkspace();
   const chat = useChatSession();
   const settings = useSettings();
@@ -46,7 +53,10 @@ export function PromptBar() {
     value: modelKey(ref),
     label: ref.modelId,
     icon: <ProviderIcon provider={ref.provider} size={16} />,
-    description: providers[ref.provider].name,
+    description:
+      settings && usesChatGPT(settings, ref.provider)
+        ? `${providers[ref.provider].name} · ${tSettings("chatgpt.planLabel")}`
+        : providers[ref.provider].name,
   }));
 
   return (

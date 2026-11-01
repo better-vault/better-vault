@@ -133,6 +133,11 @@ export interface ModelRef {
 export interface ProviderCredentials {
   apiKey?: string;
   baseURL?: string;
+  /**
+   * OpenAI only: use the ChatGPT account signed in on this server (its plan
+   * pays) instead of an API key. The tokens never leave the server.
+   */
+  chatgpt?: boolean;
 }
 
 /** `provider:modelId`. Model ids can contain colons (e.g. `llama3.2:3b`), provider ids cannot. */

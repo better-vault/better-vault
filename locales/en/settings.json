@@ -13,7 +13,7 @@
   },
   "providers": {
     "title": "AI providers",
-    "description": "Add a key or a local model. Keys stay in this browser and are only sent to reach the provider.",
+    "description": "Add a key, sign in with ChatGPT or use a local model. Keys stay in this browser and are only sent to reach the provider.",
     "ready": "Ready",
     "off": "Off",
     "needsKey": "Needs a key",
@@ -79,5 +79,39 @@
     "github": "Source code",
     "issues": "Report a problem",
     "license": "MIT license"
+  },
+  "chatgpt": {
+    "title": "Use your ChatGPT plan",
+    "description": "Chat and Studio use the usage included in your ChatGPT plan, instead of an API key.",
+    "continue": "Continue with ChatGPT",
+    "signedInAs": "Signed in as {{account}}",
+    "inUse": "Chat and Studio use your ChatGPT plan. Pictures still need an API key.",
+    "noPlanUsage": "better-vault isn't allowed to use your ChatGPT plan. Continue with ChatGPT again and allow it.",
+    "manageUsage": "Manage usage",
+    "signOut": "Sign out",
+    "signedOut": "Signed out of ChatGPT.",
+    "signedOutUnconfirmed": "Signed out here, but ChatGPT didn't confirm it. You can disconnect better-vault in ChatGPT settings.",
+    "planLabel": "ChatGPT plan",
+    "dialog": {
+      "title": "Continue with ChatGPT",
+      "description": "Use your ChatGPT plan in better-vault.",
+      "steps": "Your browser opens ChatGPT. Sign in, allow better-vault to use your plan, then come back here.",
+      "open": "Open ChatGPT",
+      "waiting": "Waiting for you to finish in your browser…",
+      "openAgain": "Open the page again",
+      "differentAccount": "Use a different account",
+      "tryAgain": "Try again",
+      "failed": "Sign-in didn't finish: {{error}}",
+      "welcomeTitle": "You're using your ChatGPT plan",
+      "welcome": "Chat and Studio requests in better-vault now use your ChatGPT plan. You can review and limit this usage in ChatGPT settings.",
+      "gotIt": "Got it",
+      "signedIn": "Signed in to ChatGPT as {{account}}."
+    },
+    "callbackDoneTitle": "You're signed in",
+    "callbackDone": "You can close this tab and go back to better-vault.",
+    "callbackFailedTitle": "Sign-in didn't finish",
+    "declined": "You didn't allow better-vault to use your ChatGPT plan.",
+    "invalidCallback": "ChatGPT sent back an answer better-vault couldn't use. Try again.",
+    "otherAccount": "That's a different ChatGPT account. Choose “Use a different account” to add it."
   }
 }

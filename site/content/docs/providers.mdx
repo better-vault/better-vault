@@ -1,13 +1,13 @@
 ---
 title: "Providers and models"
-description: "Use better-vault with OpenAI, Anthropic Claude, Google Gemini, Ollama or LM Studio, with your own API key or with a local model that runs on your computer."
+description: "Use better-vault with OpenAI, Anthropic Claude, Google Gemini, Ollama or LM Studio, with your own API key, your ChatGPT plan or a local model on your computer."
 ---
 
 better-vault works with five providers: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
 
 | Provider            | Needs                          | Web mode | Pictures (Infographic)    |
 | ------------------- | ------------------------------ | -------- | ------------------------- |
-| **OpenAI**          | API key                        | Yes      | Yes (GPT Image models)    |
+| **OpenAI**          | API key or ChatGPT sign-in     | Yes      | Yes (GPT Image models)    |
 | **Anthropic**       | API key                        | Yes      | No                        |
 | **Google (Gemini)** | API key                        | Yes      | Yes (Gemini image models) |
 | **Ollama**          | Ollama running on your machine | No       | No                        |
@@ -33,6 +33,31 @@ Open **Settings → AI providers**, choose the provider and paste the key. bette
 </Steps>
 
 Your key is stored on your device and sent only with the requests that need it. [Privacy](/docs/privacy) explains what is sent where.
+
+## Use your ChatGPT plan
+
+If you pay for ChatGPT, better-vault can use your plan instead of an OpenAI API key. Chat and every Studio tool then count against the usage included in your plan.
+
+<Steps>
+<Step>
+
+### Continue with ChatGPT
+
+Open **Settings → AI providers → OpenAI** and choose **Continue with ChatGPT**, then **Open ChatGPT**. Your browser opens OpenAI's sign-in page.
+
+</Step>
+<Step>
+
+### Sign in and allow it
+
+Sign in to ChatGPT and allow better-vault to use your plan. The page then tells you to go back to better-vault, where OpenAI's models are ready in the prompt bar.
+
+</Step>
+</Steps>
+
+You can review and limit what better-vault uses at [ChatGPT → Settings → Usage](https://chatgpt.com/settings/usage), and sign out from the same place in better-vault's settings. Pictures for infographics still need an API key, because a ChatGPT plan can't generate images in other apps.
+
+The sign-in works only when better-vault's server runs on the same computer as your browser: in the desktop app, or when you run the web app yourself. The tokens stay with that server, in a private file in its data folder, and never reach the browser.
 
 ## Use a local model
 

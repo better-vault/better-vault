@@ -57,6 +57,8 @@ export async function startServer(): Promise<LocalServer> {
       PORT: String(port),
       HOSTNAME: "127.0.0.1",
       NEXT_TELEMETRY_DISABLED: "1",
+      // Where the server keeps the ChatGPT sign-in (lib/chatgpt/store.ts).
+      BETTER_VAULT_DATA_DIR: app.getPath("userData"),
     },
   });
   await waitUntilUp(port, child);

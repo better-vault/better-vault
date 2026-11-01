@@ -24,6 +24,7 @@ import { getLanguage } from "@/lib/i18n/config";
 import { appVersion } from "@/lib/version";
 import { AboutPanel } from "./about-panel";
 import { AppearancePanel } from "./appearance-panel";
+import { ChatGPTDialog } from "./chatgpt-dialog";
 import { DataPanel } from "./data-panel";
 import { LanguagePanel } from "./language-panel";
 import { ProvidersPanel } from "./providers-panel";
@@ -51,6 +52,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
     onOpenChange?.(next);
   };
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
+  const [chatGPTOpen, setChatGPTOpen] = useState(false);
   const { t: tCommon } = useTranslation();
   const { theme } = useTheme();
   const settings = useSettings();
@@ -103,7 +105,12 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
           </Sheet.Body>
 
           <Sheet.Next name="providers" closeLabel={tCommon("actions.close")}>
-            <ProvidersPanel />
+            <ProvidersPanel
+              onChatGPTSignIn={() => {
+                setOpen(false);
+                setChatGPTOpen(true);
+              }}
+            />
           </Sheet.Next>
           <Sheet.Next name="appearance" closeLabel={tCommon("actions.close")}>
             <AppearancePanel />
@@ -124,6 +131,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
           </Sheet.Next>
         </Sheet.Content>
       </Sheet>
+      <ChatGPTDialog open={chatGPTOpen} onOpenChange={setChatGPTOpen} />
       <ConfirmDialog
         open={confirmDeleteAll}
         onOpenChange={setConfirmDeleteAll}

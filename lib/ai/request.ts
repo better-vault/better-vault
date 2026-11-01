@@ -16,4 +16,5 @@ export const imageModelRefSchema = z.object({
 export const credentialsSchema = z.object({
   apiKey: z.string().max(500).optional(),
   baseURL: z.string().max(500).optional(),
+  chatgpt: z.boolean().optional(),
 });

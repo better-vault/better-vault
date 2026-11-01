@@ -1,5 +1,6 @@
+import { listChatGPTModels } from "@/lib/chatgpt/model";
 import { providers, type ProviderCredentials, type ProviderId } from "./catalog";
-import { localProvidersAllowed, parseBaseURL } from "./server-config";
+import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-config";
 
 const TIMEOUT = 10_000;
 
@@ -40,6 +41,10 @@ export async function listModels(
   credentials: ProviderCredentials,
 ): Promise<string[]> {
   const info = providers[provider];
+  if (provider === "openai" && credentials.chatgpt) {
+    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT is turned off on this server.");
+    return listChatGPTModels();
+  }
   if (info.needsKey && !credentials.apiKey) throw new Error("An API key is needed.");
   if (info.local && !localProvidersAllowed())
     throw new Error("Local providers are turned off on this server.");

@@ -5,7 +5,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Sign in with ChatGPT: OpenAI can use your ChatGPT plan instead of an API key, through OpenAI's official sign-in for open-source apps. The tokens stay with the local server, never in the browser.
+
 ### Changed
+
+- The providers' logos in the app are their own marks, from theSVG.
+- Panel's sheet is updated: text in a sheet can be selected with the mouse.
+
+### Fixed
+
+- The desktop app no longer shows a File/Edit/View menu bar on Windows and Linux.
 
 - The landing page shows the Studio tools one at a time on a stage built from the app's own viewers, with a walkthrough in which a cursor uses each tool and handwritten notes explain it. Anatomy draws a real figure with the app's renderer.
 

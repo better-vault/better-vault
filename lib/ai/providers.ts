@@ -3,8 +3,9 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { ImageModel, LanguageModel, ToolSet } from "ai";
+import { chatGPTLanguageModel } from "@/lib/chatgpt/model";
 import { providers, type ModelRef, type ProviderCredentials } from "./catalog";
-import { localProvidersAllowed, parseBaseURL } from "./server-config";
+import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-config";
 
 /**
  * Builds the model for one request from the credentials sent with it.
@@ -15,6 +16,10 @@ export function createLanguageModel(
   credentials: ProviderCredentials,
 ): LanguageModel {
   const info = providers[ref.provider];
+  if (ref.provider === "openai" && credentials.chatgpt) {
+    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT is turned off on this server.");
+    return chatGPTLanguageModel(ref.modelId);
+  }
   if (info.needsKey && !credentials.apiKey)
     throw new Error(`Add an API key for ${info.name} in Settings.`);
   if (info.local && !localProvidersAllowed())

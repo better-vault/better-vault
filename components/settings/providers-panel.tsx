@@ -7,18 +7,20 @@ import {
   ViewIcon,
   ViewOffIcon,
 } from "@hugeicons/core-free-icons";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
 import { ProviderIcon } from "@/components/provider-icon";
-import { Button } from "@/components/panelui/button";
+import { Button, buttonVariants } from "@/components/panelui/button";
 import { Input } from "@/components/panelui/input";
 import { Label } from "@/components/panelui/label";
 import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { providerIds, providers, type ProviderId } from "@/lib/ai/catalog";
+import { accountLabel, chatGPTStatus, chatGPTUsageUrl, signOutChatGPT } from "@/lib/chatgpt/client";
 import {
   isProviderReady,
   updateProvider,
@@ -36,8 +38,13 @@ function statusOf(settings: AppSettings, id: ProviderId): Status {
   return settings.providers[id].enabled && providers[id].needsKey ? "needsKey" : "off";
 }
 
+interface ProvidersPanelProps {
+  /** Continue with ChatGPT: the settings sheet closes and opens its dialog. */
+  onChatGPTSignIn: () => void;
+}
+
 /** The list of providers; each opens its own sheet. */
-export function ProvidersPanel() {
+export function ProvidersPanel({ onChatGPTSignIn }: ProvidersPanelProps) {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation();
   const settings = useSettings();
@@ -76,19 +83,27 @@ export function ProvidersPanel() {
         </div>
       </Sheet.Body>
       <Sheet.Next name="provider" closeLabel={tCommon("actions.close")}>
-        {(id: ProviderId) => <ProviderDetail id={id} />}
+        {(id: ProviderId) => <ProviderDetail id={id} onChatGPTSignIn={onChatGPTSignIn} />}
       </Sheet.Next>
     </>
   );
 }
 
-function ProviderDetail({ id }: { id: ProviderId }) {
+function ProviderDetail({ id, onChatGPTSignIn }: { id: ProviderId; onChatGPTSignIn: () => void }) {
   const settings = useSettings();
   if (!settings) return null;
-  return <ProviderForm id={id} saved={settings.providers[id]} />;
+  return <ProviderForm id={id} saved={settings.providers[id]} onChatGPTSignIn={onChatGPTSignIn} />;
 }
 
-function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }) {
+function ProviderForm({
+  id,
+  saved,
+  onChatGPTSignIn,
+}: {
+  id: ProviderId;
+  saved: ProviderSettings;
+  onChatGPTSignIn: () => void;
+}) {
   const { t } = useTranslation("settings");
   const info = providers[id];
   const keyId = useId();
@@ -115,7 +130,11 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           provider: id,
-          credentials: info.needsKey ? { apiKey: apiKey.trim() } : { baseURL: baseURL.trim() },
+          credentials: saved.chatgpt
+            ? { chatgpt: true }
+            : info.needsKey
+              ? { apiKey: apiKey.trim() }
+              : { baseURL: baseURL.trim() },
         }),
       });
       const body = (await response.json()) as { models?: string[]; error?: string };
@@ -137,7 +156,8 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
   }
 
   const models = saved.models.length > 0 ? saved.models : info.suggestedModels;
-  const canLoad = info.needsKey ? apiKey.trim() !== "" : baseURL.trim() !== "";
+  const canLoad =
+    saved.chatgpt !== null || (info.needsKey ? apiKey.trim() !== "" : baseURL.trim() !== "");
 
   return (
     <>
@@ -151,6 +171,10 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
             <Label.Text>{t("providers.enable", { name: info.name })}</Label.Text>
             <Switch checked={saved.enabled} onCheckedChange={(enabled) => save({ enabled })} />
           </Label>
+
+          {id === "openai" ? (
+            <ChatGPTCard account={saved.chatgpt} onSignIn={onChatGPTSignIn} />
+          ) : null}
 
           {info.needsKey ? (
             <Field
@@ -313,5 +337,91 @@ function ProviderForm({ id, saved }: { id: ProviderId; saved: ProviderSettings }
         </div>
       </Sheet.Body>
     </>
+  );
+}
+
+/**
+ * Use your ChatGPT plan instead of a key (OpenAI only). Who is signed in is
+ * checked with the local server, which holds the tokens.
+ */
+function ChatGPTCard({
+  account,
+  onSignIn,
+}: {
+  account: ProviderSettings["chatgpt"];
+  onSignIn: () => void;
+}) {
+  const { t } = useTranslation("settings");
+  const [signingOut, setSigningOut] = useState(false);
+  const [available, setAvailable] = useState(true);
+
+  // Keep the saved label in step with the server (signed out elsewhere, a backup from another computer).
+  useEffect(() => {
+    let cancelled = false;
+    chatGPTStatus()
+      .then(({ account: server, available }) => {
+        if (cancelled) return;
+        setAvailable(available);
+        if (!server && account) void updateProvider("openai", { chatgpt: null });
+        if (server && (!account || server.email !== account.email))
+          void updateProvider("openai", { chatgpt: { email: server.email, name: server.name } });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // Checked once each time the sheet opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      const revoked = await signOutChatGPT();
+      await updateProvider("openai", { chatgpt: null });
+      toast(revoked ? t("chatgpt.signedOut") : t("chatgpt.signedOutUnconfirmed"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
+  if (!available) return null;
+  return (
+    <section className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-4">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm font-medium">{t("chatgpt.title")}</h3>
+        <p className="text-sm text-muted-foreground">
+          {account ? t("chatgpt.inUse") : t("chatgpt.description")}
+        </p>
+      </div>
+      {account ? (
+        <>
+          <p className="truncate text-sm">
+            {t("chatgpt.signedInAs", { account: accountLabel(account) })}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={chatGPTUsageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("chatgpt.manageUsage")}
+            </a>
+            <Button variant="ghost" size="sm" disabled={signingOut} onClick={signOut}>
+              {signingOut ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
+              {t("chatgpt.signOut")}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <Button onClick={onSignIn} className="self-start">
+          <ProviderIcon provider="openai" size={16} />
+          {t("chatgpt.continue")}
+        </Button>
+      )}
+    </section>
   );
 }

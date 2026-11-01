@@ -10,6 +10,15 @@ export function localProvidersAllowed(): boolean {
   return process.env.BETTER_VAULT_ALLOW_LOCAL_PROVIDERS !== "false";
 }
 
+/**
+ * BETTER_VAULT_ALLOW_CHATGPT=false turns off Sign in with ChatGPT. Its tokens
+ * are kept by the server, so on a server shared with others they would be
+ * everyone's; OpenAI also offers it only to apps that run locally.
+ */
+export function chatGPTAllowed(): boolean {
+  return process.env.BETTER_VAULT_ALLOW_CHATGPT !== "false";
+}
+
 /** Checks a local provider address: http(s) only. */
 export function parseBaseURL(value: string | undefined, fallback: string): URL {
   const url = new URL(value?.trim() || fallback);

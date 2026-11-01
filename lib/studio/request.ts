@@ -1,10 +1,10 @@
-import { providers, type ModelRef, type ProviderCredentials } from "@/lib/ai/catalog";
+import type { ModelRef, ProviderCredentials } from "@/lib/ai/catalog";
 import {
   activeModel,
   contextCharsFor,
   credentialsFor,
   getSettings,
-  isProviderReady,
+  imageCredentialsFrom,
 } from "@/lib/db/settings";
 import { getChunks, getSources } from "@/lib/db/sources";
 import { selectPassages, type Passage } from "@/lib/grounding/passages";
@@ -22,14 +22,9 @@ export class NoImageModelError extends Error {}
 
 /** The credentials for an image model, read fresh from settings. */
 export async function imageCredentialsFor(ref: ModelRef): Promise<ProviderCredentials> {
-  const settings = await getSettings();
-  if (
-    !isProviderReady(settings, ref.provider) ||
-    providers[ref.provider].imageModels.length === 0
-  ) {
-    throw new NoImageModelError();
-  }
-  return credentialsFor(settings, ref.provider);
+  const credentials = imageCredentialsFrom(await getSettings(), ref.provider);
+  if (!credentials) throw new NoImageModelError();
+  return credentials;
 }
 
 /**

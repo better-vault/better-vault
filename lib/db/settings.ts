@@ -16,6 +16,16 @@ export interface ProviderSettings {
   models: string[];
   /** Overrides the provider's default context size (characters of source text). */
   contextChars: number | null;
+  /**
+   * OpenAI only: the ChatGPT account signed in on the local server, whose
+   * plan then pays for text. Only who it is; the tokens stay on the server.
+   */
+  chatgpt: ChatGPTAccountLabel | null;
+}
+
+export interface ChatGPTAccountLabel {
+  email: string;
+  name: string;
 }
 
 export interface AppSettings {
@@ -35,6 +45,7 @@ export function defaultSettings(): AppSettings {
       baseURL: providers[id].defaultBaseURL ?? "",
       models: [],
       contextChars: null,
+      chatgpt: null,
     } satisfies ProviderSettings,
   ]);
   return {
@@ -77,18 +88,40 @@ export function useSettings(): AppSettings | undefined {
   return useStoreQuery(getSettings, [], ["settings"]);
 }
 
-/** A provider can be used once it is enabled and has a key (cloud) or an address (local). */
+/**
+ * A provider can be used once it is enabled and has a key (cloud) or an
+ * address (local). OpenAI can use a ChatGPT sign-in instead of a key.
+ */
 export function isProviderReady(settings: AppSettings, id: ProviderId): boolean {
   const saved = settings.providers[id];
   if (!saved.enabled) return false;
+  if (usesChatGPT(settings, id)) return true;
   return providers[id].needsKey ? saved.apiKey.trim() !== "" : saved.baseURL.trim() !== "";
 }
 
+/** Text requests to OpenAI go through the signed-in ChatGPT plan rather than the key. */
+export function usesChatGPT(settings: AppSettings, id: ProviderId): boolean {
+  return id === "openai" && settings.providers.openai.chatgpt !== null;
+}
+
+/** The credentials for text requests (chat, Studio). */
 export function credentialsFor(settings: AppSettings, id: ProviderId): ProviderCredentials {
   const saved = settings.providers[id];
+  if (usesChatGPT(settings, id)) return { chatgpt: true };
   return providers[id].needsKey
     ? { apiKey: saved.apiKey.trim() }
     : { baseURL: saved.baseURL.trim() || providers[id].defaultBaseURL };
+}
+
+/** Pictures always need an API key: a ChatGPT plan cannot generate images here. */
+function canDrawPictures(settings: AppSettings, id: ProviderId): boolean {
+  const saved = settings.providers[id];
+  return saved.enabled && saved.apiKey.trim() !== "" && providers[id].imageModels.length > 0;
+}
+
+/** The credentials for an image model: its API key. */
+export function imageCredentialsFrom(settings: AppSettings, id: ProviderId): ProviderCredentials | null {
+  return canDrawPictures(settings, id) ? { apiKey: settings.providers[id].apiKey.trim() } : null;
 }
 
 export function contextCharsFor(settings: AppSettings, id: ProviderId): number {
@@ -106,10 +139,10 @@ export function availableModels(settings: AppSettings): ModelRef[] {
     });
 }
 
-/** Every image model the user can pick: those of ready providers that draw pictures. */
+/** Every image model the user can pick: those of providers with a key that draw pictures. */
 export function availableImageModels(settings: AppSettings): ModelRef[] {
   return providerIds
-    .filter((id) => isProviderReady(settings, id))
+    .filter((id) => canDrawPictures(settings, id))
     .flatMap((id) => providers[id].imageModels.map((modelId) => ({ provider: id, modelId })));
 }
 

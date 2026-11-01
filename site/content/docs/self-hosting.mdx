@@ -28,9 +28,10 @@ All of them are optional.
 | Variable                             | Default | Effect                                                                                                                    |
 | ------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS` | `true`  | Set to `false` to turn off Ollama and LM Studio. Their address comes from the user, so on a public server they would make the server fetch any address. |
+| `BETTER_VAULT_ALLOW_CHATGPT`         | `true`  | Set to `false` to turn off Sign in with ChatGPT. Its tokens are kept by the server, so on a shared server they would belong to everyone. |
 | `BETTER_VAULT_ALLOW_PRIVATE_URLS`    | `false` | Set to `true` to let web-page sources point at private or local network addresses. Only for trusted, private installs.    |
 | `NEXT_PUBLIC_SITE_URL`               | `https://www.better-vault.dev` | The site's own address, used in canonical links, the sitemap and social cards.                               |
 
 ## Public deployments
 
-For an install that strangers can reach, set `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS=false` and leave private URLs off. Each user still brings their own key, which stays in their browser.
+For an install that strangers can reach, set `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS=false` and `BETTER_VAULT_ALLOW_CHATGPT=false`, and leave private URLs off. Each user still brings their own key, which stays in their browser.
