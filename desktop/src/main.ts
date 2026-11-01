@@ -76,6 +76,10 @@ function createWindow() {
     },
   });
 
+  // Windows and Linux draw the application menu as a bar under the title bar.
+  // The app has its own controls, so the bar stays hidden; its shortcuts still work.
+  if (process.platform !== "darwin") window.setMenuBarVisibility(false);
+
   window.once("ready-to-show", () => window.show());
 
   // Links to other sites open in the default browser.
