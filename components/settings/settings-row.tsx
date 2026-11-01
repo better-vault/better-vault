@@ -9,7 +9,8 @@ interface SettingsRowProps {
   /** The `Sheet.Next` it opens. */
   to: string;
   payload?: unknown;
-  icon: IconSvgElement;
+  /** A Hugeicons icon, or a ready element such as a provider logo. */
+  icon: IconSvgElement | ReactNode;
   label: ReactNode;
   hint?: ReactNode;
   /** Shown at the end, before the chevron. */
@@ -30,7 +31,7 @@ export function SettingsRow({ to, payload, icon, label, hint, end }: SettingsRow
       }
     >
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-        <Icon icon={icon} />
+        {isIcon(icon) ? <Icon icon={icon} /> : icon}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{label}</span>
@@ -40,4 +41,8 @@ export function SettingsRow({ to, payload, icon, label, hint, end }: SettingsRow
       <Icon icon={ArrowRight01Icon} size={16} className="shrink-0 text-muted-foreground rtl:rotate-180" />
     </Sheet.Trigger>
   );
+}
+
+function isIcon(icon: IconSvgElement | ReactNode): icon is IconSvgElement {
+  return Array.isArray(icon);
 }

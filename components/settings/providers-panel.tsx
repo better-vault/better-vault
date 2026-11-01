@@ -11,6 +11,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
+import { ProviderIcon } from "@/components/provider-icon";
 import { Button } from "@/components/panelui/button";
 import { Input } from "@/components/panelui/input";
 import { Label } from "@/components/panelui/label";
@@ -18,7 +19,6 @@ import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { providerIds, providers, type ProviderId } from "@/lib/ai/catalog";
-import { providerIcons } from "@/lib/ai/provider-icons";
 import {
   isProviderReady,
   updateProvider,
@@ -54,7 +54,7 @@ export function ProvidersPanel() {
                 key={id}
                 to="provider"
                 payload={id}
-                icon={providerIcons[id]}
+                icon={<ProviderIcon provider={id} />}
                 label={providers[id].name}
                 hint={t(`providers.${status}`)}
                 end={

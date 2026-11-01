@@ -12,11 +12,11 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
+import { ProviderIcon } from "@/components/provider-icon";
 import { Menu } from "@/components/panelui/menu";
 import { Prompt, type PromptState } from "@/components/panelui/prompt";
 import { useWorkspace } from "@/components/workspace/workspace-context";
 import { modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
-import { providerIcons } from "@/lib/ai/provider-icons";
 import type { ChatMode } from "@/lib/chat/types";
 import { activeModel, availableModels, updateSettings, useSettings } from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
@@ -45,7 +45,7 @@ export function PromptBar() {
   const modelItems = models.map((ref) => ({
     value: modelKey(ref),
     label: ref.modelId,
-    icon: <Icon icon={providerIcons[ref.provider]} size={16} />,
+    icon: <ProviderIcon provider={ref.provider} size={16} />,
     description: providers[ref.provider].name,
   }));
 
