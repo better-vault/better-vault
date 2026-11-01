@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-01
+
 ### Added
 
 - Sign in with ChatGPT: OpenAI can use your ChatGPT plan instead of an API key, through OpenAI's official sign-in for open-source apps. The tokens stay with the local server, never in the browser.
@@ -13,12 +15,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - The providers' logos in the app are their own marks, from theSVG.
 - Panel's sheet is updated: text in a sheet can be selected with the mouse.
+- The landing page shows the Studio tools one at a time on a stage built from the app's own viewers, with a walkthrough in which a cursor uses each tool and handwritten notes explain it. Anatomy draws a real figure with the app's renderer.
 
 ### Fixed
 
 - The desktop app no longer shows a File/Edit/View menu bar on Windows and Linux.
-
-- The landing page shows the Studio tools one at a time on a stage built from the app's own viewers, with a walkthrough in which a cursor uses each tool and handwritten notes explain it. Anatomy draws a real figure with the app's renderer.
 
 ## [0.4.1] - 2026-10-30
 
@@ -93,7 +94,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/better-vault/better-vault/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/better-vault/better-vault/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/better-vault/better-vault/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/better-vault/better-vault/compare/v0.2.0...v0.3.0
