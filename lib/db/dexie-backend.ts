@@ -6,7 +6,16 @@ import type { Source, StudioOutput } from "./types";
 export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
   db: BetterVaultDatabase;
 } {
-  const content = [db.notebooks, db.sources, db.chunks, db.conversations, db.messages, db.outputs];
+  const content = [
+    db.folders,
+    db.notebooks,
+    db.sources,
+    db.chunks,
+    db.conversations,
+    db.messages,
+    db.outputs,
+    db.blobs,
+  ];
 
   return {
     db,
@@ -26,6 +35,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.messages.where("notebookId").equals(id).delete();
         await db.conversations.where("notebookId").equals(id).delete();
         await db.outputs.where("notebookId").equals(id).delete();
+        await db.blobs.where("notebookId").equals(id).delete();
         await db.notebooks.delete(id);
       }),
     countSources: async () => {
@@ -35,6 +45,24 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       });
       return counts;
     },
+
+    listFolders: () => db.folders.toArray(),
+    addFolder: async (folder) => {
+      await db.folders.add(folder);
+    },
+    patchFolder: async (id, patch) => {
+      await db.folders.update(id, patch);
+    },
+    deleteFolder: (id) =>
+      db.transaction("rw", [db.folders, db.notebooks], async () => {
+        const folder = await db.folders.get(id);
+        if (!folder) return;
+        await db.folders.where("parentId").equals(id).modify({ parentId: folder.parentId });
+        await db.notebooks
+          .filter((notebook) => notebook.folderId === id)
+          .modify({ folderId: folder.parentId });
+        await db.folders.delete(id);
+      }),
 
     addSource: (source, chunks, now) =>
       db.transaction("rw", [db.sources, db.chunks, db.notebooks], async () => {
@@ -120,9 +148,16 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         .filter((output) => !keep.has(output.id))
         .modify({ status: "error", error } satisfies Partial<StudioOutput>);
     },
-    deleteOutput: async (id) => {
-      await db.outputs.delete(id);
+    deleteOutput: (id) =>
+      db.transaction("rw", [db.outputs, db.blobs], async () => {
+        await db.blobs.where("outputId").equals(id).delete();
+        await db.outputs.delete(id);
+      }),
+
+    putBlob: async (blob) => {
+      await db.blobs.put(blob);
     },
+    getBlob: (id) => db.blobs.get(id),
 
     getSetting: async (key) => (await db.settings.get(key))?.value,
     putSetting: async (key, value) => {
@@ -131,17 +166,21 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     clearSettings: () => db.settings.clear(),
 
     exportAll: async () => {
-      const [notebooks, sources, conversations, messages, outputs] = await Promise.all([
-        db.notebooks.toArray(),
-        db.sources.toArray(),
-        db.conversations.toArray(),
-        db.messages.toArray(),
-        db.outputs.toArray(),
-      ]);
-      return { notebooks, sources, conversations, messages, outputs };
+      const [folders, notebooks, sources, conversations, messages, outputs, blobs] =
+        await Promise.all([
+          db.folders.toArray(),
+          db.notebooks.toArray(),
+          db.sources.toArray(),
+          db.conversations.toArray(),
+          db.messages.toArray(),
+          db.outputs.toArray(),
+          db.blobs.toArray(),
+        ]);
+      return { folders, notebooks, sources, conversations, messages, outputs, blobs };
     },
     importAll: (data, chunks) =>
       db.transaction("rw", content, async () => {
+        await db.folders.bulkPut(data.folders);
         await db.notebooks.bulkPut(data.notebooks);
         await db.conversations.bulkPut(data.conversations);
         await db.sources.bulkPut(data.sources);
@@ -152,6 +191,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.chunks.bulkPut(chunks);
         await db.messages.bulkPut(data.messages);
         await db.outputs.bulkPut(data.outputs);
+        await db.blobs.bulkPut(data.blobs);
       }),
     clearAll: () =>
       db.transaction("rw", content, async () => {

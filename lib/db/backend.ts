@@ -1,4 +1,13 @@
-import type { Chunk, Conversation, Notebook, Source, StoredMessage, StudioOutput } from "./types";
+import type {
+  Chunk,
+  Conversation,
+  Folder,
+  Notebook,
+  Source,
+  StoredBlob,
+  StoredMessage,
+  StudioOutput,
+} from "./types";
 
 /**
  * Where notebooks are stored. The web app keeps them in IndexedDB (Dexie); the
@@ -13,10 +22,16 @@ export interface Backend {
   getNotebook(id: string): Promise<Notebook | undefined>;
   addNotebook(notebook: Notebook): Promise<void>;
   patchNotebook(id: string, patch: Partial<Notebook>): Promise<void>;
-  /** Deletes a notebook with its sources, passages, chats and outputs. */
+  /** Deletes a notebook with its sources, passages, chats, outputs and files. */
   deleteNotebook(id: string): Promise<void>;
   /** How many sources each notebook has, by notebook id. */
   countSources(): Promise<Record<string, number>>;
+
+  listFolders(): Promise<Folder[]>;
+  addFolder(folder: Folder): Promise<void>;
+  patchFolder(id: string, patch: Partial<Folder>): Promise<void>;
+  /** Deletes a folder. What it held, folders and notebooks, moves to its parent. */
+  deleteFolder(id: string): Promise<void>;
 
   /** Adds a source with its passages and moves its notebook to the top. */
   addSource(source: Source, chunks: Chunk[], now: number): Promise<void>;
@@ -56,37 +71,45 @@ export interface Backend {
   patchReadyOutput(id: string, patch: Partial<StudioOutput>): Promise<boolean>;
   /** Marks outputs still generating, except `running`, as failed. */
   interruptOutputs(running: string[], error: string): Promise<void>;
+  /** Deletes an output with its files. */
   deleteOutput(id: string): Promise<void>;
+
+  putBlob(blob: StoredBlob): Promise<void>;
+  getBlob(id: string): Promise<StoredBlob | undefined>;
 
   getSetting(key: string): Promise<unknown>;
   putSetting(key: string, value: unknown): Promise<void>;
   clearSettings(): Promise<void>;
 
-  /** Every notebook, source, conversation, message and output. */
+  /** Every folder, notebook, source, conversation, message, output and file. */
   exportAll(): Promise<StoreContent>;
   /** Adds content, replacing rows with the same id and the passages of its sources. */
   importAll(content: StoreContent, chunks: Chunk[]): Promise<void>;
-  /** Deletes every notebook and everything in them. Settings are kept. */
+  /** Deletes every folder and notebook and everything in them. Settings are kept. */
   clearAll(): Promise<void>;
   /** The number of rows in a table. Used by tests. */
   count(table: TableName): Promise<number>;
 }
 
 export interface StoreContent {
+  folders: Folder[];
   notebooks: Notebook[];
   sources: Source[];
   conversations: Conversation[];
   messages: StoredMessage[];
   outputs: StudioOutput[];
+  blobs: StoredBlob[];
 }
 
 export const tableNames = [
+  "folders",
   "notebooks",
   "sources",
   "chunks",
   "conversations",
   "messages",
   "outputs",
+  "blobs",
   "settings",
 ] as const;
 
@@ -101,7 +124,18 @@ export type BackendMethod = keyof Backend;
 export const writes = {
   addNotebook: ["notebooks"],
   patchNotebook: ["notebooks"],
-  deleteNotebook: ["notebooks", "sources", "chunks", "conversations", "messages", "outputs"],
+  deleteNotebook: [
+    "notebooks",
+    "sources",
+    "chunks",
+    "conversations",
+    "messages",
+    "outputs",
+    "blobs",
+  ],
+  addFolder: ["folders"],
+  patchFolder: ["folders"],
+  deleteFolder: ["folders", "notebooks"],
   addSource: ["sources", "chunks", "notebooks"],
   patchSource: ["sources"],
   patchNotebookSources: ["sources"],
@@ -113,11 +147,30 @@ export const writes = {
   patchOutput: ["outputs"],
   patchReadyOutput: ["outputs"],
   interruptOutputs: ["outputs"],
-  deleteOutput: ["outputs"],
+  deleteOutput: ["outputs", "blobs"],
+  putBlob: ["blobs"],
   putSetting: ["settings"],
   clearSettings: ["settings"],
-  importAll: ["notebooks", "sources", "chunks", "conversations", "messages", "outputs"],
-  clearAll: ["notebooks", "sources", "chunks", "conversations", "messages", "outputs"],
+  importAll: [
+    "folders",
+    "notebooks",
+    "sources",
+    "chunks",
+    "conversations",
+    "messages",
+    "outputs",
+    "blobs",
+  ],
+  clearAll: [
+    "folders",
+    "notebooks",
+    "sources",
+    "chunks",
+    "conversations",
+    "messages",
+    "outputs",
+    "blobs",
+  ],
 } as const satisfies Partial<Record<BackendMethod, readonly TableName[]>>;
 
 /** Every backend method, the list the desktop app accepts over IPC. */
@@ -128,6 +181,10 @@ export const backendMethods = [
   "patchNotebook",
   "deleteNotebook",
   "countSources",
+  "listFolders",
+  "addFolder",
+  "patchFolder",
+  "deleteFolder",
   "addSource",
   "getSource",
   "getSources",
@@ -149,6 +206,8 @@ export const backendMethods = [
   "patchReadyOutput",
   "interruptOutputs",
   "deleteOutput",
+  "putBlob",
+  "getBlob",
   "getSetting",
   "putSetting",
   "clearSettings",

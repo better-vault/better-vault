@@ -3,11 +3,20 @@ import { useStoreQuery } from "./live";
 import { store } from "./store";
 import type { Notebook } from "./types";
 
-export async function createNotebook(title: string): Promise<string> {
+/** The choices of the new-notebook dialog. */
+export type NotebookLook = Partial<Pick<Notebook, "icon" | "color" | "folderId">>;
+
+export async function createNotebook(title: string, look: NotebookLook = {}): Promise<string> {
   const now = Date.now();
   const id = generateId();
-  await store().addNotebook({ id, title, createdAt: now, updatedAt: now });
+  const extra = Object.fromEntries(Object.entries(look).filter(([, value]) => value != null));
+  await store().addNotebook({ id, title, ...extra, createdAt: now, updatedAt: now });
   return id;
+}
+
+/** Changes a notebook's icon, colour or folder. Moving it does not change its place in "recent". */
+export async function updateNotebook(id: string, patch: NotebookLook) {
+  await store().patchNotebook(id, patch);
 }
 
 export async function renameNotebook(id: string, title: string) {

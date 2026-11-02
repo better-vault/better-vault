@@ -6,8 +6,36 @@ import type { ChatMessage } from "@/lib/chat/types";
 export interface Notebook {
   id: string;
   title: string;
+  /** Its icon's key in `lib/notebooks/icons.ts`; the default icon when missing. */
+  icon?: string;
+  /** A colour token name from `lib/notebooks/colors.ts`. */
+  color?: string;
+  /** The folder it is in; at the top level when missing or null. */
+  folderId?: string | null;
   createdAt: number;
   updatedAt: number;
+}
+
+/** A folder on the notebooks page. Folders can hold folders. */
+export interface Folder {
+  id: string;
+  name: string;
+  /** The folder it is in; at the top level when null. */
+  parentId: string | null;
+  color?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** A file kept with a notebook, such as an audio overview's sound. */
+export interface StoredBlob {
+  id: string;
+  notebookId: string;
+  /** The output it belongs to; deleted with it. */
+  outputId?: string;
+  mime: string;
+  data: Uint8Array;
+  createdAt: number;
 }
 
 export type SourceKind = "text" | "markdown" | "pdf" | "url";

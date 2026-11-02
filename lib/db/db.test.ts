@@ -4,8 +4,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { deleteAllData, exportBackup, importBackup } from "./backup";
 import type { Backend } from "./backend";
 import { createDexieBackend } from "./dexie-backend";
-import { createNotebook, deleteNotebook } from "./notebooks";
-import { createOutput, markInterruptedOutputs } from "./outputs";
+import { loadBlob, saveBlob } from "./blobs";
+import { ancestors, createFolder, deleteFolder, moveFolder } from "./folders";
+import { createNotebook, deleteNotebook, updateNotebook } from "./notebooks";
+import { createOutput, deleteOutput, markInterruptedOutputs } from "./outputs";
 import { asBackend, createSqliteStore } from "./sqlite/store";
 import { setStoreForTests, store } from "./store";
 import { conversationTitle } from "@/lib/chat/title";
@@ -88,6 +90,72 @@ describe.each(backends)("%s store", (name, create) => {
       expect(await store().count("messages")).toBe(0);
       expect(await store().count("conversations")).toBe(0);
       expect(await store().count("notebooks")).toBe(0);
+    });
+
+    it("keeps an icon, a colour and a folder", async () => {
+      const folderId = await createFolder("Biology", null);
+      const notebookId = await createNotebook("Cells", { icon: "dna", color: "chart-2", folderId });
+      expect(await store().getNotebook(notebookId)).toMatchObject({
+        icon: "dna",
+        color: "chart-2",
+        folderId,
+      });
+      await updateNotebook(notebookId, { folderId: null });
+      expect((await store().getNotebook(notebookId))?.folderId ?? null).toBeNull();
+    });
+  });
+
+  describe("folders", () => {
+    it("moves what a deleted folder held up a level", async () => {
+      const school = await createFolder("School", null);
+      const biology = await createFolder("Biology", school);
+      const genetics = await createFolder("Genetics", biology);
+      const notebookId = await createNotebook("Cells", { folderId: biology });
+      await deleteFolder(biology);
+      const folders = await store().listFolders();
+      expect(folders.map((folder) => folder.name).sort()).toEqual(["Genetics", "School"]);
+      expect(folders.find((folder) => folder.id === genetics)?.parentId).toBe(school);
+      expect((await store().getNotebook(notebookId))?.folderId).toBe(school);
+    });
+
+    it("never moves a folder into itself", async () => {
+      const a = await createFolder("A", null);
+      const b = await createFolder("B", a);
+      await moveFolder(a, b, await store().listFolders());
+      expect((await store().listFolders()).find((folder) => folder.id === a)?.parentId).toBeNull();
+      expect(ancestors(b, await store().listFolders()).map((folder) => folder.name)).toEqual([
+        "A",
+        "B",
+      ]);
+    });
+  });
+
+  describe("files", () => {
+    it("keeps bytes and deletes them with their output and notebook", async () => {
+      const notebookId = await createNotebook("Audio");
+      const outputId = await createOutput({
+        notebookId,
+        toolId: "audio-overview",
+        title: "A",
+        options: {},
+        sourceIds: [],
+        model: { provider: "openai", modelId: "m" },
+      });
+      const kept = await saveBlob({
+        notebookId,
+        outputId,
+        mime: "audio/mpeg",
+        data: new Uint8Array([1, 2, 3]),
+      });
+      const loose = await saveBlob({ notebookId, mime: "audio/mpeg", data: new Uint8Array([4]) });
+      const blob = await loadBlob(kept);
+      expect(blob?.type).toBe("audio/mpeg");
+      expect([...new Uint8Array(await blob!.arrayBuffer())]).toEqual([1, 2, 3]);
+      await deleteOutput(outputId);
+      expect(await loadBlob(kept)).toBeNull();
+      expect(await loadBlob(loose)).not.toBeNull();
+      await deleteNotebook(notebookId);
+      expect(await store().count("blobs")).toBe(0);
     });
   });
 
@@ -180,7 +248,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(2);
+      expect(backup.format).toBe(3);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");
@@ -201,6 +269,38 @@ describe.each(backends)("%s store", (name, create) => {
       });
       expect((await store().getConversation("n1"))?.title).toBe("Old question");
       expect((await loadChat("n1")).map((m) => m.id)).toEqual(["a"]);
+    });
+
+    it("round-trips folders and files", async () => {
+      const folderId = await createFolder("School", null);
+      const notebookId = await createNotebook("Kept", { folderId });
+      const blobId = await saveBlob({
+        notebookId,
+        mime: "audio/mpeg",
+        data: new Uint8Array([7, 8, 9]),
+      });
+      const backup = await exportBackup();
+      await deleteAllData();
+      await importBackup(JSON.parse(JSON.stringify(backup)));
+      expect((await store().listFolders())[0].name).toBe("School");
+      expect((await store().getNotebook(notebookId))?.folderId).toBe(folderId);
+      const blob = await loadBlob(blobId);
+      expect([...new Uint8Array(await blob!.arrayBuffer())]).toEqual([7, 8, 9]);
+    });
+
+    it("imports a format 2 backup, with no folders or files", async () => {
+      await importBackup({
+        app: "better-vault",
+        format: 2,
+        exportedAt: 1,
+        notebooks: [{ id: "n2", title: "Two", createdAt: 1, updatedAt: 1 }],
+        sources: [],
+        conversations: [],
+        messages: [],
+        outputs: [],
+      });
+      expect((await store().listNotebooks()).map((notebook) => notebook.title)).toEqual(["Two"]);
+      expect(await store().count("folders")).toBe(0);
     });
 
     it("rejects files that are not backups", async () => {
@@ -338,5 +438,66 @@ describe("version 3 upgrade", () => {
     expect((await upgraded.sources.get("s1"))?.text).toBe("Contents\nCourse outcome");
     upgraded.close();
     await Dexie.delete(name);
+  });
+});
+
+describe("version 4 upgrade", () => {
+  it("keeps notebooks and adds folders and files", async () => {
+    const { default: Dexie } = await import("dexie");
+    const name = "better-vault-upgrade-4-test";
+    const old = new Dexie(name);
+    old.version(3).stores({
+      notebooks: "id, updatedAt",
+      sources: "id, notebookId, createdAt",
+      chunks: "id, notebookId, sourceId, [sourceId+index]",
+      messages: "id, notebookId, conversationId, [conversationId+createdAt]",
+      conversations: "id, notebookId, [notebookId+updatedAt]",
+      outputs: "id, notebookId, status, [notebookId+createdAt]",
+      settings: "key",
+    });
+    await old.open();
+    await old.table("notebooks").add({ id: "n1", title: "Old", createdAt: 1, updatedAt: 1 });
+    old.close();
+
+    const { BetterVaultDatabase } = await import("./database");
+    const upgraded = new BetterVaultDatabase(name);
+    expect((await upgraded.notebooks.get("n1"))?.title).toBe("Old");
+    await upgraded.folders.add({
+      id: "f1",
+      name: "School",
+      parentId: null,
+      createdAt: 1,
+      updatedAt: 1,
+    });
+    expect(await upgraded.folders.where("parentId").equals("x").count()).toBe(0);
+    expect(await upgraded.blobs.count()).toBe(0);
+    upgraded.close();
+  });
+});
+
+describe("SQLite migration 2", () => {
+  it("adds folders and files to a database made by an older version", () => {
+    const db = new DatabaseSync(":memory:");
+    db.exec(`
+      CREATE TABLE notebooks (id TEXT PRIMARY KEY, updated_at REAL NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE sources (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, created_at REAL NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE chunks (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, source_id TEXT NOT NULL, idx INTEGER NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE conversations (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, updated_at REAL NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE messages (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, conversation_id TEXT NOT NULL, created_at REAL NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE outputs (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, status TEXT NOT NULL, created_at REAL NOT NULL, doc TEXT NOT NULL);
+      CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      PRAGMA user_version = 1;
+    `);
+    db.prepare("INSERT INTO notebooks (id, updated_at, doc) VALUES (?, ?, ?)").run(
+      "n1",
+      1,
+      JSON.stringify({ id: "n1", title: "Old", createdAt: 1, updatedAt: 1 }),
+    );
+    const sqlite = createSqliteStore(db);
+    expect(sqlite.listNotebooks().map((notebook) => notebook.title)).toEqual(["Old"]);
+    expect(sqlite.listFolders()).toEqual([]);
+    expect((db.prepare("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(
+      2,
+    );
   });
 });

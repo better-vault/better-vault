@@ -4,9 +4,11 @@ import { cleanText } from "@/lib/grounding/clean";
 import type {
   Chunk,
   Conversation,
+  Folder,
   Notebook,
   SettingRow,
   Source,
+  StoredBlob,
   StoredMessage,
   StudioOutput,
 } from "./types";
@@ -25,6 +27,8 @@ export class BetterVaultDatabase extends Dexie {
   conversations!: EntityTable<Conversation, "id">;
   outputs!: EntityTable<StudioOutput, "id">;
   settings!: EntityTable<SettingRow, "key">;
+  folders!: EntityTable<Folder, "id">;
+  blobs!: EntityTable<StoredBlob, "id">;
 
   constructor(name = "better-vault") {
     super(name);
@@ -100,5 +104,12 @@ export class BetterVaultDatabase extends Dexie {
             chunk.text = tidy(chunk.text);
           });
       });
+    // Version 4: folders on the notebooks page, and files kept with a
+    // notebook (an audio overview's sound). Notebooks need no change: their
+    // icon, colour and folder are optional fields.
+    this.version(4).stores({
+      folders: "id, parentId",
+      blobs: "id, notebookId, outputId",
+    });
   }
 }

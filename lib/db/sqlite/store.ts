@@ -1,5 +1,14 @@
 import type { Backend, StoreContent, TableName } from "../backend";
-import type { Chunk, Conversation, Notebook, Source, StoredMessage, StudioOutput } from "../types";
+import type {
+  Chunk,
+  Conversation,
+  Folder,
+  Notebook,
+  Source,
+  StoredBlob,
+  StoredMessage,
+  StudioOutput,
+} from "../types";
 
 /**
  * The desktop app's store: one SQLite file. Each row is kept whole as JSON in
@@ -10,7 +19,7 @@ import type { Chunk, Conversation, Notebook, Source, StoredMessage, StudioOutput
  * `node:sqlite` in the desktop app and in tests alike.
  */
 
-type SqlValue = string | number | null;
+type SqlValue = string | number | null | Uint8Array;
 
 /** The parts of a SQLite driver this store uses (`node:sqlite`'s `DatabaseSync`). */
 export interface SqliteDatabase {
@@ -29,10 +38,12 @@ export type SyncBackend = {
     : never;
 };
 
-type DocTable = Exclude<TableName, "settings">;
+/** Tables that keep each row as JSON. Settings and blobs have columns of their own. */
+type DocTable = Exclude<TableName, "settings" | "blobs">;
 
 /** The columns of each table, besides `id` and `doc`, and the fields they copy. */
 const columns: Record<DocTable, Record<string, string>> = {
+  folders: { parent_id: "parentId", updated_at: "updatedAt" },
   notebooks: { updated_at: "updatedAt" },
   sources: { notebook_id: "notebookId", created_at: "createdAt" },
   chunks: { notebook_id: "notebookId", source_id: "sourceId", idx: "index" },
@@ -73,6 +84,17 @@ const migrations: string[] = [
   CREATE INDEX outputs_status ON outputs (status);
 
   CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+  `,
+  // 2: folders on the notebooks page, and files kept with a notebook (an
+  // audio overview's sound), stored as bytes. A notebook's icon, colour and
+  // folder are optional fields of its row and need no column.
+  `
+  CREATE TABLE folders (id TEXT PRIMARY KEY, parent_id TEXT, updated_at REAL NOT NULL, doc TEXT NOT NULL);
+  CREATE INDEX folders_parent ON folders (parent_id);
+
+  CREATE TABLE blobs (id TEXT PRIMARY KEY, notebook_id TEXT NOT NULL, output_id TEXT, mime TEXT NOT NULL, created_at REAL NOT NULL, data BLOB NOT NULL);
+  CREATE INDEX blobs_notebook ON blobs (notebook_id);
+  CREATE INDEX blobs_output ON blobs (output_id);
   `,
 ];
 
@@ -146,14 +168,40 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
   const deleteWhere = (table: DocTable, column: string, value: string) =>
     db.prepare(`DELETE FROM ${table} WHERE ${column} = ?`).run(value);
 
-  const content: DocTable[] = [
+  const content: Exclude<TableName, "settings">[] = [
+    "folders",
     "notebooks",
     "sources",
     "chunks",
     "conversations",
     "messages",
     "outputs",
+    "blobs",
   ];
+
+  type BlobRow = {
+    id: string;
+    notebook_id: string;
+    output_id: string | null;
+    mime: string;
+    created_at: number;
+    data: Uint8Array;
+  };
+  const blob = (row: BlobRow): StoredBlob => ({
+    id: row.id,
+    notebookId: row.notebook_id,
+    ...(row.output_id ? { outputId: row.output_id } : {}),
+    mime: row.mime,
+    // node:sqlite returns a Uint8Array; copy it so it owns its bytes.
+    data: new Uint8Array(row.data),
+    createdAt: row.created_at,
+  });
+  const putBlob = (row: StoredBlob) =>
+    db
+      .prepare(
+        "INSERT OR REPLACE INTO blobs (id, notebook_id, output_id, mime, created_at, data) VALUES (?, ?, ?, ?, ?, ?)",
+      )
+      .run(row.id, row.notebookId, row.outputId ?? null, row.mime, row.createdAt, row.data);
 
   return {
     listNotebooks: () =>
@@ -169,6 +217,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       transaction(db, () => {
         for (const table of ["sources", "chunks", "messages", "conversations", "outputs"] as const)
           deleteWhere(table, "notebook_id", id);
+        db.prepare("DELETE FROM blobs WHERE notebook_id = ?").run(id);
         deleteWhere("notebooks", "id", id);
       }),
     countSources: () => {
@@ -177,6 +226,25 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         .all() as { id: string; n: number }[];
       return Object.fromEntries(rows.map((row) => [row.id, Number(row.n)]));
     },
+
+    listFolders: () => docs<Folder>(db.prepare("SELECT doc FROM folders ORDER BY id").all()),
+    addFolder: (folder) => add("folders", folder),
+    patchFolder: (id, change) => {
+      patch<Folder>("folders", id, change);
+    },
+    deleteFolder: (id) =>
+      transaction(db, () => {
+        const folder = get<Folder>("folders", id);
+        if (!folder) return;
+        const children = db.prepare("SELECT id FROM folders WHERE parent_id = ?").all(id);
+        for (const { id: child } of children as { id: string }[])
+          patch<Folder>("folders", child, { parentId: folder.parentId });
+        const notebooks = docs<Notebook>(db.prepare("SELECT doc FROM notebooks").all());
+        for (const notebook of notebooks)
+          if (notebook.folderId === id)
+            patch<Notebook>("notebooks", notebook.id, { folderId: folder.parentId });
+        deleteWhere("folders", "id", id);
+      }),
 
     addSource: (source, chunks, now) =>
       transaction(db, () => {
@@ -286,8 +354,18 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         for (const { id } of ids as { id: string }[])
           if (!keep.has(id)) patch<StudioOutput>("outputs", id, { status: "error", error });
       }),
-    deleteOutput: (id) => {
-      deleteWhere("outputs", "id", id);
+    deleteOutput: (id) =>
+      transaction(db, () => {
+        db.prepare("DELETE FROM blobs WHERE output_id = ?").run(id);
+        deleteWhere("outputs", "id", id);
+      }),
+
+    putBlob: (row) => {
+      putBlob(row);
+    },
+    getBlob: (id) => {
+      const row = db.prepare("SELECT * FROM blobs WHERE id = ?").get(id) as BlobRow | undefined;
+      return row ? blob(row) : undefined;
     },
 
     getSetting: (key) => {
@@ -306,14 +384,17 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     },
 
     exportAll: (): StoreContent => ({
+      folders: docs(db.prepare("SELECT doc FROM folders").all()),
       notebooks: docs(db.prepare("SELECT doc FROM notebooks").all()),
       sources: docs(db.prepare("SELECT doc FROM sources").all()),
       conversations: docs(db.prepare("SELECT doc FROM conversations").all()),
       messages: docs(db.prepare("SELECT doc FROM messages").all()),
       outputs: docs(db.prepare("SELECT doc FROM outputs").all()),
+      blobs: (db.prepare("SELECT * FROM blobs").all() as BlobRow[]).map(blob),
     }),
     importAll: (data, chunks) =>
       transaction(db, () => {
+        for (const row of data.folders) put("folders", row);
         for (const row of data.notebooks) put("notebooks", row);
         for (const row of data.conversations) put("conversations", row);
         for (const row of data.sources) {
@@ -323,6 +404,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         for (const row of chunks) put("chunks", row);
         for (const row of data.messages) put("messages", row);
         for (const row of data.outputs) put("outputs", row);
+        for (const row of data.blobs) putBlob(row);
       }),
     clearAll: () =>
       transaction(db, () => {
@@ -339,7 +421,8 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
 
 /** Table names come from code, but check them before they go into SQL. */
 function tableName(table: TableName): TableName {
-  if (!(table in columns) && table !== "settings") throw new Error(`Unknown table: ${table}`);
+  if (!(table in columns) && table !== "settings" && table !== "blobs")
+    throw new Error(`Unknown table: ${table}`);
   return table;
 }
 
