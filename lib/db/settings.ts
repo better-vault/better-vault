@@ -131,6 +131,17 @@ export function imageCredentialsFrom(
   return canDrawPictures(settings, id) ? { apiKey: settings.providers[id].apiKey.trim() } : null;
 }
 
+/** The credentials for a speech model: its provider's API key, when it is on. */
+export function speechCredentialsFrom(
+  settings: AppSettings,
+  id: ProviderId,
+): ProviderCredentials | null {
+  const saved = settings.providers[id];
+  return providers[id].kind === "audio" && saved.enabled && saved.apiKey.trim()
+    ? { apiKey: saved.apiKey.trim() }
+    : null;
+}
+
 export function contextCharsFor(settings: AppSettings, id: ProviderId): number {
   return settings.providers[id].contextChars ?? providers[id].contextChars;
 }

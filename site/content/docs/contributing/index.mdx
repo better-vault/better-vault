@@ -19,7 +19,7 @@ Both stores sit behind one interface in `lib/db/backend.ts`, and the database te
 | **Bring your own key**                  | Keys are stored on the device and sent in each request's body. Routes never log or store them.           |
 | **Provider web search only**            | Web mode uses the provider's built-in search tool and no third-party search API.                         |
 | **AI SDK for every call**               | Generation never calls a provider's HTTP API directly; listing models is the one exception.              |
-| **No audio or video overviews**         | They are out of scope.                                                                                   |
+| **Audio overviews with ElevenLabs**     | Spoken through the AI SDK; video overviews are out of scope.                                             |
 | **Mermaid for diagrams**                | Mind maps and diagrams are Mermaid text, validated and rendered with Pele.                               |
 | **Anatomy figures generated each time** | No ready-made figures are shipped.                                                                       |
 | **Provider image models**               | Pictures come from the provider's image model through the AI SDK.                                        |

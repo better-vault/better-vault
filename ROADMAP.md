@@ -4,13 +4,13 @@ This page lists what better-vault has shipped, what comes next and what is out o
 
 ## Shipped
 
-| Version          | What it added                                                                                                                                         |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **v0.1.0**       | Notebooks and sources (text, Markdown, PDF, web pages), chat in Sources and Web modes with citations, Reports, Flashcards, Quiz, Data table and Mind map |
-| **v0.2.0**       | Slide deck, Infographic, Anatomy figures, Whiteboard with Annotate, several chats per notebook, citation marks and footnotes                          |
-| **v0.3.0**       | The website and documentation at [better-vault.dev](https://www.better-vault.dev)                                                                         |
-| **v0.4.0, v0.4.1** | The desktop app for macOS, Windows and Linux, with notebooks in a local SQLite file, signed macOS builds and automatic updates                      |
-| **v0.4.2**       | Sign in with ChatGPT to use your plan instead of an OpenAI key, and the providers' own logos                                                         |
+| Version            | What it added                                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **v0.1.0**         | Notebooks and sources (text, Markdown, PDF, web pages), chat in Sources and Web modes with citations, Reports, Flashcards, Quiz, Data table and Mind map |
+| **v0.2.0**         | Slide deck, Infographic, Anatomy figures, Whiteboard with Annotate, several chats per notebook, citation marks and footnotes                             |
+| **v0.3.0**         | The website and documentation at [better-vault.dev](https://www.better-vault.dev)                                                                        |
+| **v0.4.0, v0.4.1** | The desktop app for macOS, Windows and Linux, with notebooks in a local SQLite file, signed macOS builds and automatic updates                           |
+| **v0.4.2**         | Sign in with ChatGPT to use your plan instead of an OpenAI key, and the providers' own logos                                                             |
 
 ## v0.5: Understand your notebook
 
@@ -32,10 +32,10 @@ You will be able to **edit a Studio output with a prompt**, changing one slide, 
 
 ## Later
 
-More providers are planned, starting with OpenRouter and Vercel AI Gateway, along with more interface languages. A layout made for phones, installable as an app, is also on the list.
+**Chat adapters** will connect better-vault to Slack, Microsoft Teams, Discord and Telegram, so you can ask the agent to send a message there, or talk to your notebooks from those apps. More providers are planned, starting with OpenRouter and Vercel AI Gateway, along with more interface languages. A layout made for phones, installable as an app, is also on the list.
 
 The desktop app will grow too: API keys kept in the operating system's keychain, and whole folders of documents added as sources by dragging them in. This site will get example notebooks, so you can try better-vault without your own files.
 
 ## Not planned
 
-**Audio and video overviews** are out of scope; better-vault focuses on cited chat and written and visual outputs. **Accounts and server storage** are out of scope too, because better-vault stays local-first and your data lives on your device.
+**Video overviews** are out of scope; better-vault focuses on cited chat and written, visual and spoken outputs. **Accounts and server storage** are out of scope too, because better-vault stays local-first and your data lives on your device.

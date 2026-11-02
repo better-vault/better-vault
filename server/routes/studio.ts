@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { describeError } from "@/lib/ai/errors";
-import { createImageModel, createLanguageModel } from "@/lib/ai/providers";
+import { createImageModel, createLanguageModel, createSpeechModel } from "@/lib/ai/providers";
 import { credentialsSchema, modelRefSchema } from "@/lib/ai/request";
 import type { Passage } from "@/lib/grounding/passages";
 import { toolDefinitions } from "@/studio/definitions";
@@ -26,6 +26,8 @@ const bodySchema = z.object({
   credentials: credentialsSchema,
   /** The image model's credentials, for tools that draw pictures. */
   imageCredentials: credentialsSchema.optional(),
+  /** The speech model's credentials, for tools that speak. */
+  speechCredentials: credentialsSchema.optional(),
 });
 
 /** Generates one Studio output with the user's model. Nothing is stored here. */
@@ -46,6 +48,9 @@ export async function POST(request: Request) {
   const imageRef = definition.imageModel?.(options.data) ?? null;
   if (definition.imageModel && !imageRef)
     return Response.json({ error: "Choose an image model." }, { status: 400 });
+  const speechRef = definition.speechModel?.(options.data) ?? null;
+  if (definition.speechModel && !speechRef)
+    return Response.json({ error: "Choose a voice service." }, { status: 400 });
 
   try {
     const result = await generate({
@@ -57,11 +62,23 @@ export async function POST(request: Request) {
       image: imageRef
         ? { ref: imageRef, model: createImageModel(imageRef, parsed.data.imageCredentials ?? {}) }
         : undefined,
+      speech: speechRef
+        ? {
+            ref: speechRef,
+            model: createSpeechModel(speechRef, parsed.data.speechCredentials ?? {}),
+          }
+        : undefined,
       abortSignal: request.signal,
     });
     const data = definition.data.safeParse(result.data);
     if (!data.success) throw new Error("The model's answer did not have the expected shape.");
-    return Response.json({ title: result.title, data: data.data });
+    // Files travel as base64 in the JSON answer; the browser stores them as bytes.
+    const files = result.files?.map((file) => ({
+      id: file.id,
+      mime: file.mime,
+      base64: Buffer.from(file.bytes).toString("base64"),
+    }));
+    return Response.json({ title: result.title, data: data.data, files });
   } catch (error) {
     return Response.json({ error: describeError(error) }, { status: 502 });
   }

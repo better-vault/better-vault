@@ -1,8 +1,9 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createElevenLabs } from "@ai-sdk/elevenlabs";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { ImageModel, LanguageModel, ToolSet } from "ai";
+import type { ImageModel, LanguageModel, SpeechModel, ToolSet } from "ai";
 import { chatGPTLanguageModel } from "@/lib/chatgpt/model";
 import { providers, type ModelRef, type ProviderCredentials } from "./catalog";
 import { createOpenCodeModel } from "./opencode";
@@ -63,6 +64,14 @@ export function createImageModel(ref: ModelRef, credentials: ProviderCredentials
     default:
       throw new Error(`${info.name} has no image models.`);
   }
+}
+
+/** Builds a speech model for one request. Only ElevenLabs speaks. */
+export function createSpeechModel(ref: ModelRef, credentials: ProviderCredentials): SpeechModel {
+  const info = providers[ref.provider];
+  if (info.kind !== "audio") throw new Error(`${info.name} does not make speech.`);
+  if (!credentials.apiKey) throw new Error(`Add an API key for ${info.name} in Settings.`);
+  return createElevenLabs({ apiKey: credentials.apiKey }).speech(ref.modelId);
 }
 
 /**

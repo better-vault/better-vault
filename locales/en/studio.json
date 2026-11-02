@@ -54,6 +54,10 @@
     "whiteboard": {
       "name": "Whiteboard",
       "description": "A blank board to sketch, diagram and draw on pictures."
+    },
+    "audio-overview": {
+      "name": "Audio Overview",
+      "description": "Two hosts talk your sources through."
     }
   },
   "view": {
@@ -79,7 +83,8 @@
     "noModel": "Set up a model in Settings first.",
     "noSources": "Choose at least one source.",
     "failed": "Could not create it: {{error}}",
-    "noImageModel": "Add an OpenAI or Google key in Settings to draw pictures."
+    "noImageModel": "Add an OpenAI or Google key in Settings to draw pictures.",
+    "noSpeechModel": "Add your ElevenLabs key in Settings → AI providers to make audio overviews."
   },
   "choices": {
     "fewer": "Fewer",
@@ -404,7 +409,8 @@
       "pptx": "PowerPoint (.pptx)",
       "pdf": "PDF (print)",
       "json": "Board file (.json)",
-      "image": "Original image"
+      "image": "Original image",
+      "mp3": "Audio (MP3)"
     },
     "metaLocal": "Edited {{time}}",
     "annotate": "Annotate"
@@ -612,6 +618,55 @@
       "navigate": "Move around",
       "shapes": "Shapes",
       "draw": "Draw and write"
+    }
+  },
+  "audio-overview": {
+    "format": "Format",
+    "formats": {
+      "deep-dive": {
+        "name": "Deep dive",
+        "description": "A lively conversation that unpacks the sources."
+      },
+      "brief": {
+        "name": "Brief",
+        "description": "The key points, quickly."
+      },
+      "debate": {
+        "name": "Debate",
+        "description": "Two sides of the questions the sources raise."
+      }
+    },
+    "length": "Length",
+    "lengths": {
+      "short": "Short",
+      "medium": "Medium",
+      "long": "Long"
+    },
+    "minutes_one": "About {{count}} minute",
+    "minutes_other": "About {{count}} minutes",
+    "host": "Host {{number}}",
+    "speechModel": "Voice model",
+    "loadingVoices": "Loading your ElevenLabs voices…",
+    "voicesFailed": "Couldn't load your ElevenLabs voices: {{error}}",
+    "preview": "Play a sample of this voice",
+    "stopPreview": "Stop the sample",
+    "noKey": {
+      "title": "Audio overviews need ElevenLabs",
+      "body": "The conversation is written by your chat model and spoken by ElevenLabs voices. Add your ElevenLabs key in Settings.",
+      "action": "Open Settings"
+    },
+    "viewer": {
+      "missing": "The recording of this overview is missing. Make it again to listen.",
+      "speaking": "{{name}} is speaking",
+      "idle": "Paused",
+      "hosts": "With {{a}} and {{b}}",
+      "seek": "Position in the recording",
+      "back15": "Back 15 seconds",
+      "forward15": "Forward 15 seconds",
+      "play": "Play",
+      "pause": "Pause",
+      "speed": "Playback speed {{speed}}×",
+      "transcript": "Transcript"
     }
   }
 }

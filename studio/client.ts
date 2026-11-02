@@ -3,6 +3,8 @@ import type { ToolFormProps, ToolViewerProps } from "./shared/form";
 import type { StudioToolId } from "./tools";
 import { AnatomyForm } from "./tools/anatomy/dialog";
 import { AnatomyViewer } from "./tools/anatomy/viewer";
+import { AudioOverviewForm } from "./tools/audio-overview/dialog";
+import { AudioOverviewViewer } from "./tools/audio-overview/viewer";
 import { DataTableForm } from "./tools/data-table/dialog";
 import { DataTableViewer } from "./tools/data-table/viewer";
 import { FlashcardsForm } from "./tools/flashcards/dialog";
@@ -44,6 +46,14 @@ export interface ToolClient {
 
 /** How each available tool looks in the browser: its dialog form and its viewer. */
 export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
+  "audio-overview": {
+    Form: AudioOverviewForm,
+    Viewer: AudioOverviewViewer,
+    wide: true,
+    // The voices and the speech model are chosen once ElevenLabs has listed them.
+    canCreate: (options: { hosts: unknown; speechModel: unknown }) =>
+      options.hosts !== null && options.speechModel !== null,
+  },
   report: {
     Form: ReportForm,
     Viewer: ReportViewer,

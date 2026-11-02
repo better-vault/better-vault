@@ -1,5 +1,6 @@
 import type { StudioToolId } from "./tools";
 import { anatomyTool } from "./tools/anatomy/definition";
+import { audioOverviewTool } from "./tools/audio-overview/definition";
 import { dataTableTool } from "./tools/data-table/definition";
 import { flashcardsTool } from "./tools/flashcards/definition";
 import { infographicTool } from "./tools/infographic/definition";
@@ -12,6 +13,7 @@ import type { AnyToolDefinition } from "./types";
 
 /** The tools that can be used in this version, shared by the browser and the server. */
 export const toolDefinitions: Partial<Record<StudioToolId, AnyToolDefinition>> = {
+  "audio-overview": audioOverviewTool,
   report: reportTool,
   flashcards: flashcardsTool,
   quiz: quizTool,

@@ -30,10 +30,23 @@ export interface ToolDefinition<Options = unknown, Data = unknown> {
   local?: { blank: () => Data };
   /** For pictures drawn by an image model: the one chosen in the options. */
   imageModel?: (options: Options) => ModelRef | null;
+  /** For outputs that are spoken by a speech model: the one chosen in the options. */
+  speechModel?: (options: Options) => ModelRef | null;
 }
 
 export type ExportFormat =
-  "docx" | "xlsx" | "csv" | "md" | "svg" | "png" | "mmd" | "pptx" | "pdf" | "json" | "image";
+  | "docx"
+  | "xlsx"
+  | "csv"
+  | "md"
+  | "svg"
+  | "png"
+  | "mmd"
+  | "pptx"
+  | "pdf"
+  | "json"
+  | "image"
+  | "mp3";
 
 /** Words written into exported documents, in the UI language. */
 export interface ExportText {

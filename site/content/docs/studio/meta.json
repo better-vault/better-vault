@@ -2,6 +2,7 @@
   "title": "Studio",
   "pages": [
     "index",
+    "audio-overview",
     "report",
     "flashcards",
     "quiz",

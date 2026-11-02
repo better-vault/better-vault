@@ -1,5 +1,6 @@
 import type { StudioToolId } from "@/studio/tools";
 import { generateAnatomy } from "@/studio/tools/anatomy/server";
+import { generateAudioOverview } from "@/studio/tools/audio-overview/server";
 import { generateDataTable } from "@/studio/tools/data-table/server";
 import { generateFlashcards } from "@/studio/tools/flashcards/server";
 import { generateInfographic } from "@/studio/tools/infographic/server";
@@ -12,6 +13,7 @@ import type { Generator } from "./shared";
 /** How each available tool is generated on the server. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const generators: Partial<Record<StudioToolId, Generator<any, any>>> = {
+  "audio-overview": generateAudioOverview,
   report: generateReport,
   flashcards: generateFlashcards,
   quiz: generateQuiz,

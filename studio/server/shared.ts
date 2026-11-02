@@ -1,4 +1,4 @@
-import type { ImageModel, LanguageModel } from "ai";
+import type { ImageModel, LanguageModel, SpeechModel } from "ai";
 import type { ModelRef } from "@/lib/ai/catalog";
 import { formatPassages, type Passage } from "@/lib/grounding/passages";
 import { languageName } from "@/studio/languages";
@@ -12,12 +12,26 @@ export interface GenerateArgs<Options> {
   passages: Passage[];
   /** The image model chosen for the output, for tools that draw pictures. */
   image?: { model: ImageModel; ref: ModelRef };
+  /** The speech model chosen for the output, for tools that speak. */
+  speech?: { model: SpeechModel; ref: ModelRef };
   abortSignal?: AbortSignal;
+}
+
+/**
+ * A file made with an output, such as an audio overview's sound. The browser
+ * keeps it with the notebook (lib/db/blobs.ts) under `id`, which the data
+ * names, rather than inside the output's data.
+ */
+export interface GeneratedFile {
+  id: string;
+  mime: string;
+  bytes: Uint8Array;
 }
 
 export interface Generated<Data> {
   title: string;
   data: Data;
+  files?: GeneratedFile[];
 }
 
 export type Generator<Options, Data> = (args: GenerateArgs<Options>) => Promise<Generated<Data>>;

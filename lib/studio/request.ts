@@ -5,6 +5,7 @@ import {
   credentialsFor,
   getSettings,
   imageCredentialsFrom,
+  speechCredentialsFrom,
 } from "@/lib/db/settings";
 import { getChunks, getSources } from "@/lib/db/sources";
 import { selectPassages, type Passage } from "@/lib/grounding/passages";
@@ -24,6 +25,16 @@ export class NoImageModelError extends Error {}
 export async function imageCredentialsFor(ref: ModelRef): Promise<ProviderCredentials> {
   const credentials = imageCredentialsFrom(await getSettings(), ref.provider);
   if (!credentials) throw new NoImageModelError();
+  return credentials;
+}
+
+/** The speech model chosen for an output can't be used: its provider has no key. */
+export class NoSpeechModelError extends Error {}
+
+/** The credentials for a speech model, read fresh from settings. */
+export async function speechCredentialsFor(ref: ModelRef): Promise<ProviderCredentials> {
+  const credentials = speechCredentialsFrom(await getSettings(), ref.provider);
+  if (!credentials) throw new NoSpeechModelError();
   return credentials;
 }
 

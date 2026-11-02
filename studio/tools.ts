@@ -1,4 +1,5 @@
 import {
+  AudioWave01Icon,
   Cards01Icon,
   ChartBarBigIcon,
   CubeIcon,
@@ -13,6 +14,7 @@ import type { IconSvgElement } from "@hugeicons/react";
 
 /** Every Studio tool, in the order they appear in the Studio sheet (two per row). */
 export const studioToolIds = [
+  "audio-overview",
   "report",
   "flashcards",
   "quiz",
@@ -38,6 +40,12 @@ export interface StudioToolMeta {
 }
 
 export const studioTools: Record<StudioToolId, StudioToolMeta> = {
+  "audio-overview": {
+    id: "audio-overview",
+    icon: AudioWave01Icon,
+    tint: "text-chart-3",
+    available: true,
+  },
   report: { id: "report", icon: News01Icon, tint: "text-chart-2", available: true },
   flashcards: { id: "flashcards", icon: Cards01Icon, tint: "text-chart-4", available: true },
   quiz: { id: "quiz", icon: HelpSquareIcon, tint: "text-chart-3", available: true },

@@ -10,12 +10,15 @@ import {
   restartOutput,
 } from "@/lib/db/outputs";
 import { activeModel, getSettings } from "@/lib/db/settings";
+import { store } from "@/lib/db/store";
 import {
   imageCredentialsFor,
   modelRequestFor,
   NoImageModelError,
   NoModelError,
   NoSourcesError,
+  NoSpeechModelError,
+  speechCredentialsFor,
 } from "@/lib/studio/request";
 import { toolDefinitions } from "@/studio/definitions";
 import type { StudioToolId } from "@/studio/tools";
@@ -62,6 +65,8 @@ export function StudioRunnerProvider({
         );
         const imageRef = toolDefinitions[toolId]?.imageModel?.(saved.tool) ?? null;
         const imageCredentials = imageRef ? await imageCredentialsFor(imageRef) : undefined;
+        const speechRef = toolDefinitions[toolId]?.speechModel?.(saved.tool) ?? null;
+        const speechCredentials = speechRef ? await speechCredentialsFor(speechRef) : undefined;
 
         const response = await fetch("/api/studio", {
           method: "POST",
@@ -75,15 +80,29 @@ export function StudioRunnerProvider({
             model,
             credentials,
             imageCredentials,
+            speechCredentials,
           }),
         });
         const body = (await response.json().catch(() => ({}))) as {
           title?: string;
           data?: unknown;
+          files?: { id: string; mime: string; base64: string }[];
           error?: string;
         };
         if (!response.ok || body.title === undefined)
           throw new Error(body.error ?? response.statusText);
+        // Files made with the output (an audio overview's sound) are kept as bytes beside it.
+        const notebook = (await store().getOutput(outputId))?.notebookId;
+        for (const file of body.files ?? [])
+          if (notebook)
+            await store().putBlob({
+              id: file.id,
+              notebookId: notebook,
+              outputId,
+              mime: file.mime,
+              data: Uint8Array.from(atob(file.base64), (char) => char.charCodeAt(0)),
+              createdAt: Date.now(),
+            });
         await finishOutput(outputId, { title: body.title, data: body.data });
       } catch (error) {
         const message =
@@ -93,9 +112,11 @@ export function StudioRunnerProvider({
               ? t("errors.noSources")
               : error instanceof NoImageModelError
                 ? t("errors.noImageModel")
-                : error instanceof Error
-                  ? error.message
-                  : String(error);
+                : error instanceof NoSpeechModelError
+                  ? t("errors.noSpeechModel")
+                  : error instanceof Error
+                    ? error.message
+                    : String(error);
         await failOutput(outputId, message);
       } finally {
         running.delete(outputId);
