@@ -3,11 +3,97 @@
   "subtitle": "Each notebook keeps its own sources, chat and Studio outputs.",
   "newNotebook": "New notebook",
   "untitled": "Untitled notebook",
-  "empty": {
-    "title": "No notebooks yet",
-    "body": "Create a notebook, add a few sources and start asking questions."
-  },
   "updated": "Updated {{time}}",
   "menu": "Notebook options",
-  "settings": "Settings"
+  "settings": "Settings",
+  "folderSubtitle": "Notebooks and folders in this folder.",
+  "breadcrumbs": "Folders",
+  "search": "Search notebooks and folders",
+  "noResults": "Nothing matches “{{query}}”.",
+  "dropHint": "or drop files here",
+  "editLook": "Icon and colour",
+  "sort": {
+    "label": "Sort by",
+    "recent": "Recent",
+    "name": "Name"
+  },
+  "drop": {
+    "title": "Drop to start a notebook",
+    "body": "PDF, Markdown and text files become its first sources."
+  },
+  "dialog": {
+    "createTitle": "New notebook",
+    "createDescription": "Give it a name, an icon and a place. You can change them later.",
+    "editTitle": "Edit notebook",
+    "name": "Name",
+    "icon": "Icon",
+    "color": "Colour",
+    "folder": "Folder",
+    "noFolder": "No folder (top level)",
+    "create": "Create notebook",
+    "files_one": "{{count}} file to add",
+    "files_other": "{{count}} files to add",
+    "removeFile": "Don't add {{name}}"
+  },
+  "folders": {
+    "label": "Folders",
+    "new": "New folder",
+    "createTitle": "New folder",
+    "editTitle": "Edit folder",
+    "name": "Name",
+    "untitled": "Untitled folder",
+    "create": "Create folder",
+    "edit": "Name and colour",
+    "menu": "Folder options",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBody": "The folder is removed. The notebooks and folders in it move up one level; nothing else is deleted.",
+    "deleteConfirm": "Delete folder",
+    "newHint": "to group notebooks"
+  },
+  "move": {
+    "action": "Move to…",
+    "title": "Move “{{name}}”",
+    "top": "Notebooks (top level)",
+    "current": "Here now"
+  },
+  "colors": {
+    "none": "No colour",
+    "chart-2": "Blue",
+    "chart-3": "Green",
+    "chart-4": "Amber",
+    "chart-5": "Violet",
+    "destructive": "Red",
+    "chart-1": "Graphite"
+  },
+  "icons": {
+    "notebook": "Notebook",
+    "book": "Book",
+    "graduation": "Graduation cap",
+    "idea": "Idea",
+    "brain": "Brain",
+    "atom": "Atom",
+    "dna": "DNA",
+    "test-tube": "Test tube",
+    "microscope": "Microscope",
+    "medicine": "Medicine",
+    "math": "Calculator",
+    "chart": "Chart",
+    "code": "Code",
+    "globe": "Globe",
+    "language": "Languages",
+    "law": "Law",
+    "business": "Business",
+    "architecture": "Building",
+    "art": "Art",
+    "music": "Music",
+    "film": "Film",
+    "photo": "Camera",
+    "nature": "Leaf",
+    "space": "Rocket",
+    "reading": "Reading",
+    "personal": "Coffee"
+  },
+  "vault": "Vault"
 }
