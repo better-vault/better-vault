@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { Citation } from "@/components/chat/citation";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
-import { Soundwave } from "@/components/panelui/soundwave";
+import { Soundwave, useAudioLevel } from "@/components/panelui/soundwave";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { loadBlob } from "@/lib/db/blobs";
 import { cn } from "@/lib/utils";
@@ -29,14 +29,12 @@ import type { AudioOverviewData } from "./definition";
 const speeds = [1, 1.25, 1.5, 2] as const;
 /** How many bars the recording's shape is drawn with. */
 const BARS = 120;
-/** The hosts are marked A and B, like the parts of a script. */
-const LETTERS = ["A", "B"] as const;
 
 /**
- * An Audio Overview, laid out like a radio script on one screen: the player
- * on one side (the voice, the recording with each host's turns marked along
- * it, the controls) and the transcript on the other, with a timecode beside
- * every line. Only the turn being spoken carries the accent.
+ * An Audio Overview on one screen: the player on one side (a wave for each
+ * host in their colour, moving while they speak, the recording with each
+ * host's turns marked along it, the controls) and the conversation on the
+ * other, each host's lines on their own side.
  */
 export function AudioOverviewViewer({
   data,
@@ -54,6 +52,8 @@ export function AudioOverviewViewer({
   const [speed, setSpeed] = useState<(typeof speeds)[number]>(1);
   const [levels, setLevels] = useState<number[] | null>(null);
   const activeLine = useRef<HTMLLIElement | null>(null);
+  // How loud the recording is now; it drives the wave of the host speaking.
+  const level = useAudioLevel(audio);
 
   // The recording, from the notebook's files, as an <audio> element.
   useEffect(() => {
@@ -150,38 +150,55 @@ export function AudioOverviewViewer({
             </p>
           ) : (
             <>
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 py-6">
-                <Soundwave
-                  variant="radial"
-                  source={audio}
-                  state={playing ? "speaking" : "idle"}
-                  paused={!playing}
-                  height={176}
-                  className="text-foreground"
-                  label={
-                    speaker === null
-                      ? t("audio-overview.viewer.idle")
-                      : t("audio-overview.viewer.speaking", { name: data.hosts[speaker].name })
-                  }
-                >
-                  <Soundwave.Center>
-                    <HostMark
-                      speaker={speaker ?? 0}
-                      size="lg"
-                      active={speaker !== null && playing}
-                    />
-                  </Soundwave.Center>
-                </Soundwave>
-                <p className="h-5 text-sm text-muted-foreground" aria-live="polite">
-                  {speaker === null ? (
-                    t("audio-overview.viewer.hosts", {
-                      a: data.hosts[0].name,
-                      b: data.hosts[1].name,
-                    })
-                  ) : (
-                    <span className="text-foreground">{data.hosts[speaker].name}</span>
-                  )}
-                </p>
+              {/* One wave per host, in their colour; only the one speaking moves. */}
+              <div
+                className="grid min-h-0 flex-1 grid-cols-2 place-items-center gap-4 px-6 py-6"
+                aria-live="polite"
+              >
+                {data.hosts.map((host, index) => {
+                  const own = index as 0 | 1;
+                  const speaking = playing && speaker === own;
+                  return (
+                    <div key={index} className="flex flex-col items-center gap-3">
+                      <Soundwave
+                        variant="radial"
+                        level={speaking ? level : 0}
+                        state={speaking ? "speaking" : "idle"}
+                        paused={!speaking}
+                        height={156}
+                        color={hostWave[own]}
+                        className={cn(
+                          "transition-opacity",
+                          speaking ? "opacity-100" : "opacity-35",
+                        )}
+                        label={
+                          speaking
+                            ? t("audio-overview.viewer.speaking", { name: host.name })
+                            : host.name
+                        }
+                      >
+                        <Soundwave.Center>
+                          <span
+                            className={cn(
+                              "flex size-12 items-center justify-center rounded-full text-lg font-medium",
+                              hostTile[own],
+                            )}
+                          >
+                            {host.name.slice(0, 1).toLocaleUpperCase()}
+                          </span>
+                        </Soundwave.Center>
+                      </Soundwave>
+                      <p
+                        className={cn(
+                          "text-sm transition-colors",
+                          speaker === own ? "text-foreground" : "text-muted-foreground",
+                        )}
+                      >
+                        {host.name}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="flex flex-col gap-3 border-t border-border px-5 pt-4 pb-5">
@@ -256,30 +273,25 @@ export function AudioOverviewViewer({
           )}
         </section>
 
-        {/* The transcript, set like a script. */}
+        {/* The transcript, as a conversation: each host on their own side. */}
         <section
           aria-label={t("audio-overview.viewer.transcript")}
           className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border max-lg:h-[28rem]"
         >
-          <header className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
+          <header className="px-5 pt-4 pb-2">
             <h3 className="text-sm font-medium">{t("audio-overview.viewer.transcript")}</h3>
-            <p className="flex items-center gap-3 text-xs text-muted-foreground">
-              {data.hosts.map((host, index) => (
-                <span key={index} className="flex items-center gap-1.5">
-                  <HostMark speaker={index as 0 | 1} />
-                  {host.name}
-                </span>
-              ))}
-            </p>
           </header>
           <ScrollArea className="min-h-0 flex-1">
-            <ol className="flex flex-col px-2 pb-3">
+            <ol className="flex flex-col px-4 pt-2 pb-4">
               {data.turns.map((turn, index) => (
-                <ScriptLine
+                <Bubble
                   key={index}
                   lineRef={index === current ? activeLine : undefined}
+                  name={data.hosts[turn.speaker].name}
                   timecode={clock(turn.start)}
                   speaker={turn.speaker}
+                  // A host's consecutive lines group under one name.
+                  first={index === 0 || data.turns[index - 1].speaker !== turn.speaker}
                   active={index === current}
                   onSelect={() => seek(turn.start)}
                 >
@@ -292,7 +304,7 @@ export function AudioOverviewViewer({
                         <Citation passage={passage} numbers={[passage.n]} onOpen={onOpenPassage} />
                       </span>
                     ))}
-                </ScriptLine>
+                </Bubble>
               ))}
             </ol>
           </ScrollArea>
@@ -302,52 +314,60 @@ export function AudioOverviewViewer({
   );
 }
 
-/** A host's letter, set like a keycap. */
-function HostMark({
-  speaker,
-  size = "sm",
-  active = false,
-}: {
-  speaker: 0 | 1;
-  size?: "sm" | "lg";
-  active?: boolean;
-}) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "inline-flex shrink-0 items-center justify-center border border-border bg-muted font-mono font-medium text-muted-foreground transition-colors",
-        size === "sm" ? "size-5 rounded-[5px] text-[0.6875rem]" : "size-14 rounded-xl text-xl",
-        active && "text-foreground",
-      )}
-    >
-      {LETTERS[speaker]}
-    </span>
-  );
-}
+/** The two hosts' colours: green for the first, purple for the second. */
+const hostWave = ["chart-3", "chart-5"] as const;
+const hostTile = ["bg-chart-3/15 text-chart-3", "bg-chart-5/15 text-chart-5"] as const;
+const hostName = ["text-chart-3", "text-chart-5"] as const;
+const hostBubble = ["bg-chart-3/10", "bg-chart-5/10"] as const;
+const hostRing = ["ring-chart-3/60", "ring-chart-5/60"] as const;
+const hostTurn = ["bg-chart-3", "bg-chart-5"] as const;
 
-/** One line of the transcript: timecode, host and words. Choosing it plays from there. */
-function ScriptLine({
+/**
+ * One line of the conversation, on its host's side: the first host on the
+ * start side, the second on the end side. Choosing it plays from there.
+ */
+function Bubble({
   lineRef,
+  name,
   timecode,
   speaker,
+  first,
   active,
   onSelect,
   children,
 }: {
   lineRef?: Ref<HTMLLIElement>;
+  name: string;
   timecode: string;
   speaker: 0 | 1;
+  first: boolean;
   active: boolean;
   onSelect: () => void;
   children: ReactNode;
 }) {
+  const end = speaker === 1;
   return (
-    <li ref={lineRef}>
+    <li
+      ref={lineRef}
+      className={cn(
+        "flex flex-col",
+        end ? "items-end" : "items-start",
+        first ? "mt-4 first:mt-0" : "mt-1",
+      )}
+    >
+      {first ? (
+        <p className={cn("mb-1 flex items-baseline gap-2 px-1 text-xs", end && "flex-row-reverse")}>
+          <span className={cn("font-medium", hostName[speaker])}>{name}</span>
+          <span className="font-mono text-muted-foreground tabular-nums" dir="ltr">
+            {timecode}
+          </span>
+        </p>
+      ) : null}
       <div
         role="button"
         tabIndex={0}
         aria-current={active ? "true" : undefined}
+        title={timecode}
         onClick={onSelect}
         onKeyDown={(event: KeyboardEvent) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -356,24 +376,15 @@ function ScriptLine({
           }
         }}
         className={cn(
-          "relative grid cursor-pointer grid-cols-[3rem_1.25rem_minmax(0,1fr)] gap-x-3 rounded-lg px-3 py-2 transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
-          active && "bg-muted",
+          "max-w-[85%] cursor-pointer rounded-2xl px-3.5 py-2 text-sm leading-6 transition-[background-color,color,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          hostBubble[speaker],
+          end ? "rounded-se-md" : "rounded-ss-md",
+          active
+            ? cn("text-foreground ring-1", hostRing[speaker])
+            : "text-muted-foreground hover:text-foreground",
         )}
       >
-        {active ? (
-          <span aria-hidden className="absolute inset-y-2 start-0 w-0.5 rounded-full bg-chart-4" />
-        ) : null}
-        <span className="pt-0.5 font-mono text-xs text-muted-foreground tabular-nums" dir="ltr">
-          {timecode}
-        </span>
-        <span className="pt-0.5">
-          <HostMark speaker={speaker} active={active} />
-        </span>
-        <p
-          className={cn("text-sm leading-6", active ? "text-foreground" : "text-muted-foreground")}
-        >
-          {children}
-        </p>
+        {children}
       </div>
     </li>
   );
@@ -446,12 +457,9 @@ function Timeline({
           <span
             key={index}
             className={cn(
-              "h-full rounded-[1px] transition-colors",
-              index === current
-                ? "bg-chart-4"
-                : turn.speaker === 0
-                  ? "bg-foreground/35"
-                  : "bg-foreground/15",
+              "h-full rounded-[1px] transition-opacity",
+              hostTurn[turn.speaker],
+              index === current ? "opacity-100" : "opacity-30",
             )}
             style={{ width: `${((turn.end - turn.start) / total) * 100}%` }}
           />
