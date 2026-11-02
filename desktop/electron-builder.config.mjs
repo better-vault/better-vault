@@ -4,41 +4,16 @@
 // The version comes from the root package.json, so a release bumps one file.
 //
 // macOS signing and notarization read these environment variables (GitHub
-// secrets in .github/workflows/desktop.yml):
+// secrets in .github/workflows/desktop.yml, given to the macOS job only: on
+// Windows, electron-builder would sign with the same Apple certificate, and
+// installed apps would then reject every update):
 //   CSC_LINK, CSC_KEY_PASSWORD        Developer ID Application certificate (.p12)
 //   APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID   notarization
 // Without them the build is unsigned, which is fine for local testing.
-import { cpSync, existsSync, readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 const web = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const notarize = Boolean(process.env.APPLE_ID && process.env.APPLE_TEAM_ID);
-
-/**
- * Puts the standalone Next.js server (desktop/server) in the app's resources,
- * outside the asar archive: it runs in its own process and reads its files
- * from disk. electron-builder's `extraResources` always drops folders named
- * node_modules, which the server needs, so it is copied here instead. This
- * runs before signing, so the server is signed with the app.
- *
- * @param {import("electron-builder").AfterPackContext} context
- */
-function copyServer(context) {
-  const source = fileURLToPath(new URL("./server", import.meta.url));
-  if (!existsSync(path.join(source, "server.js")))
-    throw new Error("desktop/server is missing. Run `npm run build:server` first.");
-  const resources =
-    context.electronPlatformName === "darwin"
-      ? path.join(
-          context.appOutDir,
-          `${context.packager.appInfo.productFilename}.app`,
-          "Contents",
-          "Resources",
-        )
-      : path.join(context.appOutDir, "resources");
-  cpSync(source, path.join(resources, "server"), { recursive: true });
-}
 
 /** @type {import("electron-builder").Configuration} */
 const config = {
@@ -47,9 +22,8 @@ const config = {
   copyright: "Copyright © better-vault contributors",
   extraMetadata: { version: web.version },
   directories: { output: "release", buildResources: "build" },
-  files: ["dist/**", "build/icon.png", "package.json"],
-  // The Next.js server is copied next to the app by `afterPack` below.
-  afterPack: copyServer,
+  // electron-vite's build: the main process (with the API), preload and page.
+  files: ["out/**", "build/icon.png", "package.json"],
   icon: "build/icon.png",
   artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
   publish: [{ provider: "github", owner: "better-vault", repo: "better-vault" }],
@@ -82,7 +56,13 @@ const config = {
     ],
   },
 
-  win: { target: [{ target: "nsis", arch: ["x64"] }] },
+  win: {
+    target: [{ target: "nsis", arch: ["x64"] }],
+    // Windows builds are not code-signed (the Apple certificate is for macOS
+    // only), so the updater must not ask for a Windows signature. Set this back
+    // to true once the builds are signed with a Windows certificate (WIN_CSC_LINK).
+    verifyUpdateCodeSignature: false,
+  },
   nsis: { oneClick: true, perMachine: false },
 
   linux: {

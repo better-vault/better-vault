@@ -9,7 +9,7 @@
     "appearance": "Appearance",
     "language": "Language",
     "data": "Data",
-    "about": "About"
+    "about": "About & Updates"
   },
   "providers": {
     "title": "AI providers",
@@ -73,7 +73,7 @@
     "deleted": "All notebooks deleted"
   },
   "about": {
-    "title": "About",
+    "title": "About & Updates",
     "version": "Version {{version}}",
     "description": "An open-source, bring-your-own-model alternative to NotebookLM.",
     "github": "Source code",
@@ -112,6 +112,39 @@
     "callbackFailedTitle": "Sign-in didn't finish",
     "declined": "You didn't allow better-vault to use your ChatGPT plan.",
     "invalidCallback": "ChatGPT sent back an answer better-vault couldn't use. Try again.",
-    "otherAccount": "That's a different ChatGPT account. Choose “Use a different account” to add it."
+    "otherAccount": "That's a different ChatGPT account. Choose “Use a different account” to add it.",
+    "desktopOnly": "Not supported in the web app. Sign in with ChatGPT works in the better-vault desktop app, which keeps your ChatGPT sign-in on your computer.",
+    "getDesktop": "Get the desktop app"
+  },
+  "updates": {
+    "title": "Updates",
+    "notChecked": "Updates not checked yet",
+    "devBuild": "Updates are checked in the installed app",
+    "checking": "Checking for updates…",
+    "upToDate": "You're up to date",
+    "available": "Version {{version}} is available",
+    "availableShort": "Update available: {{version}}",
+    "availableHint": "Download it now; you can keep working while it downloads.",
+    "availableWebHint": "Update your copy to get it, or install the desktop app, which updates itself.",
+    "downloading": "Downloading {{version}}… {{percent}}%",
+    "progress": "Download progress",
+    "ready": "Version {{version}} is ready to install",
+    "readyHint": "better-vault restarts to finish, then opens again.",
+    "failed": "Couldn't check for updates",
+    "download": "Download update",
+    "restart": "Restart to update",
+    "whatsNew": "What's new",
+    "check": "Check for updates",
+    "tryAgain": "Try again",
+    "toast": "better-vault {{version}} is available",
+    "view": "View",
+    "readyTitle": "Update ready",
+    "readyBody": "better-vault {{version}} has downloaded. Restart the app to finish installing it; it opens again on its own.",
+    "later": "Later",
+    "restartNow": "Restart",
+    "updatedTitle": "better-vault was updated to {{version}}",
+    "updatedBody": "You're now on the newest version. Read the",
+    "releaseNotes": "release notes on GitHub",
+    "gotIt": "Got it"
   }
 }

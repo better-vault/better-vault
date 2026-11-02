@@ -74,17 +74,21 @@ jobs:
       - run: npm ci
       - run: npm ci
         working-directory: desktop
-      - run: npm run build:server
-        working-directory: desktop
       - name: Build the installers
         working-directory: desktop
         run: npm run build && npx electron-builder --config electron-builder.config.mjs ${{ matrix.platform }} --publish never
+        # The Apple certificate and notarization secrets reach the macOS job
+        # only. electron-builder signs Windows builds with CSC_LINK when it is
+        # set, and a Windows app signed with an Apple certificate refuses every
+        # update (that is why 0.4.x on Windows never updated).
         env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ runner.os == 'macOS' && secrets.CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ runner.os == 'macOS' && secrets.CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ runner.os == 'macOS' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
+          # Without a certificate, electron-builder does not look for one.
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ runner.os == 'macOS' }}
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ runner.os }}

@@ -1,9 +1,8 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { UpdatesHost } from "@/components/updates/updates-host";
 import { I18nProvider } from "./i18n-provider";
 import { ThemeProvider } from "./theme-provider";
 
@@ -16,6 +15,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           {/* The page steps back while a sheet is open. */}
           <Sheet.Stage className="h-dvh">{children}</Sheet.Stage>
           <Toaster />
+          <UpdatesHost />
         </TooltipProvider>
       </I18nProvider>
     </ThemeProvider>

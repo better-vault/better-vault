@@ -1,5 +1,3 @@
-"use client";
-
 import {
   AiBrain01Icon,
   Database01Icon,
@@ -8,7 +6,7 @@ import {
   PaintBoardIcon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import { useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -21,6 +19,7 @@ import { providerIds } from "@/lib/ai/catalog";
 import { deleteAllData } from "@/lib/db/backup";
 import { isProviderReady, useSettings } from "@/lib/db/settings";
 import { getLanguage } from "@/lib/i18n/config";
+import { useUpdates } from "@/lib/updates/use-updates";
 import { appVersion } from "@/lib/version";
 import { AboutPanel } from "./about-panel";
 import { AppearancePanel } from "./appearance-panel";
@@ -44,7 +43,7 @@ interface SettingsSheetProps {
  */
 export function SettingsSheet({ open: openProp, onOpenChange, trigger }: SettingsSheetProps) {
   const { t, i18n } = useTranslation("settings");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [ownOpen, setOwnOpen] = useState(false);
   const open = openProp ?? ownOpen;
   const setOpen = (next: boolean) => {
@@ -56,6 +55,13 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
   const { t: tCommon } = useTranslation();
   const { theme } = useTheme();
   const settings = useSettings();
+  const updates = useUpdates();
+  const updateVersion =
+    updates.state.status === "available" ||
+    updates.state.status === "downloading" ||
+    updates.state.status === "ready"
+      ? updates.state.version
+      : null;
   const ready = settings ? providerIds.filter((id) => isProviderReady(settings, id)).length : 0;
 
   return (
@@ -99,7 +105,16 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
                 to="about"
                 icon={InformationCircleIcon}
                 label={t("rows.about")}
-                hint={t("about.version", { version: appVersion })}
+                hint={
+                  updateVersion
+                    ? t("updates.availableShort", { version: updateVersion })
+                    : t("about.version", { version: appVersion })
+                }
+                end={
+                  updateVersion ? (
+                    <span aria-hidden className="size-2 rounded-full bg-info" />
+                  ) : undefined
+                }
               />
             </nav>
           </Sheet.Body>
@@ -127,7 +142,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
             />
           </Sheet.Next>
           <Sheet.Next name="about" closeLabel={tCommon("actions.close")}>
-            <AboutPanel />
+            <AboutPanel updates={updates} />
           </Sheet.Next>
         </Sheet.Content>
       </Sheet>
@@ -141,7 +156,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
         onConfirm={async () => {
           await deleteAllData();
           toast.success(t("data.deleted"));
-          router.push(routes.home);
+          navigate(routes.home);
         }}
       />
     </>
