@@ -21,7 +21,6 @@ import { Button } from "@/components/panelui/button";
 import { ButtonGroup } from "@/components/panelui/button-group";
 import { Dialog } from "@/components/panelui/dialog";
 import { Menu } from "@/components/panelui/menu";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import type { OutputChrome } from "@/studio/shared/form";
 import { clearBoard, fitContent, resetZoom, unlockAll, zoomBy, type Size } from "./actions";
 import { BoardButton } from "./board-button";
@@ -91,37 +90,6 @@ export function ViewControls({ board, size }: { board: BoardModel; size: () => S
         </ButtonGroup>
       </div>
     </div>
-  );
-}
-
-/** The board menu, bottom end: background, unlock, clear and the shortcuts. */
-/**
- * The board's icon, top start: pointing at it (or tapping it) shows the
- * board's name and when it was last edited.
- */
-export function BoardInfo({ chrome }: { chrome: OutputChrome }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <HoverCard open={open} onOpenChange={setOpen}>
-      <HoverCardTrigger
-        delay={150}
-        closeDelay={100}
-        render={
-          <button
-            type="button"
-            aria-label={`${chrome.title} · ${chrome.meta}`}
-            onClick={() => setOpen(true)}
-            className="pointer-events-auto flex size-10 cursor-pointer items-center justify-center rounded-2xl border bg-background/95 shadow-sm backdrop-blur transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-[popup-open]:bg-muted"
-          />
-        }
-      >
-        <Icon icon={chrome.icon} size={18} className={chrome.tint} />
-      </HoverCardTrigger>
-      <HoverCardContent side="bottom" align="start" sideOffset={8} className="w-72 rounded-2xl p-3">
-        <p className="text-sm font-semibold break-words">{chrome.title}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{chrome.meta}</p>
-      </HoverCardContent>
-    </HoverCard>
   );
 }
 

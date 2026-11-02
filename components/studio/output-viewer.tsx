@@ -126,6 +126,8 @@ export function OutputViewer({ id }: { id: string }) {
             : [],
         onRename: () => requestOutputAction({ kind: "rename", output }),
         onDelete: () => requestOutputAction({ kind: "delete", output }),
+        onClose: closeOutput,
+        onAnnotate: annotate && !annotating ? () => void annotate() : undefined,
       }
     : undefined;
 

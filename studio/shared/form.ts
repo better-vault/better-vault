@@ -24,6 +24,10 @@ export interface OutputChrome {
   busy: boolean;
   onRename: () => void;
   onDelete: () => void;
+  /** Back to the Studio list. */
+  onClose: () => void;
+  /** Opens the output's picture on a new whiteboard, when it has one. */
+  onAnnotate?: () => void;
 }
 
 /** What a tool's viewer receives. */

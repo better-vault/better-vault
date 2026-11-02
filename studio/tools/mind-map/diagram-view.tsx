@@ -27,7 +27,7 @@ export function DiagramView({ mermaid }: { mermaid: string }) {
     "flex size-9 cursor-pointer items-center justify-center text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset";
 
   return (
-    <Canvas viewport={view} className="min-h-[460px] flex-1 rounded-3xl ring-1 ring-border">
+    <Canvas viewport={view} className="min-h-[28rem] flex-1 rounded-3xl ring-1 ring-border">
       <Canvas.Pattern variant="dots" fade="edges" />
       {/* Absolute: the viewer's height is a minimum, so a percentage height would be 0. */}
       <Canvas.Content className="absolute inset-0">

@@ -21,7 +21,8 @@ import {
 } from "./actions";
 import { BoardCanvas } from "./board-canvas";
 import type { OutputChrome } from "@/studio/shared/form";
-import { BoardInfo, BoardMenu, ViewControls } from "./controls";
+import { OutputInfo } from "@/studio/shared/output-info";
+import { BoardMenu, ViewControls } from "./controls";
 import type { Point } from "./geometry";
 import { placedSize, prepareImage } from "./images";
 import { PropertiesPanel } from "./properties-panel";
@@ -410,7 +411,7 @@ export function Board({
 
       {chrome ? (
         <div className="pointer-events-none absolute start-3 top-3">
-          <BoardInfo chrome={chrome} />
+          <OutputInfo chrome={chrome} />
         </div>
       ) : null}
 

@@ -56,7 +56,14 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
   flashcards: { Form: FlashcardsForm, Viewer: FlashcardsViewer },
   quiz: { Form: QuizForm, Viewer: QuizViewer },
   "data-table": { Form: DataTableForm, Viewer: DataTableViewer },
-  "mind-map": { Form: MindMapForm, Viewer: MindMapViewer, wide: true, fill: true },
+  "mind-map": {
+    Form: MindMapForm,
+    Viewer: MindMapViewer,
+    wide: true,
+    fill: true,
+    bleed: true,
+    immersive: true,
+  },
   anatomy: { Form: AnatomyForm, Viewer: AnatomyViewer, fill: true },
   "slide-deck": { Form: SlideDeckForm, Viewer: SlideDeckViewer, wide: true, fill: true },
   infographic: {
