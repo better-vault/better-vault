@@ -658,7 +658,7 @@
     "viewer": {
       "missing": "The recording of this overview is missing. Make it again to listen.",
       "speaking": "{{name}} is speaking",
-      "idle": "Paused",
+      "idle": "Not playing",
       "hosts": "With {{a}} and {{b}}",
       "seek": "Position in the recording",
       "back15": "Back 15 seconds",
@@ -666,7 +666,8 @@
       "play": "Play",
       "pause": "Pause",
       "speed": "Playback speed {{speed}}×",
-      "transcript": "Transcript"
+      "transcript": "Transcript",
+      "turnOf": "Turn {{turn}} of {{total}}"
     }
   }
 }

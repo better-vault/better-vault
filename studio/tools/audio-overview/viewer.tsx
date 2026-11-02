@@ -1,46 +1,59 @@
 import {
+  ArrowLeft01Icon,
   GoBackward15SecIcon,
   GoForward15SecIcon,
   PauseIcon,
   PlayIcon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Citation } from "@/components/chat/citation";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Soundwave } from "@/components/panelui/soundwave";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { loadBlob } from "@/lib/db/blobs";
-import { initials } from "@/lib/db/profile";
 import { cn } from "@/lib/utils";
 import type { ToolViewerProps } from "@/studio/shared/form";
+import { OutputMenu } from "@/studio/shared/output-menu";
 import type { AudioOverviewData } from "./definition";
 
 const speeds = [1, 1.25, 1.5, 2] as const;
 /** How many bars the recording's shape is drawn with. */
-const BARS = 96;
-
-/** The two hosts' colours, from the theme. */
-const hostTint = ["bg-chart-2/15 text-chart-2", "bg-chart-5/15 text-chart-5"] as const;
-const hostText = ["text-chart-2", "text-chart-5"] as const;
+const BARS = 120;
+/** The hosts are marked A and B, like the parts of a script. */
+const LETTERS = ["A", "B"] as const;
 
 /**
- * An Audio Overview: the two hosts' conversation, played with a wave that
- * moves with their voices, a seekable shape of the recording, and the
- * transcript, which follows along and jumps to any line.
+ * An Audio Overview, laid out like a radio script on one screen: the player
+ * on one side (the voice, the recording with each host's turns marked along
+ * it, the controls) and the transcript on the other, with a timecode beside
+ * every line. Only the turn being spoken carries the accent.
  */
-export function AudioOverviewViewer({ data, onOpenPassage }: ToolViewerProps<AudioOverviewData>) {
+export function AudioOverviewViewer({
+  data,
+  chrome,
+  onOpenPassage,
+}: ToolViewerProps<AudioOverviewData>) {
   const { t } = useTranslation("studio");
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  // The same element as `audio`, for changing playback; state is only read.
+  const player = useRef<HTMLAudioElement | null>(null);
   const [missing, setMissing] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(data.audio.duration);
   const [speed, setSpeed] = useState<(typeof speeds)[number]>(1);
   const [levels, setLevels] = useState<number[] | null>(null);
-  const activeRef = useRef<HTMLLIElement | null>(null);
-  // The same element as `audio`, for changing playback; state is only read.
-  const player = useRef<HTMLAudioElement | null>(null);
+  const activeLine = useRef<HTMLLIElement | null>(null);
 
   // The recording, from the notebook's files, as an <audio> element.
   useEffect(() => {
@@ -79,20 +92,16 @@ export function AudioOverviewViewer({ data, onOpenPassage }: ToolViewerProps<Aud
   }, [audio, speed]);
 
   const current = useMemo(() => {
-    const index = data.turns.findIndex((turn) => time >= turn.start && time < turn.end);
-    if (index >= 0) return index;
-    // Between two turns: the one that just ended.
     let last = -1;
     data.turns.forEach((turn, at) => {
-      if (turn.end <= time) last = at;
+      if (turn.start <= time) last = at;
     });
     return last;
   }, [data.turns, time]);
-  const speaker = current >= 0 ? data.turns[current].speaker : null;
 
   // The transcript keeps the line being spoken in view.
   useEffect(() => {
-    if (playing) activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    if (playing) activeLine.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [current, playing]);
 
   const seek = (seconds: number) => {
@@ -108,243 +117,356 @@ export function AudioOverviewViewer({ data, onOpenPassage }: ToolViewerProps<Aud
     else element.pause();
   };
 
-  if (missing)
-    return (
-      <p className="py-16 text-center text-sm text-muted-foreground">
-        {t("audio-overview.viewer.missing")}
-      </p>
-    );
-
-  const host = speaker === null ? null : data.hosts[speaker];
+  const speaker = current >= 0 ? data.turns[current].speaker : null;
   const progress = duration > 0 ? time / duration : 0;
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="flex flex-col items-center gap-6 rounded-3xl bg-card px-4 pt-8 pb-6 ring-1 ring-border">
-        <Soundwave
-          variant="radial"
-          source={audio}
-          state={playing ? "speaking" : "idle"}
-          paused={!playing}
-          height={220}
-          color={speaker === 1 ? "chart-5" : "chart-2"}
-          label={
-            host
-              ? t("audio-overview.viewer.speaking", { name: host.name })
-              : t("audio-overview.viewer.idle")
-          }
-        >
-          <Soundwave.Center>
-            <span
-              className={cn(
-                "flex size-20 items-center justify-center rounded-full text-2xl font-semibold transition-colors",
-                speaker === null ? "bg-muted text-muted-foreground" : hostTint[speaker],
-              )}
-            >
-              {host ? initials(host.name) : <Icon icon={PlayIcon} size={26} />}
-            </span>
-          </Soundwave.Center>
-        </Soundwave>
+    // Fits the tab on wide screens: only the transcript scrolls. Narrow screens stack.
+    <div className="relative flex-1 lg:min-h-[36rem]">
+      <div className="grid gap-3 lg:absolute lg:inset-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+        {/* The player. */}
+        <section className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border">
+          <header className="flex items-center gap-2 p-3">
+            {chrome ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t("viewer.back")}
+                onClick={chrome.onClose}
+              >
+                <Icon icon={ArrowLeft01Icon} size={18} className="rtl:rotate-180" />
+              </Button>
+            ) : null}
+            <div className="min-w-0 flex-1 px-1">
+              <h2 className="truncate text-[0.9375rem] font-medium">{chrome?.title}</h2>
+              <p className="truncate font-mono text-xs text-muted-foreground">{chrome?.meta}</p>
+            </div>
+            {chrome ? <OutputMenu chrome={chrome} /> : null}
+          </header>
 
-        <p className="h-5 text-sm text-muted-foreground" aria-live="polite">
-          {host ? (
-            <span className={cn("font-medium", hostText[speaker!])}>{host.name}</span>
+          {missing ? (
+            <p className="flex flex-1 items-center justify-center px-6 text-center text-sm text-muted-foreground">
+              {t("audio-overview.viewer.missing")}
+            </p>
           ) : (
-            t("audio-overview.viewer.hosts", { a: data.hosts[0].name, b: data.hosts[1].name })
-          )}
-        </p>
-
-        <div className="flex w-full max-w-2xl flex-col gap-2">
-          <Seekbar
-            levels={levels}
-            progress={progress}
-            onSeek={(ratio) => seek(ratio * duration)}
-            label={t("audio-overview.viewer.seek")}
-          />
-          <div
-            className="flex justify-between font-mono text-xs text-muted-foreground tabular-nums"
-            dir="ltr"
-          >
-            <span>{clock(time)}</span>
-            <span>{clock(duration)}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            shape="pill"
-            aria-label={t("audio-overview.viewer.back15")}
-            title={t("audio-overview.viewer.back15")}
-            onClick={() => seek(time - 15)}
-            disabled={!audio}
-          >
-            <Icon icon={GoBackward15SecIcon} size={20} />
-          </Button>
-          <Button
-            size="icon-lg"
-            shape="pill"
-            aria-label={
-              playing ? t("audio-overview.viewer.pause") : t("audio-overview.viewer.play")
-            }
-            onClick={toggle}
-            disabled={!audio}
-            className="size-14"
-          >
-            <Icon icon={playing ? PauseIcon : PlayIcon} size={24} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            shape="pill"
-            aria-label={t("audio-overview.viewer.forward15")}
-            title={t("audio-overview.viewer.forward15")}
-            onClick={() => seek(time + 15)}
-            disabled={!audio}
-          >
-            <Icon icon={GoForward15SecIcon} size={20} />
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            shape="pill"
-            className="ms-2 w-14 font-mono tabular-nums"
-            aria-label={t("audio-overview.viewer.speed", { speed })}
-            onClick={() => setSpeed(speeds[(speeds.indexOf(speed) + 1) % speeds.length])}
-          >
-            {speed}×
-          </Button>
-        </div>
-      </section>
-
-      <section aria-label={t("audio-overview.viewer.transcript")} className="flex flex-col gap-2">
-        <h3 className="px-1 text-sm font-semibold">{t("audio-overview.viewer.transcript")}</h3>
-        <ol className="flex flex-col gap-1">
-          {data.turns.map((turn, index) => {
-            const active = index === current;
-            const cited = turn.cites
-              .map((n) => data.passages.find((passage) => passage.n === n))
-              .filter((passage) => passage !== undefined);
-            return (
-              <li key={index} ref={active ? activeRef : undefined}>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => seek(turn.start)}
-                  onKeyDown={(event: KeyboardEvent) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      seek(turn.start);
-                    }
-                  }}
-                  className={cn(
-                    "flex cursor-pointer gap-3 rounded-2xl px-3 py-2.5 text-start transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
-                    active && "bg-muted",
-                  )}
+            <>
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 py-6">
+                <Soundwave
+                  variant="radial"
+                  source={audio}
+                  state={playing ? "speaking" : "idle"}
+                  paused={!playing}
+                  height={176}
+                  className="text-foreground"
+                  label={
+                    speaker === null
+                      ? t("audio-overview.viewer.idle")
+                      : t("audio-overview.viewer.speaking", { name: data.hosts[speaker].name })
+                  }
                 >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full text-[0.7rem] font-semibold",
-                      hostTint[turn.speaker],
-                    )}
-                  >
-                    {initials(data.hosts[turn.speaker].name)}
+                  <Soundwave.Center>
+                    <HostMark
+                      speaker={speaker ?? 0}
+                      size="lg"
+                      active={speaker !== null && playing}
+                    />
+                  </Soundwave.Center>
+                </Soundwave>
+                <p className="h-5 text-sm text-muted-foreground" aria-live="polite">
+                  {speaker === null ? (
+                    t("audio-overview.viewer.hosts", {
+                      a: data.hosts[0].name,
+                      b: data.hosts[1].name,
+                    })
+                  ) : (
+                    <span className="text-foreground">{data.hosts[speaker].name}</span>
+                  )}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-border px-5 pt-4 pb-5">
+                <Timeline
+                  data={data}
+                  duration={duration}
+                  current={current}
+                  levels={levels}
+                  progress={progress}
+                  onSeek={seek}
+                />
+                <div
+                  className="flex items-center justify-between font-mono text-xs text-muted-foreground tabular-nums"
+                  dir="ltr"
+                >
+                  <span className="text-foreground">{clock(time)}</span>
+                  <span>
+                    {current >= 0
+                      ? t("audio-overview.viewer.turnOf", {
+                          turn: current + 1,
+                          total: data.turns.length,
+                        })
+                      : null}
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("text-xs font-medium", hostText[turn.speaker])}>
-                      {data.hosts[turn.speaker].name}
-                      <span className="ms-2 font-mono text-muted-foreground tabular-nums" dir="ltr">
-                        {clock(turn.start)}
-                      </span>
-                    </p>
-                    <p
-                      className={cn(
-                        "mt-0.5 text-sm leading-6",
-                        active ? "text-foreground" : "text-muted-foreground",
-                      )}
-                    >
-                      {turn.text}
-                      {cited.map((passage) => (
-                        <span key={passage.n} onClick={(event) => event.stopPropagation()}>
-                          <Citation
-                            passage={passage}
-                            numbers={[passage.n]}
-                            onOpen={onOpenPassage}
-                          />
-                        </span>
-                      ))}
-                    </p>
-                  </div>
+                  <span>{clock(duration)}</span>
                 </div>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-14 font-mono tabular-nums"
+                    aria-label={t("audio-overview.viewer.speed", { speed })}
+                    onClick={() => setSpeed(speeds[(speeds.indexOf(speed) + 1) % speeds.length])}
+                  >
+                    {speed}×
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("audio-overview.viewer.back15")}
+                    title={t("audio-overview.viewer.back15")}
+                    onClick={() => seek(time - 15)}
+                    disabled={!audio}
+                  >
+                    <Icon icon={GoBackward15SecIcon} size={18} />
+                  </Button>
+                  <Button
+                    size="icon-lg"
+                    aria-label={
+                      playing ? t("audio-overview.viewer.pause") : t("audio-overview.viewer.play")
+                    }
+                    onClick={toggle}
+                    disabled={!audio}
+                  >
+                    <Icon icon={playing ? PauseIcon : PlayIcon} size={20} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("audio-overview.viewer.forward15")}
+                    title={t("audio-overview.viewer.forward15")}
+                    onClick={() => seek(time + 15)}
+                    disabled={!audio}
+                  >
+                    <Icon icon={GoForward15SecIcon} size={18} />
+                  </Button>
+                  {/* Balances the speed button, so play sits in the middle. */}
+                  <span aria-hidden className="w-14" />
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* The transcript, set like a script. */}
+        <section
+          aria-label={t("audio-overview.viewer.transcript")}
+          className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border max-lg:h-[28rem]"
+        >
+          <header className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
+            <h3 className="text-sm font-medium">{t("audio-overview.viewer.transcript")}</h3>
+            <p className="flex items-center gap-3 text-xs text-muted-foreground">
+              {data.hosts.map((host, index) => (
+                <span key={index} className="flex items-center gap-1.5">
+                  <HostMark speaker={index as 0 | 1} />
+                  {host.name}
+                </span>
+              ))}
+            </p>
+          </header>
+          <ScrollArea className="min-h-0 flex-1">
+            <ol className="flex flex-col px-2 pb-3">
+              {data.turns.map((turn, index) => (
+                <ScriptLine
+                  key={index}
+                  lineRef={index === current ? activeLine : undefined}
+                  timecode={clock(turn.start)}
+                  speaker={turn.speaker}
+                  active={index === current}
+                  onSelect={() => seek(turn.start)}
+                >
+                  {turn.text}
+                  {turn.cites
+                    .map((n) => data.passages.find((passage) => passage.n === n))
+                    .filter((passage) => passage !== undefined)
+                    .map((passage) => (
+                      <span key={passage.n} onClick={(event) => event.stopPropagation()}>
+                        <Citation passage={passage} numbers={[passage.n]} onOpen={onOpenPassage} />
+                      </span>
+                    ))}
+                </ScriptLine>
+              ))}
+            </ol>
+          </ScrollArea>
+        </section>
+      </div>
     </div>
   );
 }
 
-/** The recording's shape as bars; pressing or dragging along it moves the playhead. */
-function Seekbar({
+/** A host's letter, set like a keycap. */
+function HostMark({
+  speaker,
+  size = "sm",
+  active = false,
+}: {
+  speaker: 0 | 1;
+  size?: "sm" | "lg";
+  active?: boolean;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center border border-border bg-muted font-mono font-medium text-muted-foreground transition-colors",
+        size === "sm" ? "size-5 rounded-[5px] text-[0.6875rem]" : "size-14 rounded-xl text-xl",
+        active && "text-foreground",
+      )}
+    >
+      {LETTERS[speaker]}
+    </span>
+  );
+}
+
+/** One line of the transcript: timecode, host and words. Choosing it plays from there. */
+function ScriptLine({
+  lineRef,
+  timecode,
+  speaker,
+  active,
+  onSelect,
+  children,
+}: {
+  lineRef?: Ref<HTMLLIElement>;
+  timecode: string;
+  speaker: 0 | 1;
+  active: boolean;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <li ref={lineRef}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-current={active ? "true" : undefined}
+        onClick={onSelect}
+        onKeyDown={(event: KeyboardEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelect();
+          }
+        }}
+        className={cn(
+          "relative grid cursor-pointer grid-cols-[3rem_1.25rem_minmax(0,1fr)] gap-x-3 rounded-lg px-3 py-2 transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
+          active && "bg-muted",
+        )}
+      >
+        {active ? (
+          <span aria-hidden className="absolute inset-y-2 start-0 w-0.5 rounded-full bg-chart-4" />
+        ) : null}
+        <span className="pt-0.5 font-mono text-xs text-muted-foreground tabular-nums" dir="ltr">
+          {timecode}
+        </span>
+        <span className="pt-0.5">
+          <HostMark speaker={speaker} active={active} />
+        </span>
+        <p
+          className={cn("text-sm leading-6", active ? "text-foreground" : "text-muted-foreground")}
+        >
+          {children}
+        </p>
+      </div>
+    </li>
+  );
+}
+
+/**
+ * The recording: its shape, played part in full ink, and under it each turn
+ * as a mark in its host's neutral step, the one being spoken in the accent.
+ * Pressing or dragging anywhere moves the playhead.
+ */
+function Timeline({
+  data,
+  duration,
+  current,
   levels,
   progress,
   onSeek,
-  label,
 }: {
+  data: AudioOverviewData;
+  duration: number;
+  current: number;
   levels: number[] | null;
   progress: number;
-  onSeek: (ratio: number) => void;
-  label: string;
+  onSeek: (seconds: number) => void;
 }) {
+  const { t } = useTranslation("studio");
   const ref = useRef<HTMLDivElement>(null);
-  const ratioAt = (clientX: number) => {
+  const at = (clientX: number) => {
     const box = ref.current?.getBoundingClientRect();
-    return box ? Math.max(0, Math.min(1, (clientX - box.left) / box.width)) : 0;
+    return box ? Math.max(0, Math.min(1, (clientX - box.left) / box.width)) * duration : 0;
   };
+  const total = duration || 1;
   return (
     <div
       ref={ref}
       dir="ltr"
       role="slider"
       tabIndex={0}
-      aria-label={label}
+      aria-label={t("audio-overview.viewer.seek")}
       aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(progress * 100)}
-      className="cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-valuemax={Math.round(duration)}
+      aria-valuenow={Math.round(progress * duration)}
+      aria-valuetext={clock(progress * duration)}
+      className="flex cursor-pointer flex-col gap-1.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
-        onSeek(ratioAt(event.clientX));
+        onSeek(at(event.clientX));
       }}
       onPointerMove={(event) => {
-        if (event.currentTarget.hasPointerCapture(event.pointerId)) onSeek(ratioAt(event.clientX));
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) onSeek(at(event.clientX));
       }}
       onKeyDown={(event) => {
-        if (event.key === "ArrowRight") onSeek(Math.min(1, progress + 0.02));
-        if (event.key === "ArrowLeft") onSeek(Math.max(0, progress - 0.02));
+        if (event.key === "ArrowRight") onSeek(progress * duration + 5);
+        if (event.key === "ArrowLeft") onSeek(progress * duration - 5);
       }}
     >
       <Soundwave
         variant="bars"
-        levels={levels ?? Array.from({ length: BARS }, () => 0.15)}
+        levels={levels ?? Array.from({ length: BARS }, () => 0.12)}
         progress={progress}
         bars={BARS}
-        height={48}
+        barWidth={2}
+        height={44}
         centered
-        label={label}
+        className="text-foreground"
+        label={t("audio-overview.viewer.seek")}
       />
+      <div aria-hidden className="flex h-1 gap-px">
+        {data.turns.map((turn, index) => (
+          <span
+            key={index}
+            className={cn(
+              "h-full rounded-[1px] transition-colors",
+              index === current
+                ? "bg-chart-4"
+                : turn.speaker === 0
+                  ? "bg-foreground/35"
+                  : "bg-foreground/15",
+            )}
+            style={{ width: `${((turn.end - turn.start) / total) * 100}%` }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-/** The loudness of the recording in `BARS` slices, 0 to 1, for the seek bar. */
+/** The loudness of the recording in `BARS` slices, 0 to 1, for the timeline. */
 async function shapeOf(blob: Blob): Promise<number[] | null> {
   try {
-    const Context = window.OfflineAudioContext;
-    const decoded = await new Context(1, 1, 44_100).decodeAudioData(await blob.arrayBuffer());
+    const decoded = await new OfflineAudioContext(1, 1, 44_100).decodeAudioData(
+      await blob.arrayBuffer(),
+    );
     const samples = decoded.getChannelData(0);
     const size = Math.floor(samples.length / BARS);
     const rms: number[] = [];
@@ -354,7 +476,7 @@ async function shapeOf(blob: Blob): Promise<number[] | null> {
       rms.push(Math.sqrt(sum / Math.max(1, size / 16)));
     }
     const peak = Math.max(...rms, 1e-6);
-    return rms.map((value) => Math.max(0.06, value / peak));
+    return rms.map((value) => Math.max(0.08, value / peak));
   } catch {
     return null;
   }

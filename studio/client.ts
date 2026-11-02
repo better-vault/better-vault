@@ -50,6 +50,10 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
     Form: AudioOverviewForm,
     Viewer: AudioOverviewViewer,
     wide: true,
+    // The player and transcript fill the tab, side by side, with nothing to scroll past.
+    fill: true,
+    bleed: true,
+    immersive: true,
     // The voices and the speech model are chosen once ElevenLabs has listed them.
     canCreate: (options: { hosts: unknown; speechModel: unknown }) =>
       options.hosts !== null && options.speechModel !== null,

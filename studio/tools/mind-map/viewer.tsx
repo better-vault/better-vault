@@ -1,12 +1,4 @@
-import {
-  Copy01Icon,
-  Delete02Icon,
-  Download04Icon,
-  Loading03Icon,
-  MoreHorizontalIcon,
-  PencilEdit01Icon,
-  WhiteboardIcon,
-} from "@hugeicons/core-free-icons";
+import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -16,6 +8,7 @@ import { Button } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
 import type { OutputChrome, ToolViewerProps } from "@/studio/shared/form";
 import { OutputInfo } from "@/studio/shared/output-info";
+import { OutputMenu } from "@/studio/shared/output-menu";
 import type { MindMapData } from "./definition";
 import { DiagramView } from "./diagram-view";
 import { parseMindmap } from "./tree";
@@ -95,65 +88,15 @@ export function MindMapViewer({ data, chrome }: ToolViewerProps<MindMapData>) {
   );
 }
 
-/** Downloads, the Mermaid code, annotating, renaming and deleting, top end. */
+/** The shared actions menu, with copying the Mermaid code. */
 function MindMapMenu({ chrome, onCopy }: { chrome: OutputChrome; onCopy: () => void }) {
   const { t } = useTranslation("studio");
-  const { t: tCommon } = useTranslation();
   return (
-    <Menu>
-      <Menu.Trigger
-        render={
-          <Button
-            variant="outline"
-            size="icon"
-            shape="pill"
-            aria-label={t("viewer.actions")}
-            className="pointer-events-auto bg-background/95 shadow-sm backdrop-blur"
-          />
-        }
-      >
-        <Icon
-          icon={chrome.busy ? Loading03Icon : MoreHorizontalIcon}
-          size={18}
-          className={chrome.busy ? "animate-spin" : undefined}
-        />
-      </Menu.Trigger>
-      <Menu.Content align="end" className="min-w-52">
-        {chrome.downloads.length > 0 ? (
-          <Menu.Sub>
-            <Menu.SubTrigger disabled={chrome.busy}>
-              <Icon icon={Download04Icon} />
-              {t("whiteboard.actions.download")}
-            </Menu.SubTrigger>
-            <Menu.SubContent side="inline-start">
-              {chrome.downloads.map((download) => (
-                <Menu.Item key={download.format} onClick={download.onSelect}>
-                  {download.label}
-                </Menu.Item>
-              ))}
-            </Menu.SubContent>
-          </Menu.Sub>
-        ) : null}
-        <Menu.Item onClick={onCopy}>
-          <Icon icon={Copy01Icon} />
-          {t("mind-map.viewer.copyCode")}
-        </Menu.Item>
-        {chrome.onAnnotate ? (
-          <Menu.Item onClick={chrome.onAnnotate}>
-            <Icon icon={WhiteboardIcon} />
-            {t("viewer.annotate")}
-          </Menu.Item>
-        ) : null}
-        <Menu.Separator />
-        <Menu.Item onClick={chrome.onRename}>
-          <Icon icon={PencilEdit01Icon} />
-          {tCommon("actions.rename")}
-        </Menu.Item>
-        <Menu.Item variant="destructive" onClick={chrome.onDelete}>
-          <Icon icon={Delete02Icon} />
-          {tCommon("actions.delete")}
-        </Menu.Item>
-      </Menu.Content>
-    </Menu>
+    <OutputMenu chrome={chrome} floating>
+      <Menu.Item onClick={onCopy}>
+        <Icon icon={Copy01Icon} />
+        {t("mind-map.viewer.copyCode")}
+      </Menu.Item>
+    </OutputMenu>
   );
 }
