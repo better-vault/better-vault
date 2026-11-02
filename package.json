@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.87",
+    "@ai-sdk/elevenlabs": "^3.0.78",
     "@ai-sdk/google": "^4.0.104",
     "@ai-sdk/openai": "^4.0.101",
     "@ai-sdk/openai-compatible": "^3.0.77",

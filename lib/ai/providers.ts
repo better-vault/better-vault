@@ -5,17 +5,19 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { ImageModel, LanguageModel, ToolSet } from "ai";
 import { chatGPTLanguageModel } from "@/lib/chatgpt/model";
 import { providers, type ModelRef, type ProviderCredentials } from "./catalog";
+import { createOpenCodeModel } from "./opencode";
 import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-config";
 
 /**
  * Builds the model for one request from the credentials sent with it.
  * Nothing is cached, so a key never outlives the request.
  */
-export function createLanguageModel(
+export async function createLanguageModel(
   ref: ModelRef,
   credentials: ProviderCredentials,
-): LanguageModel {
+): Promise<LanguageModel> {
   const info = providers[ref.provider];
+  if (info.kind !== "chat") throw new Error(`${info.name} makes audio only; choose another model.`);
   if (ref.provider === "openai" && credentials.chatgpt) {
     if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT works in the desktop app only.");
     return chatGPTLanguageModel(ref.modelId);
@@ -32,6 +34,8 @@ export function createLanguageModel(
       return createAnthropic({ apiKey: credentials.apiKey })(ref.modelId);
     case "google":
       return createGoogleGenerativeAI({ apiKey: credentials.apiKey })(ref.modelId);
+    case "opencode":
+      return createOpenCodeModel(ref.modelId, credentials.apiKey ?? "", credentials.baseURL);
     case "ollama":
     case "lmstudio": {
       const base = parseBaseURL(credentials.baseURL, info.defaultBaseURL ?? "");
@@ -41,6 +45,8 @@ export function createLanguageModel(
         supportsStructuredOutputs: true,
       })(ref.modelId);
     }
+    case "elevenlabs":
+      throw new Error(`${info.name} makes audio only.`);
   }
 }
 

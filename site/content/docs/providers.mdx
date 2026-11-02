@@ -1,17 +1,22 @@
 ---
 title: "Providers and models"
-description: "Use better-vault with OpenAI, Anthropic Claude, Google Gemini, Ollama or LM Studio, with your own API key, your ChatGPT plan or a local model on your computer."
+description: "Use better-vault with OpenAI, Anthropic, Gemini, OpenCode, Ollama or LM Studio, and ElevenLabs for speech, with your own key, ChatGPT plan or local model."
 ---
 
-better-vault works with five providers: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
+better-vault works with six providers that write and one that speaks: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
 
 | Provider            | Needs                                     | Web mode | Pictures (Infographic)    |
 | ------------------- | ----------------------------------------- | -------- | ------------------------- |
 | **OpenAI**          | API key, or ChatGPT sign-in (desktop app) | Yes      | Yes (GPT Image models)    |
 | **Anthropic**       | API key                                   | Yes      | No                        |
 | **Google (Gemini)** | API key                                   | Yes      | Yes (Gemini image models) |
+| **OpenCode**        | OpenCode Zen or Go API key                | No       | No                        |
 | **Ollama**          | Ollama running on your machine            | No       | No                        |
 | **LM Studio**       | LM Studio's local server                  | No       | No                        |
+
+**ElevenLabs** only makes speech. It needs an API key and reads Audio Overviews aloud; it doesn't appear in the model picker.
+
+**OpenCode** serves many makers' models behind one key. Choose **Zen** to pay as you go with console credits, or **Go** for its monthly plan, in **Settings → AI providers → OpenCode**.
 
 ## Add an API key
 

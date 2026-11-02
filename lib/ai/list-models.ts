@@ -1,5 +1,6 @@
 import { listChatGPTModels } from "@/lib/chatgpt/model";
 import { providers, type ProviderCredentials, type ProviderId } from "./catalog";
+import { listOpenCodeModels } from "./opencode";
 import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-config";
 
 const TIMEOUT = 10_000;
@@ -83,6 +84,12 @@ export async function listModels(
         .map((model) => model.name.replace(/^models\//, ""))
         .filter((id) => id.startsWith("gemini") && !NOT_CHAT.test(id))
         .sort(byNewest);
+    }
+    case "opencode":
+      return listOpenCodeModels(credentials.baseURL);
+    case "elevenlabs": {
+      // Its speech models; the voices are listed by /api/voices.
+      return [...info.suggestedModels];
     }
     case "ollama": {
       const base = parseBaseURL(credentials.baseURL, info.defaultBaseURL ?? "");

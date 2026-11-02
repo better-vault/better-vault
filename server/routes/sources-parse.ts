@@ -20,10 +20,13 @@ export async function POST(request: Request) {
     if (type.startsWith("multipart/form-data")) {
       const form = await request.formData();
       const file = form.get("file");
-      if (!(file instanceof File)) return Response.json({ error: "No file was sent." }, { status: 400 });
-      if (file.size > MAX_FILE_BYTES) return Response.json({ error: "The file is larger than 20 MB." }, { status: 413 });
+      if (!(file instanceof File))
+        return Response.json({ error: "No file was sent." }, { status: 400 });
+      if (file.size > MAX_FILE_BYTES)
+        return Response.json({ error: "The file is larger than 20 MB." }, { status: 413 });
       const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-      if (!isPdf) return Response.json({ error: "Only PDF files are read on the server." }, { status: 415 });
+      if (!isPdf)
+        return Response.json({ error: "Only PDF files are read on the server." }, { status: 415 });
       const text = await pdfToText(new Uint8Array(await file.arrayBuffer()));
       return Response.json({ title: titleFromFile(file.name), text, kind: "pdf" });
     }
@@ -43,7 +46,12 @@ export async function POST(request: Request) {
       return Response.json({ title, text, kind: "url", url: page.url.toString() });
     }
     if (page.contentType.startsWith("text/")) {
-      return Response.json({ title: fallbackTitle, text: raw, kind: "url", url: page.url.toString() });
+      return Response.json({
+        title: fallbackTitle,
+        text: raw,
+        kind: "url",
+        url: page.url.toString(),
+      });
     }
     return Response.json({ error: "That page is not text, HTML or PDF." }, { status: 415 });
   } catch (error) {

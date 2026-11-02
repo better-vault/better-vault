@@ -3,12 +3,25 @@
  * model picker) and the server (model factory). To add a provider, add it
  * here and handle it in `lib/ai/providers.ts` and `server/routes/models.ts`.
  */
-export const providerIds = ["openai", "anthropic", "google", "ollama", "lmstudio"] as const;
+export const providerIds = [
+  "openai",
+  "anthropic",
+  "google",
+  "opencode",
+  "ollama",
+  "lmstudio",
+  "elevenlabs",
+] as const;
 
 export type ProviderId = (typeof providerIds)[number];
 
 export interface ProviderInfo {
   id: ProviderId;
+  /**
+   * "chat" providers write text (chat, Studio). "audio" providers only speak:
+   * they never appear in the model picker and are used by audio tools.
+   */
+  kind: "chat" | "audio";
   /** Brand name, shown as is in every language. */
   name: string;
   /** Runs on the user's machine (no key, has a base URL). */
@@ -34,6 +47,20 @@ export interface ProviderInfo {
   imageModels: readonly string[];
 }
 
+/** Providers whose models chat and write: the ones in the model picker. */
+export const chatProviderIds = [
+  "openai",
+  "anthropic",
+  "google",
+  "opencode",
+  "ollama",
+  "lmstudio",
+] as const satisfies readonly ProviderId[];
+
+/** Providers that turn text into speech (audio overviews). */
+export const speechProviderIds = ["elevenlabs"] as const satisfies readonly ProviderId[];
+export type SpeechProviderId = (typeof speechProviderIds)[number];
+
 /** Providers with image models. */
 export const imageProviderIds = ["openai", "google"] as const satisfies readonly ProviderId[];
 export type ImageProviderId = (typeof imageProviderIds)[number];
@@ -41,6 +68,7 @@ export type ImageProviderId = (typeof imageProviderIds)[number];
 export const providers: Record<ProviderId, ProviderInfo> = {
   openai: {
     id: "openai",
+    kind: "chat",
     name: "OpenAI",
     local: false,
     needsKey: true,
@@ -60,6 +88,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
   },
   anthropic: {
     id: "anthropic",
+    kind: "chat",
     name: "Anthropic",
     local: false,
     needsKey: true,
@@ -76,6 +105,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
   },
   google: {
     id: "google",
+    kind: "chat",
     name: "Google Gemini",
     local: false,
     needsKey: true,
@@ -95,8 +125,24 @@ export const providers: Record<ProviderId, ProviderInfo> = {
       "gemini-2.5-flash-image",
     ],
   },
+  opencode: {
+    id: "opencode",
+    kind: "chat",
+    name: "OpenCode",
+    local: false,
+    needsKey: true,
+    // The plan: Zen (pay as you go) or Go (monthly). See lib/ai/opencode.ts.
+    defaultBaseURL: "https://opencode.ai/inference",
+    webSearch: false,
+    keyUrl: "https://opencode.ai/auth",
+    // Taken from OpenCode's model list (https://opencode.ai/inference/v1/models).
+    suggestedModels: ["claude-sonnet-5-5", "gpt-6-luna", "gemini-3.8-flash", "deepseek-v4.1-flash"],
+    contextChars: 300_000,
+    imageModels: [],
+  },
   ollama: {
     id: "ollama",
+    kind: "chat",
     name: "Ollama",
     local: true,
     needsKey: false,
@@ -108,6 +154,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
   },
   lmstudio: {
     id: "lmstudio",
+    kind: "chat",
     name: "LM Studio",
     local: true,
     needsKey: false,
@@ -115,6 +162,19 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     webSearch: false,
     suggestedModels: [],
     contextChars: 12_000,
+    imageModels: [],
+  },
+  elevenlabs: {
+    id: "elevenlabs",
+    kind: "audio",
+    name: "ElevenLabs",
+    local: false,
+    needsKey: true,
+    webSearch: false,
+    keyUrl: "https://elevenlabs.io/app/settings/api-keys",
+    // Speech models, from the model id union in the installed @ai-sdk/elevenlabs.
+    suggestedModels: ["eleven_v3", "eleven_v4"],
+    contextChars: 0,
     imageModels: [],
   },
 };

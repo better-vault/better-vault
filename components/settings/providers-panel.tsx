@@ -1,4 +1,5 @@
 import {
+  AudioWave01Icon,
   Cancel01Icon,
   Globe02Icon,
   Loading03Icon,
@@ -17,7 +18,8 @@ import { Label } from "@/components/panelui/label";
 import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { providerIds, providers, type ProviderId } from "@/lib/ai/catalog";
+import { Segmented } from "@/components/common/segmented";
+import { chatProviderIds, providers, speechProviderIds, type ProviderId } from "@/lib/ai/catalog";
 import { accountLabel, chatGPTStatus, chatGPTUsageUrl, signOutChatGPT } from "@/lib/chatgpt/client";
 import {
   isProviderReady,
@@ -30,6 +32,12 @@ import { cn } from "@/lib/utils";
 import { SettingsRow } from "./settings-row";
 
 type Status = "ready" | "needsKey" | "off";
+
+/** OpenCode's plans and the addresses that choose them (lib/ai/opencode.ts). */
+const openCodeAddress = {
+  zen: "https://opencode.ai/inference",
+  go: "https://opencode.ai/inference/go",
+} as const;
 
 function statusOf(settings: AppSettings, id: ProviderId): Status {
   if (isProviderReady(settings, id)) return "ready";
@@ -51,39 +59,56 @@ export function ProvidersPanel({ onChatGPTSignIn }: ProvidersPanelProps) {
     <>
       <Sheet.Header title={t("providers.title")} description={t("providers.description")} />
       <Sheet.Body>
-        <div className="-mx-2 flex flex-col gap-0.5">
-          {providerIds.map((id) => {
-            const status = settings ? statusOf(settings, id) : "off";
-            return (
-              <SettingsRow
-                key={id}
-                to="provider"
-                payload={id}
-                icon={<ProviderIcon provider={id} />}
-                label={providers[id].name}
-                hint={t(`providers.${status}`)}
-                end={
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "size-2 rounded-full",
-                      status === "ready"
-                        ? "bg-success"
-                        : status === "needsKey"
-                          ? "bg-warning"
-                          : "bg-muted-foreground/30",
-                    )}
-                  />
-                }
-              />
-            );
-          })}
-        </div>
+        <ProviderList ids={chatProviderIds} settings={settings} />
+        <h3 className="mt-5 mb-1 px-0.5 text-xs font-medium text-muted-foreground">
+          {t("providers.speech")}
+        </h3>
+        <ProviderList ids={speechProviderIds} settings={settings} />
       </Sheet.Body>
       <Sheet.Next name="provider" closeLabel={tCommon("actions.close")}>
         {(id: ProviderId) => <ProviderDetail id={id} onChatGPTSignIn={onChatGPTSignIn} />}
       </Sheet.Next>
     </>
+  );
+}
+
+function ProviderList({
+  ids,
+  settings,
+}: {
+  ids: readonly ProviderId[];
+  settings: AppSettings | undefined;
+}) {
+  const { t } = useTranslation("settings");
+  return (
+    <div className="-mx-2 flex flex-col gap-0.5">
+      {ids.map((id) => {
+        const status = settings ? statusOf(settings, id) : "off";
+        return (
+          <SettingsRow
+            key={id}
+            to="provider"
+            payload={id}
+            icon={<ProviderIcon provider={id} />}
+            label={providers[id].name}
+            hint={t(`providers.${status}`)}
+            end={
+              <span
+                aria-hidden
+                className={cn(
+                  "size-2 rounded-full",
+                  status === "ready"
+                    ? "bg-success"
+                    : status === "needsKey"
+                      ? "bg-warning"
+                      : "bg-muted-foreground/30",
+                )}
+              />
+            }
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -118,6 +143,7 @@ function ProviderForm({
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const save = (patch: Partial<ProviderSettings>) => void updateProvider(id, patch);
+  const openCodePlan = baseURL === openCodeAddress.go ? "go" : "zen";
 
   async function loadModels() {
     setLoading(true);
@@ -130,9 +156,11 @@ function ProviderForm({
           provider: id,
           credentials: saved.chatgpt
             ? { chatgpt: true }
-            : info.needsKey
-              ? { apiKey: apiKey.trim() }
-              : { baseURL: baseURL.trim() },
+            : id === "opencode"
+              ? { apiKey: apiKey.trim(), baseURL: baseURL || info.defaultBaseURL }
+              : info.needsKey
+                ? { apiKey: apiKey.trim() }
+                : { baseURL: baseURL.trim() },
         }),
       });
       const body = (await response.json()) as { models?: string[]; error?: string };
@@ -172,6 +200,34 @@ function ProviderForm({
 
           {id === "openai" ? (
             <ChatGPTCard account={saved.chatgpt} onSignIn={onChatGPTSignIn} />
+          ) : null}
+
+          {id === "opencode" ? (
+            <Field
+              label={t("providers.opencodePlan")}
+              hint={t(`providers.opencodePlanHint.${openCodePlan}`)}
+            >
+              <Segmented<"zen" | "go">
+                aria-label={t("providers.opencodePlan")}
+                value={openCodePlan}
+                onValueChange={(plan) => {
+                  const next = openCodeAddress[plan];
+                  setBaseURL(next);
+                  save({ baseURL: next, models: [] });
+                }}
+                options={[
+                  { value: "zen", label: "Zen" },
+                  { value: "go", label: "Go" },
+                ]}
+              />
+            </Field>
+          ) : null}
+
+          {info.kind === "audio" ? (
+            <p className="flex items-start gap-2 rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+              <Icon icon={AudioWave01Icon} size={16} className="mt-0.5 shrink-0 text-info" />
+              {t("providers.audioOnly", { name: info.name })}
+            </p>
           ) : null}
 
           {info.needsKey ? (
@@ -232,84 +288,92 @@ function ProviderForm({
             </Field>
           )}
 
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Icon
-              icon={Globe02Icon}
-              size={16}
-              className={info.webSearch ? "text-info" : undefined}
-            />
-            {info.webSearch ? t("providers.webSearch") : t("providers.noWebSearch")}
-          </p>
+          {info.kind === "audio" ? null : (
+            <>
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon
+                  icon={Globe02Icon}
+                  size={16}
+                  className={info.webSearch ? "text-info" : undefined}
+                />
+                {info.webSearch ? t("providers.webSearch") : t("providers.noWebSearch")}
+              </p>
 
-          <Field
-            label={t("providers.models")}
-            action={
-              <button
-                type="button"
-                disabled={!canLoad || loading}
-                onClick={loadModels}
-                className="inline-flex cursor-pointer items-center gap-1 text-foreground underline-offset-4 hover:underline disabled:cursor-default disabled:no-underline disabled:opacity-50"
+              <Field
+                label={t("providers.models")}
+                action={
+                  <button
+                    type="button"
+                    disabled={!canLoad || loading}
+                    onClick={loadModels}
+                    className="inline-flex cursor-pointer items-center gap-1 text-foreground underline-offset-4 hover:underline disabled:cursor-default disabled:no-underline disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Icon icon={Loading03Icon} size={14} className="animate-spin" />
+                    ) : null}
+                    {loading ? t("providers.refreshing") : t("providers.refresh")}
+                  </button>
+                }
+                hint={
+                  loadError
+                    ? t("providers.loadFailed", { error: loadError })
+                    : saved.models.length > 0
+                      ? t("providers.modelsLoaded", { count: saved.models.length })
+                      : info.local
+                        ? t("providers.modelsEmptyLocal", { name: info.name })
+                        : t("providers.modelsSuggested", { name: info.name })
+                }
               >
-                {loading ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
-                {loading ? t("providers.refreshing") : t("providers.refresh")}
-              </button>
-            }
-            hint={
-              loadError
-                ? t("providers.loadFailed", { error: loadError })
-                : saved.models.length > 0
-                  ? t("providers.modelsLoaded", { count: saved.models.length })
-                  : info.local
-                    ? t("providers.modelsEmptyLocal", { name: info.name })
-                    : t("providers.modelsSuggested", { name: info.name })
-            }
-          >
-            {models.length > 0 ? (
-              <ScrollArea className="rounded-xl border" viewportClassName="max-h-48">
-                <ul className="flex flex-wrap gap-1.5 p-2">
-                  {models.map((model) => (
-                    <li
-                      key={model}
-                      className="flex items-center gap-1 rounded-full bg-muted py-0.5 ps-2.5 pe-1 font-mono text-xs"
-                    >
-                      {model}
-                      {saved.models.length > 0 ? (
-                        <button
-                          type="button"
-                          aria-label={t("providers.removeModel", { model })}
-                          onClick={() => save({ models: saved.models.filter((m) => m !== model) })}
-                          className="cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                {models.length > 0 ? (
+                  <ScrollArea className="rounded-xl border" viewportClassName="max-h-48">
+                    <ul className="flex flex-wrap gap-1.5 p-2">
+                      {models.map((model) => (
+                        <li
+                          key={model}
+                          className="flex items-center gap-1 rounded-full bg-muted py-0.5 ps-2.5 pe-1 font-mono text-xs"
                         >
-                          <Icon icon={Cancel01Icon} size={12} />
-                        </button>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </ScrollArea>
-            ) : null}
-            <form
-              className="flex gap-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                addModel();
-              }}
-            >
-              <Input
-                id={modelId}
-                size="sm"
-                aria-label={t("providers.addModel")}
-                placeholder={t("providers.addModelPlaceholder")}
-                value={newModel}
-                spellCheck={false}
-                onChange={(event) => setNewModel(event.target.value)}
-                className="font-mono"
-              />
-              <Button type="submit" size="sm" variant="secondary" disabled={!newModel.trim()}>
-                {t("providers.addModel")}
-              </Button>
-            </form>
-          </Field>
+                          {model}
+                          {saved.models.length > 0 ? (
+                            <button
+                              type="button"
+                              aria-label={t("providers.removeModel", { model })}
+                              onClick={() =>
+                                save({ models: saved.models.filter((m) => m !== model) })
+                              }
+                              className="cursor-pointer rounded-full p-0.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                            >
+                              <Icon icon={Cancel01Icon} size={12} />
+                            </button>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
+                ) : null}
+                <form
+                  className="flex gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    addModel();
+                  }}
+                >
+                  <Input
+                    id={modelId}
+                    size="sm"
+                    aria-label={t("providers.addModel")}
+                    placeholder={t("providers.addModelPlaceholder")}
+                    value={newModel}
+                    spellCheck={false}
+                    onChange={(event) => setNewModel(event.target.value)}
+                    className="font-mono"
+                  />
+                  <Button type="submit" size="sm" variant="secondary" disabled={!newModel.trim()}>
+                    {t("providers.addModel")}
+                  </Button>
+                </form>
+              </Field>
+            </>
+          )}
 
           {info.local ? (
             <Field

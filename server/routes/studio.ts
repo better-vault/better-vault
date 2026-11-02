@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await generate({
-      model: createLanguageModel(model, credentials),
+      model: await createLanguageModel(model, credentials),
       options: options.data,
       language,
       focus,

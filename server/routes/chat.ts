@@ -24,7 +24,9 @@ const passageSchema = z.object({
 });
 
 const bodySchema = z.object({
-  messages: z.array(z.looseObject({ id: z.string(), role: z.enum(["system", "user", "assistant"]) })).min(1),
+  messages: z
+    .array(z.looseObject({ id: z.string(), role: z.enum(["system", "user", "assistant"]) }))
+    .min(1),
   mode: z.enum(["sources", "web"]),
   model: modelRefSchema,
   credentials: credentialsSchema,
@@ -53,12 +55,15 @@ export async function POST(request: Request) {
   const passages = parsed.data.passages as Passage[];
 
   if (mode === "web" && !providers[model.provider].webSearch) {
-    return Response.json({ error: `${providers[model.provider].name} has no built-in web search.` }, { status: 400 });
+    return Response.json(
+      { error: `${providers[model.provider].name} has no built-in web search.` },
+      { status: 400 },
+    );
   }
 
   let languageModel;
   try {
-    languageModel = createLanguageModel(model, credentials);
+    languageModel = await createLanguageModel(model, credentials);
   } catch (error) {
     return Response.json({ error: describeError(error) }, { status: 400 });
   }
@@ -67,7 +72,9 @@ export async function POST(request: Request) {
   const result = streamText({
     model: languageModel,
     system: chatSystemPrompt(mode, passages),
-    messages: await convertToModelMessages(withoutOldCitations(messages), { ignoreIncompleteToolCalls: true }),
+    messages: await convertToModelMessages(withoutOldCitations(messages), {
+      ignoreIncompleteToolCalls: true,
+    }),
     tools,
     stopWhen: stepCountIs(5),
     abortSignal: request.signal,

@@ -1,4 +1,5 @@
 import {
+  chatProviderIds,
   providerIds,
   providers,
   type ModelRef,
@@ -108,9 +109,12 @@ export function usesChatGPT(settings: AppSettings, id: ProviderId): boolean {
 export function credentialsFor(settings: AppSettings, id: ProviderId): ProviderCredentials {
   const saved = settings.providers[id];
   if (usesChatGPT(settings, id)) return { chatgpt: true };
-  return providers[id].needsKey
-    ? { apiKey: saved.apiKey.trim() }
-    : { baseURL: saved.baseURL.trim() || providers[id].defaultBaseURL };
+  if (!providers[id].needsKey)
+    return { baseURL: saved.baseURL.trim() || providers[id].defaultBaseURL };
+  // OpenCode's address picks the plan (Zen or Go); the server only accepts those two.
+  if (id === "opencode")
+    return { apiKey: saved.apiKey.trim(), baseURL: saved.baseURL || providers[id].defaultBaseURL };
+  return { apiKey: saved.apiKey.trim() };
 }
 
 /** Pictures always need an API key: a ChatGPT plan cannot generate images here. */
@@ -120,7 +124,10 @@ function canDrawPictures(settings: AppSettings, id: ProviderId): boolean {
 }
 
 /** The credentials for an image model: its API key. */
-export function imageCredentialsFrom(settings: AppSettings, id: ProviderId): ProviderCredentials | null {
+export function imageCredentialsFrom(
+  settings: AppSettings,
+  id: ProviderId,
+): ProviderCredentials | null {
   return canDrawPictures(settings, id) ? { apiKey: settings.providers[id].apiKey.trim() } : null;
 }
 
@@ -130,7 +137,7 @@ export function contextCharsFor(settings: AppSettings, id: ProviderId): number {
 
 /** Every model the user can pick: the fetched list, or the suggestions until then. */
 export function availableModels(settings: AppSettings): ModelRef[] {
-  return providerIds
+  return chatProviderIds
     .filter((id) => isProviderReady(settings, id))
     .flatMap((id) => {
       const saved = settings.providers[id].models;

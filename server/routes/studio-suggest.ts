@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   try {
     const { output } = await generateText({
-      model: createLanguageModel(parsed.data.model, parsed.data.credentials),
+      model: await createLanguageModel(parsed.data.model, parsed.data.credentials),
       output: Output.object({ schema }),
       system: studioSystem(
         "Suggest four kinds of written report that would be especially useful for these particular sources, beyond a generic summary: for example a comparison of two things they discuss, a timeline, a checklist, a case-study analysis or a guide for a specific reader. Each needs a short title, a one-sentence description and instructions for writing it.",

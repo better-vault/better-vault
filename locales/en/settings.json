@@ -42,7 +42,14 @@
     "noWebSearch": "No web search",
     "context": "Context size",
     "contextHint": "How much source text is sent with each request, in characters. Lower it if your local model has a small context window.",
-    "localHint": "Local models work when better-vault runs on the same machine."
+    "localHint": "Local models work when better-vault runs on the same machine.",
+    "speech": "Speech",
+    "opencodePlan": "Plan",
+    "opencodePlanHint": {
+      "zen": "Zen: pay as you go with credits in your OpenCode console.",
+      "go": "Go: a monthly OpenCode plan with open coding models. Use the key from your Go subscription."
+    },
+    "audioOnly": "{{name}} only makes speech. Audio Overviews in Studio use it to read the conversation aloud; it can't chat or write."
   },
   "appearance": {
     "title": "Appearance",
