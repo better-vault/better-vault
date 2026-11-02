@@ -90,7 +90,6 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
                 label={profile?.name || t("rows.account")}
                 hint={profile?.name ? t("rows.accountHint") : t("rows.accountSetUp")}
               />
-              <div className="mx-2.5 my-1.5 h-px bg-border" />
               <SettingsRow
                 to="providers"
                 icon={AiBrain01Icon}
