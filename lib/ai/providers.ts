@@ -17,7 +17,7 @@ export function createLanguageModel(
 ): LanguageModel {
   const info = providers[ref.provider];
   if (ref.provider === "openai" && credentials.chatgpt) {
-    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT is turned off on this server.");
+    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT works in the desktop app only.");
     return chatGPTLanguageModel(ref.modelId);
   }
   if (info.needsKey && !credentials.apiKey)

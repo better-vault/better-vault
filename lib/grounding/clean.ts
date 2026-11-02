@@ -12,12 +12,15 @@
  * - Latin ligatures (ﬁ, ﬂ, …) become their letters.
  */
 export function cleanText(text: string): string {
-  return text
-    .replace(/[-\u{F0000}-\u{FFFFD}\u{100000}-\u{10FFFD}]/gu, "")
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F​⁠﻿­�]/g, "")
-    .replace(/ˮ/g, "”")
-    .replace(/ʼ/g, "’")
-    .replace(/[ﬀ-ﬆ]/g, (ligature) => ligature.normalize("NFKC"))
-    .normalize("NFC")
-    .replace(/[^\S\n]{2,}/g, " ");
+  return (
+    text
+      .replace(/[-\u{F0000}-\u{FFFFD}\u{100000}-\u{10FFFD}]/gu, "")
+      // eslint-disable-next-line no-control-regex, no-irregular-whitespace -- these are the characters to remove
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F​⁠﻿­�]/g, "")
+      .replace(/ˮ/g, "”")
+      .replace(/ʼ/g, "’")
+      .replace(/[ﬀ-ﬆ]/g, (ligature) => ligature.normalize("NFKC"))
+      .normalize("NFC")
+      .replace(/[^\S\n]{2,}/g, " ")
+  );
 }

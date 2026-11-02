@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { StudioOutput } from "@/lib/db/database";

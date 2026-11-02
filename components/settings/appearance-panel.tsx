@@ -1,5 +1,3 @@
-"use client";
-
 import { ComputerIcon, Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
@@ -24,9 +22,21 @@ export function AppearancePanel() {
               onValueChange={setTheme}
               className="w-full *:flex-1"
               options={[
-                { value: "system", label: t("appearance.system"), icon: <Icon icon={ComputerIcon} size={16} /> },
-                { value: "light", label: t("appearance.light"), icon: <Icon icon={Sun03Icon} size={16} /> },
-                { value: "dark", label: t("appearance.dark"), icon: <Icon icon={Moon02Icon} size={16} /> },
+                {
+                  value: "system",
+                  label: t("appearance.system"),
+                  icon: <Icon icon={ComputerIcon} size={16} />,
+                },
+                {
+                  value: "light",
+                  label: t("appearance.light"),
+                  icon: <Icon icon={Sun03Icon} size={16} />,
+                },
+                {
+                  value: "dark",
+                  label: t("appearance.dark"),
+                  icon: <Icon icon={Moon02Icon} size={16} />,
+                },
               ]}
             />
           </Field>

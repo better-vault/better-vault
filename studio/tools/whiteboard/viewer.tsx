@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import type { ToolViewerProps } from "@/studio/shared/form";
 import { Board } from "./board";

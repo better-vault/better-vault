@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Delete02Icon,
   Download04Icon,

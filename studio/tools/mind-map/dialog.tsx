@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowDataTransferHorizontalIcon,
   Calendar03Icon,

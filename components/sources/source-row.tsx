@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowUpRight01Icon,
   BookOpen01Icon,
@@ -45,7 +43,8 @@ export function SourceRow({ source, onRead }: { source: Source; onRead: () => vo
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{source.title}</span>
           <span className="block truncate text-xs text-muted-foreground">
-            {t(`kinds.${source.kind}`)} · {t("words", { count: words, formattedCount: words.toLocaleString(i18n.language) })}
+            {t(`kinds.${source.kind}`)} ·{" "}
+            {t("words", { count: words, formattedCount: words.toLocaleString(i18n.language) })}
           </span>
         </span>
       </button>

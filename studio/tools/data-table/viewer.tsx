@@ -1,5 +1,3 @@
-"use client";
-
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";

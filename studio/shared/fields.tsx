@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowDown01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useId, useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";

@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowUpRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
@@ -16,7 +14,11 @@ export function LanguagePanel() {
     <>
       <Sheet.Header title={t("language.title")} description={t("language.description")} />
       <Sheet.Body>
-        <div role="radiogroup" aria-label={t("language.title")} className="-mx-2 flex flex-col gap-0.5">
+        <div
+          role="radiogroup"
+          aria-label={t("language.title")}
+          className="-mx-2 flex flex-col gap-0.5"
+        >
           {languages.map((language) => {
             const selected = i18n.language === language.code;
             return (
@@ -32,7 +34,7 @@ export function LanguagePanel() {
                   void i18n.changeLanguage(language.code);
                 }}
                 className={cn(
-                  "flex h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-start text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-start text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
                   selected && "bg-muted font-medium",
                 )}
               >

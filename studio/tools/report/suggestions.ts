@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { modelRequestFor } from "@/lib/studio/request";
 

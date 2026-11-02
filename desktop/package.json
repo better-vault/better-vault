@@ -3,21 +3,20 @@
   "productName": "better-vault",
   "private": true,
   "version": "0.0.0",
-  "description": "The better-vault desktop app: Electron around the same Next.js app.",
+  "description": "The better-vault desktop app: Electron around the same Vite app.",
   "license": "MIT",
   "author": {
     "name": "better-vault contributors"
   },
   "homepage": "https://better-vault.dev",
-  "main": "dist/main.js",
+  "main": "out/main/main.js",
   "engines": {
     "node": ">=22.13"
   },
   "scripts": {
-    "build:server": "node scripts/build-server.mjs",
-    "build": "node scripts/bundle.mjs",
-    "start": "npm run build && electron .",
-    "dev": "npm run build && electron . --dev-url=http://localhost:3000",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
     "dist": "npm run build && electron-builder --config electron-builder.config.mjs",
     "pack": "npm run build && electron-builder --config electron-builder.config.mjs --dir",
     "typecheck": "tsc --noEmit"
@@ -29,7 +28,8 @@
     "@types/node": "^22.20.5",
     "electron": "^45.1.0",
     "electron-builder": "^26.18.0",
-    "esbuild": "^0.28.2",
-    "typescript": "^5.9.3"
+    "electron-vite": "^6.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
   }
 }

@@ -42,7 +42,7 @@ export async function listModels(
 ): Promise<string[]> {
   const info = providers[provider];
   if (provider === "openai" && credentials.chatgpt) {
-    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT is turned off on this server.");
+    if (!chatGPTAllowed()) throw new Error("Sign in with ChatGPT works in the desktop app only.");
     return listChatGPTModels();
   }
   if (info.needsKey && !credentials.apiKey) throw new Error("An API key is needed.");

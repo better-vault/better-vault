@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useRef, useState, type PointerEvent, type WheelEvent } from "react";
 import type { CanvasViewport } from "@/components/panelui/canvas";
 

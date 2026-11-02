@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslation } from "react-i18next";
 import { Key01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/icon";

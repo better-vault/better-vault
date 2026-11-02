@@ -49,7 +49,8 @@ jobs:
       - run: npm run build
 
   # The desktop app wraps the web app, so a web change can break it. This
-  # builds the standalone server and an unpacked Linux app on every push.
+  # builds it (main process with the API, preload, page) and an unpacked
+  # Linux app on every push.
   desktop:
     runs-on: ubuntu-latest
     steps:
@@ -65,8 +66,6 @@ jobs:
       - run: npm ci
         working-directory: desktop
       - run: npm run typecheck
-        working-directory: desktop
-      - run: npm run build:server
         working-directory: desktop
       - run: npm run pack -- --linux
         working-directory: desktop

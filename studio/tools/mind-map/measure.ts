@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useMemo, useState } from "react";
 
 /** The app's sans-serif font stack, as the page has it. */

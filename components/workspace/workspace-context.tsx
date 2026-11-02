@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type { Conversation, Notebook, StudioOutput } from "@/lib/db/database";
 import type { StudioToolId } from "@/studio/tools";

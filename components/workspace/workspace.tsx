@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/panelui/button";
@@ -95,7 +93,7 @@ function NotebookNotFound() {
       <div className="max-w-sm text-center">
         <h1 className="text-xl font-semibold">{t("notFound.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("notFound.body")}</p>
-        <Link href={routes.home} className={buttonVariants({ className: "mt-6" })}>
+        <Link to={routes.home} className={buttonVariants({ className: "mt-6" })}>
           {t("notFound.action")}
         </Link>
       </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { CloudUploadIcon, Globe02Icon, Loading03Icon, TextIcon } from "@hugeicons/core-free-icons";
 import { useId, useRef, useState, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -60,7 +58,8 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
 
   function describe(error: unknown): string {
     if (error instanceof IngestError) {
-      if (error.reason === "read") return t("errors.read", { name: error.subject, error: error.detail });
+      if (error.reason === "read")
+        return t("errors.read", { name: error.subject, error: error.detail });
       return t(`errors.${error.reason}`, { name: error.subject });
     }
     return error instanceof Error ? error.message : String(error);
@@ -73,7 +72,9 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
     const results = await Promise.allSettled(tasks.map((task) => task()));
     setBusy(false);
     const added = results.filter((result) => result.status === "fulfilled").length;
-    const failed = results.flatMap((result) => (result.status === "rejected" ? [describe(result.reason)] : []));
+    const failed = results.flatMap((result) =>
+      result.status === "rejected" ? [describe(result.reason)] : [],
+    );
     if (added > 0) toast.success(t("added", { count: added }));
     if (failed.length > 0) setErrors(failed);
     else onDone();
@@ -93,7 +94,9 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
       }
       void run([() => ingestUrl(notebookId, address)]);
     } else if (mode === "text" && text.trim()) {
-      void run([() => ingestText(notebookId, title.trim() || t("addDialog.textTitlePlaceholder"), text)]);
+      void run([
+        () => ingestText(notebookId, title.trim() || t("addDialog.textTitlePlaceholder"), text),
+      ]);
     }
   }
 
@@ -103,7 +106,8 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
     addFiles(event.dataTransfer.files);
   };
 
-  const canSubmit = !busy && (mode === "url" ? url.trim() !== "" : mode === "text" ? text.trim() !== "" : false);
+  const canSubmit =
+    !busy && (mode === "url" ? url.trim() !== "" : mode === "text" ? text.trim() !== "" : false);
 
   return (
     <>
@@ -117,9 +121,21 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
           }}
           className="w-full *:flex-1"
           options={[
-            { value: "file", label: t("addDialog.tabs.file"), icon: <Icon icon={CloudUploadIcon} size={16} /> },
-            { value: "url", label: t("addDialog.tabs.url"), icon: <Icon icon={Globe02Icon} size={16} /> },
-            { value: "text", label: t("addDialog.tabs.text"), icon: <Icon icon={TextIcon} size={16} /> },
+            {
+              value: "file",
+              label: t("addDialog.tabs.file"),
+              icon: <Icon icon={CloudUploadIcon} size={16} />,
+            },
+            {
+              value: "url",
+              label: t("addDialog.tabs.url"),
+              icon: <Icon icon={Globe02Icon} size={16} />,
+            },
+            {
+              value: "text",
+              label: t("addDialog.tabs.text"),
+              icon: <Icon icon={TextIcon} size={16} />,
+            },
           ]}
         />
 
@@ -137,9 +153,15 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
             )}
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <Icon icon={busy ? Loading03Icon : CloudUploadIcon} size={22} className={busy ? "animate-spin" : undefined} />
+              <Icon
+                icon={busy ? Loading03Icon : CloudUploadIcon}
+                size={22}
+                className={busy ? "animate-spin" : undefined}
+              />
             </span>
-            <p className="text-sm font-medium">{busy ? t("addDialog.adding") : t("addDialog.drop")}</p>
+            <p className="text-sm font-medium">
+              {busy ? t("addDialog.adding") : t("addDialog.drop")}
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -218,7 +240,9 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
         ) : null}
       </Dialog.Body>
       <Dialog.Footer>
-        <Dialog.Close render={<Button variant="secondary" />}>{tCommon("actions.cancel")}</Dialog.Close>
+        <Dialog.Close render={<Button variant="secondary" />}>
+          {tCommon("actions.cancel")}
+        </Dialog.Close>
         {mode !== "file" ? (
           <Button type="submit" form={formId} disabled={!canSubmit} loading={busy}>
             {t("addDialog.submit")}

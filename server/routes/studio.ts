@@ -28,9 +28,6 @@ const bodySchema = z.object({
   imageCredentials: credentialsSchema.optional(),
 });
 
-/** A brief and then a picture can take a few minutes. */
-export const maxDuration = 300;
-
 /** Generates one Studio output with the user's model. Nothing is stored here. */
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));

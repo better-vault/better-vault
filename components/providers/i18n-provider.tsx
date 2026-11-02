@@ -1,5 +1,3 @@
-"use client";
-
 import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { useEffect, useState, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";

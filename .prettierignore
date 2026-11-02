@@ -3,11 +3,10 @@ components/panelui/
 components/ui/
 studio/tools/anatomy/kit/
 package-lock.json
-.next/
+dist/
 node_modules/
 coverage/
 public/
 desktop/node_modules/
-desktop/dist/
-desktop/server/
+desktop/out/
 desktop/release/

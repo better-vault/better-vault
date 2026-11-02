@@ -1,5 +1,3 @@
-"use client";
-
 import {
   BookOpen01Icon,
   DocumentValidationIcon,

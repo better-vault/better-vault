@@ -1,5 +1,3 @@
-"use client";
-
 import { Fragment, type ReactNode } from "react";
 import { Citation } from "@/components/chat/citation";
 import type { PassageRef } from "@/lib/chat/types";

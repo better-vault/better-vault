@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Add01Icon,
   Book02Icon,
@@ -36,7 +34,10 @@ export function TopBar() {
   return (
     // Three columns: the sides share what is left equally, so the name sits in
     // the middle; on a narrow screen it gives way first and is shortened.
-    <header className="grid grid-cols-[1fr_minmax(0,auto)_1fr] items-center gap-3 px-3 pt-3 pb-2 sm:px-4">
+    <header
+      data-window-bar
+      className="grid grid-cols-[1fr_minmax(0,auto)_1fr] items-center gap-3 px-3 pt-3 pb-2 sm:px-4"
+    >
       <div className="flex items-center justify-self-start">
         {/* Panel's ButtonGroup: Settings and Create share a track; on the Chat
             tab, History follows, split off and filled. */}

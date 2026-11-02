@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import type { ReactNode } from "react";
 import { Icon, type IconSvgElement } from "@/components/icon";
@@ -26,7 +24,7 @@ export function SettingsRow({ to, payload, icon, label, hint, end }: SettingsRow
       render={
         <button
           type="button"
-          className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-2.5 py-2.5 text-start outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex w-full cursor-pointer items-center gap-3 rounded-2xl px-2.5 py-2.5 text-start transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
         />
       }
     >
@@ -38,7 +36,11 @@ export function SettingsRow({ to, payload, icon, label, hint, end }: SettingsRow
         {hint ? <span className="block truncate text-xs text-muted-foreground">{hint}</span> : null}
       </span>
       {end}
-      <Icon icon={ArrowRight01Icon} size={16} className="shrink-0 text-muted-foreground rtl:rotate-180" />
+      <Icon
+        icon={ArrowRight01Icon}
+        size={16}
+        className="shrink-0 text-muted-foreground rtl:rotate-180"
+      />
     </Sheet.Trigger>
   );
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertDialog } from "@/components/panelui/alert-dialog";

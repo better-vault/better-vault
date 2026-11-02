@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { chatGPTAllowed } from "@/lib/ai/server-config";
+import { chatGPTAllowed, isDesktopRuntime } from "@/lib/ai/server-config";
 import { cancelLogin, loginState, startLogin } from "@/lib/chatgpt/login";
 import { currentAccount, signOut } from "@/lib/chatgpt/session";
 
@@ -26,9 +26,15 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   const body = parsed.data;
   if (!chatGPTAllowed()) {
-    if (body.action === "status") return Response.json({ account: null, available: false });
+    const reason = isDesktopRuntime() ? "off" : "desktopOnly";
+    if (body.action === "status") return Response.json({ account: null, available: false, reason });
     return Response.json(
-      { error: "Sign in with ChatGPT is turned off on this server." },
+      {
+        error:
+          reason === "desktopOnly"
+            ? "Sign in with ChatGPT works in the desktop app only."
+            : "Sign in with ChatGPT is turned off in this app.",
+      },
       { status: 403 },
     );
   }

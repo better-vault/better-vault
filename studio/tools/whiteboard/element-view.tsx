@@ -1,5 +1,3 @@
-"use client";
-
 import { memo } from "react";
 import type { Point } from "./geometry";
 import { fillCss, strokeCss } from "./palette";

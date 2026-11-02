@@ -10,7 +10,12 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "types": ["node"],
-    "paths": { "@/*": ["../*"] }
+    "paths": {
+      "@/*": ["../*"]
+    },
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src/**/*.ts"]
 }

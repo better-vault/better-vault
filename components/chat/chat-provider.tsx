@@ -1,5 +1,3 @@
-"use client";
-
 import { Chat, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, generateId } from "ai";
 import {

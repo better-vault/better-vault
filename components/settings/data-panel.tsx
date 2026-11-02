@@ -1,5 +1,3 @@
-"use client";
-
 import { Delete02Icon, Download01Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";

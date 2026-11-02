@@ -18,7 +18,7 @@ Chat with your sources, and turn them into reports, flashcards, quizzes, tables 
 [![Issues](https://img.shields.io/github/issues/better-vault/better-vault?style=flat-square&color=f59e0b)](https://github.com/better-vault/better-vault/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-10b981?style=flat-square)](CONTRIBUTING.md)
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev)
 [![AI SDK](https://img.shields.io/badge/AI%20SDK-7-000000?style=flat-square&logo=vercel&logoColor=white)](https://ai-sdk.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
@@ -63,7 +63,7 @@ Download the installer for macOS, Windows or Linux from [better-vault.dev/downlo
 
 ### Run from source
 
-**Requirements:** [Node.js](https://nodejs.org) 20.9 or newer, with npm 10 (included with Node.js).
+**Requirements:** [Node.js](https://nodejs.org) 22.12 or newer, with npm 10 (included with Node.js).
 
 ```bash
 git clone https://github.com/better-vault/better-vault.git
@@ -106,7 +106,7 @@ Two optional environment variables tighten a public deployment:
 
 ## 🧱 Tech stack
 
-[Next.js 16](https://nextjs.org) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Electron](https://www.electronjs.org) · [Tailwind CSS 4](https://tailwindcss.com)
+[Vite 8](https://vite.dev) · [React Router](https://reactrouter.com) · [Hono](https://hono.dev) · [Vercel AI SDK 7](https://ai-sdk.dev) · [Panel UI](https://panelui.dev) · [shadcn/ui](https://ui.shadcn.com) · [Pele](https://pele.run) · [Hugeicons](https://hugeicons.com) · [i18next](https://www.i18next.com) · [Dexie](https://dexie.org) · [Electron](https://www.electronjs.org) and [electron-vite](https://electron-vite.org) · [Tailwind CSS 4](https://tailwindcss.com)
 
 ## 🤝 Contributing
 

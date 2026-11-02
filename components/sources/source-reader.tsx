@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,7 +35,8 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
   const highlighted = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    if (chunks && passage) highlighted.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (chunks && passage)
+      highlighted.current?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [chunks, passage]);
 
   if (!source) return null;
@@ -70,7 +69,7 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
                 key={chunk.id}
                 ref={active ? highlighted : undefined}
                 className={cn(
-                  "whitespace-pre-wrap rounded-xl transition-colors",
+                  "rounded-xl whitespace-pre-wrap transition-colors",
                   active && "-mx-3 bg-info/10 px-3 py-2 ring-1 ring-info/30",
                 )}
               >

@@ -1,5 +1,3 @@
-"use client";
-
 import { FitToScreenIcon, MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";

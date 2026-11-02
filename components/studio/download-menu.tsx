@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowDown01Icon, Download04Icon, Loading03Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";

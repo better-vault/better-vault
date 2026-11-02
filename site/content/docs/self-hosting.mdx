@@ -1,9 +1,9 @@
 ---
 title: "Self-hosting"
-description: "Deploy your own copy of the better-vault web app on any Node.js host or on Vercel, with optional environment variables that harden public deployments."
+description: "Run your own copy of the better-vault web app on any Node.js host, with a single build command and optional settings that harden public deployments."
 ---
 
-better-vault is a standard Next.js app with stateless API routes and no database, so it runs anywhere Node.js 20.9+ runs. For a single computer, the [desktop app](/docs/desktop) is simpler.
+better-vault is a single-page app with a small stateless API and no database, so it runs anywhere Node.js 22.12+ runs. For a single computer, the [desktop app](/docs/desktop) is simpler.
 
 ## Build and start
 
@@ -15,23 +15,21 @@ npm run build
 npm start
 ```
 
-The app is then served at the root of its address, for example `http://localhost:3000`. This website is a separate project and is not part of the app.
+The app is then served at the root of its address, for example `http://localhost:3000`. Set `PORT` and `HOSTNAME` to change where it listens. This website is a separate project and is not part of the app.
 
-## Vercel
+## Other hosts
 
-Import the repository in Vercel. No environment variables or storage are required. API routes run as functions and only forward requests to the provider each user picks.
+The build is two folders: `dist/client` holds the pages and `dist/server/node.js` serves them with the API under `/api`. Any host that runs a long-lived Node.js process can run it. The API routes only forward requests to the provider each user picks.
 
 ## Environment variables
 
 All of them are optional.
 
-| Variable                             | Default | Effect                                                                                                                    |
-| ------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Variable                             | Default | Effect                                                                                                                                                  |
+| ------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS` | `true`  | Set to `false` to turn off Ollama and LM Studio. Their address comes from the user, so on a public server they would make the server fetch any address. |
-| `BETTER_VAULT_ALLOW_CHATGPT`         | `true`  | Set to `false` to turn off Sign in with ChatGPT. Its tokens are kept by the server, so on a shared server they would belong to everyone. |
-| `BETTER_VAULT_ALLOW_PRIVATE_URLS`    | `false` | Set to `true` to let web-page sources point at private or local network addresses. Only for trusted, private installs.    |
-| `NEXT_PUBLIC_SITE_URL`               | `https://www.better-vault.dev` | The site's own address, used in canonical links, the sitemap and social cards.                               |
+| `BETTER_VAULT_ALLOW_PRIVATE_URLS`    | `false` | Set to `true` to let web-page sources point at private or local network addresses. Only for trusted, private installs.                                  |
 
 ## Public deployments
 
-For an install that strangers can reach, set `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS=false` and `BETTER_VAULT_ALLOW_CHATGPT=false`, and leave private URLs off. Each user still brings their own key, which stays in their browser.
+For an install that strangers can reach, set `BETTER_VAULT_ALLOW_LOCAL_PROVIDERS=false` and leave private URLs off. Sign in with ChatGPT is never offered by the web app; it works only in the desktop app. Each user still brings their own key, which stays in their browser.

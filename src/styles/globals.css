@@ -5,9 +5,31 @@
 @import "./tokens.css";
 
 /* The website in site/ is a separate project with its own styles. */
-@source not "../site";
+@source not "../../site";
+@source not "../../desktop";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Geist, bundled with the app (@fontsource-variable, imported in src/main.tsx). */
+:root {
+  --font-geist-sans: "Geist Variable";
+  --font-geist-mono: "Geist Mono Variable";
+}
+
+/*
+ * Desktop app on macOS (set by desktop/src/preload.ts): the window has no
+ * title bar. Its buttons get a strip of their own above the top bar, and the
+ * strip and the bar move the window.
+ */
+html[data-window-controls] [data-window-bar] {
+  -webkit-app-region: drag;
+  padding-top: 2.25rem;
+}
+html[data-window-controls]
+  [data-window-bar]
+  :is(button, a, input, select, [role="tab"], [role="button"]) {
+  -webkit-app-region: no-drag;
+}
 
 /* Pele (Mermaid → SVG) draws with these variables; map them onto Panel tokens. */
 .pele {

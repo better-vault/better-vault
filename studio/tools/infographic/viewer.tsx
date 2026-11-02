@@ -1,5 +1,3 @@
-"use client";
-
 import {
   FitToScreenIcon,
   Copy01Icon,
@@ -60,7 +58,6 @@ export function InfographicViewer({
             className="absolute inset-0 cursor-grab touch-none overflow-hidden active:cursor-grabbing"
             {...handlers}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element -- a data URL made by the image model */}
             <img
               src={data.image.dataUrl}
               alt={title}

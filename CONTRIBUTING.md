@@ -4,7 +4,7 @@ Thank you for helping. This guide covers setup, the rules the code follows and h
 
 ## Setup
 
-Requirements: Node.js 20.9+ with npm 10 (included with Node.js).
+Requirements: Node.js 22.12+ with npm 10 (included with Node.js).
 
 ```bash
 git clone https://github.com/<you>/better-vault.git

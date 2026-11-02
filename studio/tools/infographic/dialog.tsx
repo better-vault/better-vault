@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";

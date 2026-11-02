@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- lang and dir follow the chosen language (components/providers/i18n-provider.tsx). -->
+<html lang="en" dir="ltr" class="h-full antialiased">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The desktop build links its files relatively; every page loads them from the root. -->
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>better-vault</title>
+    <meta
+      name="description"
+      content="An open-source, bring-your-own-model alternative to NotebookLM: chat with your sources and turn them into reports, flashcards, quizzes, tables and diagrams."
+    />
+    <meta name="application-name" content="better-vault" />
+    <!-- The app holds nothing to index: notebooks live on each person's device. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
+    <link rel="icon" href="/icon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-icon.png" />
+  </head>
+  <body class="h-full overflow-hidden">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

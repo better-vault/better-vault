@@ -1,5 +1,3 @@
-"use client";
-
 import { File01Icon, PresentationLineChart01Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { ChoiceField, FocusField, OptionCards } from "@/studio/shared/fields";

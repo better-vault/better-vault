@@ -10,13 +10,26 @@ export function localProvidersAllowed(): boolean {
   return process.env.BETTER_VAULT_ALLOW_LOCAL_PROVIDERS !== "false";
 }
 
+let desktopRuntime = false;
+
+/** Set by `createApi({ desktop: true })` when the API runs inside the desktop app. */
+export function setDesktopRuntime(desktop: boolean) {
+  desktopRuntime = desktop;
+}
+
+/** True when the API runs inside the desktop app's main process. */
+export function isDesktopRuntime(): boolean {
+  return desktopRuntime;
+}
+
 /**
- * BETTER_VAULT_ALLOW_CHATGPT=false turns off Sign in with ChatGPT. Its tokens
- * are kept by the server, so on a server shared with others they would be
- * everyone's; OpenAI also offers it only to apps that run locally.
+ * Sign in with ChatGPT works in the desktop app only. Its tokens are kept by
+ * the server, so on a web server, even one on your own computer, they would
+ * belong to whoever reaches it; OpenAI also offers it only to apps that run
+ * locally. BETTER_VAULT_ALLOW_CHATGPT=false turns it off in the desktop app too.
  */
 export function chatGPTAllowed(): boolean {
-  return process.env.BETTER_VAULT_ALLOW_CHATGPT !== "false";
+  return desktopRuntime && process.env.BETTER_VAULT_ALLOW_CHATGPT !== "false";
 }
 
 /** Checks a local provider address: http(s) only. */

@@ -6,7 +6,7 @@ export function setMenu() {
   const mac = process.platform === "darwin";
   const updates: MenuItemConstructorOptions = {
     label: "Check for Updates…",
-    click: () => void checkForUpdatesNow(),
+    click: () => checkForUpdatesNow(),
   };
   const template: MenuItemConstructorOptions[] = [
     ...(mac

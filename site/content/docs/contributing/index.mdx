@@ -3,36 +3,37 @@ title: "Architecture"
 description: "How better-vault is built, the decisions behind it and where the code lives, for people and AI coding agents who want to contribute to the web or desktop app."
 ---
 
-better-vault is a Next.js 16 App Router app that uses the Vercel AI SDK for every model call. This page is a short tour; [AGENTS.md](https://github.com/better-vault/better-vault/blob/main/AGENTS.md) in the repository holds the full rules.
+better-vault is a React app built with Vite, with a small Hono API, and it uses the Vercel AI SDK for every model call. This page is a short tour; [AGENTS.md](https://github.com/better-vault/better-vault/blob/main/AGENTS.md) in the repository holds the full rules.
 
 ## Web and desktop
 
-The same code serves both apps. In a browser, notebooks are stored in IndexedDB through Dexie. The desktop app wraps the web app in Electron: it runs a standalone build of the Next.js server on the user's computer and keeps notebooks in a SQLite file, which the page reaches through Electron's IPC.
+The same code serves both apps. In a browser, notebooks are stored in IndexedDB through Dexie. The desktop app wraps the web app in Electron: electron-vite builds the same page, Electron's main process answers its API requests itself, and notebooks are kept in a SQLite file, which the page reaches through Electron's IPC.
 
 Both stores sit behind one interface in `lib/db/backend.ts`, and the database tests run against each of them. A change to the web app therefore reaches the desktop app without extra work, as long as it passes those tests and the desktop build.
 
 ## Design decisions
 
-| Decision                              | What it means                                                                                     |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Local-first**                       | Data stays on the user's device, in IndexedDB or the desktop's SQLite file. No server database, no auth. |
-| **Bring your own key**                | Keys are stored on the device and sent in each request's body. Routes never log or store them.    |
-| **Provider web search only**          | Web mode uses the provider's built-in search tool and no third-party search API.                 |
-| **AI SDK for every call**             | Generation never calls a provider's HTTP API directly; listing models is the one exception.        |
-| **No audio or video overviews**       | They are out of scope.                                                                            |
-| **Mermaid for diagrams**              | Mind maps and diagrams are Mermaid text, validated and rendered with Pele.                        |
-| **Anatomy figures generated each time** | No ready-made figures are shipped.                                                              |
-| **Provider image models**             | Pictures come from the provider's image model through the AI SDK.                                |
-| **Local tools**                       | The Whiteboard is made in the browser, with no route and no model.                               |
+| Decision                                | What it means                                                                                            |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Local-first**                         | Data stays on the user's device, in IndexedDB or the desktop's SQLite file. No server database, no auth. |
+| **Bring your own key**                  | Keys are stored on the device and sent in each request's body. Routes never log or store them.           |
+| **Provider web search only**            | Web mode uses the provider's built-in search tool and no third-party search API.                         |
+| **AI SDK for every call**               | Generation never calls a provider's HTTP API directly; listing models is the one exception.              |
+| **No audio or video overviews**         | They are out of scope.                                                                                   |
+| **Mermaid for diagrams**                | Mind maps and diagrams are Mermaid text, validated and rendered with Pele.                               |
+| **Anatomy figures generated each time** | No ready-made figures are shipped.                                                                       |
+| **Provider image models**               | Pictures come from the provider's image model through the AI SDK.                                        |
+| **Local tools**                         | The Whiteboard is made in the browser, with no route and no model.                                       |
 
 ## Code map
 
 ```text
-app/                      the notebook app (pages and API routes)
-app/api/chat              streamText: Sources (grounded) or Web (provider search)
-app/api/studio            one Studio generation, validated against the tool's schema
-app/api/models            list a provider's models with the user's key
-app/api/sources/parse     PDF / web page → plain text
+src/                      the page: entry, routes and styles
+server/                   the API (Hono), shared by the web server and the desktop app
+server/routes/chat        streamText: Sources (grounded) or Web (provider search)
+server/routes/studio      one Studio generation, validated against the tool's schema
+server/routes/models      list a provider's models with the user's key
+server/routes/sources-parse   PDF / web page → plain text
 components/workspace      the notebook screen: top bar, sheets, tabs, prompt, views
 studio/                   Studio tools: registry, shared dialog fields, one folder per tool
 lib/ai                    providers, model catalog, web-search tools, prompts

@@ -1,5 +1,3 @@
-"use client";
-
 import { Globe02Icon, RepeatIcon } from "@hugeicons/core-free-icons";
 import { getToolName, isToolUIPart } from "ai";
 import { useMemo } from "react";

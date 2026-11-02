@@ -1,5 +1,3 @@
-"use client";
-
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/panelui/button";
@@ -16,7 +14,14 @@ interface RenameDialogProps {
 }
 
 /** A small dialog with one name field. */
-export function RenameDialog({ open, onOpenChange, title, label, value, onSave }: RenameDialogProps) {
+export function RenameDialog({
+  open,
+  onOpenChange,
+  title,
+  label,
+  value,
+  onSave,
+}: RenameDialogProps) {
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

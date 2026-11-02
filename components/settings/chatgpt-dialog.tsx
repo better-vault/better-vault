@@ -1,5 +1,3 @@
-"use client";
-
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";

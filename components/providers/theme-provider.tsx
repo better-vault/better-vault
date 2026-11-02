@@ -1,6 +1,11 @@
-"use client";
-
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { themeStorageKey } from "@/lib/theme/script";
 
 export type Theme = "system" | "light" | "dark";
@@ -44,7 +49,11 @@ function subscribeSystem(onChange: () => void) {
 /** Light, dark or the system's choice, remembered in this browser. */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useSyncExternalStore(subscribeTheme, readTheme, () => "system" as Theme);
-  const systemDark = useSyncExternalStore(subscribeSystem, () => darkQuery().matches, () => false);
+  const systemDark = useSyncExternalStore(
+    subscribeSystem,
+    () => darkQuery().matches,
+    () => false,
+  );
   const resolvedTheme = theme === "system" ? (systemDark ? "dark" : "light") : theme;
 
   useEffect(() => {

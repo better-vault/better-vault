@@ -1,5 +1,3 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
@@ -40,7 +38,11 @@ export function Segmented<Value extends string>({
       }}
       spacing={0}
       aria-label={props["aria-label"]}
-      className={cn("gap-0.5 rounded-xl bg-muted p-1", size === "sm" && "rounded-full p-0.5", className)}
+      className={cn(
+        "gap-0.5 rounded-xl bg-muted p-1",
+        size === "sm" && "rounded-full p-0.5",
+        className,
+      )}
     >
       {options.map((option) => (
         <ToggleGroupItem

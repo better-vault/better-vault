@@ -1,7 +1,7 @@
 /**
  * The AI providers better-vault can talk to. Shared by the browser (settings,
  * model picker) and the server (model factory). To add a provider, add it
- * here and handle it in `lib/ai/providers.ts` and `app/api/models/route.ts`.
+ * here and handle it in `lib/ai/providers.ts` and `server/routes/models.ts`.
  */
 export const providerIds = ["openai", "anthropic", "google", "ollama", "lmstudio"] as const;
 

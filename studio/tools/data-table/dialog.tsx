@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslation } from "react-i18next";
 import { FocusField } from "@/studio/shared/fields";
 import type { ToolFormProps } from "@/studio/shared/form";
