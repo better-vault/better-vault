@@ -10,6 +10,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent,
   type ReactNode,
   type Ref,
@@ -54,6 +55,8 @@ export function AudioOverviewViewer({
   const activeLine = useRef<HTMLLIElement | null>(null);
   // How loud the recording is now; it drives the wave of the host speaking.
   const level = useAudioLevel(audio);
+  // Phones get smaller waves, so both fit side by side.
+  const wide = useMediaQuery("(min-width: 640px)");
 
   // The recording, from the notebook's files, as an <audio> element.
   useEffect(() => {
@@ -165,7 +168,7 @@ export function AudioOverviewViewer({
                         level={speaking ? level : 0}
                         state={speaking ? "speaking" : "idle"}
                         paused={!speaking}
-                        height={156}
+                        height={wide ? 156 : 112}
                         color={hostWave[own]}
                         className={cn(
                           "transition-opacity",
@@ -180,7 +183,7 @@ export function AudioOverviewViewer({
                         <Soundwave.Center>
                           <span
                             className={cn(
-                              "flex size-12 items-center justify-center rounded-full text-lg font-medium",
+                              "flex size-10 items-center justify-center rounded-full text-base font-medium sm:size-12 sm:text-lg",
                               hostTile[own],
                             )}
                           >
@@ -301,7 +304,13 @@ export function AudioOverviewViewer({
                     .filter((passage) => passage !== undefined)
                     .map((passage) => (
                       <span key={passage.n} onClick={(event) => event.stopPropagation()}>
-                        <Citation passage={passage} numbers={[passage.n]} onOpen={onOpenPassage} />
+                        <Citation
+                          passage={passage}
+                          numbers={[passage.n]}
+                          onOpen={onOpenPassage}
+                          // On a tinted bubble the default muted mark is too faint to read.
+                          className="ms-1 bg-background text-[0.75em] text-foreground ring-1 ring-border"
+                        />
                       </span>
                     ))}
                 </Bubble>
@@ -493,4 +502,16 @@ async function shapeOf(blob: Blob): Promise<number[] | null> {
 function clock(seconds: number): string {
   const total = Math.max(0, Math.floor(seconds));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
+function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => true,
+  );
 }
