@@ -9,7 +9,10 @@
     "appearance": "Appearance",
     "language": "Language",
     "data": "Data",
-    "about": "About & Updates"
+    "about": "About & Updates",
+    "account": "Account",
+    "accountHint": "Profile, connected accounts and your data",
+    "accountSetUp": "Add your name and picture"
   },
   "providers": {
     "title": "AI providers",
@@ -146,5 +149,31 @@
     "gotIt": "Got it",
     "label": "Software update",
     "upToDateAt": "Up to date · checked {{time}}"
+  },
+  "account": {
+    "title": "Account",
+    "description": "How better-vault knows you on this device. Nothing here leaves it.",
+    "noName": "Your name",
+    "inThisBrowser": "Saved in this browser",
+    "onThisComputer": "Saved on this computer",
+    "addPicture": "Add a picture",
+    "changePicture": "Change picture",
+    "removePicture": "Remove picture",
+    "pictureTooLarge": "That picture is larger than 15 MB.",
+    "pictureFailed": "That picture could not be read.",
+    "name": "Name",
+    "namePlaceholder": "What should we call you?",
+    "nameHint": "Shown in Settings. You can change it any time.",
+    "connected": "Connected",
+    "chatgpt": "ChatGPT",
+    "signedIn": "Signed in",
+    "notConnected": "Not connected",
+    "desktopOnly": "Desktop app only",
+    "providers": "AI providers",
+    "stored": "On this device",
+    "notebooks": "Notebooks",
+    "folders": "Folders",
+    "sources": "Sources",
+    "space": "{{size}} used by better-vault in this browser."
   }
 }

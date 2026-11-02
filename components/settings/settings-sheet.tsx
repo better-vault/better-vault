@@ -21,7 +21,10 @@ import { isProviderReady, useSettings } from "@/lib/db/settings";
 import { getLanguage } from "@/lib/i18n/config";
 import { useUpdates } from "@/lib/updates/use-updates";
 import { appVersion } from "@/lib/version";
+import { Avatar } from "@/components/account/avatar";
+import { useProfile } from "@/lib/db/profile";
 import { AboutPanel } from "./about-panel";
+import { AccountPanel } from "./account-panel";
 import { AppearancePanel } from "./appearance-panel";
 import { ChatGPTDialog } from "./chatgpt-dialog";
 import { DataPanel } from "./data-panel";
@@ -56,6 +59,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
   const { theme } = useTheme();
   const settings = useSettings();
   const updates = useUpdates();
+  const profile = useProfile();
   const updateVersion =
     updates.state.status === "available" ||
     updates.state.status === "downloading" ||
@@ -80,6 +84,13 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
           <Sheet.Header title={t("title")} description={t("description")} />
           <Sheet.Body>
             <nav className="-mx-2 flex flex-col gap-0.5">
+              <SettingsRow
+                to="account"
+                icon={<Avatar profile={profile} size={36} />}
+                label={profile?.name || t("rows.account")}
+                hint={profile?.name ? t("rows.accountHint") : t("rows.accountSetUp")}
+              />
+              <div className="mx-2.5 my-1.5 h-px bg-border" />
               <SettingsRow
                 to="providers"
                 icon={AiBrain01Icon}
@@ -119,6 +130,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
             </nav>
           </Sheet.Body>
 
+          <Sheet.Next name="account" closeLabel={tCommon("actions.close")}>
+            <AccountPanel />
+          </Sheet.Next>
           <Sheet.Next name="providers" closeLabel={tCommon("actions.close")}>
             <ProvidersPanel
               onChatGPTSignIn={() => {
