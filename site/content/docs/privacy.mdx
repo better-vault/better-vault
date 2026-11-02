@@ -7,7 +7,7 @@ better-vault keeps everything on your device, and nothing is stored on a server.
 
 In the web app, notebooks, sources, chats, Studio outputs and API keys live in your browser's IndexedDB. In the [desktop app](/docs/desktop) they live in one SQLite file in the app's data folder on your computer. Either way there is no account and no server database.
 
-If you [use your ChatGPT plan](/docs/providers#use-your-chatgpt-plan), OpenAI's sign-in tokens are the one thing the server keeps: a file only you can read, in `~/.better-vault` for the web app or in the desktop app's data folder, so the tokens never sit in the browser. Signing out ends the session at OpenAI and deletes them.
+If you [use your ChatGPT plan](/docs/providers#use-your-chatgpt-plan), OpenAI's sign-in tokens are the one thing the server keeps: a file only you can read, in the desktop app's data folder, so the tokens never sit in the browser. Signing out ends the session at OpenAI and deletes them.
 
 ## What leaves your device?
 

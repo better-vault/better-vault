@@ -1,6 +1,6 @@
 /**
  * The page's side of Sign in with ChatGPT: it asks the local server
- * (`app/api/chatgpt`), which holds the tokens. Safe to import in the browser.
+ * (`server/routes/chatgpt.ts`), which holds the tokens. Safe to import in the browser.
  */
 export interface ChatGPTAccount {
   email: string;
@@ -31,7 +31,12 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
 
 /** Who is signed in, and whether this server offers the sign-in at all. */
 export function chatGPTStatus() {
-  return call<{ account: ChatGPTAccount | null; available: boolean }>({ action: "status" });
+  return call<{
+    account: ChatGPTAccount | null;
+    available: boolean;
+    /** Why it is unavailable: a web app ("desktopOnly"), or turned off in the desktop app. */
+    reason?: "desktopOnly" | "off";
+  }>({ action: "status" });
 }
 
 export function startChatGPTLogin(newAccount: boolean) {

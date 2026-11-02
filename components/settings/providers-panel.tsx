@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Cancel01Icon,
   Globe02Icon,
@@ -353,15 +351,15 @@ function ChatGPTCard({
 }) {
   const { t } = useTranslation("settings");
   const [signingOut, setSigningOut] = useState(false);
-  const [available, setAvailable] = useState(true);
+  const [unavailable, setUnavailable] = useState<"desktopOnly" | "off" | null>(null);
 
   // Keep the saved label in step with the server (signed out elsewhere, a backup from another computer).
   useEffect(() => {
     let cancelled = false;
     chatGPTStatus()
-      .then(({ account: server, available }) => {
+      .then(({ account: server, available, reason }) => {
         if (cancelled) return;
-        setAvailable(available);
+        setUnavailable(available ? null : (reason ?? "off"));
         if (!server && account) void updateProvider("openai", { chatgpt: null });
         if (server && (!account || server.email !== account.email))
           void updateProvider("openai", { chatgpt: { email: server.email, name: server.name } });
@@ -387,7 +385,22 @@ function ChatGPTCard({
     }
   }
 
-  if (!available) return null;
+  if (unavailable === "off") return null;
+  if (unavailable === "desktopOnly")
+    return (
+      <section className="flex flex-col gap-2 rounded-2xl bg-muted/60 p-4">
+        <h3 className="text-sm font-medium">{t("chatgpt.title")}</h3>
+        <p className="text-sm text-muted-foreground">{t("chatgpt.desktopOnly")}</p>
+        <a
+          href="https://better-vault.dev/download"
+          target="_blank"
+          rel="noreferrer"
+          className="self-start text-sm font-medium underline underline-offset-4"
+        >
+          {t("chatgpt.getDesktop")}
+        </a>
+      </section>
+    );
   return (
     <section className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-4">
       <div className="flex flex-col gap-1">

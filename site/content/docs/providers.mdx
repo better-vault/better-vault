@@ -5,13 +5,13 @@ description: "Use better-vault with OpenAI, Anthropic Claude, Google Gemini, Oll
 
 better-vault works with five providers: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
 
-| Provider            | Needs                          | Web mode | Pictures (Infographic)    |
-| ------------------- | ------------------------------ | -------- | ------------------------- |
-| **OpenAI**          | API key or ChatGPT sign-in     | Yes      | Yes (GPT Image models)    |
-| **Anthropic**       | API key                        | Yes      | No                        |
-| **Google (Gemini)** | API key                        | Yes      | Yes (Gemini image models) |
-| **Ollama**          | Ollama running on your machine | No       | No                        |
-| **LM Studio**       | LM Studio's local server       | No       | No                        |
+| Provider            | Needs                                     | Web mode | Pictures (Infographic)    |
+| ------------------- | ----------------------------------------- | -------- | ------------------------- |
+| **OpenAI**          | API key, or ChatGPT sign-in (desktop app) | Yes      | Yes (GPT Image models)    |
+| **Anthropic**       | API key                                   | Yes      | No                        |
+| **Google (Gemini)** | API key                                   | Yes      | Yes (Gemini image models) |
+| **Ollama**          | Ollama running on your machine            | No       | No                        |
+| **LM Studio**       | LM Studio's local server                  | No       | No                        |
 
 ## Add an API key
 
@@ -36,7 +36,7 @@ Your key is stored on your device and sent only with the requests that need it. 
 
 ## Use your ChatGPT plan
 
-If you pay for ChatGPT, better-vault can use your plan instead of an OpenAI API key. Chat and every Studio tool then count against the usage included in your plan.
+If you pay for ChatGPT, the [desktop app](/docs/desktop) can use your plan instead of an OpenAI API key. Chat and every Studio tool then count against the usage included in your plan. The web app doesn't support it: the sign-in is kept by the app's server, and a web server could share it with anyone who reaches it.
 
 <Steps>
 <Step>
