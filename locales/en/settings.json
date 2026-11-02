@@ -78,7 +78,9 @@
     "description": "An open-source, bring-your-own-model alternative to NotebookLM.",
     "github": "Source code",
     "issues": "Report a problem",
-    "license": "MIT license"
+    "license": "MIT license",
+    "links": "Links",
+    "releaseNotes": "Release notes"
   },
   "chatgpt": {
     "title": "Use your ChatGPT plan",
@@ -118,23 +120,19 @@
   },
   "updates": {
     "title": "Updates",
-    "notChecked": "Updates not checked yet",
+    "notChecked": "Not checked yet",
     "devBuild": "Updates are checked in the installed app",
     "checking": "Checking for updates…",
-    "upToDate": "You're up to date",
     "available": "Version {{version}} is available",
     "availableShort": "Update available: {{version}}",
-    "availableHint": "Download it now; you can keep working while it downloads.",
-    "availableWebHint": "Update your copy to get it, or install the desktop app, which updates itself.",
     "downloading": "Downloading {{version}}… {{percent}}%",
     "progress": "Download progress",
-    "ready": "Version {{version}} is ready to install",
-    "readyHint": "better-vault restarts to finish, then opens again.",
+    "ready": "Version {{version}} is ready · restart to install",
     "failed": "Couldn't check for updates",
     "download": "Download update",
     "restart": "Restart to update",
     "whatsNew": "What's new",
-    "check": "Check for updates",
+    "check": "Check now",
     "tryAgain": "Try again",
     "toast": "better-vault {{version}} is available",
     "view": "View",
@@ -145,6 +143,8 @@
     "updatedTitle": "better-vault was updated to {{version}}",
     "updatedBody": "You're now on the newest version. Read the",
     "releaseNotes": "release notes on GitHub",
-    "gotIt": "Got it"
+    "gotIt": "Got it",
+    "label": "Software update",
+    "upToDateAt": "Up to date · checked {{time}}"
   }
 }
