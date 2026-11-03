@@ -29,6 +29,8 @@ export interface StorageInfo {
   fields: readonly StorageField[];
   /** Where to create the keys, or manage the connection. */
   helpUrl: string;
+  /** Shown as coming soon and can't be connected yet. */
+  soon?: boolean;
 }
 
 export const storages: Record<StorageId, StorageInfo> = {
@@ -49,6 +51,8 @@ export const storages: Record<StorageId, StorageInfo> = {
     oauth: "microsoft",
     fields: [],
     helpUrl: "https://account.live.com/consent/Manage",
+    // Waiting for its Microsoft app registration; the client is ready.
+    soon: true,
   },
   s3: {
     id: "s3",

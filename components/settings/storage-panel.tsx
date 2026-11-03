@@ -42,6 +42,27 @@ export function StoragePanel() {
           {storageIds.map((id) => {
             const ready = settings ? isStorageReady(settings, id) : false;
             const account = settings?.[id].account;
+            if (storages[id].soon)
+              return (
+                <div
+                  key={id}
+                  aria-disabled
+                  className="flex w-full items-center gap-3 rounded-2xl px-2.5 py-2.5 opacity-60"
+                >
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted">
+                    <StorageLogo id={id} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">{storages[id].name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {t("storage.soonHint")}
+                    </span>
+                  </span>
+                  <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+                    {t("storage.soon")}
+                  </span>
+                </div>
+              );
             return (
               <SettingsRow
                 key={id}

@@ -52,6 +52,7 @@ export function isStorageReady(
 ): boolean {
   const info = storages[id];
   const saved = settings[id];
+  if (info.soon) return false;
   if (info.auth === "oauth") return saved.account !== null;
   return info.fields.every(
     (field) => field.optional || (saved.fields[field.key] ?? "").trim() !== "",

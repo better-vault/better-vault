@@ -16,7 +16,7 @@
     "storage": "Storage",
     "storageHint_one": "{{count}} connected",
     "storageHint_other": "{{count}} connected",
-    "storageNone": "Google Drive, OneDrive, S3, R2"
+    "storageNone": "Google Drive, S3, R2"
   },
   "providers": {
     "title": "AI providers",
@@ -249,6 +249,8 @@
       "restore": "Restore this backup",
       "add_one": "Add {{count}} file",
       "add_other": "Add {{count}} files"
-    }
+    },
+    "soon": "Soon",
+    "soonHint": "Coming in a later version"
   }
 }
