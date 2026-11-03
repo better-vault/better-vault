@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { inlineScriptHashes, securityHeaders } from "@/lib/security/csp";
 import { createApi } from "./app";
 
 /**
@@ -16,7 +17,13 @@ const port = Number(process.env.PORT) || 3000;
 const hostname = process.env.HOSTNAME || "localhost";
 
 const index = await readFile(path.join(client, "index.html"), "utf8");
+const headers = securityHeaders(inlineScriptHashes(index));
 const app = new Hono();
+// The Content-Security-Policy and friends, on every answer.
+app.use("*", async (c, next) => {
+  await next();
+  for (const [name, value] of Object.entries(headers)) c.res.headers.set(name, value);
+});
 app.route("/", createApi());
 app.use("/*", serveStatic({ root: path.relative(process.cwd(), client) }));
 // Every other path is a page of the single-page app.

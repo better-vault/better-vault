@@ -64,6 +64,7 @@ Keep the desktop shell thin: desktop-only behaviour belongs in `desktop/src/`, a
 - **CSS:** keep a single `@layer components` block in `src/styles/globals.css`.
 - **Scrolling:** pages scroll in shadcn's `ScrollArea` (`components/ui/scroll-area.tsx`), never the browser's bar. Panel sheet and dialog bodies have their own.
 - **Accessibility:** icon-only buttons need an `aria-label` (translated).
+- **Content-Security-Policy:** the built app is served with one (`lib/security/csp.ts`, applied by `server/node.ts` and `desktop/src/protocol.ts`). The page may run only its own scripts (the inline theme script by hash) and Google's sign-in and Picker, and may call only its own API and the storage services. A feature that loads a script, frame or API from a new host in the browser must add that host there; calls to AI providers go through the app's API and need nothing.
 
 ## Code map
 

@@ -22,6 +22,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - On macOS the desktop app has no title bar; the window buttons sit above the app's own top bar.
 - Backups are format 3, with folders and stored files; older backups still import.
 
+### Security
+
+- The web and desktop apps are served with a Content-Security-Policy: the page runs only its own scripts and Google's sign-in and Picker, and sends data only to its own API and the storage services. Also `nosniff`, a referrer policy and a permissions policy.
+- The `shadcn` command-line tool moved to development dependencies; production dependencies have no known vulnerabilities.
+
 ### Fixed
 
 - Windows: the desktop app was signed with the macOS certificate, so installed apps refused every update. Windows builds are no longer signed with it. **Apps on 0.4.x for Windows need to be reinstalled once by hand** from the download page; later versions update themselves.

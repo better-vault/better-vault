@@ -2,6 +2,8 @@ import { net, protocol } from "electron";
 import { statSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
+import { inlineScriptHashes, securityHeaders } from "@/lib/security/csp";
 import { createApi } from "@/server/app";
 
 /**
@@ -36,6 +38,10 @@ export function registerScheme() {
  */
 export function handleScheme(renderer: string) {
   const api = createApi({ desktop: true });
+  // Built pages only: the dev server injects scripts of its own.
+  const pageHeaders = /^https?:/.test(renderer)
+    ? null
+    : securityHeaders(inlineScriptHashes(readFileSync(path.join(renderer, "index.html"), "utf8")));
   const devServer = /^https?:/.test(renderer) ? renderer.replace(/\/$/, "") : undefined;
 
   protocol.handle(scheme, async (request) => {
@@ -54,7 +60,11 @@ export function handleScheme(renderer: string) {
     const relative = path.normalize(decodeURIComponent(url.pathname)).replace(/^([/\\])+/, "");
     let file = path.join(renderer, relative);
     if (!file.startsWith(renderer) || !isFile(file)) file = path.join(renderer, "index.html");
-    return net.fetch(pathToFileURL(file).toString());
+    const response = await net.fetch(pathToFileURL(file).toString());
+    // The pages get the same Content-Security-Policy as the web app's.
+    const answer = new Headers(response.headers);
+    for (const [name, value] of Object.entries(pageHeaders ?? {})) answer.set(name, value);
+    return new Response(response.body, { status: response.status, headers: answer });
   });
 }
 
