@@ -229,13 +229,11 @@
     "test": "Test connection",
     "testOk": "Connected to the bucket",
     "keysPrivacy": "Keys stay on this device and are sent only with the requests that use the bucket.",
-    "connectGoogle": "Connect with Google",
-    "connectMicrosoft": "Connect with Microsoft",
     "signedIn": "Connected to {{name}}",
     "signOut": "Disconnect",
     "manage": "Manage access",
     "notSetUp": "This copy of better-vault isn't set up to sign in to this service yet.",
-    "driveAccess": "better-vault asks only for the files you pick and the ones it makes. It never sees the rest of your Drive.",
+    "driveAccess": "better-vault sees only the files you pick and the ones it makes.",
     "driveDesktop": "better-vault asks only for the files you pick and the ones it makes. In the desktop app you can save backups and exports, and add files better-vault has opened before; picking new files needs the web app.",
     "onedriveAccess": "better-vault reads the files you choose and writes only to its better-vault folder.",
     "browser": {
@@ -251,6 +249,8 @@
       "add_other": "Add {{count}} files"
     },
     "soon": "Soon",
-    "soonHint": "Coming in a later version"
+    "soonHint": "Coming in a later version",
+    "continueGoogle": "Continue with Google",
+    "continueMicrosoft": "Continue with Microsoft"
   }
 }

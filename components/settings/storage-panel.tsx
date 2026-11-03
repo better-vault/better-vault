@@ -237,7 +237,13 @@ function KeyField({
   );
 }
 
-/** Google Drive and OneDrive: sign in with the service, or sign out. */
+/** The sign-in services' own marks, for the "Continue with …" button. */
+const signInMarks = { google: "/storage/google.svg", microsoft: "/storage/onedrive.svg" } as const;
+
+/**
+ * Google Drive and OneDrive: the service at the centre, one "Continue with"
+ * button, and once connected, who is signed in with a quiet way out.
+ */
 function OAuthDetail({ id, saved }: { id: StorageId; saved: StorageSettings }) {
   const { t } = useTranslation("settings");
   const info = storages[id];
@@ -245,12 +251,13 @@ function OAuthDetail({ id, saved }: { id: StorageId; saved: StorageSettings }) {
   const desktop = Boolean(desktopBridge());
   const configured = oauthConfigured(service, desktop);
   const [busy, setBusy] = useState(false);
+  const account = saved.account;
 
   async function signIn() {
     setBusy(true);
     try {
-      const account = await connect(service);
-      await updateStorage(id, { account });
+      const next = await connect(service);
+      await updateStorage(id, { account: next });
       toast.success(t("storage.signedIn", { name: info.name }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -269,51 +276,87 @@ function OAuthDetail({ id, saved }: { id: StorageId; saved: StorageSettings }) {
     }
   }
 
+  const initials = (account?.name || account?.email || "?")
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toLocaleUpperCase())
+    .join("");
+
   return (
     <>
-      <Sheet.Header title={info.name} description={t(`storage.services.${id}`)} />
+      {/* The name is in the hero below; the header keeps it for screen readers. */}
+      <Sheet.Header title={info.name} className="sr-only" />
       <Sheet.Body>
-        <div className="flex flex-col gap-5 pb-4">
-          <section className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-4">
-            <div className="flex items-center gap-3">
-              <StorageLogo id={id} size={28} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">
-                  {saved.account ? saved.account.name || info.name : t("storage.notConnected")}
-                </p>
-                {saved.account?.email ? (
-                  <p className="truncate text-xs text-muted-foreground">{saved.account.email}</p>
+        <div className="flex flex-col items-center gap-6 px-2 pt-6 pb-4 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-muted ring-1 ring-border">
+              <StorageLogo id={id} size={36} />
+            </span>
+            <h2 className="text-lg font-semibold tracking-tight">{info.name}</h2>
+            <p className="max-w-72 text-sm leading-6 text-muted-foreground">
+              {t(`storage.services.${id}`)}
+            </p>
+          </div>
+
+          {!configured ? (
+            <p className="w-full rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
+              {t("storage.notSetUp")}
+            </p>
+          ) : account ? (
+            <div className="flex w-full flex-col items-center gap-3 rounded-2xl bg-muted/60 px-4 py-5">
+              <span
+                aria-hidden
+                className="flex size-12 items-center justify-center rounded-full bg-background text-base font-medium ring-1 ring-border"
+              >
+                {initials}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{account.name || info.name}</p>
+                {account.email ? (
+                  <p className="truncate text-xs text-muted-foreground">{account.email}</p>
                 ) : null}
               </div>
-            </div>
-            {!configured ? (
-              <p className="text-sm text-muted-foreground">{t("storage.notSetUp")}</p>
-            ) : saved.account ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-1">
                 <a
                   href={info.helpUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-8 items-center rounded-md px-3 text-[0.8125rem] font-medium hover:bg-accent"
+                  className="rounded-md px-2 py-1 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
                   {t("storage.manage")}
                 </a>
-                <Button variant="ghost" size="sm" disabled={busy} onClick={signOut}>
+                <span aria-hidden className="text-xs text-muted-foreground">
+                  ·
+                </span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void signOut()}
+                  className="cursor-pointer rounded-md px-2 py-1 text-xs text-muted-foreground underline-offset-4 hover:text-destructive hover:underline disabled:opacity-50"
+                >
                   {t("storage.signOut")}
-                </Button>
+                </button>
               </div>
-            ) : (
-              <Button className="self-start" disabled={busy} onClick={signIn}>
-                {busy ? (
-                  <Icon icon={Loading03Icon} size={16} className="animate-spin" />
-                ) : (
-                  <StorageLogo id={id} size={16} />
-                )}
-                {t(service === "google" ? "storage.connectGoogle" : "storage.connectMicrosoft")}
-              </Button>
-            )}
-          </section>
-          <p className="text-xs leading-5 text-muted-foreground">
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full"
+              disabled={busy}
+              onClick={() => void signIn()}
+            >
+              {busy ? (
+                <Icon icon={Loading03Icon} size={18} className="animate-spin" />
+              ) : (
+                <img src={signInMarks[service]} alt="" width={18} height={18} />
+              )}
+              {t(service === "google" ? "storage.continueGoogle" : "storage.continueMicrosoft")}
+            </Button>
+          )}
+
+          <p className="max-w-72 text-xs leading-5 text-muted-foreground">
             {t(
               id === "google-drive"
                 ? desktop
