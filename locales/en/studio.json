@@ -682,6 +682,7 @@
     },
     "narrator": "Narrator",
     "writer": "Script written by",
-    "writerHint": "This model reads your sources and writes what is said; ElevenLabs then speaks it."
+    "writerHint": "This model reads your sources and writes what is said; ElevenLabs then speaks it.",
+    "noWriter": "No chat model yet. Add one in Settings → AI providers."
   }
 }

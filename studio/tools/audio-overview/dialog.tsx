@@ -113,8 +113,9 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
     });
   }, [voices, value, onChange]);
 
-  if (settings && !apiKey) {
-    return (
+  // Without a key the options stay; only the voices wait for ElevenLabs.
+  const noKey =
+    settings && !apiKey ? (
       <Alert tone="info" variant="plain">
         <Alert.Title>{t("audio-overview.noKey.title")}</Alert.Title>
         <Alert.Description>{t("audio-overview.noKey.body")}</Alert.Description>
@@ -130,8 +131,7 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
           </Button>
         </Alert.Actions>
       </Alert>
-    );
-  }
+    ) : null;
 
   const solo = value.speakers === "one";
   return (
@@ -178,7 +178,10 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
           description: t("audio-overview.minutes", { count: LENGTH_MINUTES[length] }),
         }))}
       />
-      {error ? (
+      <WriterField value={value.writer} onChange={(writer) => onChange({ ...value, writer })} />
+      {noKey ? (
+        noKey
+      ) : error ? (
         <p className="text-sm text-destructive">{t("audio-overview.voicesFailed", { error })}</p>
       ) : !voices ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -208,15 +211,16 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
           ))}
         </div>
       )}
-      <WriterField value={value.writer} onChange={(writer) => onChange({ ...value, writer })} />
-      <ChoiceField
-        label={t("audio-overview.speechModel")}
-        value={value.speechModel?.modelId ?? dialogueModels[0]}
-        onChange={(modelId) =>
-          onChange({ ...value, speechModel: { provider: "elevenlabs", modelId } })
-        }
-        options={dialogueModels.map((modelId) => ({ value: modelId, label: modelId }))}
-      />
+      {noKey ? null : (
+        <ChoiceField
+          label={t("audio-overview.speechModel")}
+          value={value.speechModel?.modelId ?? dialogueModels[0]}
+          onChange={(modelId) =>
+            onChange({ ...value, speechModel: { provider: "elevenlabs", modelId } })
+          }
+          options={dialogueModels.map((modelId) => ({ value: modelId, label: modelId }))}
+        />
+      )}
     </>
   );
 }
@@ -319,25 +323,31 @@ function WriterField({
   }));
   return (
     <Field label={t("audio-overview.writer")} htmlFor={id} hint={t("audio-overview.writerHint")}>
-      <Select
-        items={items}
-        value={chosen ? modelKey(chosen) : null}
-        onValueChange={(next) => {
-          const model = typeof next === "string" ? parseModelKey(next) : null;
-          if (model) onChange(model);
-        }}
-      >
-        <Select.Trigger id={id} className="w-full">
-          <Select.Value />
-        </Select.Trigger>
-        <Select.Content className="max-h-72">
-          {items.map((item) => (
-            <Select.Item key={item.value} value={item.value}>
-              {item.label}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select>
+      {items.length === 0 ? (
+        <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+          {t("audio-overview.noWriter")}
+        </p>
+      ) : (
+        <Select
+          items={items}
+          value={chosen ? modelKey(chosen) : null}
+          onValueChange={(next) => {
+            const model = typeof next === "string" ? parseModelKey(next) : null;
+            if (model) onChange(model);
+          }}
+        >
+          <Select.Trigger id={id} className="w-full">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Content className="max-h-72">
+            {items.map((item) => (
+              <Select.Item key={item.value} value={item.value}>
+                {item.label}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
+      )}
     </Field>
   );
 }
