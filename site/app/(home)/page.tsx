@@ -329,6 +329,12 @@ export default function HomePage() {
             <a href="/llms.txt" className="hover:text-foreground">
               llms.txt
             </a>
+            <LayoutLink href="/privacy" className="hover:text-foreground">
+              Privacy
+            </LayoutLink>
+            <LayoutLink href="/terms" className="hover:text-foreground">
+              Terms
+            </LayoutLink>
           </nav>
         </div>
       </footer>

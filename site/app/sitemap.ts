@@ -12,10 +12,14 @@ import { source } from "@/lib/source";
 function lastModifiedByFile(paths: string[]): Map<string, Date> {
   const dates = new Map<string, Date>();
   try {
-    const log = execFileSync("git", ["log", "--name-only", "--relative", "--pretty=format:%cI", "--", ...paths], {
-      encoding: "utf8",
-      maxBuffer: 32 * 1024 * 1024,
-    });
+    const log = execFileSync(
+      "git",
+      ["log", "--name-only", "--relative", "--pretty=format:%cI", "--", ...paths],
+      {
+        encoding: "utf8",
+        maxBuffer: 32 * 1024 * 1024,
+      },
+    );
     let commitDate: Date | null = null;
     for (const line of log.split("\n")) {
       if (!line) continue;
@@ -32,7 +36,9 @@ function lastModifiedByFile(paths: string[]): Map<string, Date> {
 export default function sitemap(): MetadataRoute.Sitemap {
   const home = "app/(home)/page.tsx";
   const download = "app/(home)/download/page.tsx";
-  const dates = lastModifiedByFile(["content/docs", home, download]);
+  const privacy = "app/(home)/privacy/page.tsx";
+  const terms = "app/(home)/terms/page.tsx";
+  const dates = lastModifiedByFile(["content/docs", home, download, privacy, terms]);
   const entry = (url: string, file: string) => {
     const lastModified = dates.get(file);
     return lastModified ? { url: absoluteUrl(url), lastModified } : { url: absoluteUrl(url) };
@@ -41,6 +47,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     entry("/", home),
     entry("/download", download),
+    entry("/privacy", privacy),
+    entry("/terms", terms),
     ...source.getPages().map((page) => entry(page.url, `content/docs/${page.path}`)),
   ];
 }
