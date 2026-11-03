@@ -29,6 +29,8 @@ const args = (modelId: string, speech: MockSpeechModelV4) => ({
   options: {
     length: "short" as const,
     format: "deep-dive" as const,
+    speakers: "two" as const,
+    writer: null,
     hosts: [
       { voiceId: "v-a", name: "Ada" },
       { voiceId: "v-b", name: "Ben" },
@@ -63,7 +65,14 @@ const response = (modelId: string) => ({ timestamp: new Date(0), modelId, header
 describe("audio overview", () => {
   it("asks for about 150 words a minute, with both hosts' names", () => {
     const task = scriptTask(
-      { length: "medium", format: "debate", hosts: null, speechModel: null },
+      {
+        length: "medium",
+        format: "debate",
+        speakers: "two",
+        hosts: null,
+        writer: null,
+        speechModel: null,
+      },
       ["Ada", "Ben"],
     );
     expect(task).toContain("About 1050 words");
@@ -169,5 +178,41 @@ describe("audio overview", () => {
     expect(voices).toEqual(["v-a", "v-b", "v-a"]);
     expect(result.data.turns.map((turn) => turn.start)).toEqual([0, 0.5, 1]);
     expect(result.data.audio.duration).toBe(1.5);
+  });
+
+  it("writes a monologue for one narrator, spoken in one voice", async () => {
+    const task = scriptTask(
+      {
+        length: "short",
+        format: "brief",
+        speakers: "one",
+        hosts: null,
+        writer: null,
+        speechModel: null,
+      },
+      ["Ada"],
+    );
+    expect(task).toContain("spoken monologue");
+    expect(task).toContain("The narrator is Ada");
+    const voices: (string | undefined)[] = [];
+    const speech = new MockSpeechModelV4({
+      modelId: "eleven_multilingual_v2",
+      doGenerate: async (options) => {
+        voices.push(options.voice);
+        return {
+          audio: new Uint8Array(8_000),
+          warnings: [],
+          response: response("eleven_multilingual_v2"),
+          providerMetadata: { elevenlabs: { outputFormat: "mp3_44100_128" } },
+        };
+      },
+    });
+    const solo = args("eleven_multilingual_v2", speech);
+    const result = await generateAudioOverview({
+      ...solo,
+      options: { ...solo.options, speakers: "one", hosts: [{ voiceId: "v-a", name: "Ada" }] },
+    });
+    expect(voices).toEqual(["v-a", "v-a", "v-a"]);
+    expect(result.data.turns.every((turn) => turn.speaker === 0)).toBe(true);
   });
 });

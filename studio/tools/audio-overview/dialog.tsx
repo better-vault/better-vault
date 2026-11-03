@@ -7,13 +7,21 @@ import { Alert } from "@/components/panelui/alert";
 import { Button } from "@/components/panelui/button";
 import { Select } from "@/components/panelui/select";
 import { useWorkspace } from "@/components/workspace/workspace-context";
+import { modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
 import type { Voice } from "@/lib/ai/voices";
-import { speechCredentialsFrom, useSettings } from "@/lib/db/settings";
+import {
+  activeModel,
+  availableModels,
+  speechCredentialsFrom,
+  useSettings,
+} from "@/lib/db/settings";
 import { ChoiceField, OptionCards } from "@/studio/shared/fields";
 import type { ToolFormProps } from "@/studio/shared/form";
 import {
   audioFormats,
   audioLengths,
+  audioSpeakers,
+  type AudioSpeakers,
   dialogueModels,
   LENGTH_MINUTES,
   type AudioOverviewOptions,
@@ -43,18 +51,25 @@ function loadVoices(apiKey: string): Promise<Voice[]> {
   return list;
 }
 
-/** Two different voices to start with: a woman and a man when ElevenLabs says which. */
-function defaultHosts(voices: Voice[]): AudioOverviewOptions["hosts"] {
-  if (voices.length < 2) return null;
+/**
+ * Voices to start with: one for a narrator; for two hosts, a woman and a man
+ * when ElevenLabs says which.
+ */
+function defaultHosts(voices: Voice[], speakers: AudioSpeakers): AudioOverviewOptions["hosts"] {
+  if (voices.length === 0) return null;
   const first = voices.find((voice) => voice.gender === "female") ?? voices[0];
+  if (speakers === "one") return [{ voiceId: first.id, name: first.name }];
   const second =
     voices.find((voice) => voice.id !== first.id && voice.gender === "male") ??
-    voices.find((voice) => voice.id !== first.id)!;
+    voices.find((voice) => voice.id !== first.id);
+  if (!second) return null;
   return [
     { voiceId: first.id, name: first.name },
     { voiceId: second.id, name: second.name },
   ];
 }
+
+const hostCount = (speakers: AudioSpeakers) => (speakers === "one" ? 1 : 2);
 
 export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOverviewOptions>) {
   const { t } = useTranslation("studio");
@@ -79,16 +94,19 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
     };
   }, [apiKey]);
 
-  // The speech model and two voices are filled in once the voices are known.
+  // The speech model and the voices are filled in once the voices are known.
   useEffect(() => {
     if (!voices) return;
     const known = (id: string) => voices.some((voice) => voice.id === id);
-    const hostsOk = value.hosts && known(value.hosts[0].voiceId) && known(value.hosts[1].voiceId);
+    const hostsOk =
+      value.hosts !== null &&
+      value.hosts.length === hostCount(value.speakers) &&
+      value.hosts.every((host) => known(host.voiceId));
     const modelOk = value.speechModel?.provider === "elevenlabs";
     if (hostsOk && modelOk) return;
     onChange({
       ...value,
-      hosts: hostsOk ? value.hosts : defaultHosts(voices),
+      hosts: hostsOk ? value.hosts : defaultHosts(voices, value.speakers),
       speechModel: modelOk
         ? value.speechModel
         : { provider: "elevenlabs", modelId: dialogueModels[0] },
@@ -115,8 +133,27 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
     );
   }
 
+  const solo = value.speakers === "one";
   return (
     <>
+      <ChoiceField
+        label={t("audio-overview.speakers")}
+        value={value.speakers}
+        onChange={(speakers) => {
+          const kept = value.hosts?.slice(0, hostCount(speakers));
+          const hosts =
+            kept && kept.length === hostCount(speakers)
+              ? (kept as AudioOverviewOptions["hosts"])
+              : voices
+                ? defaultHosts(voices, speakers)
+                : null;
+          onChange({ ...value, speakers, hosts });
+        }}
+        options={audioSpeakers.map((speakers) => ({
+          value: speakers,
+          label: t(`audio-overview.speakerOptions.${speakers}`),
+        }))}
+      />
       <OptionCards
         label={t("audio-overview.format")}
         value={value.format}
@@ -124,8 +161,10 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
         columns={3}
         options={audioFormats.map((format) => ({
           value: format,
-          title: t(`audio-overview.formats.${format}.name`),
-          description: t(`audio-overview.formats.${format}.description`),
+          title: t(`audio-overview.formats.${format}.${solo ? "soloName" : "name"}`),
+          description: t(
+            `audio-overview.formats.${format}.${solo ? "soloDescription" : "description"}`,
+          ),
         }))}
       />
       <OptionCards
@@ -148,14 +187,18 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {([0, 1] as const).map((index) => (
+          {(solo ? [0] : [0, 1]).map((index) => (
             <VoiceField
               key={index}
-              label={t("audio-overview.host", { number: index + 1 })}
+              label={
+                solo
+                  ? t("audio-overview.narrator")
+                  : t("audio-overview.host", { number: index + 1 })
+              }
               voices={voices}
               value={value.hosts?.[index]?.voiceId ?? null}
               onChange={(voice) => {
-                const hosts = value.hosts ?? defaultHosts(voices);
+                const hosts = value.hosts ?? defaultHosts(voices, value.speakers);
                 if (!hosts) return;
                 const next = [...hosts] as NonNullable<AudioOverviewOptions["hosts"]>;
                 next[index] = { voiceId: voice.id, name: voice.name };
@@ -165,6 +208,7 @@ export function AudioOverviewForm({ value, onChange }: ToolFormProps<AudioOvervi
           ))}
         </div>
       )}
+      <WriterField value={value.writer} onChange={(writer) => onChange({ ...value, writer })} />
       <ChoiceField
         label={t("audio-overview.speechModel")}
         value={value.speechModel?.modelId ?? dialogueModels[0]}
@@ -247,6 +291,53 @@ function VoiceField({
           <Icon icon={playing ? PauseIcon : PlayIcon} size={16} />
         </Button>
       </div>
+    </Field>
+  );
+}
+
+/**
+ * The chat model that writes the script from the sources, before ElevenLabs
+ * speaks it. The prompt bar's model unless another is chosen.
+ */
+function WriterField({
+  value,
+  onChange,
+}: {
+  value: AudioOverviewOptions["writer"];
+  onChange: (writer: AudioOverviewOptions["writer"]) => void;
+}) {
+  const { t } = useTranslation("studio");
+  const id = useId();
+  const settings = useSettings();
+  const models = settings ? availableModels(settings) : [];
+  const fallback = settings ? activeModel(settings) : null;
+  const chosen =
+    value && models.some((model) => modelKey(model) === modelKey(value)) ? value : fallback;
+  const items = models.map((model) => ({
+    value: modelKey(model),
+    label: `${providers[model.provider].name} · ${model.modelId}`,
+  }));
+  return (
+    <Field label={t("audio-overview.writer")} htmlFor={id} hint={t("audio-overview.writerHint")}>
+      <Select
+        items={items}
+        value={chosen ? modelKey(chosen) : null}
+        onValueChange={(next) => {
+          const model = typeof next === "string" ? parseModelKey(next) : null;
+          if (model) onChange(model);
+        }}
+      >
+        <Select.Trigger id={id} className="w-full">
+          <Select.Value />
+        </Select.Trigger>
+        <Select.Content className="max-h-72">
+          {items.map((item) => (
+            <Select.Item key={item.value} value={item.value}>
+              {item.label}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select>
     </Field>
   );
 }

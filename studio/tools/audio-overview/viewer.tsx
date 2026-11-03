@@ -156,7 +156,11 @@ export function AudioOverviewViewer({
             <>
               {/* One wave per host, in their colour; only the one speaking moves. */}
               <div
-                className="grid min-h-0 grid-cols-2 place-items-center gap-4 px-4 py-3 sm:px-6 sm:py-6 lg:flex-1"
+                className={cn(
+                  "grid min-h-0 place-items-center gap-4 px-4 py-3 sm:px-6 sm:py-6 lg:flex-1",
+                  // A narrator gets one wave, in the middle.
+                  data.hosts.length > 1 ? "grid-cols-2" : "grid-cols-1",
+                )}
                 aria-live="polite"
               >
                 {data.hosts.map((host, index) => {
@@ -291,7 +295,7 @@ export function AudioOverviewViewer({
                 <Bubble
                   key={index}
                   lineRef={index === current ? activeLine : undefined}
-                  name={data.hosts[turn.speaker].name}
+                  name={(data.hosts[turn.speaker] ?? data.hosts[0]).name}
                   timecode={clock(turn.start)}
                   speaker={turn.speaker}
                   // A host's consecutive lines group under one name.

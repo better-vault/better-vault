@@ -36,9 +36,28 @@ const FORMATS: Record<AudioFormat, string> = {
     "a friendly debate: the hosts take different sides of the questions the sources raise, argue each with evidence from the passages, and end on what they agree on",
 };
 
-export function scriptTask(options: AudioOverviewOptions, names: [string, string]): string {
+/** A narrator's version of each format. A debate with one voice weighs both sides. */
+const SOLO_FORMATS: Record<AudioFormat, string> = {
+  "deep-dive":
+    "a deep dive: one narrator unpacks the sources from the big picture to the details that matter, with examples, like a thoughtful podcast host on their own",
+  brief:
+    "a brief: one narrator runs through the most important points quickly and clearly, like a short news segment",
+  debate:
+    "a balanced argument: one narrator lays out the different sides of the questions the sources raise, with evidence for each, and ends on where they meet",
+};
+
+export function scriptTask(options: AudioOverviewOptions, names: string[]): string {
   const minutes = LENGTH_MINUTES[options.length];
   const words = minutes * WORDS_PER_MINUTE;
+  if (names.length < 2)
+    return `Write the script of a spoken monologue about the sources, for an audio overview: ${SOLO_FORMATS[options.format]}.
+
+- The narrator is ${names[0]}. Every turn is spoken by A; split the script into paragraphs of two to five sentences, each a turn.
+- About ${words} words in total (roughly ${minutes} minutes when spoken).
+- Open by saying what the episode is about, and close with the main takeaway.
+- Write for the ear: plain spoken sentences, numbers as they are said, no lists, headings, markdown, URLs or emojis.
+- Never read citations aloud. Put the numbers of the passages each turn draws on in "cites".
+- Stay faithful to the passages: explain and connect what they say, and say so when they don't settle something.`;
   return `Write the script of a spoken conversation about the sources, for an audio overview: ${FORMATS[options.format]}.
 
 - The hosts are ${names[0]} (A) and ${names[1]} (B). They may call each other by name, but not in every turn.
@@ -177,24 +196,30 @@ export const generateAudioOverview: Generator<AudioOverviewOptions, AudioOvervie
 ) => {
   const { options, speech } = args;
   if (!speech) throw new Error("Choose a voice service for the audio overview.");
-  if (!options.hosts) throw new Error("Choose the two voices.");
+  if (!options.hosts) throw new Error("Choose the voices.");
   const hosts = options.hosts;
+  const solo = hosts.length < 2;
+  /** The voice of a turn; a narrator speaks every turn. */
+  const voiceOf = (speaker: 0 | 1) => (hosts[speaker] ?? hosts[0]).voiceId;
 
   const { output } = await generateText({
     model: args.model,
     output: Output.object({ schema: modelScript }),
     system: studioSystem(
-      scriptTask(options, [hosts[0].name || "Host A", hosts[1].name || "Host B"]),
+      scriptTask(
+        options,
+        hosts.map((host, index) => host.name || `Host ${index === 0 ? "A" : "B"}`),
+      ),
       args,
     ),
-    prompt: "Write the conversation.",
+    prompt: solo ? "Write the monologue." : "Write the conversation.",
     abortSignal: args.abortSignal,
   });
 
   const known = new Set(args.passages.map((passage) => passage.n));
   const turns = output.turns
     .map((turn) => ({
-      speaker: turn.speaker === "A" ? (0 as const) : (1 as const),
+      speaker: solo || turn.speaker === "A" ? (0 as const) : (1 as const),
       // Citations are never spoken; a stray one is removed with the space before it.
       text: clean(turn.text.replace(/\s*\[\d[\d,\s–-]*\]/g, "")),
       cites: [...new Set(turn.cites)].filter((n) => known.has(n)),
@@ -211,7 +236,7 @@ export const generateAudioOverview: Generator<AudioOverviewOptions, AudioOvervie
     for (const batch of batchTurns(turns)) {
       const piece = await speakDialogue(
         speech.model,
-        batch.map((turn) => ({ text: turn.text, voiceId: hosts[turn.speaker].voiceId })),
+        batch.map((turn) => ({ text: turn.text, voiceId: voiceOf(turn.speaker) })),
         args.abortSignal,
       );
       batch.forEach((turn, index) =>
@@ -229,7 +254,7 @@ export const generateAudioOverview: Generator<AudioOverviewOptions, AudioOvervie
       const piece = await speakTurn(
         speech.model,
         turn.text,
-        hosts[turn.speaker].voiceId,
+        voiceOf(turn.speaker),
         args.abortSignal,
       );
       timed.push({ ...turn, start: offset, end: offset + piece.duration });

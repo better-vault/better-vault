@@ -62,6 +62,8 @@ export function StudioRunnerProvider({
         const { model, credentials, passages } = await modelRequestFor(
           saved.common.sourceIds,
           saved.common.focus,
+          undefined,
+          toolDefinitions[toolId]?.textModel?.(saved.tool),
         );
         const imageRef = toolDefinitions[toolId]?.imageModel?.(saved.tool) ?? null;
         const imageCredentials = imageRef ? await imageCredentialsFor(imageRef) : undefined;

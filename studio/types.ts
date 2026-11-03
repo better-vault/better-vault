@@ -32,6 +32,11 @@ export interface ToolDefinition<Options = unknown, Data = unknown> {
   imageModel?: (options: Options) => ModelRef | null;
   /** For outputs that are spoken by a speech model: the one chosen in the options. */
   speechModel?: (options: Options) => ModelRef | null;
+  /**
+   * The chat model chosen in the options, when the tool lets people pick the
+   * one that writes it; null or absent for the prompt bar's model.
+   */
+  textModel?: (options: Options) => ModelRef | null;
 }
 
 export type ExportFormat =
