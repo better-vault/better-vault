@@ -124,9 +124,10 @@ export function AudioOverviewViewer({
   const progress = duration > 0 ? time / duration : 0;
 
   return (
-    // Fits the tab on wide screens: only the transcript scrolls. Narrow screens stack.
-    <div className="relative flex-1 lg:min-h-[36rem]">
-      <div className="grid gap-3 lg:absolute lg:inset-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+    // Fits the tab on every screen: only the transcript scrolls. Phones stack the
+    // player above it, and the transcript takes the height that is left.
+    <div className="relative min-h-[32rem] flex-1">
+      <div className="absolute inset-0 grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:grid-rows-none">
         {/* The player. */}
         <section className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border">
           <header className="flex items-center gap-2 p-3">
@@ -155,7 +156,7 @@ export function AudioOverviewViewer({
             <>
               {/* One wave per host, in their colour; only the one speaking moves. */}
               <div
-                className="grid min-h-0 flex-1 grid-cols-2 place-items-center gap-4 px-6 py-6"
+                className="grid min-h-0 grid-cols-2 place-items-center gap-4 px-4 py-3 sm:px-6 sm:py-6 lg:flex-1"
                 aria-live="polite"
               >
                 {data.hosts.map((host, index) => {
@@ -168,7 +169,7 @@ export function AudioOverviewViewer({
                         level={speaking ? level : 0}
                         state={speaking ? "speaking" : "idle"}
                         paused={!speaking}
-                        height={wide ? 156 : 112}
+                        height={wide ? 156 : 96}
                         color={hostWave[own]}
                         className={cn(
                           "transition-opacity",
@@ -204,7 +205,7 @@ export function AudioOverviewViewer({
                 })}
               </div>
 
-              <div className="flex flex-col gap-3 border-t border-border px-5 pt-4 pb-5">
+              <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-4 sm:gap-3 sm:px-5 sm:pt-4 sm:pb-5">
                 <Timeline
                   data={data}
                   duration={duration}
@@ -279,7 +280,7 @@ export function AudioOverviewViewer({
         {/* The transcript, as a conversation: each host on their own side. */}
         <section
           aria-label={t("audio-overview.viewer.transcript")}
-          className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border max-lg:h-[28rem]"
+          className="flex min-h-0 flex-col rounded-2xl bg-card ring-1 ring-border"
         >
           <header className="px-5 pt-4 pb-2">
             <h3 className="text-sm font-medium">{t("audio-overview.viewer.transcript")}</h3>
