@@ -1,4 +1,10 @@
-import { CloudUploadIcon, Globe02Icon, Loading03Icon, TextIcon } from "@hugeicons/core-free-icons";
+import {
+  CloudServerIcon,
+  CloudUploadIcon,
+  Globe02Icon,
+  Loading03Icon,
+  TextIcon,
+} from "@hugeicons/core-free-icons";
 import { useId, useRef, useState, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -16,9 +22,16 @@ import {
   ingestText,
   ingestUrl,
 } from "@/lib/sources/ingest";
+import { CloudBrowser } from "@/components/storage/cloud-browser";
+import { storageIds } from "@/lib/storage/catalog";
+import { storageClient } from "@/lib/storage/clients";
+import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { cn } from "@/lib/utils";
 
-type Mode = "file" | "url" | "text";
+type Mode = "file" | "cloud" | "url" | "text";
+
+/** The file types a source can be, as extensions, for the cloud browser. */
+const SOURCE_EXTENSIONS = ["pdf", "md", "markdown", "mdx", "txt", "text", "csv"] as const;
 
 interface AddSourceDialogProps {
   notebookId: string;
@@ -55,6 +68,9 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  // "From storage" appears once a storage service is connected (Settings → Storage).
+  const storage = useStorageSettings();
+  const hasStorage = storage ? storageIds.some((id) => isStorageReady(storage, id)) : false;
 
   function describe(error: unknown): string {
     if (error instanceof IngestError) {
@@ -126,6 +142,15 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
               label: t("addDialog.tabs.file"),
               icon: <Icon icon={CloudUploadIcon} size={16} />,
             },
+            ...(hasStorage
+              ? [
+                  {
+                    value: "cloud" as const,
+                    label: t("addDialog.tabs.cloud"),
+                    icon: <Icon icon={CloudServerIcon} size={16} />,
+                  },
+                ]
+              : []),
             {
               value: "url",
               label: t("addDialog.tabs.url"),
@@ -139,7 +164,21 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
           ]}
         />
 
-        {mode === "file" ? (
+        {mode === "cloud" && storage ? (
+          <CloudBrowser
+            mode="sources"
+            accept={SOURCE_EXTENSIONS}
+            busy={busy}
+            onChoose={(service, files) => {
+              const client = storageClient(service, storage[service]);
+              return run(
+                files.map(
+                  (file) => async () => ingestFile(notebookId, await client.download(file)),
+                ),
+              );
+            }}
+          />
+        ) : mode === "file" ? (
           <div
             onDragOver={(event) => {
               event.preventDefault();

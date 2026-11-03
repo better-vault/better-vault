@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
+import { storages } from "@/lib/storage/catalog";
 import type { OutputChrome } from "./form";
 
 /**
@@ -66,6 +67,23 @@ export function OutputMenu({
             </Menu.SubContent>
           </Menu.Sub>
         ) : null}
+        {chrome.cloud.map((target) =>
+          target.formats.length > 0 ? (
+            <Menu.Sub key={target.service}>
+              <Menu.SubTrigger disabled={chrome.busy}>
+                <img src={storages[target.service].logo} alt="" width={16} height={16} />
+                {t("viewer.saveToService", { name: target.name })}
+              </Menu.SubTrigger>
+              <Menu.SubContent side="inline-start">
+                {target.formats.map((format) => (
+                  <Menu.Item key={format.format} onClick={format.onSelect}>
+                    {format.label}
+                  </Menu.Item>
+                ))}
+              </Menu.SubContent>
+            </Menu.Sub>
+          ) : null,
+        )}
         {children}
         {chrome.onAnnotate ? (
           <Menu.Item onClick={chrome.onAnnotate}>

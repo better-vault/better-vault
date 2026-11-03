@@ -18,6 +18,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWorkspace } from "@/components/workspace/workspace-context";
 import { updateOutputData, useOutput } from "@/lib/db/outputs";
 import { formatRelativeTime } from "@/lib/format";
+import { storageIds, storages } from "@/lib/storage/catalog";
+import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { cn } from "@/lib/utils";
 import { toolClients } from "@/studio/client";
 import { toolDefinitions } from "@/studio/definitions";
@@ -44,6 +46,8 @@ export function OutputViewer({ id }: { id: string }) {
   );
   const [annotating, setAnnotating] = useState(false);
   const exporter = useExporter();
+  const storage = useStorageSettings();
+  const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)) : [];
   const gone = output === null || (output !== undefined && !isStudioToolId(output.toolId));
 
   // A deleted output, here or in another tab, goes back to the list.
@@ -122,6 +126,18 @@ export function OutputViewer({ id }: { id: string }) {
                 format: option.format,
                 label: t(`viewer.formats.${option.format}`),
                 onSelect: () => void exporter.save(output.title, parsed.data, option),
+              }))
+            : [],
+        cloud:
+          parsed?.success && definition?.exports
+            ? connected.map((service) => ({
+                service,
+                name: storages[service].name,
+                formats: definition.exports!.filter(isFileExport).map((option) => ({
+                  format: option.format,
+                  label: t(`viewer.formats.${option.format}`),
+                  onSelect: () => void exporter.saveTo(service, output.title, parsed.data, option),
+                })),
               }))
             : [],
         onRename: () => requestOutputAction({ kind: "rename", output }),

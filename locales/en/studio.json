@@ -413,7 +413,10 @@
       "mp3": "Audio (MP3)"
     },
     "metaLocal": "Edited {{time}}",
-    "annotate": "Annotate"
+    "annotate": "Annotate",
+    "saveTo": "Save to storage",
+    "saveToService": "Save to {{name}}",
+    "savedTo": "Saved to {{name}}"
   },
   "export": {
     "question": "Question",

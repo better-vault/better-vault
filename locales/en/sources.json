@@ -35,7 +35,8 @@
     "tabs": {
       "file": "Upload",
       "url": "Web page",
-      "text": "Paste text"
+      "text": "Paste text",
+      "cloud": "From storage"
     },
     "drop": "Drop files here",
     "choose": "Choose files",

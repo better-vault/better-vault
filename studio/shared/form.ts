@@ -20,6 +20,12 @@ export interface OutputChrome {
   /** "Edited 3 minutes ago", or the sources, model and date. */
   meta: string;
   downloads: { format: string; label: string; onSelect: () => void }[];
+  /** The connected storage services, each with the formats it can save the output as. */
+  cloud: {
+    service: import("@/lib/storage/catalog").StorageId;
+    name: string;
+    formats: { format: string; label: string; onSelect: () => void }[];
+  }[];
   /** A download is being built. */
   busy: boolean;
   onRename: () => void;

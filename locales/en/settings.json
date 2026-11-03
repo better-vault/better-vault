@@ -91,7 +91,13 @@
       "body": "Every notebook, source, chat and Studio output in this browser will be deleted. This can't be undone.",
       "confirm": "Delete everything"
     },
-    "deleted": "All notebooks deleted"
+    "deleted": "All notebooks deleted",
+    "backupTo": "Back up to {{name}}",
+    "backupToHint": "Saves a backup to its better-vault/backups folder. API keys are not included.",
+    "backingUp": "Backing up…",
+    "backedUp": "Backed up to {{name}}",
+    "restoreFrom": "Restore from storage",
+    "restoreFromHint": "Adds the notebooks from a backup saved in your storage."
   },
   "about": {
     "title": "About & Updates",
@@ -231,6 +237,18 @@
     "notSetUp": "This copy of better-vault isn't set up to sign in to this service yet.",
     "driveAccess": "better-vault asks only for the files you pick and the ones it makes. It never sees the rest of your Drive.",
     "driveDesktop": "better-vault asks only for the files you pick and the ones it makes. In the desktop app you can save backups and exports, and add files better-vault has opened before; picking new files needs the web app.",
-    "onedriveAccess": "better-vault reads the files you choose and writes only to its better-vault folder."
+    "onedriveAccess": "better-vault reads the files you choose and writes only to its better-vault folder.",
+    "browser": {
+      "none": "No storage connected. Connect one in Settings → Storage.",
+      "pickerHint": "Choose files in Google's own picker. better-vault can open only the files you pick.",
+      "pick": "Choose from {{name}}",
+      "up": "Up one folder",
+      "loading": "Loading files…",
+      "empty": "No files here that can be added.",
+      "noBackups": "No backups here yet.",
+      "restore": "Restore this backup",
+      "add_one": "Add {{count}} file",
+      "add_other": "Add {{count}} files"
+    }
   }
 }
