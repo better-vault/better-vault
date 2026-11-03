@@ -13,6 +13,7 @@ import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
 import { ProviderIcon } from "@/components/provider-icon";
 import { Button, buttonVariants } from "@/components/panelui/button";
+import { Alert } from "@/components/panelui/alert";
 import { Input } from "@/components/panelui/input";
 import { Label } from "@/components/panelui/label";
 import { Sheet } from "@/components/panelui/sheet";
@@ -20,6 +21,7 @@ import { Switch } from "@/components/panelui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Segmented } from "@/components/common/segmented";
 import { chatProviderIds, providers, speechProviderIds, type ProviderId } from "@/lib/ai/catalog";
+import { desktopBridge } from "@/lib/desktop/bridge";
 import { accountLabel, chatGPTStatus, chatGPTUsageUrl, signOutChatGPT } from "@/lib/chatgpt/client";
 import {
   isProviderReady,
@@ -193,10 +195,15 @@ function ProviderForm({
       />
       <Sheet.Body>
         <div className="flex flex-col gap-5 pb-4">
-          <Label className="justify-between gap-4 rounded-2xl bg-muted/60 px-4 py-3">
-            <Label.Text>{t("providers.enable", { name: info.name })}</Label.Text>
-            <Switch checked={saved.enabled} onCheckedChange={(enabled) => save({ enabled })} />
-          </Label>
+          {/* OpenCode is on while it has a key; its sheet checks for OpenCode instead. */}
+          {id === "opencode" ? (
+            <OpenCodeCheck />
+          ) : (
+            <Label className="justify-between gap-4 rounded-2xl bg-muted/60 px-4 py-3">
+              <Label.Text>{t("providers.enable", { name: info.name })}</Label.Text>
+              <Switch checked={saved.enabled} onCheckedChange={(enabled) => save({ enabled })} />
+            </Label>
+          )}
 
           {id === "openai" ? (
             <ChatGPTCard account={saved.chatgpt} onSignIn={onChatGPTSignIn} />
@@ -257,6 +264,8 @@ function ProviderForm({
                     save({
                       apiKey: value.trim(),
                       ...(value.trim() && !saved.enabled ? { enabled: true } : {}),
+                      // With no switch, OpenCode is off once its key is removed.
+                      ...(id === "opencode" && !value.trim() ? { enabled: false } : {}),
                     });
                   }}
                 />
@@ -500,5 +509,79 @@ function ChatGPTCard({
         </Button>
       )}
     </section>
+  );
+}
+
+/**
+ * Desktop app: checks whether OpenCode is installed on this computer, with a
+ * spinner while it looks, and says what to do when it isn't.
+ */
+function OpenCodeCheck() {
+  const { t } = useTranslation("settings");
+  const [state, setState] = useState<
+    | { status: "idle" | "checking" }
+    | { status: "found"; version: string }
+    | { status: "missing" }
+    | { status: "failed"; error: string }
+  >({ status: "idle" });
+  if (!desktopBridge()) return null;
+
+  async function check() {
+    setState({ status: "checking" });
+    try {
+      const response = await fetch("/api/opencode/detect", { method: "POST" });
+      const body = (await response.json()) as {
+        install?: { version: string } | null;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(body.error ?? response.statusText);
+      setState(
+        body.install ? { status: "found", version: body.install.version } : { status: "missing" },
+      );
+    } catch (error) {
+      setState({ status: "failed", error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Button
+        variant="secondary"
+        className="self-start"
+        disabled={state.status === "checking"}
+        aria-busy={state.status === "checking"}
+        onClick={() => void check()}
+      >
+        {state.status === "checking" ? (
+          <Icon icon={Loading03Icon} size={16} className="animate-spin" />
+        ) : null}
+        {state.status === "checking"
+          ? t("providers.opencodeChecking")
+          : t("providers.opencodeCheck")}
+      </Button>
+      {state.status === "found" ? (
+        <Alert tone="success" variant="plain">
+          <Alert.Title>{t("providers.opencodeFound", { version: state.version })}</Alert.Title>
+          <Alert.Description>{t("providers.opencodeFoundBody")}</Alert.Description>
+        </Alert>
+      ) : state.status === "missing" ? (
+        <Alert tone="warning" variant="plain">
+          <Alert.Title>{t("providers.opencodeMissing")}</Alert.Title>
+          <Alert.Description>{t("providers.opencodeMissingBody")}</Alert.Description>
+          <Alert.Actions>
+            <a
+              href="https://opencode.ai/download"
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("providers.opencodeDownload")}
+            </a>
+          </Alert.Actions>
+        </Alert>
+      ) : state.status === "failed" ? (
+        <p className="text-sm text-destructive">{state.error}</p>
+      ) : null}
+    </div>
   );
 }
