@@ -12,7 +12,11 @@
     "about": "About & Updates",
     "account": "Account",
     "accountHint": "Profile, connected accounts and your data",
-    "accountSetUp": "Add your name and picture"
+    "accountSetUp": "Add your name and picture",
+    "storage": "Storage",
+    "storageHint_one": "{{count}} connected",
+    "storageHint_other": "{{count}} connected",
+    "storageNone": "Google Drive, OneDrive, S3, R2"
   },
   "providers": {
     "title": "AI providers",
@@ -182,5 +186,44 @@
     "folders": "Folders",
     "sources": "Sources",
     "space": "{{size}} used by better-vault in this browser."
+  },
+  "storage": {
+    "title": "Storage",
+    "description": "Add sources from your cloud files, and keep backups and Studio exports there.",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "services": {
+      "google-drive": "Pick files from your Drive as sources, and save backups and exports to a better-vault folder.",
+      "onedrive": "Browse your OneDrive for sources, and save backups and exports to a better-vault folder.",
+      "s3": "Use an S3 bucket, or any S3-compatible service, for sources, backups and exports.",
+      "r2": "Use a Cloudflare R2 bucket for sources, backups and exports."
+    },
+    "fields": {
+      "accessKeyId": "Access key ID",
+      "secretAccessKey": "Secret access key",
+      "bucket": "Bucket",
+      "region": "Region",
+      "endpoint": "Endpoint",
+      "accountId": "Account ID",
+      "prefix": "Folder in the bucket"
+    },
+    "optional": "{{label}} (optional)",
+    "hints": {
+      "endpoint": "For S3-compatible services other than AWS, such as MinIO or Wasabi.",
+      "prefix": "better-vault keeps to this folder; leave empty for the whole bucket."
+    },
+    "getKeys": "Get keys",
+    "test": "Test connection",
+    "testOk": "Connected to the bucket",
+    "keysPrivacy": "Keys stay on this device and are sent only with the requests that use the bucket.",
+    "connectGoogle": "Connect with Google",
+    "connectMicrosoft": "Connect with Microsoft",
+    "signedIn": "Connected to {{name}}",
+    "signOut": "Disconnect",
+    "manage": "Manage access",
+    "notSetUp": "This copy of better-vault isn't set up to sign in to this service yet.",
+    "driveAccess": "better-vault asks only for the files you pick and the ones it makes. It never sees the rest of your Drive.",
+    "driveDesktop": "better-vault asks only for the files you pick and the ones it makes. In the desktop app you can save backups and exports, and add files better-vault has opened before; picking new files needs the web app.",
+    "onedriveAccess": "better-vault reads the files you choose and writes only to its better-vault folder."
   }
 }

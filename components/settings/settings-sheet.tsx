@@ -1,5 +1,6 @@
 import {
   AiBrain01Icon,
+  CloudServerIcon,
   Database01Icon,
   InformationCircleIcon,
   LanguageSkillIcon,
@@ -25,6 +26,9 @@ import { Avatar } from "@/components/account/avatar";
 import { useProfile } from "@/lib/db/profile";
 import { AboutPanel } from "./about-panel";
 import { AccountPanel } from "./account-panel";
+import { StoragePanel } from "./storage-panel";
+import { storageIds } from "@/lib/storage/catalog";
+import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { AppearancePanel } from "./appearance-panel";
 import { ChatGPTDialog } from "./chatgpt-dialog";
 import { DataPanel } from "./data-panel";
@@ -60,6 +64,8 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
   const settings = useSettings();
   const updates = useUpdates();
   const profile = useProfile();
+  const storage = useStorageSettings();
+  const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)).length : 0;
   const updateVersion =
     updates.state.status === "available" ||
     updates.state.status === "downloading" ||
@@ -96,6 +102,16 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
                 label={t("rows.providers")}
                 hint={
                   ready > 0 ? t("rows.providersHint", { count: ready }) : t("rows.providersNone")
+                }
+              />
+              <SettingsRow
+                to="storage"
+                icon={CloudServerIcon}
+                label={t("rows.storage")}
+                hint={
+                  connected > 0
+                    ? t("rows.storageHint", { count: connected })
+                    : t("rows.storageNone")
                 }
               />
               <SettingsRow
@@ -139,6 +155,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
                 setChatGPTOpen(true);
               }}
             />
+          </Sheet.Next>
+          <Sheet.Next name="storage" closeLabel={tCommon("actions.close")}>
+            <StoragePanel />
           </Sheet.Next>
           <Sheet.Next name="appearance" closeLabel={tCommon("actions.close")}>
             <AppearancePanel />

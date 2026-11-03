@@ -1,16 +1,36 @@
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import type { Plugin, UserConfig } from "vite";
+import { loadEnv, type Plugin, type UserConfig } from "vite";
 import { themeScript } from "./lib/theme/script.ts";
 import packageJson from "./package.json" with { type: "json" };
 
 /** The repository root, where the app's sources live. */
 export const appRoot = fileURLToPath(new URL("./", import.meta.url));
 
-/** Build-time constants shared by the page and the API. */
+/**
+ * The OAuth apps that sign in to Google Drive and OneDrive. They identify
+ * better-vault, not a user, and are public (they ship in every page), so they
+ * are read at build time from the environment or a .env file. Without them
+ * those two services say they are not set up in this build.
+ */
+const oauthKeys = [
+  "VITE_GOOGLE_CLIENT_ID",
+  "VITE_GOOGLE_API_KEY",
+  "VITE_GOOGLE_APP_ID",
+  "VITE_GOOGLE_DESKTOP_CLIENT_ID",
+  "VITE_GOOGLE_DESKTOP_CLIENT_SECRET",
+  "VITE_MICROSOFT_CLIENT_ID",
+] as const;
+
+const env = { ...loadEnv(process.env.NODE_ENV ?? "development", appRoot, "VITE_"), ...process.env };
+
+/** Build-time constants shared by the page, the API and the desktop main process. */
 export const appDefine = {
   "import.meta.env.VITE_APP_VERSION": JSON.stringify(packageJson.version),
+  ...Object.fromEntries(
+    oauthKeys.map((key) => [`import.meta.env.${key}`, JSON.stringify(env[key] ?? "")]),
+  ),
 };
 
 /** Sets the theme class before the first paint, so a dark theme never flashes light. */

@@ -4,6 +4,11 @@ import { routes } from "@/lib/routes";
 
 /** The app's pages; their paths come from lib/routes.ts. Each page loads on first visit. */
 export const router = createBrowserRouter([
+  // A sign-in popup's landing page, without the app around it.
+  {
+    path: "/oauth/callback",
+    lazy: async () => ({ Component: (await import("./oauth-callback")).OAuthCallback }),
+  },
   {
     element: (
       <AppProviders>
