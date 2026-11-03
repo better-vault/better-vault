@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Storage: connect Google Drive (drive.file only, with the Google Picker), OneDrive, Amazon S3 and Cloudflare R2 in Settings → Storage. Add sources from them, back up notebooks and restore from there, and save Studio exports.
+- Audio Overview: two hosts, or one narrator, talk your sources through. Choose the format, the length (about 3, 7 or 12 minutes), the chat model that writes the script and the ElevenLabs voices. The player shows a wave per host and a transcript that follows along.
+- Providers: OpenCode (Zen or Go key) for chat, and ElevenLabs for speech. The desktop app can check whether OpenCode is installed.
+- Notebooks page: a dialog to name a new notebook and give it an icon, a colour and a folder; drop files on the page to start a notebook with them; folders, with breadcrumbs, search and sorting.
+- Settings → Account: a local profile with your name and picture, connected accounts and what this device holds.
+- Settings → About & Updates: the desktop app shows when an update is out, downloads it on request, asks to restart when it's ready and then links to the release notes.
+
+### Changed
+
+- The app is built with Vite and Hono instead of Next.js, and the desktop app with electron-vite. The desktop app runs the API in its own process: no local server or startup wait.
+- Sign in with ChatGPT works in the desktop app only; the web app says it isn't supported.
+- The mind map takes the whole Studio tab, like the whiteboard.
+- On macOS the desktop app has no title bar; the window buttons sit above the app's own top bar.
+- Backups are format 3, with folders and stored files; older backups still import.
+
+### Fixed
+
+- Windows: the desktop app was signed with the macOS certificate, so installed apps refused every update. Windows builds are no longer signed with it. **Apps on 0.4.x for Windows need to be reinstalled once by hand** from the download page; later versions update themselves.
+- The notebook's top bar and the Audio Overview fit on phones.
+
 ## [0.4.2] - 2026-11-01
 
 ### Added

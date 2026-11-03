@@ -1,0 +1,102 @@
+---
+title: "Storage"
+description: "Connect Google Drive, OneDrive, Amazon S3 or Cloudflare R2 to add sources from your cloud files and keep backups and Studio exports there."
+---
+
+Storage connects better-vault to the places your files already live. Once a service is connected, you can add sources from it, back up your notebooks to it and save Studio exports there.
+
+## Connect a service
+
+Open **Settings → Storage** and choose a service.
+
+| Service           | How it connects                                           | What better-vault can see                               |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| **Google Drive**  | **Connect with Google**                                   | Only the files you pick and the ones it makes           |
+| **OneDrive**      | **Connect with Microsoft**                                | Your files, to browse; it writes only to its own folder |
+| **Amazon S3**     | An access key, its secret, the bucket and its region      | The bucket, or one folder in it                         |
+| **Cloudflare R2** | Your account ID, an access key, its secret and the bucket | The bucket, or one folder in it                         |
+
+For S3 and R2, choose **Test connection** to check the keys. The keys stay on your device and are sent only with the requests that use the bucket, like your AI provider keys. S3-compatible services such as MinIO or Wasabi work through the optional **Endpoint**.
+
+## Use your files
+
+When a service is connected, **Add source** has a **From storage** tab. On the web, Google Drive opens Google's own picker; OneDrive, S3 and R2 let you browse folder by folder. Google Docs, Slides and Sheets are added as text.
+
+**Settings → Data** gains **Back up to …** for each connected service and **Restore from storage**. Backups go to a `better-vault/backups` folder, and the **Download** menu of every Studio output can save a file to `better-vault/exports`.
+
+In the desktop app, Google Drive can save backups and exports and open files it has used before; picking new files from Drive needs the web app, because Google's picker only runs on a registered web address.
+
+## Set up Google Drive and OneDrive for your copy
+
+Google and Microsoft only let registered apps sign in. The official desktop app is registered already. If you run better-vault yourself, create your own registration once and give its IDs to your build as environment variables; without them those two services say they aren't set up.
+
+### Google
+
+<Steps>
+<Step>
+
+### Create a project
+
+In the [Google Cloud console](https://console.cloud.google.com/), create a project. Under **APIs & Services → Library**, enable the **Google Drive API** and the **Google Picker API**.
+
+</Step>
+<Step>
+
+### Set up the consent screen
+
+Under **Google Auth Platform**, fill in the app's name and your email, choose **External**, and add the scope `https://www.googleapis.com/auth/drive.file`. It is a non-sensitive scope, so the app needs no security review.
+
+</Step>
+<Step>
+
+### Create the clients and key
+
+Under **Clients**, create an **OAuth client** of type **Web application** with your app's address as an authorized JavaScript origin, for example `http://localhost:3000`. For the desktop app, create a second client of type **Desktop app**. Under **APIs & Services → Credentials**, create an **API key** restricted to the Google Picker API. The project number is on the project's dashboard.
+
+</Step>
+</Steps>
+
+### Microsoft
+
+<Steps>
+<Step>
+
+### Register an app
+
+In the [Microsoft Entra admin center](https://entra.microsoft.com/), open **App registrations → New registration**. Choose **Accounts in any organizational directory and personal Microsoft accounts**.
+
+</Step>
+<Step>
+
+### Add the redirect addresses
+
+Under **Authentication**, add a **Single-page application** platform with your app's address followed by `/oauth/callback`, for example `http://localhost:3000/oauth/callback`. For the desktop app, add a **Mobile and desktop applications** platform with `http://localhost`.
+
+</Step>
+<Step>
+
+### Allow the permissions
+
+Under **API permissions**, add the Microsoft Graph delegated permissions `User.Read`, `Files.ReadWrite` and `offline_access`. Copy the **Application (client) ID** from the overview.
+
+</Step>
+</Steps>
+
+### Give the IDs to your build
+
+Put the values in a `.env` file at the root of the repository, or set them as environment variables where you build. They identify your app, not a person, and they are shipped in the page, so they are not secrets.
+
+| Variable                            | Value                                       |
+| ----------------------------------- | ------------------------------------------- |
+| `VITE_GOOGLE_CLIENT_ID`             | The web application client's ID             |
+| `VITE_GOOGLE_API_KEY`               | The Picker API key                          |
+| `VITE_GOOGLE_APP_ID`                | The project number                          |
+| `VITE_GOOGLE_DESKTOP_CLIENT_ID`     | The desktop app client's ID                 |
+| `VITE_GOOGLE_DESKTOP_CLIENT_SECRET` | The desktop app client's secret             |
+| `VITE_MICROSOFT_CLIENT_ID`          | The Microsoft app's application (client) ID |
+
+Build again with `npm run build`, or `npm run desktop:dist` for the desktop app, and the services can sign in.
+
+## Privacy
+
+The web app signs in to Google and Microsoft in your browser, so the app's server never holds your tokens. The desktop app keeps its sign-ins in a file only you can read, in its data folder. Disconnecting a service in its sheet signs out; Google's access is also revoked. [Privacy](/docs/privacy) covers the rest.

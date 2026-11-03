@@ -89,6 +89,14 @@ jobs:
           APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
           # Without a certificate, electron-builder does not look for one.
           CSC_IDENTITY_AUTO_DISCOVERY: ${{ runner.os == 'macOS' }}
+          # The OAuth apps for Google Drive and OneDrive (public ids, kept as
+          # repository variables, not secrets). See /docs/storage.
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_GOOGLE_API_KEY: ${{ vars.VITE_GOOGLE_API_KEY }}
+          VITE_GOOGLE_APP_ID: ${{ vars.VITE_GOOGLE_APP_ID }}
+          VITE_GOOGLE_DESKTOP_CLIENT_ID: ${{ vars.VITE_GOOGLE_DESKTOP_CLIENT_ID }}
+          VITE_GOOGLE_DESKTOP_CLIENT_SECRET: ${{ vars.VITE_GOOGLE_DESKTOP_CLIENT_SECRET }}
+          VITE_MICROSOFT_CLIENT_ID: ${{ vars.VITE_MICROSOFT_CLIENT_ID }}
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ runner.os }}
