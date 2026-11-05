@@ -30,6 +30,8 @@ interface NotebookDialogProps {
   onRemoveFile?: (file: File) => void;
   /** Saves; the dialog shows a spinner until it settles and closes after. */
   onSubmit: (details: NotebookDetails) => Promise<void>;
+  /** Other wording, for a vault: the same name, icon and colour. */
+  labels?: { title: string; description?: string; submit: string; placeholder: string };
 }
 
 /**
@@ -40,12 +42,21 @@ interface NotebookDialogProps {
 export function NotebookDialog({ open, onOpenChange, mode, ...props }: NotebookDialogProps) {
   const { t } = useTranslation("home");
   const { t: tCommon } = useTranslation();
+  const labels = props.labels;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Dialog.Content size="md" closeLabel={tCommon("actions.close")}>
         <Dialog.Header
-          title={mode === "create" ? t("dialog.createTitle") : t("dialog.editTitle")}
-          description={mode === "create" ? t("dialog.createDescription") : undefined}
+          title={
+            labels?.title ?? (mode === "create" ? t("dialog.createTitle") : t("dialog.editTitle"))
+          }
+          description={
+            labels
+              ? labels.description
+              : mode === "create"
+                ? t("dialog.createDescription")
+                : undefined
+          }
         />
         {/* Mounted only while open, so each opening starts from `initial`. */}
         <NotebookForm mode={mode} {...props} onDone={() => onOpenChange(false)} />
@@ -62,6 +73,7 @@ function NotebookForm({
   onRemoveFile,
   onSubmit,
   onDone,
+  labels,
 }: Omit<NotebookDialogProps, "open" | "onOpenChange"> & { onDone: () => void }) {
   const { t } = useTranslation("home");
   const { t: tCommon } = useTranslation();
@@ -74,7 +86,8 @@ function NotebookForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // A new notebook may stay untitled; an edited one keeps a name.
-  const trimmed = title.trim() || (mode === "create" ? t("untitled") : "");
+  const placeholder = labels?.placeholder ?? t("untitled");
+  const trimmed = title.trim() || (mode === "create" ? placeholder : "");
   const look = itemColor(color);
 
   const top = "";
@@ -130,7 +143,7 @@ function NotebookForm({
                 <Input
                   id={nameId}
                   value={title}
-                  placeholder={t("untitled")}
+                  placeholder={placeholder}
                   onChange={(event) => setTitle(event.target.value)}
                   autoFocus
                   onFocus={(event) => event.target.select()}
@@ -248,7 +261,7 @@ function NotebookForm({
         </Dialog.Close>
         <Button type="submit" form={formId} disabled={!trimmed || busy} aria-busy={busy}>
           {busy ? <Icon icon={Loading03Icon} size={16} className="animate-spin" /> : null}
-          {mode === "create" ? t("dialog.create") : tCommon("actions.save")}
+          {mode === "create" ? (labels?.submit ?? t("dialog.create")) : tCommon("actions.save")}
         </Button>
       </Dialog.Footer>
     </>

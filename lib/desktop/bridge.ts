@@ -20,6 +20,8 @@ export type UpdateState =
 export interface DesktopBridge {
   /** The desktop app's version. */
   version: string;
+  /** The system it runs on (Node's `process.platform`), for shortcut labels. */
+  platform: string;
   db: {
     /** Runs one backend method in the main process, against the SQLite file. */
     call(method: BackendMethod, args: unknown[]): Promise<unknown>;

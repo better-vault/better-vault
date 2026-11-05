@@ -17,6 +17,7 @@ function listen<T>(channel: string, listener: (value: T) => void) {
 
 const bridge: DesktopBridge = {
   version: versionArg?.split("=")[1] ?? "",
+  platform: process.platform,
   db: {
     call: (method, args) => ipcRenderer.invoke("db", method, args),
     onChange: (listener) => listen("db:changed", listener),
