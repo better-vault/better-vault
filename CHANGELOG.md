@@ -13,6 +13,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Added
 
+- Command palette: press ⌘K (Ctrl K on Windows and Linux) or the Search button to search every notebook, source, Studio output, folder and vault, including the text inside PDFs, and jump to the passage. It also runs actions (new notebook, add a source, switch tab, vault or theme) and opens any settings page.
 - Vaults: separate spaces, each with its own notebooks and folders, a name, an icon and a colour. Everything you had is in “My vault”. Backups are format 4 and hold vaults; older backups import into “My vault”.
 - Notebooks page, laid out like a Finder window: a side panel with Recent, All notebooks, pinned notebooks and your vaults; a toolbar with back and forward, an icon or list view and sorting, new notebook, new folder, import and search; and a path bar you can drop notebooks on. Notebooks can be pinned and moved to another vault.
 - Sources: pictures in a PDF are kept with it and shown in the source sheet where their page ends; press one to see it larger. PDFs added before this version show their text only.

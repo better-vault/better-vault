@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CommandPalette } from "@/components/command/command-palette";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <TooltipProvider>
           {/* The page steps back while a sheet is open. */}
           <Sheet.Stage className="h-dvh">{children}</Sheet.Stage>
+          <CommandPalette />
           <Toaster />
           <UpdatesHost />
         </TooltipProvider>

@@ -47,6 +47,8 @@ export interface Backend {
   getSources(ids: string[]): Promise<Source[]>;
   /** A notebook's sources, oldest first. */
   listSources(notebookId: string): Promise<Source[]>;
+  /** Every source of every notebook, for the search index. */
+  listAllSources(): Promise<Source[]>;
   patchSource(id: string, patch: Partial<Source>): Promise<void>;
   patchNotebookSources(notebookId: string, patch: Partial<Source>): Promise<void>;
   /** Deletes a source with its passages. */
@@ -71,6 +73,8 @@ export interface Backend {
   getOutput(id: string): Promise<StudioOutput | undefined>;
   /** A notebook's outputs, newest first. */
   listOutputs(notebookId: string): Promise<StudioOutput[]>;
+  /** Every Studio output of every notebook, for the search index. */
+  listAllOutputs(): Promise<StudioOutput[]>;
   /** Adds an output and moves its notebook to the top. */
   addOutput(output: StudioOutput): Promise<void>;
   patchOutput(id: string, patch: Partial<StudioOutput>): Promise<void>;
@@ -205,6 +209,7 @@ export const backendMethods = [
   "getSource",
   "getSources",
   "listSources",
+  "listAllSources",
   "patchSource",
   "patchNotebookSources",
   "deleteSource",
@@ -217,6 +222,7 @@ export const backendMethods = [
   "deleteConversation",
   "getOutput",
   "listOutputs",
+  "listAllOutputs",
   "addOutput",
   "patchOutput",
   "patchReadyOutput",

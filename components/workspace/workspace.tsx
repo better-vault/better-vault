@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/panelui/button";
@@ -46,8 +46,26 @@ function WorkspaceLayout() {
     closeReader,
     activeTool,
     closeTool,
+    readSource,
+    openOutput,
   } = useWorkspace();
   const { t } = useTranslation();
+  const [params, setParams] = useSearchParams();
+
+  // Links from the command palette: open a source at a passage, an output, a tab or Add source.
+  useEffect(() => {
+    if (params.size === 0) return;
+    const source = params.get("source");
+    const output = params.get("output");
+    const view = params.get("tab");
+    if (source) {
+      setTab("sources");
+      readSource(source, params.get("passage") ?? undefined);
+    } else if (output) openOutput(output);
+    else if (view === "chat" || view === "sources" || view === "studio") setTab(view);
+    if (params.get("add") === "source") setAddSourceOpen(true);
+    setParams({}, { replace: true });
+  }, [params, setParams, setTab, readSource, openOutput, setAddSourceOpen]);
 
   useEffect(() => {
     document.title = `${notebook.title} · ${t("appName")}`;

@@ -296,6 +296,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       );
       return ids.flatMap((id) => found.get(id) ?? []);
     },
+    listAllSources: () => docs<Source>(db.prepare("SELECT doc FROM sources").all()),
     listSources: (notebookId) =>
       docs<Source>(
         db
@@ -360,6 +361,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       }),
 
     getOutput: (id) => get<StudioOutput>("outputs", id),
+    listAllOutputs: () => docs<StudioOutput>(db.prepare("SELECT doc FROM outputs").all()),
     listOutputs: (notebookId) =>
       docs<StudioOutput>(
         db

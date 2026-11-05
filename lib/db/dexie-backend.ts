@@ -82,6 +82,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     getSource: (id) => db.sources.get(id),
     getSources: async (ids) =>
       (await db.sources.bulkGet(ids)).filter((source): source is Source => source !== undefined),
+    listAllSources: () => db.sources.toArray(),
     listSources: (notebookId) =>
       db.sources.where("notebookId").equals(notebookId).sortBy("createdAt"),
     patchSource: async (id, patch) => {
@@ -132,6 +133,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       }),
 
     getOutput: (id) => db.outputs.get(id),
+    listAllOutputs: () => db.outputs.toArray(),
     listOutputs: async (notebookId) =>
       (await db.outputs.where("notebookId").equals(notebookId).sortBy("createdAt")).reverse(),
     addOutput: (output) =>

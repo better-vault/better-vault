@@ -203,6 +203,28 @@ describe.each(backends)("%s store", (name, create) => {
     });
   });
 
+  describe("search", () => {
+    it("lists the sources and outputs of every notebook", async () => {
+      const a = await createNotebook("A");
+      const b = await createNotebook("B");
+      await addSource({ notebookId: a, title: "one", kind: "text", text: "first" });
+      await addSource({ notebookId: b, title: "two", kind: "text", text: "second" });
+      await createOutput({
+        notebookId: b,
+        toolId: "report",
+        title: "Report",
+        options: {},
+        sourceIds: [],
+        model: { provider: "openai", modelId: "m" },
+      });
+      expect((await store().listAllSources()).map((source) => source.title).sort()).toEqual([
+        "one",
+        "two",
+      ]);
+      expect((await store().listAllOutputs()).map((output) => output.title)).toEqual(["Report"]);
+    });
+  });
+
   describe("source pictures", () => {
     it("keeps a PDF's pictures with its source and deletes them with it", async () => {
       const notebookId = await createNotebook("Pictures");

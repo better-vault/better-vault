@@ -56,5 +56,30 @@
     "description": "Your notebooks are safe. Reload the page to carry on.",
     "reload": "Reload",
     "home": "Go to notebooks"
+  },
+  "command": {
+    "label": "Command menu",
+    "placeholder": "Search notebooks, sources, PDFs and settings…",
+    "lead": "to open anywhere",
+    "open": "Open",
+    "empty": "Nothing matches “{{query}}”.",
+    "indexing": "Indexing your notebooks…",
+    "home": "Go to notebooks",
+    "addSource": "Add a source to this notebook",
+    "chat": "Open the chat",
+    "sources": "Open the sources",
+    "studio": "Open the Studio",
+    "theme": "Theme: {{theme}}",
+    "vault": "Switch to {{name}}",
+    "groups": {
+      "recent": "Recent notebooks",
+      "actions": "Actions",
+      "notebooks": "Notebooks",
+      "sources": "Sources",
+      "passages": "In your sources",
+      "outputs": "Studio outputs",
+      "folders": "Folders",
+      "vaults": "Vaults"
+    }
   }
 }

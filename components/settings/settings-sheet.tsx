@@ -8,7 +8,7 @@ import {
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
-import { useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -42,13 +42,44 @@ interface SettingsSheetProps {
   onOpenChange?: (open: boolean) => void;
   /** The button that opens the sheet, with its own content. Default: a round ghost button with the gear. */
   trigger?: ReactElement;
+  /** A page (`appearance`, `providers`, …) to open on top as soon as the sheet opens. */
+  page?: SettingsPage | null;
+}
+
+export const settingsPages = [
+  "account",
+  "providers",
+  "storage",
+  "appearance",
+  "language",
+  "data",
+  "about",
+] as const;
+export type SettingsPage = (typeof settingsPages)[number];
+
+/**
+ * Opens one of the sheet's pages from code: it presses a hidden trigger for
+ * that page, the way a row would be pressed.
+ */
+function OpenPage({ page }: { page: SettingsPage }) {
+  const button = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => button.current?.click(), 0);
+    return () => clearTimeout(timer);
+  }, [page]);
+  return (
+    <Sheet.Trigger
+      to={page}
+      render={<button ref={button} type="button" hidden aria-hidden tabIndex={-1} />}
+    />
+  );
 }
 
 /**
  * General settings. Each row opens a sheet of its own on top. A choice that
  * needs a dialog closes the sheets first.
  */
-export function SettingsSheet({ open: openProp, onOpenChange, trigger }: SettingsSheetProps) {
+export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: SettingsSheetProps) {
   const { t, i18n } = useTranslation("settings");
   const navigate = useNavigate();
   const [ownOpen, setOwnOpen] = useState(false);
@@ -88,6 +119,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
         )}
         <Sheet.Content closeLabel={tCommon("actions.close")}>
           <Sheet.Header title={t("title")} description={t("description")} />
+          {page ? <OpenPage page={page} /> : null}
           <Sheet.Body>
             <nav className="-mx-2 flex flex-col gap-0.5">
               <SettingsRow
