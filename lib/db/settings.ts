@@ -25,6 +25,8 @@ export interface ProviderSettings {
   chatgpt: ChatGPTAccountLabel | null;
   /** How much its models think before answering, in chat and in the Studio. */
   effort: Effort;
+  /** Each model's context window in tokens, where the provider's list said. */
+  contextTokens: Record<string, number>;
 }
 
 export interface ChatGPTAccountLabel {
@@ -36,6 +38,8 @@ export interface AppSettings {
   providers: Record<ProviderId, ProviderSettings>;
   /** The model chosen in the prompt bar. */
   model: ModelRef | null;
+  /** Models starred in the model picker, as `provider:modelId`. */
+  favoriteModels: string[];
 }
 
 const SETTINGS_KEY = "app";
@@ -51,11 +55,13 @@ export function defaultSettings(): AppSettings {
       contextChars: null,
       chatgpt: null,
       effort: "provider-default",
+      contextTokens: {},
     } satisfies ProviderSettings,
   ]);
   return {
     providers: Object.fromEntries(entries) as Record<ProviderId, ProviderSettings>,
     model: null,
+    favoriteModels: [],
   };
 }
 
@@ -67,6 +73,7 @@ function withDefaults(saved: Partial<AppSettings> | undefined): AppSettings {
     base.providers[id] = { ...base.providers[id], ...saved.providers?.[id] };
   }
   base.model = saved.model ?? null;
+  base.favoriteModels = saved.favoriteModels ?? [];
   return base;
 }
 
@@ -150,6 +157,18 @@ export function speechCredentialsFrom(
 export function effortFor(settings: AppSettings, id: ProviderId): Effort {
   const effort = settings.providers[id].effort;
   return providers[id].efforts.includes(effort) ? effort : "provider-default";
+}
+
+/**
+ * How many tokens a model reads at once: the provider's figure when its list
+ * gave one, else the catalog's estimate (for local models, from the context
+ * size the user set).
+ */
+export function contextTokensFor(settings: AppSettings, ref: ModelRef): number {
+  const listed = settings.providers[ref.provider].contextTokens[ref.modelId];
+  if (listed) return listed;
+  if (providers[ref.provider].local) return Math.round(contextCharsFor(settings, ref.provider) / 4);
+  return providers[ref.provider].contextTokens;
 }
 
 export function contextCharsFor(settings: AppSettings, id: ProviderId): number {

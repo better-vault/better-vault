@@ -12,9 +12,10 @@ import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { ProviderIcon } from "@/components/provider-icon";
 import { Menu } from "@/components/panelui/menu";
+import { ModelPicker } from "@/components/panelui/model-picker";
 import { Prompt, type PromptState } from "@/components/panelui/prompt";
 import { useWorkspace } from "@/components/workspace/workspace-context";
-import { modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
+import { chatProviderIds, modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
 import type { ChatMode } from "@/lib/chat/types";
 import {
   activeModel,
@@ -25,6 +26,8 @@ import {
 } from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
 import { useChatSession } from "./chat-provider";
+import { EffortMenu } from "./effort-menu";
+import { UsageRing } from "./usage-ring";
 
 /** The prompt at the bottom of the notebook: question, mode, model and send. */
 export function PromptBar() {
@@ -47,15 +50,31 @@ export function PromptBar() {
   const needsSource = mode === "sources" && selected === 0;
   const status: PromptState = chat.status === "ready" ? "idle" : chat.status;
 
-  const modelItems = models.map((ref) => ({
-    value: modelKey(ref),
-    label: ref.modelId,
-    icon: <ProviderIcon provider={ref.provider} size={16} />,
-    description:
-      settings && usesChatGPT(settings, ref.provider)
-        ? `${providers[ref.provider].name} · ${tSettings("chatgpt.planLabel")}`
-        : providers[ref.provider].name,
-  }));
+  const modelItems = models.map((ref) => {
+    const info = providers[ref.provider];
+    const listed = settings?.providers[ref.provider].contextTokens[ref.modelId];
+    return {
+      value: modelKey(ref),
+      label: ref.modelId,
+      provider: ref.provider,
+      note:
+        settings && usesChatGPT(settings, ref.provider)
+          ? tSettings("chatgpt.planLabel")
+          : undefined,
+      contextWindow: listed,
+      tags: [
+        ...(info.webSearch ? [t("modelTags.web")] : []),
+        ...(info.local ? [t("modelTags.local")] : []),
+      ],
+    };
+  });
+  const pickerProviders = chatProviderIds
+    .filter((id) => models.some((ref) => ref.provider === id))
+    .map((id) => ({
+      value: id,
+      label: providers[id].name,
+      icon: <ProviderIcon provider={id} size={20} />,
+    }));
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/80 to-transparent px-3 pt-8 pb-3 sm:px-4 sm:pb-4">
@@ -133,28 +152,63 @@ export function PromptBar() {
                     },
                   ]}
                 />
-                {modelItems.length > 0 && model ? (
-                  <Prompt.Model
-                    items={modelItems}
-                    value={modelKey(model)}
-                    variant="ghost"
-                    label={t("model")}
-                    className="max-w-48"
-                    onValueChange={(key) => {
-                      const next = parseModelKey(key);
-                      if (next) void updateSettings((saved) => void (saved.model = next));
-                    }}
-                  />
+                {modelItems.length > 0 && model && settings ? (
+                  <>
+                    <ModelPicker
+                      variant="rail"
+                      items={modelItems}
+                      providers={pickerProviders}
+                      value={modelKey(model)}
+                      label={t("model")}
+                      favorites={settings.favoriteModels}
+                      onFavoritesChange={(favorites) =>
+                        void updateSettings((saved) => void (saved.favoriteModels = favorites))
+                      }
+                      onValueChange={(key) => {
+                        const next = parseModelKey(key);
+                        if (next) void updateSettings((saved) => void (saved.model = next));
+                      }}
+                    >
+                      <ModelPicker.Trigger
+                        appearance="ghost"
+                        className="max-w-48"
+                        placeholder={t("chooseModel")}
+                      />
+                      <ModelPicker.Content
+                        side="top"
+                        placeholder={t("searchModels")}
+                        emptyText={t("noModels")}
+                      />
+                    </ModelPicker>
+                    <EffortMenu settings={settings} provider={model.provider} />
+                  </>
                 ) : null}
               </Prompt.Tools>
               <Prompt.Submit sendLabel={t("send")} stopLabel={t("stop")} />
             </Prompt.Footer>
           </Prompt.Field>
-          <Prompt.Context open={sources !== undefined && sources.length > 0 && mode === "sources"}>
-            <Prompt.ContextItem onSelect={() => setTab("sources")}>
-              <Icon icon={Book02Icon} size={14} />
-              {tCommon("sourceCount", { count: selected })}
-            </Prompt.ContextItem>
+          <Prompt.Context
+            open={
+              (sources !== undefined && sources.length > 0 && mode === "sources") ||
+              (model !== null && chat.messages.length > 0)
+            }
+          >
+            {mode === "sources" && sources && sources.length > 0 ? (
+              <Prompt.ContextItem onSelect={() => setTab("sources")}>
+                <Icon icon={Book02Icon} size={14} />
+                {tCommon("sourceCount", { count: selected })}
+              </Prompt.ContextItem>
+            ) : null}
+            {model && settings ? (
+              <span className="ms-auto flex items-center">
+                <UsageRing
+                  messages={chat.messages}
+                  settings={settings}
+                  model={model}
+                  busy={chat.status === "streaming" || chat.status === "submitted"}
+                />
+              </span>
+            ) : null}
           </Prompt.Context>
         </Prompt>
       </div>

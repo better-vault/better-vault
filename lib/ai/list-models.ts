@@ -36,10 +36,26 @@ const NOT_CHAT =
 
 const byNewest = (a: string, b: string) => b.localeCompare(a, "en", { numeric: true });
 
-/** Lists the chat models a provider offers to these credentials. */
+export interface ModelList {
+  models: string[];
+  /** Each model's context window in tokens, where the provider says. */
+  contextTokens: Record<string, number>;
+}
+
+/** Lists the chat models a provider offers to these credentials, with their context windows. */
 export async function listModels(
   provider: ProviderId,
   credentials: ProviderCredentials,
+): Promise<ModelList> {
+  const contextTokens: Record<string, number> = {};
+  const models = await listModelIds(provider, credentials, contextTokens);
+  return { models, contextTokens };
+}
+
+async function listModelIds(
+  provider: ProviderId,
+  credentials: ProviderCredentials,
+  contextTokens: Record<string, number>,
 ): Promise<string[]> {
   const info = providers[provider];
   if (provider === "openai" && credentials.chatgpt) {
@@ -64,21 +80,26 @@ export async function listModels(
         .sort(byNewest);
     }
     case "anthropic": {
-      const body = await getJson<{ data: { id: string }[] }>(
+      const body = await getJson<{ data: { id: string; max_input_tokens?: number }[] }>(
         "https://api.anthropic.com/v1/models?limit=100",
         {
           "x-api-key": credentials.apiKey ?? "",
           "anthropic-version": "2023-06-01",
         },
       );
+      for (const model of body.data)
+        if (model.max_input_tokens) contextTokens[model.id] = model.max_input_tokens;
       return body.data.map((model) => model.id);
     }
     case "google": {
       const body = await getJson<{
-        models?: { name: string; supportedGenerationMethods?: string[] }[];
+        models?: { name: string; supportedGenerationMethods?: string[]; inputTokenLimit?: number }[];
       }>("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         "x-goog-api-key": credentials.apiKey ?? "",
       });
+      for (const model of body.models ?? [])
+        if (model.inputTokenLimit)
+          contextTokens[model.name.replace(/^models\//, "")] = model.inputTokenLimit;
       return (body.models ?? [])
         .filter((model) => model.supportedGenerationMethods?.includes("generateContent"))
         .map((model) => model.name.replace(/^models\//, ""))

@@ -4,6 +4,7 @@ import {
   stepCountIs,
   streamText,
   toUIMessageStream,
+  type LanguageModelUsage,
 } from "ai";
 import { z } from "zod";
 import { providers } from "@/lib/ai/catalog";
@@ -11,7 +12,7 @@ import { describeError } from "@/lib/ai/errors";
 import { chatSystemPrompt } from "@/lib/ai/prompts";
 import { createLanguageModel, createWebSearchTools } from "@/lib/ai/providers";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
-import type { ChatMessage, ChatMessageMetadata } from "@/lib/chat/types";
+import type { ChatMessage, ChatMessageMetadata, TokenUsage } from "@/lib/chat/types";
 import { toPassageRefs, stripCitations, type Passage } from "@/lib/grounding/passages";
 
 const passageSchema = z.object({
@@ -48,6 +49,20 @@ function withoutOldCitations(messages: ChatMessage[]): ChatMessage[] {
   );
 }
 
+function textLength(message: ChatMessage): number {
+  return message.parts.reduce((sum, part) => sum + (part.type === "text" ? part.text.length : 0), 0);
+}
+
+/** The provider's count, without the parts that are unknown. */
+function tokenUsage(usage: LanguageModelUsage): TokenUsage {
+  return {
+    inputTokens: usage.inputTokens ?? 0,
+    outputTokens: usage.outputTokens ?? 0,
+    reasoningTokens: usage.outputTokenDetails.reasoningTokens,
+    cachedInputTokens: usage.inputTokenDetails.cacheReadTokens,
+  };
+}
+
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
@@ -70,9 +85,11 @@ export async function POST(request: Request) {
   }
 
   const tools = mode === "web" ? createWebSearchTools(model, credentials) : undefined;
+  const system = chatSystemPrompt(mode, passages);
+  const instructions = chatSystemPrompt(mode, []).length;
   const result = streamText({
     model: languageModel,
-    system: chatSystemPrompt(mode, passages),
+    system,
     messages: await convertToModelMessages(withoutOldCitations(messages), {
       ignoreIncompleteToolCalls: true,
     }),
@@ -86,6 +103,11 @@ export async function POST(request: Request) {
     mode,
     model,
     passages: toPassageRefs(passages),
+    prompt: {
+      instructions,
+      sources: Math.max(0, system.length - instructions),
+      conversation: messages.reduce((sum, message) => sum + textLength(message), 0),
+    },
   };
 
   return createUIMessageStreamResponse({
@@ -94,7 +116,11 @@ export async function POST(request: Request) {
       tools,
       originalMessages: messages,
       sendSources: true,
-      messageMetadata: ({ part }) => (part.type === "start" ? metadata : undefined),
+      messageMetadata: ({ part }): ChatMessageMetadata | undefined => {
+        if (part.type === "start") return metadata;
+        if (part.type === "finish") return { usage: tokenUsage(part.totalUsage) };
+        return undefined;
+      },
       onError: describeError,
     }),
   });

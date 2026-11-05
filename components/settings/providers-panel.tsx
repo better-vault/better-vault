@@ -173,9 +173,13 @@ function ProviderForm({
                 : { baseURL: baseURL.trim() },
         }),
       });
-      const body = (await response.json()) as { models?: string[]; error?: string };
+      const body = (await response.json()) as {
+        models?: string[];
+        contextTokens?: Record<string, number>;
+        error?: string;
+      };
       if (!response.ok || !body.models) throw new Error(body.error ?? response.statusText);
-      await updateProvider(id, { models: body.models });
+      await updateProvider(id, { models: body.models, contextTokens: body.contextTokens ?? {} });
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : String(error));
     } finally {

@@ -9,6 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.
 - Settings → AI providers: an Effort level for each provider (Default, None, Low, Medium, High, Max and more where the provider has them), used in chat and in the Studio.
+- Chat: a new model picker, with providers in a rail, search and starred models; an Effort switch beside it; and a usage ring under the prompt showing how much of the model's context the last answer used, and the tokens sent and received in the chat.
 
 ## [0.5.0] - 2026-11-03
 

@@ -86,5 +86,29 @@
       "body": "“{{title}}” and its answers will be removed from this browser. This can’t be undone.",
       "confirm": "Delete chat"
     }
+  },
+  "chooseModel": "Choose a model",
+  "searchModels": "Search models…",
+  "noModels": "No models match",
+  "modelTags": {
+    "web": "Web search",
+    "local": "On this device"
+  },
+  "usage": {
+    "label": "Context",
+    "context": "Context window",
+    "tokens": "tokens",
+    "instructions": "Instructions",
+    "sources": "Sources",
+    "conversation": "Conversation",
+    "prompt": "Prompt",
+    "answer": "Answer",
+    "conversationTitle": "This chat",
+    "sent": "Sent",
+    "received": "Received",
+    "reasoning_one": "{{tokens}} token of thinking in the last answer",
+    "reasoning_other": "{{tokens}} tokens of thinking in the last answer",
+    "estimate": "At the last answer. The provider counts the tokens; the split between parts is estimated.",
+    "empty": "Ask a question to see how much of the model's context it uses."
   }
 }

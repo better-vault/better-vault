@@ -59,6 +59,11 @@ export interface ProviderInfo {
   /** How much source text, in characters, to send as context by default. */
   contextChars: number;
   /**
+   * A typical context window of its models, in tokens, for the usage ring
+   * until the provider's model list gives the real one.
+   */
+  contextTokens: number;
+  /**
    * Models that draw pictures (infographics), best first, from the image
    * model id unions in the installed `@ai-sdk/*` packages. Empty when the
    * provider has none.
@@ -98,6 +103,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     keyUrl: "https://platform.openai.com/api-keys",
     suggestedModels: ["gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna", "gpt-5.5", "gpt-5.4-mini"],
     contextChars: 400_000,
+    contextTokens: 400_000,
     imageModels: [
       "gpt-image-2",
       "gpt-image-2.5-sunburst",
@@ -124,6 +130,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
       "claude-fable-5-1",
     ],
     contextChars: 400_000,
+    contextTokens: 200_000,
     imageModels: [],
     efforts: ["provider-default", "low", "medium", "high", "xhigh", "max"],
   },
@@ -142,6 +149,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
       "gemini-flash-latest",
     ],
     contextChars: 400_000,
+    contextTokens: 1_048_576,
     imageModels: [
       "gemini-3-pro-image-preview",
       "gemini-nano-banana-2.1",
@@ -163,6 +171,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     // Taken from OpenCode's model list (https://opencode.ai/inference/v1/models).
     suggestedModels: ["claude-sonnet-5-5", "gpt-6-luna", "gemini-3.8-flash", "deepseek-v4.1-flash"],
     contextChars: 300_000,
+    contextTokens: 200_000,
     imageModels: [],
     efforts: ["provider-default", "none", "low", "medium", "high"],
   },
@@ -176,6 +185,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     webSearch: false,
     suggestedModels: [],
     contextChars: 12_000,
+    contextTokens: 8_192,
     imageModels: [],
     efforts: ["provider-default", "none", "low", "medium", "high"],
   },
@@ -189,6 +199,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     webSearch: false,
     suggestedModels: [],
     contextChars: 12_000,
+    contextTokens: 8_192,
     imageModels: [],
     efforts: ["provider-default", "none", "low", "medium", "high"],
   },
@@ -204,6 +215,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     // From the model id union in the installed @ai-sdk/deepseek.
     suggestedModels: ["deepseek-v4-pro", "deepseek-v4-flash"],
     contextChars: 400_000,
+    contextTokens: 128_000,
     imageModels: [],
     // DeepSeek V4 thinks at high or max; the SDK maps the other levels onto those.
     efforts: ["provider-default", "none", "low", "high", "max"],
@@ -219,6 +231,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     // Speech models, from the model id union in the installed @ai-sdk/elevenlabs.
     suggestedModels: ["eleven_v3", "eleven_v4"],
     contextChars: 0,
+    contextTokens: 0,
     imageModels: [],
     efforts: [],
   },

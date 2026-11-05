@@ -26,6 +26,23 @@ export interface ChatMessageMetadata {
   model?: ModelRef;
   /** The numbered passages the answer could cite. */
   passages?: PassageRef[];
+  /** What the request was made of, in characters, to split the token count by. */
+  prompt?: PromptSize;
+  /** The tokens the answer took, as the provider counted them. */
+  usage?: TokenUsage;
+}
+
+export interface PromptSize {
+  instructions: number;
+  sources: number;
+  conversation: number;
+}
+
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens?: number;
+  cachedInputTokens?: number;
 }
 
 export type ChatMessage = UIMessage<ChatMessageMetadata>;

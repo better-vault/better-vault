@@ -14,8 +14,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   try {
-    const models = await listModels(parsed.data.provider, parsed.data.credentials);
-    return Response.json({ models });
+    return Response.json(await listModels(parsed.data.provider, parsed.data.credentials));
   } catch (error) {
     return Response.json({ error: describeError(error) }, { status: 502 });
   }
