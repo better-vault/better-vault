@@ -7,6 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
@@ -14,6 +15,7 @@ import { StorageLogo } from "@/components/settings/storage-panel";
 import { formatRelativeTime } from "@/lib/format";
 import { storageIds, storages, type CloudFile, type StorageId } from "@/lib/storage/catalog";
 import { storageClient } from "@/lib/storage/clients";
+import { canExport, googlePicker, isGoogleDocument } from "@/lib/storage/clients/google-drive";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { cn } from "@/lib/utils";
 
@@ -108,6 +110,11 @@ function ServiceFiles({
   const usesPicker = mode === "sources" && Boolean(client?.pick);
   const folder = path.at(-1)?.id;
 
+  // Loads Google's Picker and sign-in now, so the click can open the sign-in popup at once.
+  useEffect(() => {
+    if (usesPicker && service === "google-drive") void googlePicker.prepare().catch(() => undefined);
+  }, [usesPicker, service]);
+
   useEffect(() => {
     if (!client || usesPicker) return;
     let live = true;
@@ -131,10 +138,14 @@ function ServiceFiles({
   const allowed = (file: CloudFile) => {
     if (file.folder) return true;
     if (mode === "backups") return file.name.endsWith(".json");
-    // Google's own documents are exported as text.
-    if (file.mime?.startsWith("application/vnd.google-apps.")) return true;
+    // Google's own documents are exported as text, when they can be.
+    if (isGoogleDocument(file.mime))
+      return canExport(file.mime) || file.mime === "application/vnd.google-apps.shortcut";
     const extension = file.name.toLowerCase().split(".").pop() ?? "";
-    return !accept || accept.includes(extension);
+    if (!accept || accept.includes(extension)) return true;
+    // A file named without its extension is judged by its type.
+    if (file.mime === "application/pdf") return accept.includes("pdf");
+    return Boolean(file.mime?.startsWith("text/")) && accept.includes("txt");
   };
 
   if (usesPicker)
@@ -148,7 +159,17 @@ function ServiceFiles({
             setPicking(true);
             setError(null);
             try {
-              const picked = (await client!.pick!()).filter(allowed);
+              const all = await client!.pick!();
+              const picked = all.filter(allowed);
+              const skipped = all.filter((file) => !allowed(file));
+              // A toast, because the dialog closes once the other files are added.
+              if (skipped.length > 0)
+                toast.warning(
+                  t("storage.browser.skipped", {
+                    count: skipped.length,
+                    names: skipped.map((file) => file.name).join(", "),
+                  }),
+                );
               if (picked.length > 0) await onChoose(picked);
             } catch (failure) {
               setError(failure instanceof Error ? failure.message : String(failure));

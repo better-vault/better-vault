@@ -1,5 +1,6 @@
 import { googleScopes, microsoftScopes, oauthApps } from "./apps";
 import type { StorageAccount } from "./desktop-oauth";
+import { loadScript } from "./load-script";
 import { updateStorage, getStorageSettings } from "./settings";
 
 /**
@@ -9,18 +10,6 @@ import { updateStorage, getStorageSettings } from "./settings";
  * the authorization code flow with PKCE in a popup; its rotating refresh
  * token is kept with the storage settings on this device.
  */
-
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Could not load the sign-in script."));
-    document.head.appendChild(script);
-  });
-}
 
 /* ---------------------------------- Google --------------------------------- */
 
@@ -46,11 +35,32 @@ declare global {
 }
 
 let googleToken: { value: string; expiresAt: number } | null = null;
+/** A token request already waiting for the popup; later callers share it. */
+let googleAsking: Promise<string> | null = null;
+
+const googleSignInScript = "https://accounts.google.com/gsi/client";
+
+/** Loads Google's sign-in ahead of a click, so the click can open its popup at once. */
+export function prepareGoogleSignIn(): Promise<void> {
+  return loadScript(googleSignInScript, "Could not load the sign-in script.");
+}
 
 /** A Google access token; asks the person (a small popup) when there is none. */
 export async function googleAccessToken(prompt: "" | "consent" = ""): Promise<string> {
-  if (googleToken && googleToken.expiresAt - Date.now() > 60_000) return googleToken.value;
-  await loadScript("https://accounts.google.com/gsi/client");
+  if (prompt === "" && googleToken && googleToken.expiresAt - Date.now() > 60_000)
+    return googleToken.value;
+  if (googleAsking) return googleAsking;
+  googleAsking = askGoogle(prompt).finally(() => (googleAsking = null));
+  return googleAsking;
+}
+
+/** Drops a token Google refused, so the next request asks for a new one. */
+export function dropGoogleToken() {
+  googleToken = null;
+}
+
+async function askGoogle(prompt: "" | "consent"): Promise<string> {
+  await prepareGoogleSignIn();
   const accounts = window.google?.accounts;
   if (!accounts) throw new Error("Google sign-in didn't load.");
   return new Promise((resolve, reject) => {

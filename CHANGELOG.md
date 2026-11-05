@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+
+- Google Drive: files picked in Google's Picker sometimes never appeared as sources. The Add source dialog no longer closes or pulls focus while the Picker is open, a refused or expired token is renewed once, the Picker reports its errors instead of waiting forever, scripts that failed to load are tried again, shortcuts open their file, files named without an extension are read by their type, and files that can't be read are named in a message.
+
 ### Added
 
 - Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.

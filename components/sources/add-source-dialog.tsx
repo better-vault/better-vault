@@ -5,7 +5,7 @@ import {
   Loading03Icon,
   TextIcon,
 } from "@hugeicons/core-free-icons";
-import { useId, useRef, useState, type DragEvent } from "react";
+import { useId, useRef, useState, useSyncExternalStore, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Field } from "@/components/common/field";
@@ -25,6 +25,7 @@ import {
 import { CloudBrowser } from "@/components/storage/cloud-browser";
 import { storageIds } from "@/lib/storage/catalog";
 import { storageClient } from "@/lib/storage/clients";
+import { googlePicker } from "@/lib/storage/clients/google-drive";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { cn } from "@/lib/utils";
 
@@ -43,8 +44,15 @@ interface AddSourceDialogProps {
 export function AddSourceDialog({ notebookId, open, onOpenChange }: AddSourceDialogProps) {
   const { t } = useTranslation("sources");
   const { t: tCommon } = useTranslation();
+  // Google's Picker opens over the dialog, outside it: a press or Escape there must not close it.
+  const picking = useSyncExternalStore(googlePicker.subscribe, googlePicker.isOpen, () => false);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => (next || !googlePicker.isOpen() ? onOpenChange(next) : undefined)}
+      dismissible={!picking}
+      modal={!picking}
+    >
       <Dialog.Content size="lg" closeLabel={tCommon("actions.close")}>
         <Dialog.Header title={t("addDialog.title")} description={t("addDialog.description")} />
         <AddSourceForm notebookId={notebookId} onDone={() => onOpenChange(false)} />

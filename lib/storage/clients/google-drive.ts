@@ -1,6 +1,8 @@
 import { desktopBridge } from "@/lib/desktop/bridge";
 import { oauthApps } from "../apps";
-import { accessToken } from "../auth";
+import { accessToken, dropAccessToken } from "../auth";
+import { loadScript } from "../load-script";
+import { prepareGoogleSignIn } from "../web-oauth";
 import type { CloudFile, StorageFolder } from "../catalog";
 import type { StorageClient } from "./types";
 
@@ -11,6 +13,7 @@ import type { StorageClient } from "./types";
  */
 const api = "https://www.googleapis.com/drive/v3";
 const FOLDER = "application/vnd.google-apps.folder";
+const SHORTCUT = "application/vnd.google-apps.shortcut";
 
 /** Google's own documents are exported to a file better-vault can read. */
 const exports: Record<string, { mime: string; extension: string }> = {
@@ -19,12 +22,24 @@ const exports: Record<string, { mime: string; extension: string }> = {
   "application/vnd.google-apps.spreadsheet": { mime: "text/csv", extension: "csv" },
 };
 
-async function drive(path: string, init: RequestInit = {}): Promise<Response> {
+/** Whether a file is one of Google's own documents, which have no bytes of their own. */
+export const isGoogleDocument = (mime?: string) =>
+  Boolean(mime?.startsWith("application/vnd.google-apps.")) && mime !== FOLDER;
+
+/** Whether better-vault can turn this Google document into a file. */
+export const canExport = (mime?: string) => Boolean(mime && exports[mime]);
+
+async function drive(path: string, init: RequestInit = {}, retried = false): Promise<Response> {
   const token = await accessToken("google");
   const response = await fetch(path.startsWith("http") ? path : `${api}${path}`, {
     ...init,
     headers: { ...init.headers, authorization: `Bearer ${token}` },
   });
+  // A token can run out or be revoked between requests: get a new one, once.
+  if (response.status === 401 && !retried) {
+    dropAccessToken("google");
+    return drive(path, init, true);
+  }
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as { error?: { message?: string } };
     throw new Error(body.error?.message ?? `Google Drive answered ${response.status}.`);
@@ -83,7 +98,7 @@ interface PickerApi {
     setSelectFolderEnabled(on: boolean): unknown;
   };
   Feature: { MULTISELECT_ENABLED: string };
-  Action: { PICKED: string; CANCEL: string };
+  Action: { PICKED: string; CANCEL: string; ERROR?: string };
 }
 interface PickerBuilder {
   addView(view: unknown): PickerBuilder;
@@ -96,18 +111,79 @@ interface PickerBuilder {
   build(): { setVisible(on: boolean): void };
 }
 
-async function loadPicker(): Promise<PickerApi> {
-  if (!document.querySelector('script[src="https://apis.google.com/js/api.js"]')) {
+let pickerLoad: Promise<PickerApi> | null = null;
+
+/** Loads the Picker once; a failed load is tried again next time. */
+function loadPicker(): Promise<PickerApi> {
+  pickerLoad ??= (async () => {
+    await loadScript("https://apis.google.com/js/api.js", "Could not load the Google Picker.");
     await new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = "https://apis.google.com/js/api.js";
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Could not load the Google Picker."));
-      document.head.appendChild(script);
+      const timer = setTimeout(
+        () => reject(new Error("The Google Picker took too long to load.")),
+        20_000,
+      );
+      window.gapi!.load("picker", () => {
+        clearTimeout(timer);
+        resolve();
+      });
     });
-  }
-  await new Promise<void>((resolve) => window.gapi!.load("picker", resolve));
-  return (window.google as unknown as { picker: PickerApi }).picker;
+    return (window.google as unknown as { picker: PickerApi }).picker;
+  })().catch((error: unknown) => {
+    pickerLoad = null;
+    throw error;
+  });
+  return pickerLoad;
+}
+
+/* Whether the Picker is on screen, so a dialog under it can stay open. */
+let pickerOpen = false;
+const pickerListeners = new Set<() => void>();
+function setPickerOpen(open: boolean) {
+  pickerOpen = open;
+  for (const listener of pickerListeners) listener();
+}
+export const googlePicker = {
+  isOpen: () => pickerOpen,
+  subscribe(listener: () => void) {
+    pickerListeners.add(listener);
+    return () => pickerListeners.delete(listener);
+  },
+  /**
+   * Loads the Picker and Google's sign-in before the click, so the click
+   * opens the sign-in popup straight away (a popup opened after slow awaits
+   * is blocked by the browser).
+   */
+  prepare: () => Promise.all([loadPicker(), prepareGoogleSignIn()]).then(() => undefined),
+};
+
+/** A shortcut's target, which is the file that can be read. */
+async function resolveShortcut(file: CloudFile): Promise<CloudFile> {
+  if (file.mime !== SHORTCUT) return file;
+  const body = (await (
+    await drive(
+      `/files/${encodeURIComponent(file.id)}?fields=shortcutDetails(targetId,targetMimeType)`,
+    )
+  ).json()) as { shortcutDetails?: { targetId?: string; targetMimeType?: string } };
+  const target = body.shortcutDetails;
+  if (!target?.targetId)
+    throw new Error(`“${file.name}” is a shortcut to a file that can't be opened.`);
+  return { ...file, id: target.targetId, mime: target.targetMimeType };
+}
+
+/** Adds the extension a file's type implies when its name has none, so it is read as that type. */
+function withExtension(name: string, mime: string): string {
+  if (/\.[a-z0-9]{1,5}$/i.test(name)) return name;
+  const extension =
+    mime === "application/pdf"
+      ? "pdf"
+      : mime === "text/markdown"
+        ? "md"
+        : mime === "text/csv"
+          ? "csv"
+          : mime.startsWith("text/")
+            ? "txt"
+            : "";
+  return extension ? `${name}.${extension}` : name;
 }
 
 export function googleDriveClient(): StorageClient {
@@ -116,32 +192,40 @@ export function googleDriveClient(): StorageClient {
     pick: desktopBridge()
       ? undefined
       : async () => {
+          // The token first: it may open Google's popup, which must follow the click closely.
           const token = await accessToken("google");
           const picker = await loadPicker();
-          return new Promise<CloudFile[]>((resolve) => {
-            const view = new picker.DocsView();
-            view.setIncludeFolders(true);
-            new picker.PickerBuilder()
-              .addView(view)
-              .enableFeature(picker.Feature.MULTISELECT_ENABLED)
-              .setOAuthToken(token)
-              .setDeveloperKey(oauthApps.google.apiKey)
-              .setAppId(oauthApps.google.appId)
-              .setOrigin(location.origin)
-              .setCallback((data) => {
-                if (data.action === picker.Action.PICKED)
-                  resolve(
-                    (data.docs ?? []).map((doc) => ({
-                      id: doc.id,
-                      name: doc.name,
-                      mime: doc.mimeType,
-                    })),
-                  );
-                else if (data.action === picker.Action.CANCEL) resolve([]);
-              })
-              .build()
-              .setVisible(true);
-          });
+          setPickerOpen(true);
+          try {
+            return await new Promise<CloudFile[]>((resolve, reject) => {
+              const view = new picker.DocsView();
+              view.setIncludeFolders(true);
+              new picker.PickerBuilder()
+                .addView(view)
+                .enableFeature(picker.Feature.MULTISELECT_ENABLED)
+                .setOAuthToken(token)
+                .setDeveloperKey(oauthApps.google.apiKey)
+                .setAppId(oauthApps.google.appId)
+                .setOrigin(location.origin)
+                .setCallback((data) => {
+                  if (data.action === picker.Action.PICKED)
+                    resolve(
+                      (data.docs ?? []).map((doc) => ({
+                        id: doc.id,
+                        name: doc.name,
+                        mime: doc.mimeType,
+                      })),
+                    );
+                  else if (data.action === picker.Action.CANCEL) resolve([]);
+                  else if (data.action === (picker.Action.ERROR ?? "error"))
+                    reject(new Error("The Google Picker could not open your files. Try again."));
+                })
+                .build()
+                .setVisible(true);
+            });
+          } finally {
+            setPickerOpen(false);
+          }
         },
     // On desktop, Drive shows what better-vault can open: what it made or was shown before.
     browse: desktopBridge()
@@ -163,7 +247,12 @@ export function googleDriveClient(): StorageClient {
       ).json()) as { files: DriveFile[] };
       return body.files.map(toCloud);
     },
-    download: async (file) => {
+    download: async (picked) => {
+      const file = await resolveShortcut(picked);
+      if (isGoogleDocument(file.mime) && !canExport(file.mime))
+        throw new Error(
+          `“${file.name}” is a kind of Google file better-vault can't read. Docs, Slides and Sheets work.`,
+        );
       const exported = file.mime ? exports[file.mime] : undefined;
       const response = exported
         ? await drive(
@@ -171,8 +260,9 @@ export function googleDriveClient(): StorageClient {
           )
         : await drive(`/files/${encodeURIComponent(file.id)}?alt=media`);
       const blob = await response.blob();
-      const name = exported ? `${file.name}.${exported.extension}` : file.name;
-      return new File([blob], name, { type: exported?.mime ?? blob.type });
+      const type = exported?.mime ?? (file.mime || blob.type);
+      const name = exported ? `${file.name}.${exported.extension}` : withExtension(file.name, type);
+      return new File([blob], name, { type });
     },
     upload: async (folder, name, blob) => {
       const parent = await ownFolder(folder);

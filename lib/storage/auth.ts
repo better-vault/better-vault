@@ -2,6 +2,7 @@ import { desktopBridge } from "@/lib/desktop/bridge";
 import type { OAuthService } from "./apps";
 import type { StorageAccount } from "./desktop-oauth";
 import {
+  dropGoogleToken,
   forgetGoogle,
   forgetMicrosoft,
   googleAccessToken,
@@ -50,6 +51,11 @@ export async function connect(service: OAuthService): Promise<StorageAccount> {
   }
   const token = service === "google" ? await googleAccessToken("consent") : await microsoftSignIn();
   return webAccount(service, token);
+}
+
+/** Forgets an access token the service refused (web only; the desktop app refreshes its own). */
+export function dropAccessToken(service: OAuthService) {
+  if (!desktopBridge() && service === "google") dropGoogleToken();
 }
 
 /** An access token for the service's API, signing in again if needed. */

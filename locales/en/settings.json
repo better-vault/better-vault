@@ -258,7 +258,9 @@
       "noBackups": "No backups here yet.",
       "restore": "Restore this backup",
       "add_one": "Add {{count}} file",
-      "add_other": "Add {{count}} files"
+      "add_other": "Add {{count}} files",
+      "skipped_one": "Not added, because better-vault can't read this kind of file: {{names}}",
+      "skipped_other": "Not added, because better-vault can't read these kinds of files: {{names}}"
     },
     "soon": "Soon",
     "soonHint": "Coming in a later version",

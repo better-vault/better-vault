@@ -188,6 +188,13 @@ export interface DialogProps {
    * Default `true`.
    */
   dismissible?: boolean;
+  /**
+   * better-vault addition (not in Panel): passed to Base UI's `modal`. The
+   * Add source dialog turns it off while Google's Picker, an iframe outside
+   * the dialog, is open, so the focus trap doesn't pull focus out of it.
+   * Default `true`.
+   */
+  modal?: boolean;
 }
 
 function DialogRoot({
@@ -196,6 +203,7 @@ function DialogRoot({
   defaultOpen,
   onOpenChange,
   dismissible = true,
+  modal = true,
 }: DialogProps) {
   return (
     <Primitive.Root
@@ -203,6 +211,7 @@ function DialogRoot({
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange ? (next) => onOpenChange(next) : undefined}
       disablePointerDismissal={!dismissible}
+      modal={modal}
     >
       {children}
     </Primitive.Root>
