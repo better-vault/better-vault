@@ -1,5 +1,6 @@
 import {
   AiBrain01Icon,
+  Calendar03Icon,
   CloudServerIcon,
   Database01Icon,
   InformationCircleIcon,
@@ -30,6 +31,7 @@ import { StoragePanel } from "./storage-panel";
 import { storageIds } from "@/lib/storage/catalog";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { AppearancePanel } from "./appearance-panel";
+import { CalendarPanel } from "./calendar-panel";
 import { ChatGPTDialog } from "./chatgpt-dialog";
 import { DataPanel } from "./data-panel";
 import { LanguagePanel } from "./language-panel";
@@ -51,6 +53,7 @@ export const settingsPages = [
   "providers",
   "storage",
   "appearance",
+  "calendar",
   "language",
   "data",
   "about",
@@ -153,6 +156,17 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 hint={`${t(`appearance.${theme}`)} · ${t(`appearance.accents.${accent}`)}`}
               />
               <SettingsRow
+                to="calendar"
+                icon={Calendar03Icon}
+                label={t("rows.calendar")}
+                hint={t("rows.calendarHint")}
+                end={
+                  <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+                    {t("storage.soon")}
+                  </span>
+                }
+              />
+              <SettingsRow
                 to="language"
                 icon={LanguageSkillIcon}
                 label={t("rows.language")}
@@ -193,6 +207,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
           </Sheet.Next>
           <Sheet.Next name="appearance" closeLabel={tCommon("actions.close")}>
             <AppearancePanel />
+          </Sheet.Next>
+          <Sheet.Next name="calendar" closeLabel={tCommon("actions.close")}>
+            <CalendarPanel />
           </Sheet.Next>
           <Sheet.Next name="language" closeLabel={tCommon("actions.close")}>
             <LanguagePanel />

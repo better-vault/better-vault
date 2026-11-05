@@ -16,7 +16,9 @@
     "storage": "Storage",
     "storageHint_one": "{{count}} connected",
     "storageHint_other": "{{count}} connected",
-    "storageNone": "Google Drive, S3, R2"
+    "storageNone": "Google Drive, S3, R2",
+    "calendar": "Calendar",
+    "calendarHint": "Connected calendars and preferences"
   },
   "providers": {
     "title": "AI providers",
@@ -266,5 +268,45 @@
     "soonHint": "Coming in a later version",
     "continueGoogle": "Continue with Google",
     "continueMicrosoft": "Continue with Microsoft"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "description": "Connect the calendars you already use and choose how yours looks. These arrive in a later version; your entries are kept on this device until then.",
+    "accounts": "Connected calendars",
+    "preferences": "Preferences",
+    "items": {
+      "google": {
+        "label": "Google Calendar",
+        "hint": "Show and edit your Google calendars"
+      },
+      "outlook": {
+        "label": "Outlook Calendar",
+        "hint": "Microsoft 365 and Outlook.com"
+      },
+      "apple": {
+        "label": "Apple Calendar",
+        "hint": "iCloud calendars"
+      },
+      "subscribe": {
+        "label": "Subscribe to a calendar",
+        "hint": "Add an .ics link, such as a class timetable"
+      },
+      "export": {
+        "label": "Import and export",
+        "hint": "Move entries in and out as .ics files"
+      },
+      "weekStart": {
+        "label": "Week starts on",
+        "hint": "Monday, Sunday or Saturday"
+      },
+      "defaultView": {
+        "label": "Default view",
+        "hint": "Day, week, month or agenda"
+      },
+      "timeFormat": {
+        "label": "Time format",
+        "hint": "12-hour or 24-hour clock"
+      }
+    }
   }
 }
