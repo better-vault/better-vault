@@ -60,7 +60,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [chatGPTOpen, setChatGPTOpen] = useState(false);
   const { t: tCommon } = useTranslation();
-  const { theme } = useTheme();
+  const { theme, accent } = useTheme();
   const settings = useSettings();
   const updates = useUpdates();
   const profile = useProfile();
@@ -118,7 +118,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger }: Setting
                 to="appearance"
                 icon={PaintBoardIcon}
                 label={t("rows.appearance")}
-                hint={t(`appearance.${theme}`)}
+                hint={`${t(`appearance.${theme}`)} · ${t(`appearance.accents.${accent}`)}`}
               />
               <SettingsRow
                 to="language"

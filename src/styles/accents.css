@@ -1,0 +1,90 @@
+/*
+ * Primary colours chosen in Settings → Appearance. `data-accent` is set on
+ * <html> by the theme script before the page paints. Each preset has its own
+ * light and dark values so text on the primary colour stays readable; the
+ * neutral default lives in tokens.css. The same attribute on a swatch gives
+ * it that preset's colour.
+ */
+[data-accent="blue"] {
+  --primary: oklch(0.546 0.215 262.9);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.707 0.165 254.6);
+}
+.dark[data-accent="blue"],
+.dark [data-accent="blue"] {
+  --primary: oklch(0.707 0.165 254.6);
+  --primary-foreground: oklch(0.205 0.04 265);
+  --ring: oklch(0.546 0.215 262.9);
+}
+
+[data-accent="violet"] {
+  --primary: oklch(0.541 0.247 293);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.702 0.183 293.5);
+}
+.dark[data-accent="violet"],
+.dark [data-accent="violet"] {
+  --primary: oklch(0.702 0.183 293.5);
+  --primary-foreground: oklch(0.21 0.05 293);
+  --ring: oklch(0.541 0.247 293);
+}
+
+[data-accent="teal"] {
+  --primary: oklch(0.511 0.096 186.4);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.704 0.123 182.5);
+}
+.dark[data-accent="teal"],
+.dark [data-accent="teal"] {
+  --primary: oklch(0.777 0.134 181.9);
+  --primary-foreground: oklch(0.2 0.03 186);
+  --ring: oklch(0.511 0.096 186.4);
+}
+
+[data-accent="green"] {
+  --primary: oklch(0.527 0.137 150.1);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.723 0.192 149.6);
+}
+.dark[data-accent="green"],
+.dark [data-accent="green"] {
+  --primary: oklch(0.792 0.191 151.7);
+  --primary-foreground: oklch(0.21 0.04 150);
+  --ring: oklch(0.527 0.137 150.1);
+}
+
+[data-accent="amber"] {
+  --primary: oklch(0.555 0.146 49);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.769 0.188 70.1);
+}
+.dark[data-accent="amber"],
+.dark [data-accent="amber"] {
+  --primary: oklch(0.828 0.171 81.5);
+  --primary-foreground: oklch(0.25 0.05 60);
+  --ring: oklch(0.555 0.146 49);
+}
+
+[data-accent="orange"] {
+  --primary: oklch(0.577 0.2 41.1);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.705 0.187 47.6);
+}
+.dark[data-accent="orange"],
+.dark [data-accent="orange"] {
+  --primary: oklch(0.75 0.183 55.9);
+  --primary-foreground: oklch(0.22 0.05 45);
+  --ring: oklch(0.577 0.2 41.1);
+}
+
+[data-accent="rose"] {
+  --primary: oklch(0.586 0.222 17.6);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.712 0.194 13.4);
+}
+.dark[data-accent="rose"],
+.dark [data-accent="rose"] {
+  --primary: oklch(0.712 0.194 13.4);
+  --primary-foreground: oklch(0.21 0.05 15);
+  --ring: oklch(0.586 0.222 17.6);
+}

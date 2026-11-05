@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @import "./tokens.css";
+@import "./accents.css";
 
 /* The website in site/ is a separate project with its own styles. */
 @source not "../../site";

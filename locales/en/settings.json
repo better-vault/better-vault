@@ -67,7 +67,19 @@
     "theme": "Theme",
     "system": "System",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "accent": "Primary colour",
+    "accentHint": "Used for buttons, selections and highlights.",
+    "accents": {
+      "default": "Neutral",
+      "blue": "Blue",
+      "violet": "Violet",
+      "teal": "Teal",
+      "green": "Green",
+      "amber": "Amber",
+      "orange": "Orange",
+      "rose": "Rose"
+    }
   },
   "language": {
     "title": "Language",
