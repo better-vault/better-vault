@@ -7,6 +7,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
   db: BetterVaultDatabase;
 } {
   const content = [
+    db.vaults,
     db.folders,
     db.notebooks,
     db.sources,
@@ -44,6 +45,14 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         counts[source.notebookId] = (counts[source.notebookId] ?? 0) + 1;
       });
       return counts;
+    },
+
+    listVaults: () => db.vaults.toArray(),
+    putVault: async (vault) => {
+      await db.vaults.put(vault);
+    },
+    deleteVault: async (id) => {
+      await db.vaults.delete(id);
     },
 
     listFolders: () => db.folders.toArray(),
@@ -167,8 +176,9 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     clearSettings: () => db.settings.clear(),
 
     exportAll: async () => {
-      const [folders, notebooks, sources, conversations, messages, outputs, blobs] =
+      const [vaults, folders, notebooks, sources, conversations, messages, outputs, blobs] =
         await Promise.all([
+          db.vaults.toArray(),
           db.folders.toArray(),
           db.notebooks.toArray(),
           db.sources.toArray(),
@@ -177,10 +187,11 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
           db.outputs.toArray(),
           db.blobs.toArray(),
         ]);
-      return { folders, notebooks, sources, conversations, messages, outputs, blobs };
+      return { vaults, folders, notebooks, sources, conversations, messages, outputs, blobs };
     },
     importAll: (data, chunks) =>
       db.transaction("rw", content, async () => {
+        await db.vaults.bulkPut(data.vaults);
         await db.folders.bulkPut(data.folders);
         await db.notebooks.bulkPut(data.notebooks);
         await db.conversations.bulkPut(data.conversations);

@@ -7,6 +7,7 @@ export async function createFolder(
   name: string,
   parentId: string | null,
   color?: string,
+  vaultId?: string,
 ): Promise<string> {
   const now = Date.now();
   const id = generateId();
@@ -15,6 +16,7 @@ export async function createFolder(
     name,
     parentId,
     ...(color ? { color } : {}),
+    ...(vaultId && vaultId !== "default" ? { vaultId } : {}),
     createdAt: now,
     updatedAt: now,
   });

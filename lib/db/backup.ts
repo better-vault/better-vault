@@ -11,6 +11,7 @@ import type {
   StoredBlob,
   StoredMessage,
   StudioOutput,
+  Vault,
 } from "./types";
 
 /** A stored file in a backup: its bytes as base64, since backups are JSON. */
@@ -24,11 +25,13 @@ export type BackupBlob = Omit<StoredBlob, "data"> & { data: string };
 export interface Backup {
   app: "better-vault";
   /**
-   * 3 adds folders and files; 2 added conversations. Older backups still
-   * import: format 1 (one chat per notebook) and format 2 (no folders).
+   * 4 adds vaults; 3 added folders and files; 2 added conversations. Older
+   * backups still import: format 1 (one chat per notebook), format 2 (no
+   * folders) and format 3 (no vaults: everything is in the default vault).
    */
-  format: 3;
+  format: 4;
   exportedAt: number;
+  vaults: Vault[];
   folders: Folder[];
   notebooks: Notebook[];
   sources: Source[];
@@ -40,8 +43,9 @@ export interface Backup {
 
 const backupSchema = z.object({
   app: z.literal("better-vault"),
-  format: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  format: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   exportedAt: z.number(),
+  vaults: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
   folders: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
   notebooks: z.array(z.object({ id: z.string(), title: z.string() }).loose()),
   sources: z.array(z.object({ id: z.string(), notebookId: z.string(), text: z.string() }).loose()),
@@ -61,7 +65,7 @@ export async function exportBackup(): Promise<Backup> {
   const { blobs, ...content } = await store().exportAll();
   return {
     app: "better-vault",
-    format: 3,
+    format: 4,
     exportedAt: Date.now(),
     ...content,
     blobs: blobs.map((blob) => ({ ...blob, data: toBase64(blob.data) })),
@@ -84,6 +88,7 @@ export async function importBackup(raw: unknown): Promise<number> {
   );
   await store().importAll(
     {
+      vaults: backup.vaults,
       folders: backup.folders,
       notebooks: backup.notebooks,
       sources: backup.sources,
@@ -97,8 +102,9 @@ export async function importBackup(raw: unknown): Promise<number> {
   return backup.notebooks.length;
 }
 
-type OldBackup = Omit<Backup, "format" | "conversations" | "folders" | "blobs"> & {
-  format: 1 | 2 | 3;
+type OldBackup = Omit<Backup, "format" | "conversations" | "folders" | "blobs" | "vaults"> & {
+  format: 1 | 2 | 3 | 4;
+  vaults?: Vault[];
   conversations?: Conversation[];
   folders?: Folder[];
   blobs?: BackupBlob[];
@@ -107,7 +113,7 @@ type OldBackup = Omit<Backup, "format" | "conversations" | "folders" | "blobs"> 
 /**
  * Brings an older backup up to date: in format 1 each notebook's single chat
  * becomes a conversation with the notebook's id, as the database upgrade
- * does; before format 3 there are no folders or files.
+ * does; before format 3 there are no folders or files, before 4 no vaults.
  */
 function upgradeBackup(backup: OldBackup): Backup {
   const messages = backup.messages.map((row) => ({
@@ -133,7 +139,8 @@ function upgradeBackup(backup: OldBackup): Backup {
   }
   return {
     ...backup,
-    format: 3,
+    format: 4,
+    vaults: backup.vaults ?? [],
     conversations,
     messages,
     folders: backup.folders ?? [],

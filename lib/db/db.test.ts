@@ -27,6 +27,14 @@ import {
   updateProvider,
 } from "./settings";
 import { addSource, attachImages, deleteSource, getChunks } from "./sources";
+import {
+  DEFAULT_VAULT,
+  createVault,
+  deleteVault,
+  listVaults,
+  updateVault,
+  vaultOf,
+} from "./vaults";
 
 const userMessage = (id: string, text = id) => ({
   id,
@@ -159,6 +167,42 @@ describe.each(backends)("%s store", (name, create) => {
     });
   });
 
+  describe("vaults", () => {
+    it("has a default vault for everything made before vaults", async () => {
+      const vaults = await listVaults();
+      expect(vaults.map((vault) => vault.id)).toEqual([DEFAULT_VAULT]);
+      const notebookId = await createNotebook("Old");
+      expect(vaultOf((await store().getNotebook(notebookId))!)).toBe(DEFAULT_VAULT);
+    });
+
+    it("keeps vaults in order, renames them and deletes one with what is in it", async () => {
+      const work = await createVault({ name: "Work", color: "chart-2" });
+      await updateVault(DEFAULT_VAULT, { name: "Home" });
+      expect((await listVaults()).map((vault) => vault.name)).toEqual(["Home", "Work"]);
+      const kept = await createNotebook("Kept");
+      const gone = await createNotebook("Gone", { vaultId: work });
+      await addSource({ notebookId: gone, title: "a", kind: "text", text: "hello" });
+      await createFolder("Projects", null, undefined, work);
+      await deleteVault(work);
+      expect((await listVaults()).map((vault) => vault.id)).toEqual([DEFAULT_VAULT]);
+      expect((await store().listNotebooks()).map((notebook) => notebook.id)).toEqual([kept]);
+      expect(await store().count("folders")).toBe(0);
+      expect(await store().count("sources")).toBe(0);
+      await deleteVault(DEFAULT_VAULT);
+      expect(await listVaults()).toHaveLength(1);
+    });
+
+    it("round-trips vaults in a backup", async () => {
+      const work = await createVault({ name: "Work" });
+      await createNotebook("In work", { vaultId: work });
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteAllData();
+      await importBackup(backup);
+      expect((await listVaults()).map((vault) => vault.name)).toEqual(["", "Work"]);
+      expect((await store().listNotebooks())[0].vaultId).toBe(work);
+    });
+  });
+
   describe("source pictures", () => {
     it("keeps a PDF's pictures with its source and deletes them with it", async () => {
       const notebookId = await createNotebook("Pictures");
@@ -270,7 +314,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(3);
+      expect(backup.format).toBe(4);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");

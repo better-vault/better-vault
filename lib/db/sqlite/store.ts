@@ -8,6 +8,7 @@ import type {
   StoredBlob,
   StoredMessage,
   StudioOutput,
+  Vault,
 } from "../types";
 
 /**
@@ -43,6 +44,7 @@ type DocTable = Exclude<TableName, "settings" | "blobs">;
 
 /** The columns of each table, besides `id` and `doc`, and the fields they copy. */
 const columns: Record<DocTable, Record<string, string>> = {
+  vaults: { updated_at: "updatedAt" },
   folders: { parent_id: "parentId", updated_at: "updatedAt" },
   notebooks: { updated_at: "updatedAt" },
   sources: { notebook_id: "notebookId", created_at: "createdAt" },
@@ -100,6 +102,10 @@ const migrations: string[] = [
   `
   ALTER TABLE blobs ADD COLUMN source_id TEXT;
   CREATE INDEX blobs_source ON blobs (source_id);
+  `,
+  // 4: vaults. Notebooks and folders without a vault are in the default one.
+  `
+  CREATE TABLE vaults (id TEXT PRIMARY KEY, updated_at REAL NOT NULL, doc TEXT NOT NULL);
   `,
 ];
 
@@ -177,6 +183,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     db.prepare(`DELETE FROM ${table} WHERE ${column} = ?`).run(value);
 
   const content: Exclude<TableName, "settings">[] = [
+    "vaults",
     "folders",
     "notebooks",
     "sources",
@@ -243,6 +250,14 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         .prepare("SELECT notebook_id AS id, COUNT(*) AS n FROM sources GROUP BY notebook_id")
         .all() as { id: string; n: number }[];
       return Object.fromEntries(rows.map((row) => [row.id, Number(row.n)]));
+    },
+
+    listVaults: () => docs<Vault>(db.prepare("SELECT doc FROM vaults ORDER BY id").all()),
+    putVault: (vault) => {
+      put("vaults", vault);
+    },
+    deleteVault: (id) => {
+      deleteWhere("vaults", "id", id);
     },
 
     listFolders: () => docs<Folder>(db.prepare("SELECT doc FROM folders ORDER BY id").all()),
@@ -403,6 +418,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     },
 
     exportAll: (): StoreContent => ({
+      vaults: docs(db.prepare("SELECT doc FROM vaults").all()),
       folders: docs(db.prepare("SELECT doc FROM folders").all()),
       notebooks: docs(db.prepare("SELECT doc FROM notebooks").all()),
       sources: docs(db.prepare("SELECT doc FROM sources").all()),
@@ -413,6 +429,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     }),
     importAll: (data, chunks) =>
       transaction(db, () => {
+        for (const row of data.vaults) put("vaults", row);
         for (const row of data.folders) put("folders", row);
         for (const row of data.notebooks) put("notebooks", row);
         for (const row of data.conversations) put("conversations", row);

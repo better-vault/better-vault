@@ -7,6 +7,7 @@ import type {
   StoredBlob,
   StoredMessage,
   StudioOutput,
+  Vault,
 } from "./types";
 
 /**
@@ -26,6 +27,12 @@ export interface Backend {
   deleteNotebook(id: string): Promise<void>;
   /** How many sources each notebook has, by notebook id. */
   countSources(): Promise<Record<string, number>>;
+
+  listVaults(): Promise<Vault[]>;
+  /** Adds a vault or replaces it. */
+  putVault(vault: Vault): Promise<void>;
+  /** Deletes a vault's row only; `lib/db/vaults.ts` deletes what is in it first. */
+  deleteVault(id: string): Promise<void>;
 
   listFolders(): Promise<Folder[]>;
   addFolder(folder: Folder): Promise<void>;
@@ -92,6 +99,7 @@ export interface Backend {
 }
 
 export interface StoreContent {
+  vaults: Vault[];
   folders: Folder[];
   notebooks: Notebook[];
   sources: Source[];
@@ -102,6 +110,7 @@ export interface StoreContent {
 }
 
 export const tableNames = [
+  "vaults",
   "folders",
   "notebooks",
   "sources",
@@ -133,6 +142,8 @@ export const writes = {
     "outputs",
     "blobs",
   ],
+  putVault: ["vaults"],
+  deleteVault: ["vaults"],
   addFolder: ["folders"],
   patchFolder: ["folders"],
   deleteFolder: ["folders", "notebooks"],
@@ -152,6 +163,7 @@ export const writes = {
   putSetting: ["settings"],
   clearSettings: ["settings"],
   importAll: [
+    "vaults",
     "folders",
     "notebooks",
     "sources",
@@ -162,6 +174,7 @@ export const writes = {
     "blobs",
   ],
   clearAll: [
+    "vaults",
     "folders",
     "notebooks",
     "sources",
@@ -181,6 +194,9 @@ export const backendMethods = [
   "patchNotebook",
   "deleteNotebook",
   "countSources",
+  "listVaults",
+  "putVault",
+  "deleteVault",
   "listFolders",
   "addFolder",
   "patchFolder",

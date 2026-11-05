@@ -11,6 +11,7 @@ import type {
   StoredBlob,
   StoredMessage,
   StudioOutput,
+  Vault,
 } from "./types";
 
 export type * from "./types";
@@ -28,6 +29,7 @@ export class BetterVaultDatabase extends Dexie {
   outputs!: EntityTable<StudioOutput, "id">;
   settings!: EntityTable<SettingRow, "key">;
   folders!: EntityTable<Folder, "id">;
+  vaults!: EntityTable<Vault, "id">;
   blobs!: EntityTable<StoredBlob, "id">;
 
   constructor(name = "better-vault") {
@@ -114,6 +116,11 @@ export class BetterVaultDatabase extends Dexie {
     // Version 5: pictures taken from a PDF are kept as files of its source.
     this.version(5).stores({
       blobs: "id, notebookId, outputId, sourceId",
+    });
+    // Version 6: vaults. Notebooks and folders without a vault are in the
+    // default one, so they need no change.
+    this.version(6).stores({
+      vaults: "id",
     });
   }
 }

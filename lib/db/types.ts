@@ -12,6 +12,29 @@ export interface Notebook {
   color?: string;
   /** The folder it is in; at the top level when missing or null. */
   folderId?: string | null;
+  /** The vault it is in; the default vault when missing. */
+  vaultId?: string;
+  /** Kept at the top of its vault's sidebar. */
+  pinned?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * A vault: a space of its own on the notebooks page, with its own notebooks
+ * and folders (like a workspace). Rows saved before vaults have no `vaultId`
+ * and belong to the default vault, whose id is `default`.
+ */
+export interface Vault {
+  id: string;
+  /** Empty for the default vault until it is renamed; shown translated. */
+  name: string;
+  /** An icon key from `lib/notebooks/icons.ts`. */
+  icon?: string;
+  /** A colour token name from `lib/notebooks/colors.ts`. */
+  color?: string;
+  /** Its place in the vault switcher. */
+  order: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -22,6 +45,8 @@ export interface Folder {
   name: string;
   /** The folder it is in; at the top level when null. */
   parentId: string | null;
+  /** The vault it is in; the default vault when missing. */
+  vaultId?: string;
   color?: string;
   createdAt: number;
   updatedAt: number;
