@@ -4,14 +4,15 @@ This page lists what better-vault has shipped, what comes next and what is out o
 
 ## Shipped
 
-| Version            | What it added                                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **v0.1.0**         | Notebooks and sources (text, Markdown, PDF, web pages), chat in Sources and Web modes with citations, Reports, Flashcards, Quiz, Data table and Mind map    |
-| **v0.2.0**         | Slide deck, Infographic, Anatomy figures, Whiteboard with Annotate, several chats per notebook, citation marks and footnotes                                |
-| **v0.3.0**         | The website and documentation at [better-vault.dev](https://www.better-vault.dev)                                                                           |
-| **v0.4.0, v0.4.1** | The desktop app for macOS, Windows and Linux, with notebooks in a local SQLite file, signed macOS builds and automatic updates                              |
-| **v0.4.2**         | Sign in with ChatGPT to use your plan instead of an OpenAI key, and the providers' own logos                                                                |
-| **v0.5.0**         | Audio Overviews with ElevenLabs, storage (Google Drive, S3, R2) for sources, backups and exports, folders, OpenCode, an account profile, and in-app updates |
+| Version            | What it added                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **v0.1.0**         | Notebooks and sources (text, Markdown, PDF, web pages), chat in Sources and Web modes with citations, Reports, Flashcards, Quiz, Data table and Mind map                             |
+| **v0.2.0**         | Slide deck, Infographic, Anatomy figures, Whiteboard with Annotate, several chats per notebook, citation marks and footnotes                                                         |
+| **v0.3.0**         | The website and documentation at [better-vault.dev](https://www.better-vault.dev)                                                                                                    |
+| **v0.4.0, v0.4.1** | The desktop app for macOS, Windows and Linux, with notebooks in a local SQLite file, signed macOS builds and automatic updates                                                       |
+| **v0.4.2**         | Sign in with ChatGPT to use your plan instead of an OpenAI key, and the providers' own logos                                                                                         |
+| **v0.5.0**         | Audio Overviews with ElevenLabs, storage (Google Drive, S3, R2) for sources, backups and exports, folders, OpenCode, an account profile, and in-app updates                          |
+| **v0.6.0**         | Vaults and a Finder-style notebooks page, a calendar, a ⌘K command palette that searches inside PDFs, pictures from PDFs, effort levels, DeepSeek, a usage ring and a primary colour |
 
 ## v0.5: Understand your notebook
 

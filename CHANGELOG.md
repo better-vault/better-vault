@@ -5,23 +5,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
-### Fixed
-
-- A page that fails shows a short message with Reload and Go to notebooks, instead of a developer error. In development, contexts survive hot reloads, which caused “must be used inside its provider” errors.
-- Google Drive: files picked in Google's Picker sometimes never appeared as sources. The Add source dialog no longer closes or pulls focus while the Picker is open, a refused or expired token is renewed once, the Picker reports its errors instead of waiting forever, scripts that failed to load are tried again, shortcuts open their file, files named without an extension are read by their type, and files that can't be read are named in a message.
-- Sources: the source sheet joins the lines a PDF broke back into paragraphs, keeps headings and bullets apart, and renders Markdown sources.
+## [0.6.0] - 2026-11-05
 
 ### Added
 
 - Calendar: a Calendar entry under All notebooks opens a full calendar (kloq) in the middle of the notebooks page. Drag on the grid or double-click to add an entry, drag to move it, pull an edge to change its length; day, week, month, agenda and year views. Entries are kept on this device with your notebooks and in backups (format 5). Settings → Calendar lists connected calendars and preferences, coming in a later version.
 - Command palette: press ⌘K (Ctrl K on Windows and Linux) or the Search button to search every notebook, source, Studio output, folder and vault, including the text inside PDFs, and jump to the passage. It also runs actions (new notebook, add a source, switch tab, vault or theme) and opens any settings page.
-- Vaults: separate spaces, each with its own notebooks and folders, a name, an icon and a colour. Everything you had is in “My vault”. Backups are format 4 and hold vaults; older backups import into “My vault”.
+- Vaults: separate spaces, each with its own notebooks and folders, a name, an icon and a colour. Everything you had is in “My vault”. Older backups import into “My vault”.
 - Notebooks page, laid out like a Finder window: a side panel with Recent, All notebooks, pinned notebooks and your vaults; a toolbar with back and forward, an icon or list view and sorting, new notebook, new folder, import and search; and a path bar you can drop notebooks on. Notebooks can be pinned and moved to another vault.
 - Sources: pictures in a PDF are kept with it and shown in the source sheet where their page ends; press one to see it larger. PDFs added before this version show their text only.
 - Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.
 - Settings → AI providers: an Effort level for each provider (Default, None, Low, Medium, High, Max and more where the provider has them), used in chat and in the Studio.
 - Chat: a new model picker, with providers in a rail, search and starred models; and, under the prompt, an Effort switch beside a usage ring showing how much of the model's context the last answer used, and the tokens sent and received in the chat.
 - Settings → Appearance: a primary colour (Neutral, Blue, Violet, Teal, Green, Amber, Orange or Rose), tuned for light and dark mode.
+
+### Changed
+
+- Backups are format 5, with vaults and calendar entries; older backups still import.
+- The model picker in the prompt bar is Panel's Model Picker; the old select is gone.
+
+### Fixed
+
+- A page that fails shows a short message with Reload and Go to notebooks, instead of a developer error. In development, contexts survive hot reloads, which caused “must be used inside its provider” errors.
+- Google Drive: files picked in Google's Picker sometimes never appeared as sources. The Add source dialog no longer closes or pulls focus while the Picker is open, a refused or expired token is renewed once, the Picker reports its errors instead of waiting forever, scripts that failed to load are tried again, shortcuts open their file, files named without an extension are read by their type, and files that can't be read are named in a message.
+- Sources: the source sheet joins the lines a PDF broke back into paragraphs, keeps headings and bullets apart, and renders Markdown sources.
 
 ## [0.5.0] - 2026-11-03
 
@@ -141,7 +148,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/better-vault/better-vault/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/better-vault/better-vault/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/better-vault/better-vault/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/better-vault/better-vault/compare/v0.4.0...v0.4.1
