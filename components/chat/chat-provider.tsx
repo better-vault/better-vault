@@ -13,7 +13,13 @@ import {
 import { providers } from "@/lib/ai/catalog";
 import type { ChatMessage, ChatMode } from "@/lib/chat/types";
 import { latestConversation, loadChat, saveChat } from "@/lib/db/messages";
-import { activeModel, contextCharsFor, credentialsFor, getSettings } from "@/lib/db/settings";
+import {
+  activeModel,
+  contextCharsFor,
+  credentialsFor,
+  effortFor,
+  getSettings,
+} from "@/lib/db/settings";
 import { getChunks, listSources } from "@/lib/db/sources";
 import { selectPassages } from "@/lib/grounding/passages";
 
@@ -166,6 +172,7 @@ function ChatRunner({
         mode: mode === "web" && providers[model.provider].webSearch ? "web" : "sources",
         model,
         credentials: credentialsFor(settings, model.provider),
+        effort: effortFor(settings, model.provider),
         passages,
       };
     },

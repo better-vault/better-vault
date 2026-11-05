@@ -10,7 +10,7 @@ import { providers } from "@/lib/ai/catalog";
 import { describeError } from "@/lib/ai/errors";
 import { chatSystemPrompt } from "@/lib/ai/prompts";
 import { createLanguageModel, createWebSearchTools } from "@/lib/ai/providers";
-import { credentialsSchema, modelRefSchema } from "@/lib/ai/request";
+import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
 import type { ChatMessage, ChatMessageMetadata } from "@/lib/chat/types";
 import { toPassageRefs, stripCitations, type Passage } from "@/lib/grounding/passages";
 
@@ -30,6 +30,7 @@ const bodySchema = z.object({
   mode: z.enum(["sources", "web"]),
   model: modelRefSchema,
   credentials: credentialsSchema,
+  effort: effortSchema,
   passages: z.array(passageSchema).max(2000),
 });
 
@@ -50,7 +51,7 @@ function withoutOldCitations(messages: ChatMessage[]): ChatMessage[] {
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
-  const { mode, model, credentials } = parsed.data;
+  const { mode, model, credentials, effort } = parsed.data;
   const messages = parsed.data.messages as unknown as ChatMessage[];
   const passages = parsed.data.passages as Passage[];
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
 
   let languageModel;
   try {
-    languageModel = await createLanguageModel(model, credentials);
+    languageModel = await createLanguageModel(model, credentials, effort);
   } catch (error) {
     return Response.json({ error: describeError(error) }, { status: 400 });
   }

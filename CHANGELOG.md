@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.
+- Settings → AI providers: an Effort level for each provider (Default, None, Low, Medium, High, Max and more where the provider has them), used in chat and in the Studio.
+
 ## [0.5.0] - 2026-11-03
 
 ### Added

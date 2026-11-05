@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { imageProviderIds, providerIds, speechProviderIds } from "./catalog";
+import { efforts, imageProviderIds, providerIds, speechProviderIds } from "./catalog";
 
 /** The model and credentials every AI request carries. */
 export const modelRefSchema = z.object({
@@ -24,3 +24,6 @@ export const credentialsSchema = z.object({
   baseURL: z.string().max(500).optional(),
   chatgpt: z.boolean().optional(),
 });
+
+/** How much the model thinks; `provider-default` when not sent. */
+export const effortSchema = z.enum(efforts).optional();

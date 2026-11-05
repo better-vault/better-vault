@@ -2,6 +2,7 @@ import {
   chatProviderIds,
   providerIds,
   providers,
+  type Effort,
   type ModelRef,
   type ProviderCredentials,
   type ProviderId,
@@ -22,6 +23,8 @@ export interface ProviderSettings {
    * plan then pays for text. Only who it is; the tokens stay on the server.
    */
   chatgpt: ChatGPTAccountLabel | null;
+  /** How much its models think before answering, in chat and in the Studio. */
+  effort: Effort;
 }
 
 export interface ChatGPTAccountLabel {
@@ -47,6 +50,7 @@ export function defaultSettings(): AppSettings {
       models: [],
       contextChars: null,
       chatgpt: null,
+      effort: "provider-default",
     } satisfies ProviderSettings,
   ]);
   return {
@@ -140,6 +144,12 @@ export function speechCredentialsFrom(
   return providers[id].kind === "audio" && saved.enabled && saved.apiKey.trim()
     ? { apiKey: saved.apiKey.trim() }
     : null;
+}
+
+/** The effort for text requests to this provider; `provider-default` when it has no levels. */
+export function effortFor(settings: AppSettings, id: ProviderId): Effort {
+  const effort = settings.providers[id].effort;
+  return providers[id].efforts.includes(effort) ? effort : "provider-default";
 }
 
 export function contextCharsFor(settings: AppSettings, id: ProviderId): number {

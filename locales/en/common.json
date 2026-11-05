@@ -36,5 +36,19 @@
     "label": "Source {{numbers}}: {{title}}",
     "passage": "passage {{numbers}}",
     "open": "Open in source"
+  },
+  "effort": {
+    "label": "Effort",
+    "hint": "How much the model thinks before it answers. More effort is slower and uses more tokens; models that don't think ignore it.",
+    "levels": {
+      "provider-default": "Default",
+      "none": "None",
+      "minimal": "Minimal",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "xhigh": "Extra high",
+      "max": "Max"
+    }
   }
 }

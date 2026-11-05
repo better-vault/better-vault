@@ -10,10 +10,29 @@ export const providerIds = [
   "opencode",
   "ollama",
   "lmstudio",
+  "deepseek",
   "elevenlabs",
 ] as const;
 
 export type ProviderId = (typeof providerIds)[number];
+
+/**
+ * How much a model thinks before it answers: the AI SDK's `reasoning` call
+ * option, which each provider maps to its own setting. `provider-default`
+ * sends nothing and lets the provider decide.
+ */
+export const efforts = [
+  "provider-default",
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+] as const;
+
+export type Effort = (typeof efforts)[number];
 
 export interface ProviderInfo {
   id: ProviderId;
@@ -45,6 +64,8 @@ export interface ProviderInfo {
    * provider has none.
    */
   imageModels: readonly string[];
+  /** The effort levels its models accept, `provider-default` first. Empty when it has none. */
+  efforts: readonly Effort[];
 }
 
 /** Providers whose models chat and write: the ones in the model picker. */
@@ -55,6 +76,7 @@ export const chatProviderIds = [
   "opencode",
   "ollama",
   "lmstudio",
+  "deepseek",
 ] as const satisfies readonly ProviderId[];
 
 /** Providers that turn text into speech (audio overviews). */
@@ -85,6 +107,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
       "gpt-image-1-mini",
       "chatgpt-image-latest",
     ],
+    efforts: ["provider-default", "none", "minimal", "low", "medium", "high", "xhigh", "max"],
   },
   anthropic: {
     id: "anthropic",
@@ -102,6 +125,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     ],
     contextChars: 400_000,
     imageModels: [],
+    efforts: ["provider-default", "low", "medium", "high", "xhigh", "max"],
   },
   google: {
     id: "google",
@@ -124,6 +148,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
       "gemini-3.1-flash-image-preview",
       "gemini-2.5-flash-image",
     ],
+    efforts: ["provider-default", "none", "minimal", "low", "medium", "high"],
   },
   opencode: {
     id: "opencode",
@@ -139,6 +164,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     suggestedModels: ["claude-sonnet-5-5", "gpt-6-luna", "gemini-3.8-flash", "deepseek-v4.1-flash"],
     contextChars: 300_000,
     imageModels: [],
+    efforts: ["provider-default", "none", "low", "medium", "high"],
   },
   ollama: {
     id: "ollama",
@@ -151,6 +177,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     suggestedModels: [],
     contextChars: 12_000,
     imageModels: [],
+    efforts: ["provider-default", "none", "low", "medium", "high"],
   },
   lmstudio: {
     id: "lmstudio",
@@ -163,6 +190,23 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     suggestedModels: [],
     contextChars: 12_000,
     imageModels: [],
+    efforts: ["provider-default", "none", "low", "medium", "high"],
+  },
+  deepseek: {
+    id: "deepseek",
+    kind: "chat",
+    name: "DeepSeek",
+    local: false,
+    needsKey: true,
+    // DeepSeek has no built-in web search tool, so Web mode stays off.
+    webSearch: false,
+    keyUrl: "https://platform.deepseek.com/api_keys",
+    // From the model id union in the installed @ai-sdk/deepseek.
+    suggestedModels: ["deepseek-v4-pro", "deepseek-v4-flash"],
+    contextChars: 400_000,
+    imageModels: [],
+    // DeepSeek V4 thinks at high or max; the SDK maps the other levels onto those.
+    efforts: ["provider-default", "none", "low", "high", "max"],
   },
   elevenlabs: {
     id: "elevenlabs",
@@ -176,6 +220,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     suggestedModels: ["eleven_v3", "eleven_v4"],
     contextChars: 0,
     imageModels: [],
+    efforts: [],
   },
 };
 

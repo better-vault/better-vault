@@ -2,7 +2,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { describeError } from "@/lib/ai/errors";
 import { createLanguageModel } from "@/lib/ai/providers";
-import { credentialsSchema, modelRefSchema } from "@/lib/ai/request";
+import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
 import type { Passage } from "@/lib/grounding/passages";
 import { studioSystem } from "@/studio/server/shared";
 
@@ -23,6 +23,7 @@ const bodySchema = z.object({
     .max(200),
   model: modelRefSchema,
   credentials: credentialsSchema,
+  effort: effortSchema,
 });
 
 const schema = z.object({
@@ -41,7 +42,11 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   try {
     const { output } = await generateText({
-      model: await createLanguageModel(parsed.data.model, parsed.data.credentials),
+      model: await createLanguageModel(
+        parsed.data.model,
+        parsed.data.credentials,
+        parsed.data.effort,
+      ),
       output: Output.object({ schema }),
       system: studioSystem(
         "Suggest four kinds of written report that would be especially useful for these particular sources, beyond a generic summary: for example a comparison of two things they discuss, a timeline, a checklist, a case-study analysis or a guide for a specific reader. Each needs a short title, a one-sentence description and instructions for writing it.",

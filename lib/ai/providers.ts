@@ -1,11 +1,18 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createElevenLabs } from "@ai-sdk/elevenlabs";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { ImageModel, LanguageModel, SpeechModel, ToolSet } from "ai";
+import {
+  wrapLanguageModel,
+  type ImageModel,
+  type LanguageModel,
+  type SpeechModel,
+  type ToolSet,
+} from "ai";
 import { chatGPTLanguageModel } from "@/lib/chatgpt/model";
-import { providers, type ModelRef, type ProviderCredentials } from "./catalog";
+import { providers, type Effort, type ModelRef, type ProviderCredentials } from "./catalog";
 import { createOpenCodeModel } from "./opencode";
 import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-config";
 
@@ -14,6 +21,21 @@ import { chatGPTAllowed, localProvidersAllowed, parseBaseURL } from "./server-co
  * Nothing is cached, so a key never outlives the request.
  */
 export async function createLanguageModel(
+  ref: ModelRef,
+  credentials: ProviderCredentials,
+  effort: Effort = "provider-default",
+): Promise<LanguageModel> {
+  const model = await baseLanguageModel(ref, credentials);
+  if (effort === "provider-default" || !providers[ref.provider].efforts.includes(effort))
+    return model;
+  // Every call made with this model (chat, Studio) thinks at the chosen effort.
+  return wrapLanguageModel({
+    model: model as Parameters<typeof wrapLanguageModel>[0]["model"],
+    middleware: { transformParams: async ({ params }) => ({ ...params, reasoning: effort }) },
+  });
+}
+
+async function baseLanguageModel(
   ref: ModelRef,
   credentials: ProviderCredentials,
 ): Promise<LanguageModel> {
@@ -35,6 +57,8 @@ export async function createLanguageModel(
       return createAnthropic({ apiKey: credentials.apiKey })(ref.modelId);
     case "google":
       return createGoogleGenerativeAI({ apiKey: credentials.apiKey })(ref.modelId);
+    case "deepseek":
+      return createDeepSeek({ apiKey: credentials.apiKey })(ref.modelId);
     case "opencode":
       return createOpenCodeModel(ref.modelId, credentials.apiKey ?? "", credentials.baseURL);
     case "ollama":

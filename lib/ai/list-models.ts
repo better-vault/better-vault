@@ -85,6 +85,12 @@ export async function listModels(
         .filter((id) => id.startsWith("gemini") && !NOT_CHAT.test(id))
         .sort(byNewest);
     }
+    case "deepseek": {
+      const body = await getJson<{ data: { id: string }[] }>("https://api.deepseek.com/models", {
+        authorization: `Bearer ${credentials.apiKey}`,
+      });
+      return body.data.map((model) => model.id).sort(byNewest);
+    }
     case "opencode":
       return listOpenCodeModels(credentials.baseURL);
     case "elevenlabs": {

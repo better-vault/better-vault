@@ -59,7 +59,7 @@ export function StudioRunnerProvider({
     async function run(outputId: string, toolId: StudioToolId, saved: SavedOptions) {
       running.add(outputId);
       try {
-        const { model, credentials, passages } = await modelRequestFor(
+        const { model, credentials, effort, passages } = await modelRequestFor(
           saved.common.sourceIds,
           saved.common.focus,
           undefined,
@@ -81,6 +81,7 @@ export function StudioRunnerProvider({
             passages,
             model,
             credentials,
+            effort,
             imageCredentials,
             speechCredentials,
           }),

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { describeError } from "@/lib/ai/errors";
 import { createImageModel, createLanguageModel, createSpeechModel } from "@/lib/ai/providers";
-import { credentialsSchema, modelRefSchema } from "@/lib/ai/request";
+import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
 import type { Passage } from "@/lib/grounding/passages";
 import { toolDefinitions } from "@/studio/definitions";
 import { generators } from "@/studio/server/generators";
@@ -24,6 +24,7 @@ const bodySchema = z.object({
   passages: z.array(passageSchema).min(1).max(2000),
   model: modelRefSchema,
   credentials: credentialsSchema,
+  effort: effortSchema,
   /** The image model's credentials, for tools that draw pictures. */
   imageCredentials: credentialsSchema.optional(),
   /** The speech model's credentials, for tools that speak. */
@@ -34,7 +35,7 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
-  const { tool, language, focus, model, credentials } = parsed.data;
+  const { tool, language, focus, model, credentials, effort } = parsed.data;
 
   const definition = toolDefinitions[tool];
   const generate = generators[tool];
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await generate({
-      model: await createLanguageModel(model, credentials),
+      model: await createLanguageModel(model, credentials, effort),
       options: options.data,
       language,
       focus,

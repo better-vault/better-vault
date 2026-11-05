@@ -1,9 +1,10 @@
-import type { ModelRef, ProviderCredentials } from "@/lib/ai/catalog";
+import type { Effort, ModelRef, ProviderCredentials } from "@/lib/ai/catalog";
 import {
   activeModel,
   availableModels,
   contextCharsFor,
   credentialsFor,
+  effortFor,
   getSettings,
   imageCredentialsFrom,
   speechCredentialsFrom,
@@ -14,6 +15,7 @@ import { selectPassages, type Passage } from "@/lib/grounding/passages";
 export interface ModelRequest {
   model: ModelRef;
   credentials: ProviderCredentials;
+  effort: Effort;
   passages: Passage[];
 }
 
@@ -68,5 +70,10 @@ export async function modelRequestFor(
     query,
   });
   if (passages.length === 0) throw new NoSourcesError();
-  return { model, credentials: credentialsFor(settings, model.provider), passages };
+  return {
+    model,
+    credentials: credentialsFor(settings, model.provider),
+    effort: effortFor(settings, model.provider),
+    passages,
+  };
 }

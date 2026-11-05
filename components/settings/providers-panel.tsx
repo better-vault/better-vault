@@ -20,7 +20,14 @@ import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Segmented } from "@/components/common/segmented";
-import { chatProviderIds, providers, speechProviderIds, type ProviderId } from "@/lib/ai/catalog";
+import { Select } from "@/components/panelui/select";
+import {
+  chatProviderIds,
+  providers,
+  speechProviderIds,
+  type Effort,
+  type ProviderId,
+} from "@/lib/ai/catalog";
 import { desktopBridge } from "@/lib/desktop/bridge";
 import { accountLabel, chatGPTStatus, chatGPTUsageUrl, signOutChatGPT } from "@/lib/chatgpt/client";
 import {
@@ -130,6 +137,7 @@ function ProviderForm({
   onChatGPTSignIn: () => void;
 }) {
   const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation();
   const info = providers[id];
   const keyId = useId();
   const urlId = useId();
@@ -383,6 +391,32 @@ function ProviderForm({
               </Field>
             </>
           )}
+
+          {info.efforts.length > 0 ? (
+            <Field label={tCommon("effort.label")} hint={tCommon("effort.hint")}>
+              <Select
+                items={info.efforts.map((value) => ({
+                  value,
+                  label: tCommon(`effort.levels.${value}`),
+                }))}
+                value={info.efforts.includes(saved.effort) ? saved.effort : "provider-default"}
+                onValueChange={(next) =>
+                  typeof next === "string" && save({ effort: next as Effort })
+                }
+              >
+                <Select.Trigger aria-label={tCommon("effort.label")} className="w-full">
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  {info.efforts.map((value) => (
+                    <Select.Item key={value} value={value}>
+                      {tCommon(`effort.levels.${value}`)}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select>
+            </Field>
+          ) : null}
 
           {info.local ? (
             <Field
