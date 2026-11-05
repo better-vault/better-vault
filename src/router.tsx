@@ -1,4 +1,5 @@
 import { createBrowserRouter, Outlet, useParams } from "react-router";
+import { RouteError } from "@/components/common/route-error";
 import { AppProviders } from "@/components/providers/app-providers";
 import { routes } from "@/lib/routes";
 
@@ -18,12 +19,14 @@ export const router = createBrowserRouter([
     children: [
       {
         path: routes.home,
+        errorElement: <RouteError />,
         lazy: async () => ({
           Component: (await import("@/components/home/notebook-home")).NotebookHome,
         }),
       },
       {
         path: routes.notebook(":id"),
+        errorElement: <RouteError />,
         lazy: async () => {
           const { Workspace } = await import("@/components/workspace/workspace");
           function NotebookPage() {
@@ -36,6 +39,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "*",
+        errorElement: <RouteError />,
         lazy: async () => ({
           Component: (await import("@/components/home/notebook-home")).NotebookHome,
         }),

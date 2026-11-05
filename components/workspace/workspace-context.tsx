@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
+import { stableContext } from "@/lib/context";
 import type { Conversation, Notebook, StudioOutput } from "@/lib/db/database";
 import type { StudioToolId } from "@/studio/tools";
 
@@ -52,7 +53,7 @@ interface WorkspaceState {
   closeReader: () => void;
 }
 
-const WorkspaceContext = createContext<WorkspaceState | null>(null);
+const WorkspaceContext = stableContext<WorkspaceState | null>("workspace", null);
 
 /**
  * The notebook screen's state. Dialogs opened from a sheet live here, outside

@@ -1,11 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useSyncExternalStore,
-  type ReactNode,
-} from "react";
+import { useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { stableContext } from "@/lib/context";
 import { accentStorageKey, accents, themeStorageKey, type Accent } from "@/lib/theme/script";
 
 export type Theme = "system" | "light" | "dark";
@@ -20,7 +14,7 @@ interface ThemeState {
   setAccent: (accent: Accent) => void;
 }
 
-const ThemeContext = createContext<ThemeState | null>(null);
+const ThemeContext = stableContext<ThemeState | null>("theme", null);
 const CHANGE = "better-vault:theme-change";
 
 function readTheme(): Theme {

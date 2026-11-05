@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { useContext, useEffect, useMemo, type ReactNode } from "react";
+import { stableContext } from "@/lib/context";
 import { useTranslation } from "react-i18next";
 import type { StudioOutput } from "@/lib/db/database";
 import {
@@ -39,7 +40,7 @@ interface StudioRunner {
   ) => Promise<string>;
 }
 
-const RunnerContext = createContext<StudioRunner | null>(null);
+const RunnerContext = stableContext<StudioRunner | null>("studio-runner", null);
 
 export function StudioRunnerProvider({
   notebookId,

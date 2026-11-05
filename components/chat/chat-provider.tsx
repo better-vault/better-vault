@@ -1,7 +1,6 @@
 import { Chat, useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, generateId } from "ai";
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -10,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { stableContext } from "@/lib/context";
 import { providers } from "@/lib/ai/catalog";
 import type { ChatMessage, ChatMode } from "@/lib/chat/types";
 import { latestConversation, loadChat, saveChat } from "@/lib/db/messages";
@@ -43,7 +43,7 @@ interface ChatSession {
   open: (conversationId: string) => Promise<void>;
 }
 
-const ChatContext = createContext<ChatSession | null>(null);
+const ChatContext = stableContext<ChatSession | null>("chat-session", null);
 
 const transport = new DefaultChatTransport<ChatMessage>({
   api: "/api/chat",

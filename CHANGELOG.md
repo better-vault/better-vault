@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- A page that fails shows a short message with Reload and Go to notebooks, instead of a developer error. In development, contexts survive hot reloads, which caused “must be used inside its provider” errors.
 - Google Drive: files picked in Google's Picker sometimes never appeared as sources. The Add source dialog no longer closes or pulls focus while the Picker is open, a refused or expired token is renewed once, the Picker reports its errors instead of waiting forever, scripts that failed to load are tried again, shortcuts open their file, files named without an extension are read by their type, and files that can't be read are named in a message.
 - Sources: the source sheet joins the lines a PDF broke back into paragraphs, keeps headings and bullets apart, and renders Markdown sources.
 

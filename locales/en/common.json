@@ -50,5 +50,11 @@
       "xhigh": "Extra high",
       "max": "Max"
     }
+  },
+  "crash": {
+    "title": "This page stopped working",
+    "description": "Your notebooks are safe. Reload the page to carry on.",
+    "reload": "Reload",
+    "home": "Go to notebooks"
   }
 }
