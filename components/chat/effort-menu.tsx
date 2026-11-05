@@ -1,7 +1,6 @@
 import { AiBrain02Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
-import { Button } from "@/components/panelui/button";
 import { Menu } from "@/components/panelui/menu";
 import { providers, type Effort, type ProviderId } from "@/lib/ai/catalog";
 import { effortFor, updateProvider, type AppSettings } from "@/lib/db/settings";
@@ -28,12 +27,12 @@ export function EffortMenu({
       <Menu.Trigger
         aria-label={`${t("effort.label")}: ${name}`}
         title={t("effort.label")}
-        render={<Button variant="ghost" size="sm" shape="pill" className="gap-1.5 px-2.5" />}
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-md whitespace-nowrap transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-popup-open:text-foreground"
       >
-        <Icon icon={AiBrain02Icon} size={16} />
-        <span className="hidden sm:inline">{name}</span>
+        <Icon icon={AiBrain02Icon} size={14} />
+        {name}
       </Menu.Trigger>
-      <Menu.Content side="top" align="start">
+      <Menu.Content side="top" align="end">
         <Menu.Group>
           <Menu.GroupLabel>{t("effort.label")}</Menu.GroupLabel>
           <Menu.RadioGroup

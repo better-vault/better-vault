@@ -153,35 +153,32 @@ export function PromptBar() {
                   ]}
                 />
                 {modelItems.length > 0 && model && settings ? (
-                  <>
-                    <ModelPicker
-                      variant="rail"
-                      items={modelItems}
-                      providers={pickerProviders}
-                      value={modelKey(model)}
-                      label={t("model")}
-                      favorites={settings.favoriteModels}
-                      onFavoritesChange={(favorites) =>
-                        void updateSettings((saved) => void (saved.favoriteModels = favorites))
-                      }
-                      onValueChange={(key) => {
-                        const next = parseModelKey(key);
-                        if (next) void updateSettings((saved) => void (saved.model = next));
-                      }}
-                    >
-                      <ModelPicker.Trigger
-                        appearance="ghost"
-                        className="max-w-48"
-                        placeholder={t("chooseModel")}
-                      />
-                      <ModelPicker.Content
-                        side="top"
-                        placeholder={t("searchModels")}
-                        emptyText={t("noModels")}
-                      />
-                    </ModelPicker>
-                    <EffortMenu settings={settings} provider={model.provider} />
-                  </>
+                  <ModelPicker
+                    variant="rail"
+                    items={modelItems}
+                    providers={pickerProviders}
+                    value={modelKey(model)}
+                    label={t("model")}
+                    favorites={settings.favoriteModels}
+                    onFavoritesChange={(favorites) =>
+                      void updateSettings((saved) => void (saved.favoriteModels = favorites))
+                    }
+                    onValueChange={(key) => {
+                      const next = parseModelKey(key);
+                      if (next) void updateSettings((saved) => void (saved.model = next));
+                    }}
+                  >
+                    <ModelPicker.Trigger
+                      appearance="ghost"
+                      className="max-w-48"
+                      placeholder={t("chooseModel")}
+                    />
+                    <ModelPicker.Content
+                      side="top"
+                      placeholder={t("searchModels")}
+                      emptyText={t("noModels")}
+                    />
+                  </ModelPicker>
                 ) : null}
               </Prompt.Tools>
               <Prompt.Submit sendLabel={t("send")} stopLabel={t("stop")} />
@@ -189,8 +186,7 @@ export function PromptBar() {
           </Prompt.Field>
           <Prompt.Context
             open={
-              (sources !== undefined && sources.length > 0 && mode === "sources") ||
-              (model !== null && chat.messages.length > 0)
+              (sources !== undefined && sources.length > 0 && mode === "sources") || model !== null
             }
           >
             {mode === "sources" && sources && sources.length > 0 ? (
@@ -200,7 +196,8 @@ export function PromptBar() {
               </Prompt.ContextItem>
             ) : null}
             {model && settings ? (
-              <span className="ms-auto flex items-center">
+              <span className="ms-auto flex items-center gap-3">
+                <EffortMenu settings={settings} provider={model.provider} />
                 <UsageRing
                   messages={chat.messages}
                   settings={settings}
