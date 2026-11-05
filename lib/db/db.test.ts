@@ -8,7 +8,7 @@ import { loadBlob, saveBlob } from "./blobs";
 import { ancestors, createFolder, deleteFolder, moveFolder } from "./folders";
 import { createNotebook, deleteNotebook, updateNotebook } from "./notebooks";
 import { createOutput, deleteOutput, markInterruptedOutputs } from "./outputs";
-import { asBackend, createSqliteStore } from "./sqlite/store";
+import { asBackend, createSqliteStore, schemaVersion } from "./sqlite/store";
 import { setStoreForTests, store } from "./store";
 import { conversationTitle } from "@/lib/chat/title";
 import {
@@ -26,7 +26,7 @@ import {
   isProviderReady,
   updateProvider,
 } from "./settings";
-import { addSource, getChunks } from "./sources";
+import { addSource, attachImages, deleteSource, getChunks } from "./sources";
 
 const userMessage = (id: string, text = id) => ({
   id,
@@ -155,6 +155,28 @@ describe.each(backends)("%s store", (name, create) => {
       expect(await loadBlob(kept)).toBeNull();
       expect(await loadBlob(loose)).not.toBeNull();
       await deleteNotebook(notebookId);
+      expect(await store().count("blobs")).toBe(0);
+    });
+  });
+
+  describe("source pictures", () => {
+    it("keeps a PDF's pictures with its source and deletes them with it", async () => {
+      const notebookId = await createNotebook("Pictures");
+      const source = await addSource({
+        notebookId,
+        title: "Paper",
+        kind: "pdf",
+        text: "Page one.",
+      });
+      await attachImages(source, [
+        { mime: "image/webp", data: new Uint8Array([7, 8]), width: 10, height: 20, at: 9 },
+      ]);
+      const saved = await store().getSource(source.id);
+      expect(saved?.images).toHaveLength(1);
+      expect(saved?.images?.[0]).toMatchObject({ at: 9, width: 10, height: 20 });
+      const blob = await loadBlob(saved!.images![0].blobId);
+      expect(blob?.type).toBe("image/webp");
+      await deleteSource(source.id);
       expect(await store().count("blobs")).toBe(0);
     });
   });
@@ -497,7 +519,7 @@ describe("SQLite migration 2", () => {
     expect(sqlite.listNotebooks().map((notebook) => notebook.title)).toEqual(["Old"]);
     expect(sqlite.listFolders()).toEqual([]);
     expect((db.prepare("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(
-      2,
+      schemaVersion,
     );
   });
 });

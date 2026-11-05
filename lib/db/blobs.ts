@@ -5,6 +5,7 @@ import { store } from "./store";
 export async function saveBlob(input: {
   notebookId: string;
   outputId?: string;
+  sourceId?: string;
   mime: string;
   data: Uint8Array;
 }): Promise<string> {

@@ -111,5 +111,9 @@ export class BetterVaultDatabase extends Dexie {
       folders: "id, parentId",
       blobs: "id, notebookId, outputId",
     });
+    // Version 5: pictures taken from a PDF are kept as files of its source.
+    this.version(5).stores({
+      blobs: "id, notebookId, outputId, sourceId",
+    });
   }
 }

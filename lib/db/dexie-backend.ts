@@ -82,8 +82,9 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       await db.sources.where("notebookId").equals(notebookId).modify(patch);
     },
     deleteSource: (id) =>
-      db.transaction("rw", [db.sources, db.chunks], async () => {
+      db.transaction("rw", [db.sources, db.chunks, db.blobs], async () => {
         await db.chunks.where("sourceId").equals(id).delete();
+        await db.blobs.where("sourceId").equals(id).delete();
         await db.sources.delete(id);
       }),
     getChunks: (sourceIds) => db.chunks.where("sourceId").anyOf(sourceIds).toArray(),

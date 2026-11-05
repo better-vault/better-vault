@@ -139,7 +139,7 @@ export const writes = {
   addSource: ["sources", "chunks", "notebooks"],
   patchSource: ["sources"],
   patchNotebookSources: ["sources"],
-  deleteSource: ["sources", "chunks"],
+  deleteSource: ["sources", "chunks", "blobs"],
   saveChat: ["messages", "conversations", "notebooks"],
   patchConversation: ["conversations"],
   deleteConversation: ["conversations", "messages"],

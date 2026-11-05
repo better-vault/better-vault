@@ -1,8 +1,9 @@
 import { generateId } from "ai";
 import { chunkText, normaliseText } from "@/lib/grounding/chunk";
+import { saveBlob } from "./blobs";
 import { useStoreQuery } from "./live";
 import { store } from "./store";
-import type { Chunk, Source, SourceKind } from "./types";
+import type { Chunk, Source, SourceImage, SourceKind } from "./types";
 
 export interface NewSource {
   notebookId: string;
@@ -38,6 +39,31 @@ export async function addSource(input: NewSource): Promise<Source> {
   }));
   await store().addSource(source, chunks, Date.now());
   return source;
+}
+
+export interface NewSourceImage {
+  mime: string;
+  data: Uint8Array;
+  width: number;
+  height: number;
+  /** A character offset in the source's text. */
+  at: number;
+}
+
+/** Keeps pictures with a source (from its PDF); they are deleted with it. */
+export async function attachImages(source: Source, images: NewSourceImage[]): Promise<void> {
+  if (images.length === 0) return;
+  const kept: SourceImage[] = [];
+  for (const image of images) {
+    const blobId = await saveBlob({
+      notebookId: source.notebookId,
+      sourceId: source.id,
+      mime: image.mime,
+      data: image.data,
+    });
+    kept.push({ blobId, at: image.at, width: image.width, height: image.height });
+  }
+  await store().patchSource(source.id, { images: kept });
 }
 
 export async function setSourceSelected(id: string, selected: boolean) {

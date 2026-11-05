@@ -8,9 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Fixed
 
 - Google Drive: files picked in Google's Picker sometimes never appeared as sources. The Add source dialog no longer closes or pulls focus while the Picker is open, a refused or expired token is renewed once, the Picker reports its errors instead of waiting forever, scripts that failed to load are tried again, shortcuts open their file, files named without an extension are read by their type, and files that can't be read are named in a message.
+- Sources: the source sheet joins the lines a PDF broke back into paragraphs, keeps headings and bullets apart, and renders Markdown sources.
 
 ### Added
 
+- Sources: pictures in a PDF are kept with it and shown in the source sheet where their page ends; press one to see it larger. PDFs added before this version show their text only.
 - Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.
 - Settings → AI providers: an Effort level for each provider (Default, None, Low, Medium, High, Max and more where the provider has them), used in chat and in the Studio.
 - Chat: a new model picker, with providers in a rail, search and starred models; and, under the prompt, an Effort switch beside a usage ring showing how much of the model's context the last answer used, and the tokens sent and received in the chat.

@@ -96,7 +96,15 @@ const migrations: string[] = [
   CREATE INDEX blobs_notebook ON blobs (notebook_id);
   CREATE INDEX blobs_output ON blobs (output_id);
   `,
+  // 3: pictures taken from a PDF are kept as files of its source.
+  `
+  ALTER TABLE blobs ADD COLUMN source_id TEXT;
+  CREATE INDEX blobs_source ON blobs (source_id);
+  `,
 ];
+
+/** The schema version a database has once migrated. */
+export const schemaVersion = migrations.length;
 
 /** Brings the database's schema up to date. */
 export function migrate(db: SqliteDatabase) {
@@ -183,6 +191,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     id: string;
     notebook_id: string;
     output_id: string | null;
+    source_id: string | null;
     mime: string;
     created_at: number;
     data: Uint8Array;
@@ -191,6 +200,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     id: row.id,
     notebookId: row.notebook_id,
     ...(row.output_id ? { outputId: row.output_id } : {}),
+    ...(row.source_id ? { sourceId: row.source_id } : {}),
     mime: row.mime,
     // node:sqlite returns a Uint8Array; copy it so it owns its bytes.
     data: new Uint8Array(row.data),
@@ -199,9 +209,17 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
   const putBlob = (row: StoredBlob) =>
     db
       .prepare(
-        "INSERT OR REPLACE INTO blobs (id, notebook_id, output_id, mime, created_at, data) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO blobs (id, notebook_id, output_id, source_id, mime, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?)",
       )
-      .run(row.id, row.notebookId, row.outputId ?? null, row.mime, row.createdAt, row.data);
+      .run(
+        row.id,
+        row.notebookId,
+        row.outputId ?? null,
+        row.sourceId ?? null,
+        row.mime,
+        row.createdAt,
+        row.data,
+      );
 
   return {
     listNotebooks: () =>
@@ -280,6 +298,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     deleteSource: (id) =>
       transaction(db, () => {
         deleteWhere("chunks", "source_id", id);
+        db.prepare("DELETE FROM blobs WHERE source_id = ?").run(id);
         deleteWhere("sources", "id", id);
       }),
     getChunks: (sourceIds) =>

@@ -59,5 +59,6 @@
     "tooLarge": "{{name}} is larger than 20 MB.",
     "read": "Could not read {{name}}: {{error}}",
     "url": "Enter a full address starting with http:// or https://."
-  }
+  },
+  "picture": "Picture from {{title}}"
 }

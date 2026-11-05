@@ -33,6 +33,8 @@ export interface StoredBlob {
   notebookId: string;
   /** The output it belongs to; deleted with it. */
   outputId?: string;
+  /** The source it belongs to (a picture from a PDF); deleted with it. */
+  sourceId?: string;
   mime: string;
   data: Uint8Array;
   createdAt: number;
@@ -51,10 +53,23 @@ export interface Source {
   fileName?: string;
   /** The source as plain text. */
   text: string;
+  /**
+   * Pictures taken from a PDF, in reading order, kept as files (`blobs`).
+   * Each sits after the character `at` of `text`: the end of its page.
+   */
+  images?: SourceImage[];
   charCount: number;
   /** Only selected sources are given to the model. */
   selected: boolean;
   createdAt: number;
+}
+
+export interface SourceImage {
+  blobId: string;
+  /** Where in the text it belongs: a character offset. */
+  at: number;
+  width: number;
+  height: number;
 }
 
 /** A passage of a source, used for retrieval and citations. */

@@ -1,5 +1,5 @@
 import type { Source, SourceKind } from "@/lib/db/database";
-import { addSource } from "@/lib/db/sources";
+import { addSource, attachImages } from "@/lib/db/sources";
 
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
@@ -68,7 +68,13 @@ export async function ingestFile(notebookId: string, file: File): Promise<Source
         error instanceof Error ? error.message : String(error),
       );
     }
-    return save({ ...base, kind: "pdf", text: parsed.text });
+    const source = await save({ ...base, kind: "pdf", text: parsed.text });
+    // The pictures follow in the background; the source can be used at once.
+    void import("./pdf-images")
+      .then(({ pdfImages }) => pdfImages(file, source.text))
+      .then((images) => attachImages(source, images))
+      .catch(() => undefined);
+    return source;
   }
   if (["md", "markdown", "mdx"].includes(ext) || file.type === "text/markdown") {
     return save({ ...base, kind: "markdown", text: await file.text() });
