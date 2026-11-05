@@ -14,7 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - Vaults: separate spaces, each with its own notebooks and folders, a name, an icon and a colour. Everything you had is in “My vault”. Backups are format 4 and hold vaults; older backups import into “My vault”.
-- Notebooks page: a sidebar with the vault, search, pinned notebooks and a folder tree (drop notebooks on a folder to move them), and a vault switcher at its foot; the page opens on the vault's counts, quick actions (new notebook, import files, search) and recent notebooks. Notebooks can be pinned and moved to another vault.
+- Notebooks page, laid out like a Finder window: a side panel with Recent, All notebooks, pinned notebooks and your vaults; a toolbar with back and forward, an icon or list view and sorting, new notebook, new folder, import and search; and a path bar you can drop notebooks on. Notebooks can be pinned and moved to another vault.
 - Sources: pictures in a PDF are kept with it and shown in the source sheet where their page ends; press one to see it larger. PDFs added before this version show their text only.
 - Providers: DeepSeek, with your own key. It has no built-in web search, so Web mode stays off for it.
 - Settings → AI providers: an Effort level for each provider (Default, None, Low, Medium, High, Max and more where the provider has them), used in chat and in the Studio.

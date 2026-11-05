@@ -1,22 +1,27 @@
 import {
   Add01Icon,
+  ArrowDown01Icon,
+  ArrowLeft01Icon,
   ArrowRight01Icon,
   FileImportIcon,
   FileUploadIcon,
   FolderAddIcon,
+  GridViewIcon,
+  Menu01Icon,
+  MoreHorizontalIcon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
-import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
-import { Input } from "@/components/panelui/input";
+import { Menu } from "@/components/panelui/menu";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { openCommandPalette } from "@/lib/command";
+import type { Folder } from "@/lib/db/database";
 import { ancestors, createFolder, moveFolder, useFolders } from "@/lib/db/folders";
 import {
   createNotebook,
@@ -24,8 +29,13 @@ import {
   useNotebookCounts,
   useNotebooks,
 } from "@/lib/db/notebooks";
-import { DEFAULT_VAULT, useCurrentVault, useVaults, vaultOf } from "@/lib/db/vaults";
-import { formatRelativeTime } from "@/lib/format";
+import {
+  DEFAULT_VAULT,
+  setCurrentVault,
+  useCurrentVault,
+  useVaults,
+  vaultOf,
+} from "@/lib/db/vaults";
 import { itemColor } from "@/lib/notebooks/colors";
 import { notebookIcon } from "@/lib/notebooks/icons";
 import { shortcutKeys } from "@/lib/platform";
@@ -34,31 +44,41 @@ import { ACCEPTED_FILES, IngestError, ingestFile } from "@/lib/sources/ingest";
 import { cn } from "@/lib/utils";
 import { FolderDialog } from "./folder-dialogs";
 import {
-  Crumb,
   FOLDER_DRAG,
-  FolderTile,
+  FolderItem,
+  ListHeader,
   NOTEBOOK_DRAG,
-  NewTile,
-  NotebookCard,
-  Section,
+  NotebookItem,
   isFileDrag,
+  useDropTarget,
+  type HomeView,
 } from "./home-cards";
 import { NotebookDialog } from "./notebook-dialog";
-import { VaultSidebar } from "./vault-sidebar";
+import { VaultSidebar, type HomeSection } from "./vault-sidebar";
 import { useVaultName } from "./vault-name";
 
 const sortKey = "better-vault:home-sort";
+const viewKey = "better-vault:home-view";
 
 type Sort = "recent" | "name";
 
+const saved = <T extends string>(key: string, values: readonly T[], fallback: T): T => {
+  try {
+    const value = localStorage.getItem(key);
+    return values.includes(value as T) ? (value as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 /**
- * The notebooks page: a vault's sidebar (pinned notebooks, folder tree, vault
- * switcher) beside its notebooks, with quick actions, recent notebooks,
- * folders, search, and files dropped to start a notebook.
+ * The notebooks page, laid out like a Finder window: a side panel of
+ * favourites and vaults, a toolbar, the current folder's folders and
+ * notebooks as icons or a list, and a path bar. Files dropped anywhere start
+ * a notebook with them.
  */
-/** The notebooks page: folders, notebooks, search, and files dropped to start a notebook. */
 export function NotebookHome() {
-  const { t, i18n } = useTranslation("home");
+  const { t } = useTranslation("home");
   const { t: tCommon } = useTranslation();
   const tSources = useTranslation("sources").t;
   const navigate = useNavigate();
@@ -75,87 +95,72 @@ export function NotebookHome() {
     [allNotebooks, vaultId],
   );
   const folders = useMemo(
-    () => everyFolder?.filter((folder) => vaultOf(folder) === vaultId),
+    () => (everyFolder ?? []).filter((folder) => vaultOf(folder) === vaultId),
     [everyFolder, vaultId],
   );
   const importInput = useRef<HTMLInputElement>(null);
 
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<Sort>(() =>
-    typeof localStorage !== "undefined" && localStorage.getItem(sortKey) === "name"
-      ? "name"
-      : "recent",
-  );
+  const [sort, setSort] = useState<Sort>(() => saved(sortKey, ["recent", "name"], "recent"));
+  const [view, setView] = useState<HomeView>(() => saved(viewKey, ["grid", "list"], "grid"));
   const [creating, setCreating] = useState<{ files: File[] } | null>(null);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [fileDrag, setFileDrag] = useState(false);
   const dragDepth = useRef(0);
 
-  const allFolders = useMemo(() => folders ?? [], [folders]);
+  const section: HomeSection = params.get("view") === "recents" ? "recents" : "all";
   const folderParam = params.get("folder");
   const current =
-    folderParam && allFolders.some((folder) => folder.id === folderParam) ? folderParam : null;
-  const path = ancestors(current, allFolders);
+    section === "all" && folderParam && folders.some((folder) => folder.id === folderParam)
+      ? folderParam
+      : null;
+  const path = ancestors(current, folders);
   const currentFolder = path.at(-1);
+  const title =
+    section === "recents"
+      ? t("vaults.recent")
+      : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
 
   useEffect(() => {
-    document.title = currentFolder
-      ? `${currentFolder.name} · ${tCommon("appName")}`
-      : tCommon("appName");
-  }, [currentFolder, tCommon]);
+    document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
+  }, [title, tCommon]);
 
-  const recent = useMemo(
-    () => [...(notebooks ?? [])].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 4),
-    [notebooks],
-  );
-  const sourceTotal = (notebooks ?? []).reduce(
-    (sum, notebook) => sum + (counts?.get(notebook.id)?.sources ?? 0),
-    0,
-  );
-  const empty = notebooks !== undefined && notebooks.length === 0 && allFolders.length === 0;
-  const keys = shortcutKeys("k");
+  const openFolder = (id: string | null) => setParams(id ? { folder: id } : {});
+  const showSection = (next: HomeSection) =>
+    setParams(next === "recents" ? { view: "recents" } : {});
 
-  const openFolder = (id: string | null) => {
-    setQuery("");
-    setParams(id ? { folder: id } : {});
-  };
-
-  const searching = query.trim().length > 0;
-  const needle = query.trim().toLocaleLowerCase();
   const order = <T extends { updatedAt: number }>(items: T[], name: (item: T) => string) =>
     [...items].sort((a, b) =>
       sort === "name" ? name(a).localeCompare(name(b)) : b.updatedAt - a.updatedAt,
     );
-
-  const shownFolders = order(
-    allFolders.filter((folder) =>
-      searching
-        ? folder.name.toLocaleLowerCase().includes(needle)
-        : (folder.parentId ?? null) === current,
-    ),
-    (folder) => folder.name,
-  );
+  const shownFolders =
+    section === "recents"
+      ? []
+      : order(
+          folders.filter((folder) => (folder.parentId ?? null) === current),
+          (folder) => folder.name,
+        );
   const shownNotebooks = notebooks
-    ? order(
-        notebooks.filter((notebook) =>
-          searching
-            ? notebook.title.toLocaleLowerCase().includes(needle)
-            : (notebook.folderId ?? null) === current,
-        ),
-        (notebook) => notebook.title,
-      )
+    ? section === "recents"
+      ? [...notebooks].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 24)
+      : order(
+          notebooks.filter((notebook) => (notebook.folderId ?? null) === current),
+          (notebook) => notebook.title,
+        )
     : undefined;
+  const empty =
+    shownNotebooks !== undefined && shownNotebooks.length === 0 && shownFolders.length === 0;
+  const pinned = (notebooks ?? []).filter((notebook) => notebook.pinned);
 
   /** What a folder holds, for its tile. */
   const sizeOf = (id: string) =>
-    allFolders.filter((folder) => folder.parentId === id).length +
+    folders.filter((folder) => folder.parentId === id).length +
     (notebooks ?? []).filter((notebook) => notebook.folderId === id).length;
 
   async function dropCards(event: DragEvent, target: string | null) {
     const notebookId = event.dataTransfer.getData(NOTEBOOK_DRAG);
     const folderId = event.dataTransfer.getData(FOLDER_DRAG);
     if (notebookId) await updateNotebook(notebookId, { folderId: target });
-    if (folderId && folderId !== target) await moveFolder(folderId, target, allFolders);
+    if (folderId && folderId !== target) await moveFolder(folderId, target, folders);
   }
 
   function describe(error: unknown): string {
@@ -167,14 +172,17 @@ export function NotebookHome() {
     return error instanceof Error ? error.message : String(error);
   }
 
-  const sortItems = [
-    { value: "recent" as const, label: t("sort.recent") },
-    { value: "name" as const, label: t("sort.name") },
-  ];
+  const remember = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Storage can be blocked; the choice then lasts for this page only.
+    }
+  };
 
   return (
     <div
-      className="relative flex h-full flex-col"
+      className="relative flex h-full"
       onDragEnter={(event) => {
         if (!isFileDrag(event)) return;
         event.preventDefault();
@@ -198,239 +206,261 @@ export function NotebookHome() {
         if (files.length > 0) setCreating({ files });
       }}
     >
-      {/* Small screens have no sidebar: the app name and Settings stay in a bar. */}
-      <header data-window-bar className="flex items-center justify-between px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2.5">
-          <Logo size={28} />
-          <span className="text-[0.9375rem] font-semibold">{tCommon("appName")}</span>
-        </div>
-        <SettingsSheet />
-      </header>
-      <div className="flex min-h-0 flex-1">
-        {vaults && vault ? (
-          <VaultSidebar
-            vaults={vaults}
-            vault={vault}
-            notebooks={notebooks ?? []}
-            folders={allFolders}
-            currentFolder={current}
-            onOpenFolder={openFolder}
-            onDropCards={(event, target) => void dropCards(event, target)}
-          />
-        ) : null}
-        <ScrollArea className="min-h-0 flex-1">
-          <main className="px-4 pb-16 sm:px-8">
-            <div className="mx-auto max-w-5xl pt-8 md:pt-14">
-              {current ? (
-                <nav
-                  aria-label={t("breadcrumbs")}
-                  className="-ms-1 flex flex-wrap items-center gap-1 text-3xl font-semibold tracking-tight sm:text-4xl"
-                >
-                  <Crumb
-                    onOpen={() => openFolder(null)}
-                    onDropCards={(event) => dropCards(event, null)}
-                    active={!current}
-                  >
-                    {vault ? vaultName(vault) : t("title")}
-                  </Crumb>
-                  {path.map((folder) => (
-                    <span key={folder.id} className="flex items-center gap-1">
-                      <Icon
-                        icon={ArrowRight01Icon}
-                        size={22}
-                        className="text-muted-foreground rtl:rotate-180"
-                      />
-                      <Crumb
-                        onOpen={() => openFolder(folder.id)}
-                        onDropCards={(event) => dropCards(event, folder.id)}
-                        active={folder.id === current}
-                      >
-                        {folder.name}
-                      </Crumb>
-                    </span>
-                  ))}
-                </nav>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <span
-                    className={cn(
-                      "flex size-14 shrink-0 items-center justify-center rounded-2xl",
-                      itemColor(vault?.color).tile,
-                    )}
-                  >
-                    <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
-                  </span>
-                  <div className="min-w-0">
-                    <h1 className="truncate text-3xl font-semibold tracking-tight sm:text-4xl">
-                      {vault ? vaultName(vault) : t("title")}
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {t("vaults.stats", {
-                        notebooks: t("vaults.notebookCount", { count: notebooks?.length ?? 0 }),
-                        sources: tCommon("sourceCount", { count: sourceTotal }),
-                        folders: t("vaults.folderCount", { count: allFolders.length }),
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )}
-              {current ? <p className="mt-2 text-muted-foreground">{t("folderSubtitle")}</p> : null}
+      {vaults && vault ? (
+        <VaultSidebar
+          vaults={vaults}
+          vault={vault}
+          pinned={pinned}
+          section={section}
+          onSection={showSection}
+          onDropCards={(event) => void dropCards(event, null)}
+        />
+      ) : null}
 
-              {!current && !searching ? (
-                <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <QuickAction
-                    icon={Add01Icon}
-                    label={t("newNotebook")}
-                    hint={t("vaults.newNotebookHint")}
-                    onClick={() => setCreating({ files: [] })}
-                  />
-                  <QuickAction
-                    icon={FileImportIcon}
-                    label={t("vaults.importFiles")}
-                    hint={t("vaults.importHint")}
-                    onClick={() => importInput.current?.click()}
-                  />
-                  <QuickAction
-                    icon={Search01Icon}
-                    label={t("vaults.search")}
-                    hint={t("vaults.searchHint")}
-                    keys={keys}
-                    onClick={openCommandPalette}
-                  />
-                  <input
-                    ref={importInput}
-                    type="file"
-                    multiple
-                    accept={ACCEPTED_FILES}
-                    className="hidden"
-                    onChange={(event) => {
-                      const files = [...(event.target.files ?? [])];
-                      event.target.value = "";
-                      if (files.length > 0) setCreating({ files });
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* The toolbar: history, the title, the view, actions and search. */}
+        <header data-window-bar className="flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6">
+          <div className="flex items-center gap-2 md:hidden">
+            <Logo size={24} />
+            {vaults && vault ? <MobileVaults vaults={vaults} current={vault.id} /> : null}
+          </div>
+          <Pill className="hidden sm:flex">
+            <ToolButton label={t("toolbar.back")} onClick={() => navigate(-1)}>
+              <Icon icon={ArrowLeft01Icon} size={18} className="rtl:rotate-180" />
+            </ToolButton>
+            <ToolButton label={t("toolbar.forward")} onClick={() => navigate(1)}>
+              <Icon icon={ArrowRight01Icon} size={18} className="rtl:rotate-180" />
+            </ToolButton>
+          </Pill>
+          <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{title}</h1>
+
+          <Pill>
+            <Menu>
+              <Menu.Trigger
+                aria-label={t("toolbar.view")}
+                title={t("toolbar.view")}
+                className="flex h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-popup-open:bg-accent"
+              >
+                <Icon icon={view === "grid" ? GridViewIcon : Menu01Icon} size={18} />
+                <Icon icon={ArrowDown01Icon} size={14} />
+              </Menu.Trigger>
+              <Menu.Content align="end">
+                <Menu.Group>
+                  <Menu.GroupLabel>{t("toolbar.view")}</Menu.GroupLabel>
+                  <Menu.RadioGroup
+                    value={view}
+                    onValueChange={(next: unknown) => {
+                      const value = next === "list" ? "list" : "grid";
+                      setView(value);
+                      remember(viewKey, value);
                     }}
-                  />
-                </div>
-              ) : null}
+                  >
+                    <Menu.RadioItem value="grid">{t("toolbar.grid")}</Menu.RadioItem>
+                    <Menu.RadioItem value="list">{t("toolbar.list")}</Menu.RadioItem>
+                  </Menu.RadioGroup>
+                </Menu.Group>
+                <Menu.Separator />
+                <Menu.Group>
+                  <Menu.GroupLabel>{t("sort.label")}</Menu.GroupLabel>
+                  <Menu.RadioGroup
+                    value={sort}
+                    onValueChange={(next: unknown) => {
+                      const value = next === "name" ? "name" : "recent";
+                      setSort(value);
+                      remember(sortKey, value);
+                    }}
+                  >
+                    <Menu.RadioItem value="recent">{t("sort.recent")}</Menu.RadioItem>
+                    <Menu.RadioItem value="name">{t("sort.name")}</Menu.RadioItem>
+                  </Menu.RadioGroup>
+                </Menu.Group>
+              </Menu.Content>
+            </Menu>
+          </Pill>
 
-              {!current && !searching && recent.length > 0 ? (
-                <section aria-label={t("vaults.recent")} className="mt-8">
-                  <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
-                    {t("vaults.recent")}
-                  </h2>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                    {recent.map((notebook) => (
-                      <Link
-                        key={notebook.id}
-                        to={routes.notebook(notebook.id)}
-                        className="flex min-w-0 items-center gap-3 rounded-2xl bg-card p-3 ring-1 ring-border transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <span
-                          className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
-                            itemColor(notebook.color).tile,
-                          )}
-                        >
-                          <Icon icon={notebookIcon(notebook.icon)} size={18} />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium">
-                            {notebook.title}
-                          </span>
-                          <span className="block truncate text-xs text-muted-foreground">
-                            {formatRelativeTime(notebook.updatedAt, i18n.language)}
-                          </span>
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
+          <Pill>
+            <ToolButton label={t("newNotebook")} onClick={() => setCreating({ files: [] })}>
+              <Icon icon={Add01Icon} size={18} />
+            </ToolButton>
+            <ToolButton label={t("folders.new")} onClick={() => setCreatingFolder(true)}>
+              <Icon icon={FolderAddIcon} size={18} />
+            </ToolButton>
+            <Menu>
+              <Menu.Trigger
+                aria-label={t("toolbar.more")}
+                title={t("toolbar.more")}
+                className="flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-popup-open:bg-accent"
+              >
+                <Icon icon={MoreHorizontalIcon} size={18} />
+              </Menu.Trigger>
+              <Menu.Content align="end">
+                <Menu.Item onClick={() => importInput.current?.click()}>
+                  <Icon icon={FileImportIcon} />
+                  {t("vaults.importFiles")}
+                </Menu.Item>
+              </Menu.Content>
+            </Menu>
+          </Pill>
 
-              {empty ? (
-                <div className="mt-10 flex flex-col items-center gap-2 rounded-3xl border border-dashed px-6 py-12 text-center">
-                  <p className="font-semibold">{t("vaults.emptyTitle")}</p>
-                  <p className="max-w-sm text-sm text-muted-foreground">{t("vaults.emptyBody")}</p>
-                </div>
-              ) : null}
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            aria-label={t("vaults.search")}
+            title={`${t("vaults.search")} (${shortcutKeys("k").join(" ")})`}
+            className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Icon icon={Search01Icon} size={18} />
+          </button>
+          <span className="md:hidden">
+            <SettingsSheet />
+          </span>
+          <input
+            ref={importInput}
+            type="file"
+            multiple
+            accept={ACCEPTED_FILES}
+            className="hidden"
+            onChange={(event) => {
+              const files = [...(event.target.files ?? [])];
+              event.target.value = "";
+              if (files.length > 0) setCreating({ files });
+            }}
+          />
+        </header>
 
-              <div className={cn("mt-8 flex flex-wrap items-center gap-2", empty && "hidden")}>
-                <div className="min-w-48 flex-1">
-                  <Input.Group>
-                    <Input.Addon>
-                      <Icon icon={Search01Icon} size={16} />
-                    </Input.Addon>
-                    <Input
-                      type="search"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder={t("search")}
-                      aria-label={t("search")}
-                    />
-                  </Input.Group>
-                </div>
-                <Segmented<Sort>
-                  value={sort}
-                  onValueChange={(next) => {
-                    setSort(next);
-                    localStorage.setItem(sortKey, next);
-                  }}
-                  options={sortItems}
-                  aria-label={t("sort.label")}
-                />
-              </div>
-
-              <Section title={t("vaults.notebooks")}>
-                {searching ? null : (
-                  <NewTile
-                    icon={Add01Icon}
-                    label={t("newNotebook")}
-                    hint={t("dropHint")}
+        <ScrollArea className="min-h-0 flex-1">
+          <main className="px-4 pt-2 pb-10 sm:px-6">
+            {empty ? (
+              <div className="flex flex-col items-center gap-3 py-20 text-center">
+                <span
+                  className={cn(
+                    "flex size-16 items-center justify-center rounded-[1.25rem]",
+                    itemColor(vault?.color).tile,
+                  )}
+                >
+                  <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
+                </span>
+                <p className="font-semibold">
+                  {section === "recents" || current
+                    ? t("vaults.emptyFolder")
+                    : t("vaults.emptyTitle")}
+                </p>
+                <p className="max-w-sm text-sm text-muted-foreground">{t("vaults.emptyBody")}</p>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
                     onClick={() => setCreating({ files: [] })}
-                  />
-                )}
-                {shownNotebooks?.map((notebook) => (
-                  <NotebookCard
-                    key={notebook.id}
-                    notebook={notebook}
-                    folders={allFolders}
-                    vaults={vaults ?? []}
-                    showFolder={searching}
-                    sources={counts?.get(notebook.id)?.sources ?? 0}
+                    className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Icon icon={Add01Icon} size={16} />
+                    {t("newNotebook")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => importInput.current?.click()}
+                    className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 ring-border outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Icon icon={FileImportIcon} size={16} />
+                    {t("vaults.importFiles")}
+                  </button>
+                </div>
+              </div>
+            ) : view === "grid" ? (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
+                {shownFolders.map((folder) => (
+                  <FolderItem
+                    key={folder.id}
+                    folder={folder}
+                    folders={folders}
+                    size={sizeOf(folder.id)}
+                    view="grid"
+                    onOpen={() => openFolder(folder.id)}
+                    onDropCards={(event) => void dropCards(event, folder.id)}
                   />
                 ))}
-              </Section>
-
-              {searching && shownFolders.length === 0 ? null : (
-                <Section title={t("folders.label")}>
-                  {searching ? null : (
-                    <NewTile
-                      icon={FolderAddIcon}
-                      label={t("folders.new")}
-                      hint={t("folders.newHint")}
-                      onClick={() => setCreatingFolder(true)}
-                    />
-                  )}
-                  {shownFolders.map((folder) => (
-                    <FolderTile
-                      key={folder.id}
-                      folder={folder}
-                      folders={allFolders}
-                      size={sizeOf(folder.id)}
-                      onOpen={() => openFolder(folder.id)}
-                      onDropCards={(event) => dropCards(event, folder.id)}
-                    />
-                  ))}
-                </Section>
-              )}
-
-              {searching && shownNotebooks?.length === 0 && shownFolders.length === 0 ? (
-                <p className="mt-10 text-center text-sm text-muted-foreground">
-                  {t("noResults", { query: query.trim() })}
-                </p>
-              ) : null}
-            </div>
+                {shownNotebooks?.map((notebook) => (
+                  <NotebookItem
+                    key={notebook.id}
+                    notebook={notebook}
+                    folders={folders}
+                    vaults={vaults ?? []}
+                    sources={counts?.get(notebook.id)?.sources ?? 0}
+                    view="grid"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-0.5">
+                <ListHeader>
+                  <span>{t("toolbar.name")}</span>
+                  <span>{t("toolbar.contents")}</span>
+                  <span>{t("toolbar.modified")}</span>
+                  <span />
+                </ListHeader>
+                {shownFolders.map((folder) => (
+                  <FolderItem
+                    key={folder.id}
+                    folder={folder}
+                    folders={folders}
+                    size={sizeOf(folder.id)}
+                    view="list"
+                    onOpen={() => openFolder(folder.id)}
+                    onDropCards={(event) => void dropCards(event, folder.id)}
+                  />
+                ))}
+                {shownNotebooks?.map((notebook) => (
+                  <NotebookItem
+                    key={notebook.id}
+                    notebook={notebook}
+                    folders={folders}
+                    vaults={vaults ?? []}
+                    sources={counts?.get(notebook.id)?.sources ?? 0}
+                    view="list"
+                  />
+                ))}
+              </div>
+            )}
           </main>
         </ScrollArea>
+
+        {/* The path bar: the vault and the folders down to this one, each a drop target. */}
+        <nav
+          aria-label={t("breadcrumbs")}
+          className="flex h-10 shrink-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-t px-4 text-sm text-muted-foreground sm:px-6"
+        >
+          {vault ? (
+            <PathStep
+              active={!current && section === "all"}
+              onOpen={() => openFolder(null)}
+              onDropCards={(event) => void dropCards(event, null)}
+            >
+              <Icon icon={notebookIcon(vault.icon ?? "notebook")} size={15} />
+              {vaultName(vault)}
+            </PathStep>
+          ) : null}
+          {section === "recents" ? (
+            <Crumbs>
+              <span className="px-1.5 text-foreground">{t("vaults.recent")}</span>
+            </Crumbs>
+          ) : (
+            path.map((folder: Folder) => (
+              <Crumbs key={folder.id}>
+                <PathStep
+                  active={folder.id === current}
+                  onOpen={() => openFolder(folder.id)}
+                  onDropCards={(event) => void dropCards(event, folder.id)}
+                >
+                  {folder.name}
+                </PathStep>
+              </Crumbs>
+            ))
+          )}
+          <span className="ms-auto shrink-0 ps-4 text-xs">
+            {t("vaults.itemCount", {
+              count: shownFolders.length + (shownNotebooks?.length ?? 0),
+            })}
+          </span>
+        </nav>
       </div>
 
       {fileDrag ? (
@@ -447,7 +477,7 @@ export function NotebookHome() {
         open={creating !== null}
         onOpenChange={(open) => !open && setCreating(null)}
         mode="create"
-        folders={allFolders}
+        folders={folders}
         files={creating?.files}
         onRemoveFile={(file) =>
           setCreating((state) =>
@@ -459,8 +489,8 @@ export function NotebookHome() {
           folderId: current,
         }}
         onSubmit={async (details) => {
-          const { title, ...look } = details;
-          const id = await createNotebook(title || t("untitled"), {
+          const { title: name, ...look } = details;
+          const id = await createNotebook(name || t("untitled"), {
             ...look,
             ...(vaultId !== DEFAULT_VAULT ? { vaultId } : {}),
           });
@@ -489,42 +519,111 @@ export function NotebookHome() {
   );
 }
 
-/** A large button for one of the vault's first actions. */
-function QuickAction({
-  icon,
+/** A rounded group of toolbar buttons. */
+function Pill({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex h-10 shrink-0 items-center gap-0.5 rounded-full bg-card px-1 ring-1 ring-border",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ToolButton({
   label,
-  hint,
-  keys,
   onClick,
+  children,
 }: {
-  icon: typeof Add01Icon;
   label: string;
-  hint: string;
-  keys?: string[];
   onClick: () => void;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
+      aria-label={label}
+      title={label}
       onClick={onClick}
-      className="flex min-w-0 cursor-pointer items-center gap-3 rounded-2xl bg-card p-4 text-start ring-1 ring-border transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-        <Icon icon={icon} size={18} strokeWidth={2.2} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium">{label}</span>
-        <span className="block truncate text-xs text-muted-foreground">{hint}</span>
-      </span>
-      {keys ? (
-        <kbd className="hidden shrink-0 gap-0.5 font-sans text-xs text-muted-foreground lg:flex">
-          {keys.map((key) => (
-            <span key={key} className="rounded border bg-muted px-1.5 py-0.5">
-              {key}
-            </span>
-          ))}
-        </kbd>
-      ) : null}
+      {children}
     </button>
+  );
+}
+
+function Crumbs({ children }: { children: ReactNode }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      <Icon icon={ArrowRight01Icon} size={14} className="rtl:rotate-180" />
+      {children}
+    </span>
+  );
+}
+
+/** One step of the path bar; notebooks and folders can be dropped on it to move them there. */
+function PathStep({
+  children,
+  active,
+  onOpen,
+  onDropCards,
+}: {
+  children: ReactNode;
+  active: boolean;
+  onOpen: () => void;
+  onDropCards: (event: DragEvent) => void;
+}) {
+  const drop = useDropTarget(onDropCards);
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-current={active ? "page" : undefined}
+      {...drop.props}
+      className={cn(
+        "flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-1.5 py-1 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
+        active && "text-foreground",
+        drop.over && "bg-accent ring-1 ring-primary",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Small screens have no side panel: the vaults are in a menu. */
+function MobileVaults({
+  vaults,
+  current,
+}: {
+  vaults: { id: string; name: string; icon?: string }[];
+  current: string;
+}) {
+  const { t } = useTranslation("home");
+  const vaultName = useVaultName();
+  return (
+    <Menu>
+      <Menu.Trigger
+        aria-label={t("vaults.switch")}
+        className="flex h-8 cursor-pointer items-center gap-1 rounded-full px-2 text-muted-foreground outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Icon icon={ArrowDown01Icon} size={14} />
+      </Menu.Trigger>
+      <Menu.Content align="start">
+        <Menu.RadioGroup
+          value={current}
+          onValueChange={(next: unknown) => typeof next === "string" && setCurrentVault(next)}
+        >
+          {vaults.map((vault) => (
+            <Menu.RadioItem key={vault.id} value={vault.id}>
+              {vaultName(vault)}
+            </Menu.RadioItem>
+          ))}
+        </Menu.RadioGroup>
+      </Menu.Content>
+    </Menu>
   );
 }

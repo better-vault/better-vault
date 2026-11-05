@@ -93,7 +93,11 @@ async function listModelIds(
     }
     case "google": {
       const body = await getJson<{
-        models?: { name: string; supportedGenerationMethods?: string[]; inputTokenLimit?: number }[];
+        models?: {
+          name: string;
+          supportedGenerationMethods?: string[];
+          inputTokenLimit?: number;
+        }[];
       }>("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", {
         "x-goog-api-key": credentials.apiKey ?? "",
       });
