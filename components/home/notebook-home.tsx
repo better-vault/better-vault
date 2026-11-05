@@ -11,7 +11,16 @@ import {
   MoreHorizontalIcon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useMemo, useRef, useState, type DragEvent, type ReactNode } from "react";
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -56,6 +65,9 @@ import {
 import { NotebookDialog } from "./notebook-dialog";
 import { VaultSidebar, type HomeSection } from "./vault-sidebar";
 import { useVaultName } from "./vault-name";
+
+/** The calendar is large; it loads the first time it is opened. */
+const CalendarView = lazy(() => import("@/components/calendar/calendar-view"));
 
 const sortKey = "better-vault:home-sort";
 const viewKey = "better-vault:home-view";
@@ -107,7 +119,9 @@ export function NotebookHome() {
   const [fileDrag, setFileDrag] = useState(false);
   const dragDepth = useRef(0);
 
-  const section: HomeSection = params.get("view") === "recents" ? "recents" : "all";
+  const viewParam = params.get("view");
+  const section: HomeSection =
+    viewParam === "recents" || viewParam === "calendar" ? viewParam : "all";
   const folderParam = params.get("folder");
   const current =
     section === "all" && folderParam && folders.some((folder) => folder.id === folderParam)
@@ -116,17 +130,18 @@ export function NotebookHome() {
   const path = ancestors(current, folders);
   const currentFolder = path.at(-1);
   const title =
-    section === "recents"
-      ? t("vaults.recent")
-      : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
+    section === "calendar"
+      ? t("calendar.title")
+      : section === "recents"
+        ? t("vaults.recent")
+        : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
 
   useEffect(() => {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
   }, [title, tCommon]);
 
   const openFolder = (id: string | null) => setParams(id ? { folder: id } : {});
-  const showSection = (next: HomeSection) =>
-    setParams(next === "recents" ? { view: "recents" } : {});
+  const showSection = (next: HomeSection) => setParams(next === "all" ? {} : { view: next });
 
   const order = <T extends { updatedAt: number }>(items: T[], name: (item: T) => string) =>
     [...items].sort((a, b) =>
@@ -234,7 +249,7 @@ export function NotebookHome() {
           </Pill>
           <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{title}</h1>
 
-          <Pill>
+          <Pill className={cn(section === "calendar" && "hidden")}>
             <Menu>
               <Menu.Trigger
                 aria-label={t("toolbar.view")}
@@ -278,7 +293,7 @@ export function NotebookHome() {
             </Menu>
           </Pill>
 
-          <Pill>
+          <Pill className={cn(section === "calendar" && "hidden")}>
             <ToolButton label={t("newNotebook")} onClick={() => setCreating({ files: [] })}>
               <Icon icon={Add01Icon} size={18} />
             </ToolButton>
@@ -328,105 +343,124 @@ export function NotebookHome() {
           />
         </header>
 
-        <ScrollArea className="min-h-0 flex-1">
-          <main className="px-4 pt-2 pb-10 sm:px-6">
-            {empty ? (
-              <div className="flex flex-col items-center gap-3 py-20 text-center">
-                <span
-                  className={cn(
-                    "flex size-16 items-center justify-center rounded-[1.25rem]",
-                    itemColor(vault?.color).tile,
-                  )}
-                >
-                  <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
-                </span>
-                <p className="font-semibold">
-                  {section === "recents" || current
-                    ? t("vaults.emptyFolder")
-                    : t("vaults.emptyTitle")}
-                </p>
-                <p className="max-w-sm text-sm text-muted-foreground">{t("vaults.emptyBody")}</p>
-                <div className="mt-2 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCreating({ files: [] })}
-                    className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Icon icon={Add01Icon} size={16} />
-                    {t("newNotebook")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => importInput.current?.click()}
-                    className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 ring-border outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Icon icon={FileImportIcon} size={16} />
-                    {t("vaults.importFiles")}
-                  </button>
-                </div>
-              </div>
-            ) : view === "grid" ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
-                {shownFolders.map((folder) => (
-                  <FolderItem
-                    key={folder.id}
-                    folder={folder}
-                    folders={folders}
-                    size={sizeOf(folder.id)}
-                    view="grid"
-                    onOpen={() => openFolder(folder.id)}
-                    onDropCards={(event) => void dropCards(event, folder.id)}
-                  />
-                ))}
-                {shownNotebooks?.map((notebook) => (
-                  <NotebookItem
-                    key={notebook.id}
-                    notebook={notebook}
-                    folders={folders}
-                    vaults={vaults ?? []}
-                    sources={counts?.get(notebook.id)?.sources ?? 0}
-                    view="grid"
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-0.5">
-                <ListHeader>
-                  <span>{t("toolbar.name")}</span>
-                  <span>{t("toolbar.contents")}</span>
-                  <span>{t("toolbar.modified")}</span>
-                  <span />
-                </ListHeader>
-                {shownFolders.map((folder) => (
-                  <FolderItem
-                    key={folder.id}
-                    folder={folder}
-                    folders={folders}
-                    size={sizeOf(folder.id)}
-                    view="list"
-                    onOpen={() => openFolder(folder.id)}
-                    onDropCards={(event) => void dropCards(event, folder.id)}
-                  />
-                ))}
-                {shownNotebooks?.map((notebook) => (
-                  <NotebookItem
-                    key={notebook.id}
-                    notebook={notebook}
-                    folders={folders}
-                    vaults={vaults ?? []}
-                    sources={counts?.get(notebook.id)?.sources ?? 0}
-                    view="list"
-                  />
-                ))}
-              </div>
-            )}
+        {section === "calendar" ? (
+          <main className="min-h-0 flex-1 px-2 pb-2 sm:px-4">
+            <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    {tCommon("status.loading")}
+                  </div>
+                }
+              >
+                <CalendarView />
+              </Suspense>
+            </div>
           </main>
-        </ScrollArea>
+        ) : (
+          <ScrollArea className="min-h-0 flex-1">
+            <main className="px-4 pt-2 pb-10 sm:px-6">
+              {empty ? (
+                <div className="flex flex-col items-center gap-3 py-20 text-center">
+                  <span
+                    className={cn(
+                      "flex size-16 items-center justify-center rounded-[1.25rem]",
+                      itemColor(vault?.color).tile,
+                    )}
+                  >
+                    <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
+                  </span>
+                  <p className="font-semibold">
+                    {section === "recents" || current
+                      ? t("vaults.emptyFolder")
+                      : t("vaults.emptyTitle")}
+                  </p>
+                  <p className="max-w-sm text-sm text-muted-foreground">{t("vaults.emptyBody")}</p>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCreating({ files: [] })}
+                      className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Icon icon={Add01Icon} size={16} />
+                      {t("newNotebook")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => importInput.current?.click()}
+                      className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 ring-border outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Icon icon={FileImportIcon} size={16} />
+                      {t("vaults.importFiles")}
+                    </button>
+                  </div>
+                </div>
+              ) : view === "grid" ? (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
+                  {shownFolders.map((folder) => (
+                    <FolderItem
+                      key={folder.id}
+                      folder={folder}
+                      folders={folders}
+                      size={sizeOf(folder.id)}
+                      view="grid"
+                      onOpen={() => openFolder(folder.id)}
+                      onDropCards={(event) => void dropCards(event, folder.id)}
+                    />
+                  ))}
+                  {shownNotebooks?.map((notebook) => (
+                    <NotebookItem
+                      key={notebook.id}
+                      notebook={notebook}
+                      folders={folders}
+                      vaults={vaults ?? []}
+                      sources={counts?.get(notebook.id)?.sources ?? 0}
+                      view="grid"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-0.5">
+                  <ListHeader>
+                    <span>{t("toolbar.name")}</span>
+                    <span>{t("toolbar.contents")}</span>
+                    <span>{t("toolbar.modified")}</span>
+                    <span />
+                  </ListHeader>
+                  {shownFolders.map((folder) => (
+                    <FolderItem
+                      key={folder.id}
+                      folder={folder}
+                      folders={folders}
+                      size={sizeOf(folder.id)}
+                      view="list"
+                      onOpen={() => openFolder(folder.id)}
+                      onDropCards={(event) => void dropCards(event, folder.id)}
+                    />
+                  ))}
+                  {shownNotebooks?.map((notebook) => (
+                    <NotebookItem
+                      key={notebook.id}
+                      notebook={notebook}
+                      folders={folders}
+                      vaults={vaults ?? []}
+                      sources={counts?.get(notebook.id)?.sources ?? 0}
+                      view="list"
+                    />
+                  ))}
+                </div>
+              )}
+            </main>
+          </ScrollArea>
+        )}
 
         {/* The path bar: the vault and the folders down to this one, each a drop target. */}
         <nav
           aria-label={t("breadcrumbs")}
-          className="flex h-10 shrink-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-t px-4 text-sm text-muted-foreground sm:px-6"
+          className={cn(
+            "flex h-10 shrink-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-t px-4 text-sm text-muted-foreground sm:px-6",
+            section === "calendar" && "hidden",
+          )}
         >
           {vault ? (
             <PathStep

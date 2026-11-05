@@ -1,0 +1,24 @@
+/*
+ * Opt-in page-level styling. kloq.css scopes every token to `[data-kloq-root]`
+ * and never touches :root, html, body or `*`. A host that wants kloq's look
+ * for the whole page puts `data-kloq-root` on <body> (so the tokens and the
+ * `data-kloq-theme` / `.dark` blocks apply everywhere) and imports this file
+ * for the resets a page expects. Tailwind v4 only, like kloq.css.
+ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+  html {
+    @apply font-sans;
+  }
+}

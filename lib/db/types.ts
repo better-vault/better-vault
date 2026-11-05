@@ -39,6 +39,20 @@ export interface Vault {
   updatedAt: number;
 }
 
+/**
+ * An entry in the calendar: kloq's `CalEvent` (components/kloq), stored as
+ * it is. Timed entries hold offset-qualified instants, all-day entries
+ * date-only ones with an exclusive end (RFC 5545).
+ */
+export interface CalendarEntry {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  allDay?: boolean;
+  [field: string]: unknown;
+}
+
 /** A folder on the notebooks page. Folders can hold folders. */
 export interface Folder {
   id: string;

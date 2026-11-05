@@ -8,6 +8,7 @@ import type {
   StoredMessage,
   StudioOutput,
   Vault,
+  CalendarEntry,
 } from "./types";
 
 /**
@@ -27,6 +28,11 @@ export interface Backend {
   deleteNotebook(id: string): Promise<void>;
   /** How many sources each notebook has, by notebook id. */
   countSources(): Promise<Record<string, number>>;
+
+  /** Every calendar entry. */
+  listCalendar(): Promise<CalendarEntry[]>;
+  /** Replaces the calendar with these entries (the calendar saves its whole list on each change). */
+  saveCalendar(entries: CalendarEntry[]): Promise<void>;
 
   listVaults(): Promise<Vault[]>;
   /** Adds a vault or replaces it. */
@@ -103,6 +109,7 @@ export interface Backend {
 }
 
 export interface StoreContent {
+  calendar: CalendarEntry[];
   vaults: Vault[];
   folders: Folder[];
   notebooks: Notebook[];
@@ -114,6 +121,7 @@ export interface StoreContent {
 }
 
 export const tableNames = [
+  "calendar",
   "vaults",
   "folders",
   "notebooks",
@@ -146,6 +154,7 @@ export const writes = {
     "outputs",
     "blobs",
   ],
+  saveCalendar: ["calendar"],
   putVault: ["vaults"],
   deleteVault: ["vaults"],
   addFolder: ["folders"],
@@ -167,6 +176,7 @@ export const writes = {
   putSetting: ["settings"],
   clearSettings: ["settings"],
   importAll: [
+    "calendar",
     "vaults",
     "folders",
     "notebooks",
@@ -178,6 +188,7 @@ export const writes = {
     "blobs",
   ],
   clearAll: [
+    "calendar",
     "vaults",
     "folders",
     "notebooks",
@@ -198,6 +209,8 @@ export const backendMethods = [
   "patchNotebook",
   "deleteNotebook",
   "countSources",
+  "listCalendar",
+  "saveCalendar",
   "listVaults",
   "putVault",
   "deleteVault",

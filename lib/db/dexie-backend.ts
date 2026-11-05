@@ -7,6 +7,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
   db: BetterVaultDatabase;
 } {
   const content = [
+    db.calendar,
     db.vaults,
     db.folders,
     db.notebooks,
@@ -46,6 +47,13 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       });
       return counts;
     },
+
+    listCalendar: () => db.calendar.toArray(),
+    saveCalendar: (entries) =>
+      db.transaction("rw", db.calendar, async () => {
+        await db.calendar.clear();
+        await db.calendar.bulkPut(entries);
+      }),
 
     listVaults: () => db.vaults.toArray(),
     putVault: async (vault) => {
@@ -178,21 +186,42 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     clearSettings: () => db.settings.clear(),
 
     exportAll: async () => {
-      const [vaults, folders, notebooks, sources, conversations, messages, outputs, blobs] =
-        await Promise.all([
-          db.vaults.toArray(),
-          db.folders.toArray(),
-          db.notebooks.toArray(),
-          db.sources.toArray(),
-          db.conversations.toArray(),
-          db.messages.toArray(),
-          db.outputs.toArray(),
-          db.blobs.toArray(),
-        ]);
-      return { vaults, folders, notebooks, sources, conversations, messages, outputs, blobs };
+      const [
+        calendar,
+        vaults,
+        folders,
+        notebooks,
+        sources,
+        conversations,
+        messages,
+        outputs,
+        blobs,
+      ] = await Promise.all([
+        db.calendar.toArray(),
+        db.vaults.toArray(),
+        db.folders.toArray(),
+        db.notebooks.toArray(),
+        db.sources.toArray(),
+        db.conversations.toArray(),
+        db.messages.toArray(),
+        db.outputs.toArray(),
+        db.blobs.toArray(),
+      ]);
+      return {
+        calendar,
+        vaults,
+        folders,
+        notebooks,
+        sources,
+        conversations,
+        messages,
+        outputs,
+        blobs,
+      };
     },
     importAll: (data, chunks) =>
       db.transaction("rw", content, async () => {
+        await db.calendar.bulkPut(data.calendar);
         await db.vaults.bulkPut(data.vaults);
         await db.folders.bulkPut(data.folders);
         await db.notebooks.bulkPut(data.notebooks);

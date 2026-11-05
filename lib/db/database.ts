@@ -12,6 +12,7 @@ import type {
   StoredMessage,
   StudioOutput,
   Vault,
+  CalendarEntry,
 } from "./types";
 
 export type * from "./types";
@@ -30,6 +31,7 @@ export class BetterVaultDatabase extends Dexie {
   settings!: EntityTable<SettingRow, "key">;
   folders!: EntityTable<Folder, "id">;
   vaults!: EntityTable<Vault, "id">;
+  calendar!: EntityTable<CalendarEntry, "id">;
   blobs!: EntityTable<StoredBlob, "id">;
 
   constructor(name = "better-vault") {
@@ -121,6 +123,10 @@ export class BetterVaultDatabase extends Dexie {
     // default one, so they need no change.
     this.version(6).stores({
       vaults: "id",
+    });
+    // Version 7: calendar entries.
+    this.version(7).stores({
+      calendar: "id",
     });
   }
 }

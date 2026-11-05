@@ -2,6 +2,7 @@ import {
   AiBrain02Icon,
   Book02Icon,
   BubbleChatIcon,
+  Calendar03Icon,
   CloudIcon,
   ComputerIcon,
   Database01Icon,
@@ -129,6 +130,13 @@ export function CommandPalette() {
         run: () => go(routes.home),
       },
       {
+        id: "calendar",
+        label: t("command.calendar"),
+        icon: Calendar03Icon,
+        keywords: ["calendar", "event", "schedule", "agenda", "entry"],
+        run: () => go(`${routes.home}?view=calendar`),
+      },
+      {
         id: "new-notebook",
         label: tHome("newNotebook"),
         icon: Notebook01Icon,
@@ -194,6 +202,7 @@ export function CommandPalette() {
   const settingsActions: Action[] = [
     { page: "providers", icon: AiBrain02Icon, keywords: ["ai", "model", "key", "api", "effort"] },
     { page: "appearance", icon: PaintBoardIcon, keywords: ["theme", "colour", "color", "dark"] },
+    { page: "calendar", icon: Calendar03Icon, keywords: ["calendar", "google", "outlook", "ics"] },
     { page: "storage", icon: CloudIcon, keywords: ["drive", "google", "s3", "backup"] },
     { page: "account", icon: UserIcon, keywords: ["profile", "name"] },
     { page: "language", icon: LanguageSkillIcon, keywords: ["language", "translate"] },

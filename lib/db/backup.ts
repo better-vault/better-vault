@@ -12,6 +12,7 @@ import type {
   StoredMessage,
   StudioOutput,
   Vault,
+  CalendarEntry,
 } from "./types";
 
 /** A stored file in a backup: its bytes as base64, since backups are JSON. */
@@ -25,12 +26,14 @@ export type BackupBlob = Omit<StoredBlob, "data"> & { data: string };
 export interface Backup {
   app: "better-vault";
   /**
-   * 4 adds vaults; 3 added folders and files; 2 added conversations. Older
-   * backups still import: format 1 (one chat per notebook), format 2 (no
-   * folders) and format 3 (no vaults: everything is in the default vault).
+   * 5 adds calendar entries; 4 added vaults; 3 added folders and files; 2
+   * added conversations. Older backups still import: format 1 (one chat per
+   * notebook), format 2 (no folders), format 3 (no vaults: everything is in
+   * the default vault) and format 4 (no calendar).
    */
-  format: 4;
+  format: 5;
   exportedAt: number;
+  calendar: CalendarEntry[];
   vaults: Vault[];
   folders: Folder[];
   notebooks: Notebook[];
@@ -43,7 +46,12 @@ export interface Backup {
 
 const backupSchema = z.object({
   app: z.literal("better-vault"),
-  format: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+  format: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+  calendar: z
+    .array(
+      z.object({ id: z.string(), title: z.string(), start: z.string(), end: z.string() }).loose(),
+    )
+    .optional(),
   exportedAt: z.number(),
   vaults: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
   folders: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
@@ -65,7 +73,7 @@ export async function exportBackup(): Promise<Backup> {
   const { blobs, ...content } = await store().exportAll();
   return {
     app: "better-vault",
-    format: 4,
+    format: 5,
     exportedAt: Date.now(),
     ...content,
     blobs: blobs.map((blob) => ({ ...blob, data: toBase64(blob.data) })),
@@ -88,6 +96,7 @@ export async function importBackup(raw: unknown): Promise<number> {
   );
   await store().importAll(
     {
+      calendar: backup.calendar,
       vaults: backup.vaults,
       folders: backup.folders,
       notebooks: backup.notebooks,
@@ -102,8 +111,12 @@ export async function importBackup(raw: unknown): Promise<number> {
   return backup.notebooks.length;
 }
 
-type OldBackup = Omit<Backup, "format" | "conversations" | "folders" | "blobs" | "vaults"> & {
-  format: 1 | 2 | 3 | 4;
+type OldBackup = Omit<
+  Backup,
+  "format" | "conversations" | "folders" | "blobs" | "vaults" | "calendar"
+> & {
+  format: 1 | 2 | 3 | 4 | 5;
+  calendar?: CalendarEntry[];
   vaults?: Vault[];
   conversations?: Conversation[];
   folders?: Folder[];
@@ -139,7 +152,8 @@ function upgradeBackup(backup: OldBackup): Backup {
   }
   return {
     ...backup,
-    format: 4,
+    format: 5,
+    calendar: backup.calendar ?? [],
     vaults: backup.vaults ?? [],
     conversations,
     messages,

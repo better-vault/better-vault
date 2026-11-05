@@ -57,6 +57,7 @@ Keep the desktop shell thin: desktop-only behaviour belongs in `desktop/src/`, a
 ## UI rules
 
 - **Components:** Panel UI first (`components/panelui`, added with `npx shadcn@latest add @panelui/<name>`). Use shadcn (`components/ui`) only when Panel has no such component. Do not add other component libraries (Rare UI was removed on purpose); build what is missing from Panel and shadcn parts, with a design of our own. Do not hand-edit vendored components unless necessary, and note why in the file.
+- **Calendar:** the calendar is [kloq](https://coss.com/kloq/docs), copied from its registry into `components/kloq/` (MIT, keep its `LICENSE`). It is the one other component library, chosen by the maintainer. Its `lucide-react` imports point at `components/kloq/lib/icons.tsx`, which draws them with Hugeicons; after re-running `npx shadcn@latest add @kloq/kloq`, point them there again and move the files from `src/components/kloq` to `components/kloq`. `src/styles/calendar.css` hands the app's tokens and fonts back to it. Entries are stored through `lib/db/calendar.ts` (the `calendar` table), never kloq's localStorage, and kloq's own ⌘K and design mode stay off.
 - **Colours:** only semantic tokens (`bg-card`, `text-muted-foreground`, `text-info`, `bg-chart-3`, …) from `src/styles/tokens.css`, which holds the Panel palette (`site/app/tokens.css` is a copy; keep the two in step). Never use raw colours like `bg-neutral-800` or hex values in app code.
 - **Icons:** only [Hugeicons](https://hugeicons.com): `import { HugeiconsIcon } from "@hugeicons/react"` and icons from `@hugeicons/core-free-icons`. No lucide or other sets. The small glyphs built into Panel components are left as they ship. The exceptions are brand marks: the providers' logos in the app (`lib/ai/provider-icons.ts`, theSVG's single-colour marks drawn by `components/provider-icon.tsx`) and on the website (`site/public/providers`) and the desktop systems' logos on the download page (`site/public/platforms`), each with a README.
 - **Text:** every user-facing string in the app goes through i18next (`useTranslation`, `t("…")`). No hard-coded UI strings. English in `locales/en/*.json` is the source of truth. Keys are typed, so a missing key is a type error. The website and docs are English only: landing copy lives in `site/lib/site/copy.ts` and docs in `site/content/docs/*.mdx`.
@@ -77,6 +78,7 @@ server/                   the API (Hono): app.ts mounts the routes; node.ts serv
   routes/sources-parse    PDF / web page → plain text
 vite.config.ts            the web app's Vite config (dev server serves the API too); vite.shared.ts is shared with desktop
 components/panelui        Panel UI (vendored registry code)
+components/kloq           kloq, the calendar (vendored registry code; icons drawn with Hugeicons)
 components/ui             shadcn fallbacks (vendored)
 components/providers      app-wide providers (theme, i18n, Sheet.Stage)
 components/workspace      the notebook screen: top bar, sheets, tabs, prompt, views

@@ -20,6 +20,8 @@ export default defineConfig([
     // upstream style and are not linted here.
     "components/panelui/**",
     "components/ui/**",
+    // kloq, the calendar, from its registry (icons swapped for Hugeicons).
+    "components/kloq/**",
     // Anatomy's drawing kit, copied unchanged.
     "studio/tools/anatomy/kit/**",
   ]),

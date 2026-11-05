@@ -1,5 +1,6 @@
 import {
   Add01Icon,
+  Calendar03Icon,
   Clock01Icon,
   Delete02Icon,
   GridViewIcon,
@@ -32,7 +33,7 @@ import { NotebookDialog } from "./notebook-dialog";
 import { useVaultName } from "./vault-name";
 
 /** What the page shows: everything in the vault (by folder) or its recent notebooks. */
-export type HomeSection = "all" | "recents";
+export type HomeSection = "all" | "recents" | "calendar";
 
 interface VaultSidebarProps {
   vaults: Vault[];
@@ -100,6 +101,15 @@ export function VaultSidebar({
             >
               <Icon icon={GridViewIcon} size={18} className="text-muted-foreground" />
               {t("vaults.all")}
+            </button>
+            <button
+              type="button"
+              aria-current={section === "calendar" ? "page" : undefined}
+              onClick={() => onSection("calendar")}
+              className={cn(row, section === "calendar" && "bg-foreground/10 font-medium")}
+            >
+              <Icon icon={Calendar03Icon} size={18} className="text-muted-foreground" />
+              {t("calendar.title")}
             </button>
             {pinned.map((notebook) => (
               <Link

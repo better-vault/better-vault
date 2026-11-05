@@ -203,6 +203,32 @@ describe.each(backends)("%s store", (name, create) => {
     });
   });
 
+  describe("calendar", () => {
+    it("replaces the calendar on save and keeps it in backups", async () => {
+      const first = {
+        id: "a",
+        title: "Exam",
+        start: "2026-11-10T09:00:00+01:00",
+        end: "2026-11-10T11:00:00+01:00",
+      };
+      const second = {
+        id: "b",
+        title: "Holiday",
+        allDay: true,
+        start: "2026-12-24",
+        end: "2026-12-27",
+      };
+      await store().saveCalendar([first, second]);
+      await store().saveCalendar([second]);
+      expect((await store().listCalendar()).map((entry) => entry.id)).toEqual(["b"]);
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteAllData();
+      expect(await store().listCalendar()).toEqual([]);
+      await importBackup(backup);
+      expect(await store().listCalendar()).toEqual([second]);
+    });
+  });
+
   describe("search", () => {
     it("lists the sources and outputs of every notebook", async () => {
       const a = await createNotebook("A");
@@ -336,7 +362,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(4);
+      expect(backup.format).toBe(5);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");

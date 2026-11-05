@@ -1,0 +1,51 @@
+/*
+ * The calendar (kloq, components/kloq) in better-vault's own colours. kloq
+ * sets its tokens on [data-kloq-root]; these rules come after its stylesheet
+ * with the same specificity and hand the app's tokens back, so the calendar
+ * follows the Panel palette, light and dark, and the primary colour chosen in
+ * Settings → Appearance. kloq's own tokens (now line, drafts, sidebar) stay.
+ */
+[data-kloq-root],
+.dark [data-kloq-root]:not(:where(.light)),
+[data-kloq-root].dark {
+  --background: inherit;
+  --foreground: inherit;
+  --card: inherit;
+  --card-foreground: inherit;
+  --popover: inherit;
+  --popover-foreground: inherit;
+  --primary: inherit;
+  --primary-foreground: inherit;
+  --secondary: inherit;
+  --secondary-foreground: inherit;
+  --muted: inherit;
+  --muted-foreground: inherit;
+  --accent: inherit;
+  --accent-foreground: inherit;
+  --destructive: inherit;
+  --border: inherit;
+  --input: inherit;
+  --ring: inherit;
+  --radius: inherit;
+  --info: inherit;
+  --success: inherit;
+  --warning: inherit;
+  --kloq-draft: var(--primary);
+}
+
+/*
+ * kloq's stylesheet declares the font tokens again (`--font-sans:
+ * var(--font-sans)`), which would leave the whole app without its font.
+ * The app's fonts are set once more after it, for the page and the calendar.
+ */
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-kloq-root] {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+}

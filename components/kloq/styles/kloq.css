@@ -1,0 +1,1656 @@
+
+/* `reference`: utilities read the runtime variable of the same name; nothing cyclic is emitted on :root.
+   Shadows fall back to Tailwind's stock values outside a [data-kloq-root]. */
+@theme inline reference {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading);
+  --shadow-xs: var(--shadow-xs, 0 1px 2px 0 rgb(0 0 0 / 0.05));
+  --shadow-sm: var(--shadow-sm, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1));
+  --shadow-md: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1));
+  --shadow-lg: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
+  --shadow-xl: var(--shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1));
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar: var(--sidebar);
+  --color-code-highlight: var(--code-highlight);
+  --color-code-foreground: var(--code-foreground);
+  --color-code: var(--code);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-ring: var(--ring);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning: var(--warning);
+  --color-success-foreground: var(--success-foreground);
+  --color-success: var(--success);
+  --color-info-foreground: var(--info-foreground);
+  --color-info: var(--info);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-scrim: var(--scrim);
+  --color-scrim-subtle: var(--scrim-subtle);
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: calc(1 / 0.6875);
+  --text-3xs: 0.625rem;
+  --text-3xs--line-height: calc(0.875 / 0.625);
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-xs: calc(var(--radius) * 0.4);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* tokens live on [data-kloq-root] — the calendar, its portal container, or a host's <body> — never the document root */
+[data-kloq-root] {
+  --destructive-foreground: var(--color-red-700);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-700);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-700);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-700);
+  --accent: --alpha(var(--color-black) / 4%);
+  --accent-foreground: var(--color-neutral-800);
+  --background: var(--color-white);
+  --border: --alpha(var(--color-black) / 8%);
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-800);
+  --destructive: var(--color-red-500);
+  --foreground: var(--color-neutral-800);
+  --input: --alpha(var(--color-black) / 10%);
+  --muted: --alpha(var(--color-black) / 4%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 90%, var(--color-black));
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-800);
+  --primary: var(--color-neutral-800);
+  --primary-foreground: var(--color-neutral-50);
+  --ring: var(--color-neutral-500);
+  --secondary: --alpha(var(--color-black) / 4%);
+  --secondary-foreground: var(--color-neutral-800);
+  --code: var(--color-white);
+  --code-foreground: var(--foreground);
+  --code-highlight: --alpha(var(--color-black) / 4%);
+  --radius: 0.625rem;
+  /* the derived scale, again as runtime variables: the `@theme inline` block
+     above inlines these into utilities and never emits them, so component
+     classes like `rounded-[calc(var(--radius-lg)-1px)]` resolved to 0 */
+  --radius-xs: calc(var(--radius) * 0.4);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --shadow-color: var(--color-black);
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 5%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 5%), 0 1px 2px -1px --alpha(var(--shadow-color) / 5%);
+  --shadow-md: 0 4px 6px -1px --alpha(var(--shadow-color) / 5%), 0 2px 4px -2px --alpha(var(--shadow-color) / 5%);
+  --shadow-lg: 0 10px 15px -3px --alpha(var(--shadow-color) / 5%), 0 4px 6px -4px --alpha(var(--shadow-color) / 5%);
+  --shadow-xl: 0 20px 25px -5px --alpha(var(--shadow-color) / 5%), 0 8px 10px -6px --alpha(var(--shadow-color) / 5%);
+  --brand: var(--color-red-500);
+  --brand-foreground: var(--color-red-600);
+  --scrim: --alpha(var(--color-black) / 32%);
+  --scrim-subtle: --alpha(var(--color-black) / 12%);
+  --overlay-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --overlay-enter: 150ms;
+  --overlay-exit: 100ms;
+  --kloq-now: var(--brand);
+  --kloq-draft: var(--color-blue-500);
+  --kloq-draft-ink: var(--color-blue-800);
+  --sidebar: var(--color-neutral-50);
+  --sidebar-accent: --alpha(var(--color-black) / 4%);
+  --sidebar-accent-foreground: var(--color-neutral-800);
+  --sidebar-border: --alpha(var(--color-black) / 6%);
+  --sidebar-foreground: color-mix(in srgb, var(--color-neutral-800) 64%, var(--sidebar));
+  --sidebar-primary: var(--color-neutral-800);
+  --sidebar-primary-foreground: var(--color-neutral-50);
+  --sidebar-ring: var(--color-neutral-400);
+}
+
+.dark [data-kloq-root]:not(:where(.light)),
+[data-kloq-root].dark {
+  color-scheme: dark;
+  --brand-foreground: var(--color-red-400);
+  --scrim-subtle: var(--scrim);
+  --kloq-draft-ink: var(--color-blue-200);
+  --destructive-foreground: var(--color-red-400);
+  --info: var(--color-blue-500);
+  --info-foreground: var(--color-blue-400);
+  --success: var(--color-emerald-500);
+  --success-foreground: var(--color-emerald-400);
+  --warning: var(--color-amber-500);
+  --warning-foreground: var(--color-amber-400);
+  --accent: --alpha(var(--color-white) / 4%);
+  --accent-foreground: var(--color-neutral-100);
+  --background: color-mix(in srgb, var(--color-neutral-950) 95%, var(--color-white));
+  --border: --alpha(var(--color-white) / 6%);
+  --card: color-mix(in srgb, var(--background) 98%, var(--color-white));
+  --card-foreground: var(--color-neutral-100);
+  --destructive: color-mix(in srgb, var(--color-red-500) 90%, var(--color-white));
+  --foreground: var(--color-neutral-100);
+  --input: --alpha(var(--color-white) / 8%);
+  --muted: --alpha(var(--color-white) / 4%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 82%, var(--color-white));
+  --popover: color-mix(in srgb, var(--background) 98%, var(--color-white));
+  --popover-foreground: var(--color-neutral-100);
+  --primary: var(--color-neutral-100);
+  --primary-foreground: var(--color-neutral-800);
+  --ring: var(--color-neutral-500);
+  --secondary: --alpha(var(--color-white) / 4%);
+  --secondary-foreground: var(--color-neutral-100);
+  --code: color-mix(in srgb, var(--background) 98%, var(--color-white));
+  --code-foreground: var(--foreground);
+  --code-highlight: --alpha(var(--color-white) / 4%);
+  --sidebar: color-mix(in srgb, var(--color-neutral-950) 97%, var(--color-white));
+  --sidebar-accent: --alpha(var(--color-white) / 4%);
+  --sidebar-accent-foreground: var(--color-neutral-100);
+  --sidebar-border: --alpha(var(--color-white) / 5%);
+  --sidebar-foreground: color-mix(in srgb, var(--color-neutral-100) 64%, var(--sidebar));
+  --sidebar-primary: var(--color-neutral-100);
+  --sidebar-primary-foreground: var(--color-neutral-800);
+  --sidebar-ring: var(--color-neutral-400);
+}
+
+/* the calendar paints its own ground; page-level resets are in tokens.css (opt-in).
+   `@layer base` so utilities like `border-transparent` still win, as with Tailwind's preflight. */
+@layer base {
+  [data-kloq-root] {
+    /* native UA surfaces (scrollbars, form controls) follow the calendar's own
+       scheme — without this a dark calendar renders a light scrollbar track */
+    color-scheme: light;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji");
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  [data-kloq-root] *,
+  [data-kloq-root] *::before,
+  [data-kloq-root] *::after {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  [data-kloq-root] :where(code, kbd, samp, pre) {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  }
+  /* anchored popups share one enter/exit; a primitive's own transition utilities still win */
+  [data-kloq-root] :where(
+      [data-slot="menu-popup"],
+      [data-slot="menu-sub-content"],
+      [data-slot="context-menu-popup"],
+      [data-slot="context-menu-sub-content"],
+      [data-slot="select-popup"],
+      [data-slot="autocomplete-popup"],
+      [data-slot="combobox-popup"],
+      [data-slot="popover-popup"],
+      [data-slot="tooltip-popup"],
+      [data-slot="preview-card-content"]
+    ) {
+    transition:
+      scale var(--overlay-enter) var(--overlay-ease),
+      opacity var(--overlay-enter) var(--overlay-ease);
+    &:where([data-starting-style], [data-ending-style]) {
+      scale: 0.98;
+      opacity: 0;
+    }
+    &:where([data-ending-style]) {
+      transition-duration: var(--overlay-exit);
+    }
+    &:where([data-instant]) {
+      transition: none;
+    }
+  }
+  /* any focusable thing without its own ring; `:where` keeps it below every utility */
+  [data-kloq-root] :where(a, button, input, select, textarea, summary, [tabindex], [contenteditable]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+/* unlayered so it outranks the primitives' duration utilities */
+@media (prefers-reduced-motion: reduce) {
+  [data-kloq-root] :where([data-slot$="-popup"], [data-slot$="-backdrop"], [data-slot$="-positioner"], [data-slot$="-viewport"]) {
+    transition-duration: 1ms;
+    animation-duration: 1ms;
+  }
+}
+
+/* kloq calendar — imperative drag-engine surfaces */
+
+/* hour rules are one gradient, not 24 divs; period is `--kloq-hour-height`, fallback 64px */
+.cal-hour-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--border) 0 1px,
+    transparent 1px var(--kloq-hour-height, 64px)
+  );
+}
+
+/* draft block — the engine writes only geometry */
+[data-cal-draft] {
+  pointer-events: none;
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--kloq-draft) 16%, transparent);
+  will-change: transform, height;
+}
+[data-cal-draft][hidden] {
+  display: none;
+}
+[data-cal-draft] [data-slot="draft-bar"] {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--kloq-draft);
+}
+[data-cal-draft] [data-slot="draft-label"] {
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--kloq-draft-ink);
+}
+/* too short for an inside label: flip it outside */
+[data-cal-draft][data-label-outside="bottom"] [data-slot="draft-label"] {
+  top: calc(100% + 4px);
+}
+[data-cal-draft][data-label-outside="top"] [data-slot="draft-label"] {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+/* mid-move: transitions off so the engine owns every frame; `--kloq-lift` (0..1) is written per frame */
+@property --kloq-lift {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+[data-cal-event][data-dragging],
+[data-cal-lift] {
+  z-index: 40;
+  cursor: grabbing;
+  transition: none;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--shadow-color) calc(4% * var(--kloq-lift)), transparent),
+    0 calc(4px * var(--kloq-lift)) calc(12px * var(--kloq-lift))
+      color-mix(in oklab, var(--shadow-color) calc(12% * var(--kloq-lift)), transparent),
+    0 calc(12px * var(--kloq-lift)) calc(32px * var(--kloq-lift))
+      color-mix(in oklab, var(--shadow-color) calc(10% * var(--kloq-lift)), transparent);
+  will-change: transform;
+  @variant dark {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--color-white) calc(6% * var(--kloq-lift)), transparent),
+      0 calc(4px * var(--kloq-lift)) calc(12px * var(--kloq-lift))
+        color-mix(in oklab, var(--shadow-color) calc(40% * var(--kloq-lift)), transparent),
+      0 calc(12px * var(--kloq-lift)) calc(32px * var(--kloq-lift))
+        color-mix(in oklab, var(--shadow-color) calc(32% * var(--kloq-lift)), transparent);
+  }
+}
+
+/* origin ghost, engine-cloned */
+[data-cal-ghost] {
+  z-index: 5;
+}
+
+body[data-cal-grabbing] {
+  cursor: grabbing;
+}
+body[data-cal-grabbing] [data-kloq-root] {
+  user-select: none;
+}
+body[data-cal-grabbing] [data-cal-event] {
+  cursor: grabbing;
+}
+
+/* ⌥-drag duplicate tell */
+body[data-cal-duplicating],
+body[data-cal-duplicating] [data-cal-event] {
+  cursor: copy;
+}
+[data-cal-event][data-duplicating]::after {
+  content: "+";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+/* drag edge markers, engine-pooled; `data-aligned` = magnetically on another event's edge */
+.cal-align-guide {
+  position: absolute;
+  left: 0;
+  width: 8px;
+  height: 1px;
+  z-index: 25;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--primary) 55%, transparent);
+}
+.cal-align-guide::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  margin-right: 1px;
+  border: 3px solid transparent;
+  border-left: 4px solid var(--primary);
+  border-right: 0;
+  translate: 0 -50%;
+}
+/* sits where the hour labels do, over a wash so a coincident label doesn't bleed through */
+.cal-align-guide::after {
+  content: attr(data-time);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  translate: 0 -50%;
+  padding: 0 3px;
+  margin-right: -3px;
+  border-radius: 3px;
+  background: var(--background);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.cal-align-guide[data-aligned]::after {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--primary) 50%, transparent);
+  text-underline-offset: 2px;
+}
+.cal-align-guide[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-cal-draft],
+  [data-cal-event] {
+    transition-duration: 80ms !important;
+    transition-property: opacity !important;
+  }
+}
+/* kloq themes — token overrides for a [data-kloq-root] under [data-kloq-theme] / .dark[data-kloq-theme] (html, usually),
+   or with the attribute and a pinned .light/.dark on the root itself — how the `theme`/`scheme` props scope one instance.
+   Colours, --radius, fonts and the --shadow-xs/sm/md/lg stacks (which every elevated surface reads at runtime). */
+
+/* theme/scheme swap: `themeTransition()` in lib/themes.ts runs one root view transition */
+html[data-kloq-swapping]::view-transition-old(root),
+html[data-kloq-swapping]::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+}
+html[data-kloq-swapping]::view-transition {
+  pointer-events: none;
+}
+
+/* what no theme block sets: derived from what every block does set, and status text stepped for tinted grounds */
+[data-kloq-theme] [data-kloq-root],
+[data-kloq-theme][data-kloq-root] {
+  --secondary-foreground: var(--foreground);
+  --code: var(--card);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-ring: var(--ring);
+  --brand-foreground: var(--color-red-700);
+  --success-foreground: var(--color-emerald-800);
+  --warning-foreground: var(--color-amber-800);
+  --kloq-draft: var(--primary);
+  --kloq-draft-ink: color-mix(in oklab, var(--primary) 55%, var(--color-black));
+}
+.dark[data-kloq-theme] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme][data-kloq-root].dark {
+  --kloq-draft-ink: color-mix(in oklab, var(--primary) 35%, var(--color-white));
+  --brand-foreground: var(--color-red-300);
+  --destructive-foreground: var(--color-red-300);
+  --info-foreground: var(--color-blue-300);
+  --success-foreground: var(--color-emerald-400);
+  --warning-foreground: var(--color-amber-400);
+}
+
+/* ── Midnight — deep blue-black, electric indigo ─────────────────────────── */
+[data-kloq-theme="midnight"] [data-kloq-root],
+[data-kloq-theme="midnight"][data-kloq-root] {
+  --background: color-mix(in srgb, var(--color-slate-100) 92%, var(--color-indigo-500));
+  --foreground: var(--color-slate-900);
+  --card: var(--color-white);
+  --card-foreground: var(--color-slate-900);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-slate-900);
+  --primary: var(--color-indigo-600);
+  --primary-foreground: var(--color-indigo-50);
+  --accent: --alpha(var(--color-indigo-600) / 8%);
+  --accent-foreground: var(--color-indigo-900);
+  --muted: --alpha(var(--color-indigo-900) / 5%);
+  --muted-foreground: color-mix(in srgb, var(--color-slate-500) 80%, var(--foreground));
+  --border: --alpha(var(--color-indigo-950) / 10%);
+  --input: --alpha(var(--color-indigo-950) / 12%);
+  --ring: var(--color-indigo-500);
+}
+.dark[data-kloq-theme="midnight"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="midnight"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="midnight"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="midnight"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="midnight"][data-kloq-root].dark {
+  --background: color-mix(in srgb, var(--color-slate-950) 82%, var(--color-indigo-950));
+  --foreground: var(--color-slate-100);
+  --card: color-mix(in srgb, var(--color-slate-950) 72%, var(--color-indigo-950));
+  --card-foreground: var(--color-slate-100);
+  --popover: color-mix(in srgb, var(--color-slate-950) 72%, var(--color-indigo-950));
+  --popover-foreground: var(--color-slate-100);
+  --primary: var(--color-indigo-400);
+  --primary-foreground: var(--color-indigo-950);
+  --accent: --alpha(var(--color-indigo-400) / 10%);
+  --accent-foreground: var(--color-indigo-200);
+  --muted: --alpha(var(--color-indigo-300) / 6%);
+  --muted-foreground: color-mix(in srgb, var(--color-slate-400) 80%, var(--color-indigo-300));
+  --border: --alpha(var(--color-indigo-300) / 10%);
+  --input: --alpha(var(--color-indigo-300) / 12%);
+  --ring: var(--color-indigo-500);
+}
+
+/* ── Paper — warm cream, ink, serif headings, sharp corners ──────────────── */
+[data-kloq-theme="paper"] [data-kloq-root],
+[data-kloq-theme="paper"][data-kloq-root] {
+  --font-heading: Georgia, "Times New Roman", serif;
+  --radius: 0.25rem;
+  --background: color-mix(in srgb, var(--color-stone-50) 78%, var(--color-amber-100));
+  --foreground: var(--color-stone-800);
+  --card: color-mix(in srgb, var(--color-stone-50) 90%, var(--color-amber-100));
+  --card-foreground: var(--color-stone-800);
+  --popover: color-mix(in srgb, var(--color-stone-50) 90%, var(--color-amber-100));
+  --popover-foreground: var(--color-stone-800);
+  --primary: color-mix(in srgb, var(--color-stone-800) 88%, var(--color-amber-800));
+  --primary-foreground: var(--color-stone-50);
+  --accent: --alpha(var(--color-amber-800) / 8%);
+  --accent-foreground: var(--color-stone-800);
+  --muted: --alpha(var(--color-stone-800) / 5%);
+  --muted-foreground: color-mix(in srgb, var(--color-stone-500) 84%, var(--foreground));
+  --border: --alpha(var(--color-stone-800) / 12%);
+  --input: --alpha(var(--color-stone-800) / 14%);
+  --ring: var(--color-amber-700);
+}
+.dark[data-kloq-theme="paper"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="paper"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="paper"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="paper"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="paper"][data-kloq-root].dark {
+  --font-heading: Georgia, "Times New Roman", serif;
+  --radius: 0.25rem;
+  --background: color-mix(in srgb, var(--color-stone-950) 94%, var(--color-amber-400));
+  --foreground: var(--color-stone-200);
+  --card: color-mix(in srgb, var(--color-stone-900) 94%, var(--color-amber-400));
+  --card-foreground: var(--color-stone-200);
+  --popover: color-mix(in srgb, var(--color-stone-900) 94%, var(--color-amber-400));
+  --popover-foreground: var(--color-stone-200);
+  --primary: var(--color-amber-200);
+  --primary-foreground: var(--color-stone-900);
+  --accent: --alpha(var(--color-amber-200) / 8%);
+  --accent-foreground: var(--color-amber-100);
+  --muted: --alpha(var(--color-amber-100) / 5%);
+  --muted-foreground: var(--color-stone-400);
+  --border: --alpha(var(--color-amber-100) / 10%);
+  --input: --alpha(var(--color-amber-100) / 12%);
+  --ring: var(--color-amber-500);
+}
+
+/* ── Forest — mossy neutrals, evergreen primary ──────────────────────────── */
+[data-kloq-theme="forest"] [data-kloq-root],
+[data-kloq-theme="forest"][data-kloq-root] {
+  --radius: 0.5rem;
+  --background: color-mix(in srgb, var(--color-neutral-50) 88%, var(--color-emerald-200));
+  --foreground: color-mix(in srgb, var(--color-neutral-800) 85%, var(--color-emerald-900));
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-800);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-800);
+  --primary: var(--color-emerald-800);
+  --primary-foreground: var(--color-emerald-50);
+  --accent: --alpha(var(--color-emerald-800) / 8%);
+  --accent-foreground: var(--color-emerald-900);
+  --muted: --alpha(var(--color-emerald-950) / 5%);
+  --muted-foreground: color-mix(in srgb, color-mix(in srgb, var(--color-neutral-500) 80%, var(--color-emerald-700)) 90%, var(--foreground));
+  --border: --alpha(var(--color-emerald-950) / 12%);
+  --input: --alpha(var(--color-emerald-950) / 14%);
+  --ring: var(--color-emerald-600);
+}
+.dark[data-kloq-theme="forest"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="forest"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="forest"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="forest"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="forest"][data-kloq-root].dark {
+  --radius: 0.5rem;
+  --background: color-mix(in srgb, var(--color-neutral-950) 88%, var(--color-emerald-900));
+  --foreground: color-mix(in srgb, var(--color-neutral-100) 88%, var(--color-emerald-200));
+  --card: color-mix(in srgb, var(--color-neutral-900) 88%, var(--color-emerald-900));
+  --card-foreground: var(--color-neutral-100);
+  --popover: color-mix(in srgb, var(--color-neutral-900) 88%, var(--color-emerald-900));
+  --popover-foreground: var(--color-neutral-100);
+  --primary: var(--color-emerald-400);
+  --primary-foreground: var(--color-emerald-950);
+  --accent: --alpha(var(--color-emerald-400) / 10%);
+  --accent-foreground: var(--color-emerald-200);
+  --muted: --alpha(var(--color-emerald-200) / 6%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-400) 80%, var(--color-emerald-400));
+  --border: --alpha(var(--color-emerald-200) / 10%);
+  --input: --alpha(var(--color-emerald-200) / 12%);
+  --ring: var(--color-emerald-500);
+}
+
+/* ── Ultraviolet — violet everything, pillowy corners ────────────────────── */
+[data-kloq-theme="ultraviolet"] [data-kloq-root],
+[data-kloq-theme="ultraviolet"][data-kloq-root] {
+  --radius: 0.875rem;
+  --background: color-mix(in srgb, var(--color-white) 92%, var(--color-violet-300));
+  --foreground: color-mix(in srgb, var(--color-neutral-900) 80%, var(--color-violet-950));
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-900);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-900);
+  --primary: var(--color-violet-600);
+  --primary-foreground: var(--color-violet-50);
+  --accent: --alpha(var(--color-violet-600) / 9%);
+  --accent-foreground: var(--color-violet-900);
+  --muted: --alpha(var(--color-violet-950) / 5%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 66%, var(--color-violet-600));
+  --border: --alpha(var(--color-violet-950) / 11%);
+  --input: --alpha(var(--color-violet-950) / 13%);
+  --ring: var(--color-violet-500);
+}
+.dark[data-kloq-theme="ultraviolet"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ultraviolet"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ultraviolet"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ultraviolet"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ultraviolet"][data-kloq-root].dark {
+  --radius: 0.875rem;
+  --background: color-mix(in srgb, var(--color-neutral-950) 80%, var(--color-violet-950));
+  --foreground: var(--color-violet-50);
+  --card: color-mix(in srgb, var(--color-neutral-950) 68%, var(--color-violet-950));
+  --card-foreground: var(--color-violet-50);
+  --popover: color-mix(in srgb, var(--color-neutral-950) 68%, var(--color-violet-950));
+  --popover-foreground: var(--color-violet-50);
+  --primary: var(--color-violet-400);
+  --primary-foreground: var(--color-violet-950);
+  --accent: --alpha(var(--color-violet-400) / 12%);
+  --accent-foreground: var(--color-violet-200);
+  --muted: --alpha(var(--color-violet-300) / 7%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-400) 70%, var(--color-violet-300));
+  --border: --alpha(var(--color-violet-300) / 11%);
+  --input: --alpha(var(--color-violet-300) / 13%);
+  --ring: var(--color-violet-500);
+}
+
+/* ── Terminal — phosphor green, mono type, near-square corners ───────────── */
+[data-kloq-theme="terminal"] [data-kloq-root],
+[data-kloq-theme="terminal"][data-kloq-root] {
+  --font-sans: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-mono), ui-monospace, monospace;
+  --radius: 0.125rem;
+  --background: color-mix(in srgb, var(--color-neutral-50) 90%, var(--color-green-200));
+  --foreground: var(--color-green-950);
+  --card: var(--color-white);
+  --card-foreground: var(--color-green-950);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-green-950);
+  --primary: var(--color-green-700);
+  --primary-foreground: var(--color-green-50);
+  --accent: --alpha(var(--color-green-700) / 9%);
+  --accent-foreground: var(--color-green-900);
+  --muted: --alpha(var(--color-green-950) / 5%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 70%, var(--color-green-800));
+  --border: --alpha(var(--color-green-950) / 14%);
+  --input: --alpha(var(--color-green-950) / 16%);
+  --ring: var(--color-green-600);
+}
+.dark[data-kloq-theme="terminal"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="terminal"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="terminal"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="terminal"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="terminal"][data-kloq-root].dark {
+  --font-sans: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-mono), ui-monospace, monospace;
+  --radius: 0.125rem;
+  --background: color-mix(in srgb, var(--color-neutral-950) 92%, var(--color-green-800));
+  --foreground: var(--color-green-300);
+  --card: color-mix(in srgb, var(--color-neutral-950) 85%, var(--color-green-900));
+  --card-foreground: var(--color-green-200);
+  --popover: color-mix(in srgb, var(--color-neutral-950) 85%, var(--color-green-900));
+  --popover-foreground: var(--color-green-200);
+  --primary: var(--color-green-500);
+  --primary-foreground: var(--color-green-950);
+  --accent: --alpha(var(--color-green-500) / 10%);
+  --accent-foreground: var(--color-green-300);
+  --muted: --alpha(var(--color-green-400) / 6%);
+  --muted-foreground: color-mix(in srgb, color-mix(in srgb, var(--color-green-700) 70%, var(--color-neutral-400)) 85%, var(--foreground));
+  --border: --alpha(var(--color-green-400) / 14%);
+  --input: --alpha(var(--color-green-400) / 16%);
+  --ring: var(--color-green-500);
+}
+
+/* ── Rosé — soft pink, generous corners ──────────────────────────────────── */
+[data-kloq-theme="rose"] [data-kloq-root],
+[data-kloq-theme="rose"][data-kloq-root] {
+  --radius: 0.875rem;
+  --background: color-mix(in srgb, var(--color-white) 90%, var(--color-rose-200));
+  --foreground: color-mix(in srgb, var(--color-neutral-800) 82%, var(--color-rose-950));
+  --card: var(--color-white);
+  --card-foreground: var(--color-neutral-800);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-neutral-800);
+  --primary: var(--color-rose-700);
+  --primary-foreground: var(--color-rose-50);
+  --accent: --alpha(var(--color-rose-700) / 8%);
+  --accent-foreground: var(--color-rose-900);
+  --muted: --alpha(var(--color-rose-950) / 5%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-500) 75%, var(--color-rose-700));
+  --border: --alpha(var(--color-rose-950) / 11%);
+  --input: --alpha(var(--color-rose-950) / 13%);
+  --ring: var(--color-rose-500);
+}
+.dark[data-kloq-theme="rose"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="rose"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="rose"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="rose"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="rose"][data-kloq-root].dark {
+  --radius: 0.875rem;
+  --background: color-mix(in srgb, var(--color-neutral-950) 88%, var(--color-rose-900));
+  --foreground: var(--color-rose-50);
+  --card: color-mix(in srgb, var(--color-neutral-950) 78%, var(--color-rose-950));
+  --card-foreground: var(--color-rose-50);
+  --popover: color-mix(in srgb, var(--color-neutral-950) 78%, var(--color-rose-950));
+  --popover-foreground: var(--color-rose-50);
+  --primary: var(--color-rose-400);
+  --primary-foreground: var(--color-rose-950);
+  --accent: --alpha(var(--color-rose-400) / 10%);
+  --accent-foreground: var(--color-rose-200);
+  --muted: --alpha(var(--color-rose-300) / 6%);
+  --muted-foreground: color-mix(in srgb, var(--color-neutral-400) 72%, var(--color-rose-300));
+  --border: --alpha(var(--color-rose-300) / 11%);
+  --input: --alpha(var(--color-rose-300) / 13%);
+  --ring: var(--color-rose-500);
+}
+
+/* Editor ports — published palettes mapped onto coss tokens; literal hex is allowed here for fidelity */
+
+/* ── Dracula — Alucard (light) / Dracula (dark) ──────────────────────────── */
+[data-kloq-theme="dracula"] [data-kloq-root],
+[data-kloq-theme="dracula"][data-kloq-root] {
+  --background: #fffbeb;
+  --foreground: #1f1f1f;
+  --card: #fffdf5;
+  --card-foreground: #1f1f1f;
+  --popover: #fffdf5;
+  --popover-foreground: #1f1f1f;
+  --primary: #644ac9;
+  --primary-foreground: #fffbeb;
+  --accent: --alpha(#644ac9 / 10%);
+  --accent-foreground: #3a2a8c;
+  --muted: --alpha(#6c664b / 8%);
+  --muted-foreground: #6c664b;
+  --border: --alpha(#6c664b / 20%);
+  --input: --alpha(#6c664b / 26%);
+  --ring: #a3144d;
+}
+.dark[data-kloq-theme="dracula"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="dracula"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="dracula"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="dracula"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="dracula"][data-kloq-root].dark {
+  --background: #282a36;
+  --foreground: #f8f8f2;
+  --card: #2f3240;
+  --card-foreground: #f8f8f2;
+  --popover: #2f3240;
+  --popover-foreground: #f8f8f2;
+  --primary: #bd93f9;
+  --primary-foreground: #282a36;
+  --accent: --alpha(#bd93f9 / 14%);
+  --accent-foreground: color-mix(in srgb, #ff79c6 80%, #fff);
+  --muted: --alpha(#6272a4 / 26%);
+  --muted-foreground: color-mix(in srgb, #8b95bf 70%, var(--foreground));
+  --border: --alpha(#6272a4 / 42%);
+  --input: --alpha(#6272a4 / 52%);
+  --ring: #ff79c6;
+}
+
+/* ── Nord — Snow Storm (light) / Polar Night (dark) ──────────────────────── */
+[data-kloq-theme="nord"] [data-kloq-root],
+[data-kloq-theme="nord"][data-kloq-root] {
+  --background: #eceff4;
+  --foreground: #2e3440;
+  --card: #f4f6f9;
+  --card-foreground: #2e3440;
+  --popover: #f4f6f9;
+  --popover-foreground: #2e3440;
+  --primary: color-mix(in srgb, #5e81ac 84%, #000);
+  --primary-foreground: #eceff4;
+  --accent: --alpha(#5e81ac / 12%);
+  --accent-foreground: #2e3440;
+  --muted: --alpha(#4c566a / 8%);
+  --muted-foreground: color-mix(in srgb, #60697c 90%, var(--foreground));
+  --border: --alpha(#4c566a / 20%);
+  --input: --alpha(#4c566a / 26%);
+  --ring: #5e81ac;
+}
+.dark[data-kloq-theme="nord"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="nord"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="nord"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="nord"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="nord"][data-kloq-root].dark {
+  --background: #2e3440;
+  --foreground: #eceff4;
+  --card: #3b4252;
+  --card-foreground: #eceff4;
+  --popover: #3b4252;
+  --popover-foreground: #eceff4;
+  --primary: #88c0d0;
+  --primary-foreground: #2e3440;
+  --accent: --alpha(#88c0d0 / 14%);
+  --accent-foreground: #d8dee9;
+  --muted: --alpha(#d8dee9 / 7%);
+  --muted-foreground: color-mix(in srgb, #9aa5b8 50%, var(--foreground));
+  --border: --alpha(#d8dee9 / 12%);
+  --input: --alpha(#d8dee9 / 16%);
+  --ring: #81a1c1;
+}
+
+/* ── Tokyo Night — Day (light) / Night (dark) ────────────────────────────── */
+[data-kloq-theme="tokyo-night"] [data-kloq-root],
+[data-kloq-theme="tokyo-night"][data-kloq-root] {
+  --background: #e1e2e7;
+  --foreground: #343b58;
+  --card: #eaeaef;
+  --card-foreground: #343b58;
+  --popover: #eaeaef;
+  --popover-foreground: #343b58;
+  --primary: color-mix(in srgb, #2e7de9 78%, #000);
+  --primary-foreground: #e1e2e7;
+  --accent: --alpha(#2e7de9 / 12%);
+  --accent-foreground: color-mix(in srgb, #9854f1 62%, #000);
+  --muted: --alpha(#848cb5 / 14%);
+  --muted-foreground: #565a6e;
+  --border: --alpha(#848cb5 / 30%);
+  --input: --alpha(#848cb5 / 38%);
+  --ring: #9854f1;
+
+  --brand: var(--color-red-600);
+}
+.dark[data-kloq-theme="tokyo-night"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="tokyo-night"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="tokyo-night"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="tokyo-night"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="tokyo-night"][data-kloq-root].dark {
+  --background: #1a1b26;
+  --foreground: #c0caf5;
+  --card: #24283b;
+  --card-foreground: #c0caf5;
+  --popover: #24283b;
+  --popover-foreground: #c0caf5;
+  --primary: #7aa2f7;
+  --primary-foreground: #1a1b26;
+  --accent: --alpha(#7aa2f7 / 14%);
+  --accent-foreground: #bb9af7;
+  --muted: --alpha(#565f89 / 26%);
+  --muted-foreground: color-mix(in srgb, #7f88b0 55%, var(--foreground));
+  --border: --alpha(#565f89 / 44%);
+  --input: --alpha(#565f89 / 56%);
+  --ring: #bb9af7;
+}
+
+/* ── Catppuccin — Latte (light) / Mocha (dark) ───────────────────────────── */
+[data-kloq-theme="catppuccin"] [data-kloq-root],
+[data-kloq-theme="catppuccin"][data-kloq-root] {
+  --background: #eff1f5;
+  --foreground: #4c4f69;
+  --card: #f6f7fa;
+  --card-foreground: #4c4f69;
+  --popover: #f6f7fa;
+  --popover-foreground: #4c4f69;
+  --primary: #8839ef;
+  --primary-foreground: #eff1f5;
+  --accent: --alpha(#8839ef / 10%);
+  --accent-foreground: color-mix(in srgb, #1e66d5 82%, #000);
+  --muted: --alpha(#9ca0b0 / 18%);
+  --muted-foreground: color-mix(in srgb, #6c6f85 60%, var(--foreground));
+  --border: --alpha(#9ca0b0 / 34%);
+  --input: --alpha(#9ca0b0 / 44%);
+  --ring: #1e66d5;
+}
+.dark[data-kloq-theme="catppuccin"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="catppuccin"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="catppuccin"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="catppuccin"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="catppuccin"][data-kloq-root].dark {
+  --background: #1e1e2e;
+  --foreground: #cdd6f4;
+  --card: #313244;
+  --card-foreground: #cdd6f4;
+  --popover: #313244;
+  --popover-foreground: #cdd6f4;
+  --primary: #cba6f7;
+  --primary-foreground: #1e1e2e;
+  --accent: --alpha(#cba6f7 / 14%);
+  --accent-foreground: #89b4fa;
+  --muted: --alpha(#6c7086 / 26%);
+  --muted-foreground: color-mix(in srgb, #a6adc8 80%, var(--foreground));
+  --border: --alpha(#6c7086 / 44%);
+  --input: --alpha(#6c7086 / 56%);
+  --ring: #89b4fa;
+}
+
+/* ── Gruvbox — light hard / dark hard, the retro-groove warmth ───────────── */
+[data-kloq-theme="gruvbox"] [data-kloq-root],
+[data-kloq-theme="gruvbox"][data-kloq-root] {
+  --radius: 0.25rem;
+  --background: #fbf1c7;
+  --foreground: #3c3836;
+  --card: #f9f5d7;
+  --card-foreground: #3c3836;
+  --popover: #f9f5d7;
+  --popover-foreground: #3c3836;
+  --primary: #076678;
+  --primary-foreground: #fbf1c7;
+  --accent: --alpha(#af3a03 / 12%);
+  --accent-foreground: #9d0006;
+  --muted: --alpha(#7c6f64 / 14%);
+  --muted-foreground: color-mix(in srgb, #7c6f64 70%, var(--foreground));
+  --border: --alpha(#7c6f64 / 30%);
+  --input: --alpha(#7c6f64 / 38%);
+  --ring: #b57614;
+}
+.dark[data-kloq-theme="gruvbox"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="gruvbox"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="gruvbox"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="gruvbox"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="gruvbox"][data-kloq-root].dark {
+  --radius: 0.25rem;
+  --background: #282828;
+  --foreground: #ebdbb2;
+  --card: #3c3836;
+  --card-foreground: #ebdbb2;
+  --popover: #3c3836;
+  --popover-foreground: #ebdbb2;
+  --primary: #fabd2f;
+  --primary-foreground: #282828;
+  --accent: --alpha(#fe8019 / 16%);
+  --accent-foreground: #fabd2f;
+  --muted: --alpha(#928374 / 22%);
+  --muted-foreground: color-mix(in srgb, #a89984 55%, var(--foreground));
+  --border: --alpha(#928374 / 38%);
+  --input: --alpha(#928374 / 48%);
+  --ring: #83a598;
+}
+
+/* ── Solarized — the canonical dual-scheme palette, shared accents ───────── */
+[data-kloq-theme="solarized"] [data-kloq-root],
+[data-kloq-theme="solarized"][data-kloq-root] {
+  --background: #fdf6e3;
+  --foreground: #073642;
+  --card: #fefaef;
+  --card-foreground: #073642;
+  --popover: #fefaef;
+  --popover-foreground: #073642;
+  --primary: color-mix(in srgb, #268bd2 84%, #000);
+  --primary-foreground: #fdf6e3;
+  --accent: --alpha(#2aa198 / 14%);
+  --accent-foreground: #073642;
+  --muted: --alpha(#93a1a1 / 22%);
+  --muted-foreground: color-mix(in srgb, #586e75 80%, #073642);
+  --border: --alpha(#93a1a1 / 40%);
+  --input: --alpha(#93a1a1 / 52%);
+  --ring: color-mix(in srgb, #b58900 90%, #000);
+}
+.dark[data-kloq-theme="solarized"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="solarized"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="solarized"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="solarized"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="solarized"][data-kloq-root].dark {
+  --background: #002b36;
+  --foreground: #eee8d5;
+  --card: #073642;
+  --card-foreground: #eee8d5;
+  --popover: #073642;
+  --popover-foreground: #eee8d5;
+  --primary: #268bd2;
+  --primary-foreground: color-mix(in srgb, #002b36 70%, #000);
+  --accent: --alpha(#2aa198 / 14%);
+  --accent-foreground: #eee8d5;
+  --muted: --alpha(#586e75 / 26%);
+  --muted-foreground: color-mix(in srgb, #93a1a1 70%, #eee8d5);
+  --border: --alpha(#586e75 / 52%);
+  --input: --alpha(#586e75 / 64%);
+  --ring: #b58900;
+}
+
+/* ── One — One Light / One Dark, the Atom classic ────────────────────────── */
+[data-kloq-theme="one"] [data-kloq-root],
+[data-kloq-theme="one"][data-kloq-root] {
+  --background: #fafafa;
+  --foreground: #383a42;
+  --card: #ffffff;
+  --card-foreground: #383a42;
+  --popover: #ffffff;
+  --popover-foreground: #383a42;
+  --primary: color-mix(in srgb, #4078f2 90%, #000);
+  --primary-foreground: #fafafa;
+  --accent: --alpha(#4078f2 / 10%);
+  --accent-foreground: #a626a4;
+  --muted: --alpha(#a0a1a7 / 16%);
+  --muted-foreground: color-mix(in srgb, #6b6d77 90%, var(--foreground));
+  --border: --alpha(#a0a1a7 / 32%);
+  --input: --alpha(#a0a1a7 / 42%);
+  --ring: #a626a4;
+}
+.dark[data-kloq-theme="one"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="one"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="one"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="one"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="one"][data-kloq-root].dark {
+  --background: #282c34;
+  --foreground: #abb2bf;
+  --card: #31353f;
+  --card-foreground: #abb2bf;
+  --popover: #31353f;
+  --popover-foreground: #abb2bf;
+  --primary: #61afef;
+  --primary-foreground: #282c34;
+  --accent: --alpha(#61afef / 8%);
+  --accent-foreground: color-mix(in srgb, #c678dd 70%, #fff);
+  --muted: --alpha(#5c6370 / 18%);
+  --muted-foreground: color-mix(in srgb, #848b98 20%, var(--foreground));
+  --border: --alpha(#5c6370 / 46%);
+  --input: --alpha(#5c6370 / 58%);
+  --ring: #c678dd;
+}
+
+/* ── Cal.com — black on white, Cal Sans headings, 6px, hairline gray borders ── */
+[data-kloq-theme="calcom"] [data-kloq-root],
+[data-kloq-theme="calcom"][data-kloq-root] {
+  --font-heading: var(--font-cal-sans, "Cal Sans"), var(--font-sans);
+  --radius: 0.5rem;
+  --background: #ffffff;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #111827;
+  --primary-foreground: #ffffff;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: color-mix(in srgb, #6b7280 95%, var(--foreground));
+  --border: #e5e7eb;
+  --input: #d1d5db;
+  --ring: #6b7280;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 6%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 8%);
+  --shadow-md: 0 2px 6px -1px --alpha(var(--shadow-color) / 8%);
+  --shadow-lg: 0 2px 6px -1px --alpha(var(--shadow-color) / 8%), 0 8px 24px -4px --alpha(var(--shadow-color) / 8%);
+}
+.dark[data-kloq-theme="calcom"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="calcom"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="calcom"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="calcom"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="calcom"][data-kloq-root].dark {
+  --font-heading: var(--font-cal-sans, "Cal Sans"), var(--font-sans);
+  --radius: 0.5rem;
+  --background: #101010;
+  --foreground: #f3f4f6;
+  --card: #161616;
+  --card-foreground: #f3f4f6;
+  --popover: #1c1c1c;
+  --popover-foreground: #f3f4f6;
+  --primary: #f3f4f6;
+  --primary-foreground: #101010;
+  --accent: #2b2b2b;
+  --accent-foreground: #f3f4f6;
+  --muted: #1c1c1c;
+  --muted-foreground: #a5a5a5;
+  --border: #2b2b2b;
+  --input: #4a4a4a;
+  --ring: #757575;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 35%);
+  --shadow-md: 0 2px 6px -1px --alpha(var(--shadow-color) / 40%);
+  --shadow-lg: 0 2px 6px -1px --alpha(var(--shadow-color) / 40%), 0 8px 24px -4px --alpha(var(--shadow-color) / 45%);
+}
+
+/* ── Graphite — Linear-style near-black, indigo, tight tracking, deep soft shadows ── */
+[data-kloq-theme="graphite"] [data-kloq-root],
+[data-kloq-theme="graphite"][data-kloq-root] {
+  --radius: 0.5rem;
+  --background: #fcfcfc;
+  --foreground: #282a30;
+  --card: #ffffff;
+  --card-foreground: #282a30;
+  --popover: #ffffff;
+  --popover-foreground: #282a30;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --accent: --alpha(#5e6ad2 / 8%);
+  --accent-foreground: #282a30;
+  --muted: --alpha(#282a30 / 5%);
+  --muted-foreground: color-mix(in srgb, #6b6f76 95%, var(--foreground));
+  --border: --alpha(#282a30 / 9%);
+  --input: --alpha(#282a30 / 13%);
+  --ring: #5e6ad2;
+  --shadow-color: #1e1f3d;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 6%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 8%);
+  --shadow-md: 0 2px 4px 0 --alpha(var(--shadow-color) / 6%), 0 6px 12px -4px --alpha(var(--shadow-color) / 8%);
+  --shadow-lg: 0 4px 8px -4px --alpha(var(--shadow-color) / 10%), 0 12px 32px -8px --alpha(var(--shadow-color) / 14%);
+}
+.dark[data-kloq-theme="graphite"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="graphite"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="graphite"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="graphite"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="graphite"][data-kloq-root].dark {
+  --radius: 0.5rem;
+  --background: #08090a;
+  --foreground: #f7f8f8;
+  --card: #0f1011;
+  --card-foreground: #f7f8f8;
+  --popover: #191a1c;
+  --popover-foreground: #f7f8f8;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --accent: --alpha(#6e79d6 / 14%);
+  --accent-foreground: #e2e4e7;
+  --muted: --alpha(#ffffff / 5%);
+  --muted-foreground: #8a8f98;
+  --border: --alpha(#ffffff / 8%);
+  --input: --alpha(#ffffff / 12%);
+  --ring: #6e79d6;
+  --shadow-color: #000000;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 25%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-md: 0 2px 6px 0 --alpha(var(--shadow-color) / 30%), 0 6px 16px -4px --alpha(var(--shadow-color) / 30%);
+  --shadow-lg: 0 4px 8px -4px --alpha(var(--shadow-color) / 35%), 0 8px 24px 0 --alpha(var(--shadow-color) / 35%);
+}
+
+/* ── Ember — Raycast-style jet black, translucent panels, red accent, heavy shadows ── */
+[data-kloq-theme="ember"] [data-kloq-root],
+[data-kloq-theme="ember"][data-kloq-root] {
+  --radius: 0.75rem;
+  --background: #f5f5f7;
+  --foreground: #1c1c1e;
+  --card: #ffffff;
+  --card-foreground: #1c1c1e;
+  --popover: #ffffff;
+  --popover-foreground: #1c1c1e;
+  --primary: #2f3031;
+  --primary-foreground: #ffffff;
+  --accent: --alpha(#ff6363 / 10%);
+  --accent-foreground: #1c1c1e;
+  --muted: --alpha(#1c1c1e / 5%);
+  --muted-foreground: color-mix(in srgb, #6b6b6e 95%, var(--foreground));
+  --border: --alpha(#1c1c1e / 8%);
+  --input: --alpha(#1c1c1e / 12%);
+  --ring: color-mix(in srgb, #ff6363 88%, #000);
+  --shadow-xs: 0 1px 3px 0 --alpha(var(--shadow-color) / 8%);
+  --shadow-sm: 0 2px 6px 0 --alpha(var(--shadow-color) / 8%);
+  --shadow-md: 0 4px 16px -2px --alpha(var(--shadow-color) / 12%);
+  --shadow-lg: 0 2px 8px 0 --alpha(var(--shadow-color) / 8%), 0 8px 32px -4px --alpha(var(--shadow-color) / 18%);
+}
+.dark[data-kloq-theme="ember"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ember"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ember"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ember"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ember"][data-kloq-root].dark {
+  --radius: 0.75rem;
+  --background: #07080a;
+  --foreground: #f5f5f5;
+  --card: #16171a;
+  --card-foreground: #f5f5f5;
+  --popover: #1c1d20;
+  --popover-foreground: #f5f5f5;
+  --primary: #e6e6e6;
+  --primary-foreground: #1c1c1c;
+  --accent: --alpha(#ff6363 / 14%);
+  --accent-foreground: #ffb4b4;
+  --muted: --alpha(#ffffff / 6%);
+  --muted-foreground: #9c9c9d;
+  --border: --alpha(#ffffff / 8%);
+  --input: --alpha(#ffffff / 10%);
+  --ring: #ff6363;
+  --shadow-xs: 0 1px 3px 0 --alpha(var(--shadow-color) / 40%);
+  --shadow-sm: 0 2px 6px 0 --alpha(var(--shadow-color) / 40%);
+  --shadow-md: 0 4px 16px -2px --alpha(var(--shadow-color) / 50%);
+  --shadow-lg: 0 2px 8px 0 --alpha(var(--shadow-color) / 40%), 0 8px 32px -4px --alpha(var(--shadow-color) / 60%);
+}
+
+/* ── Geist — Vercel's black/white, Geist Sans, 6px, whisper-thin shadows ─── */
+[data-kloq-theme="geist"] [data-kloq-root],
+[data-kloq-theme="geist"][data-kloq-root] {
+  --font-sans: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  --radius: 0.375rem;
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #ffffff;
+  --accent: --alpha(#000000 / 4%);
+  --accent-foreground: #171717;
+  --muted: --alpha(#000000 / 5%);
+  --muted-foreground: #666666;
+  --border: --alpha(#000000 / 8%);
+  --input: --alpha(#000000 / 10%);
+  --ring: #0070f3;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 4%);
+  --shadow-sm: 0 2px 2px 0 --alpha(var(--shadow-color) / 4%);
+  --shadow-md: 0 2px 2px 0 --alpha(var(--shadow-color) / 4%), 0 8px 8px -8px --alpha(var(--shadow-color) / 4%);
+  --shadow-lg: 0 1px 1px 0 --alpha(var(--shadow-color) / 2%), 0 4px 8px -4px --alpha(var(--shadow-color) / 4%), 0 16px 24px -8px --alpha(var(--shadow-color) / 6%);
+}
+.dark[data-kloq-theme="geist"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="geist"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="geist"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="geist"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="geist"][data-kloq-root].dark {
+  --font-sans: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans, "Geist"), ui-sans-serif, system-ui, sans-serif;
+  --radius: 0.375rem;
+  --background: #000000;
+  --foreground: #ededed;
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0a;
+  --accent: --alpha(#ffffff / 6%);
+  --accent-foreground: #ededed;
+  --muted: --alpha(#ffffff / 5%);
+  --muted-foreground: #a1a1a1;
+  --border: --alpha(#ffffff / 12%);
+  --input: --alpha(#ffffff / 18%);
+  --ring: #3291ff;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-sm: 0 2px 2px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-md: 0 2px 2px 0 --alpha(var(--shadow-color) / 30%), 0 8px 8px -8px --alpha(var(--shadow-color) / 40%);
+  --shadow-lg: 0 1px 1px 0 --alpha(var(--shadow-color) / 40%), 0 4px 8px -4px --alpha(var(--shadow-color) / 40%), 0 16px 24px -8px --alpha(var(--shadow-color) / 50%);
+}
+
+/* ── Ivory — ChatGPT-style paper white, system sans, generous 12px, fill-on-fill ── */
+[data-kloq-theme="ivory"] [data-kloq-root],
+[data-kloq-theme="ivory"][data-kloq-root] {
+  --font-sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-heading: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #0d0d0d;
+  --card: #f9f9f9;
+  --card-foreground: #0d0d0d;
+  --popover: #ffffff;
+  --popover-foreground: #0d0d0d;
+  --primary: #0d0d0d;
+  --primary-foreground: #ffffff;
+  --accent: --alpha(#000000 / 5%);
+  --accent-foreground: #0d0d0d;
+  --muted: --alpha(#000000 / 5%);
+  --muted-foreground: #5d5d5d;
+  --border: --alpha(#000000 / 8%);
+  --input: --alpha(#000000 / 12%);
+  --ring: #0d0d0d;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 4%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 5%);
+  --shadow-md: 0 4px 12px 0 --alpha(var(--shadow-color) / 6%);
+  --shadow-lg: 0 1px 2px 0 --alpha(var(--shadow-color) / 4%), 0 8px 24px 0 --alpha(var(--shadow-color) / 8%);
+}
+.dark[data-kloq-theme="ivory"] [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ivory"] [data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ivory"] .dark [data-kloq-root]:not(:where(.light)),
+.dark [data-kloq-theme="ivory"][data-kloq-root]:not(:where(.light)),
+[data-kloq-theme="ivory"][data-kloq-root].dark {
+  --font-sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-heading: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --radius: 0.75rem;
+  --background: #212121;
+  --foreground: #ececec;
+  --card: #262626;
+  --card-foreground: #ececec;
+  --popover: #2f2f2f;
+  --popover-foreground: #ececec;
+  --primary: #ececec;
+  --primary-foreground: #0d0d0d;
+  --accent: --alpha(#ffffff / 6%);
+  --accent-foreground: #ececec;
+  --muted: --alpha(#ffffff / 5%);
+  --muted-foreground: #b4b4b4;
+  --border: --alpha(#ffffff / 10%);
+  --input: --alpha(#ffffff / 15%);
+  --ring: #ececec;
+  --shadow-xs: 0 1px 2px 0 --alpha(var(--shadow-color) / 25%);
+  --shadow-sm: 0 1px 3px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-md: 0 4px 12px 0 --alpha(var(--shadow-color) / 30%);
+  --shadow-lg: 0 0 0 1px --alpha(var(--shadow-color) / 20%), 0 8px 24px 0 --alpha(var(--shadow-color) / 40%);
+}
+
+/* free/busy — a "free" block is an outline + hatch over the existing tint */
+[data-cal-event][data-free] {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    --alpha(var(--color-black) / 6%) 5px 10px
+  );
+  @variant dark {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 5px,
+      --alpha(var(--color-white) / 7%) 5px 10px
+    );
+  }
+}
+/* the colour bar still identifies the event */
+[data-cal-event][data-free] [data-slot="event-bar"] {
+  opacity: 0.6;
+}
+
+/* all-day lane draft chip */
+[data-cal-lane-draft] {
+  pointer-events: none;
+  top: 3px;
+  height: 22px;
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--kloq-draft) 16%, transparent);
+  will-change: left, width;
+}
+[data-cal-lane-draft][hidden] {
+  display: none;
+}
+[data-cal-lane-draft] [data-slot="draft-label"] {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  translate: 0 -50%;
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--kloq-draft-ink);
+}
+
+/* timeline slot rules: one gradient per canvas, sized by the slot width */
+.tl-slot-lines {
+  background-image: repeating-linear-gradient(
+    to right,
+    color-mix(in oklab, var(--border) 40%, transparent) 0 1px,
+    transparent 1px var(--kloq-slot-width, 40px)
+  );
+}
+.tl-slot-lines[data-dated] {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--border) 0 1px,
+    transparent 1px var(--kloq-slot-width, 40px)
+  );
+}
+
+/* Design mode — scoped to [data-design-mode] on <html> or .dm-* classes */
+
+/* blueprint: a backdrop layer over the calendar, never a filter on <body> (that would break every fixed element) */
+.dm-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: saturate(0.72) brightness(0.96);
+  background:
+    linear-gradient(
+      color-mix(in oklab, var(--kloq-draft) 4%, transparent),
+      color-mix(in oklab, var(--kloq-draft) 4%, transparent)
+    );
+}
+
+.dm-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle at 0.5px 0.5px,
+    color-mix(in oklab, currentColor 22%, transparent) 0.75px,
+    transparent 0.75px
+  );
+  background-size: 8px 8px;
+  color: var(--foreground);
+  opacity: 0.5;
+}
+
+/* the hint bar keeps its place in the layout but steps out from behind an event sheet */
+:root:has([data-event-panel][data-sheet]) [data-dm-hint] {
+  visibility: hidden;
+}
+
+.dm-snap-lines {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--brand) 45%, transparent) 0 1px,
+    transparent 1px 100%
+  );
+  background-repeat: repeat;
+}
+.dm-snap-lines[data-axis="x"] {
+  background-image: repeating-linear-gradient(
+    to right,
+    color-mix(in oklab, var(--brand) 45%, transparent) 0 1px,
+    transparent 1px 100%
+  );
+}
+
+html[data-dm-hit] [data-resize-edge],
+html[data-dm-hit] [data-lane-edge] {
+  background: color-mix(in oklab, var(--brand) 28%, transparent) !important;
+  outline: 1px dashed var(--brand);
+  outline-offset: -1px;
+}
+html[data-dm-hit] [data-resize-edge] > *,
+html[data-dm-hit] [data-lane-edge] > * {
+  opacity: 1 !important;
+}
+
+/* ── the anchored panel as a bottom sheet (`use-anchored-panel.ts` decides when) ── */
+[data-event-panel][data-sheet] {
+  inset: auto 0 0 0;
+  width: auto !important;
+  max-width: 28rem;
+  max-height: 85dvh;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+}
+[data-event-panel][data-sheet] > [data-slot="card"] {
+  max-height: 85dvh;
+  overflow-y: auto;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  border-bottom: 0;
+}
+
+.dm-inspect-outline {
+  position: fixed;
+  z-index: 1;
+  pointer-events: none;
+  border: 1px solid var(--brand);
+  visibility: hidden;
+}
+.dm-inspect-outline[data-kind="slot"] {
+  border-style: dashed;
+  background: color-mix(in oklab, var(--brand) 8%, transparent);
+}
+.dm-inspect-outline[data-kind="event"] {
+  border-width: 2px;
+  border-radius: var(--radius-md);
+}
+
+.dm-inspect-badge {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 4px);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--brand);
+  color: var(--color-white);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  width: max-content;
+  max-width: 16rem;
+  white-space: nowrap;
+}
+
+/* time-awareness washes — past dim + off-hours tint (see time-shade.tsx) */
+
+.cal-past-shade,
+.cal-offhours {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1; /* above hour lines, below every event block */
+}
+
+.cal-past-shade {
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+}
+
+.cal-offhours {
+  background: color-mix(in oklab, var(--foreground) 2.5%, transparent);
+}
+
+/* agenda days off-screen skip layout and paint */
+[data-agenda-day] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 6rem;
+}
+
+/* unavailable (minDate/maxDate, isSlotDisabled): the hatch carries the meaning without colour */
+.cal-blocked {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2; /* above the off-hours tint, below every event block */
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--muted-foreground) 20%, transparent) 0 1.5px,
+    transparent 1.5px 7px
+  );
+  background-color: color-mix(in oklab, var(--muted) 45%, transparent);
+  border-block: 1px solid color-mix(in oklab, var(--muted-foreground) 26%, transparent);
+}
+
+/* forced colours strips color-mix; keep the boundary */
+@media (forced-colors: active) {
+  .cal-blocked {
+    border-block: 1px solid GrayText;
+    background-image: repeating-linear-gradient(
+      135deg,
+      GrayText 0 1px,
+      transparent 1px 7px
+    );
+  }
+}
+
+/* refused drag; declared after the grab/copy cursors so it wins */
+body[data-cal-refused],
+body[data-cal-refused] [data-cal-event] {
+  cursor: not-allowed;
+}
+
+/* in-flight sync pulse — data-syncing while a commit is on the wire */
+
+[data-cal-event][data-syncing]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.4;
+  animation: cal-sync-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes cal-sync-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-cal-event][data-syncing]::after {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+/* touch & density. The geometry half of density (px per hour) lives in `KloqSettings`, not here. */
+
+/* coarse pointers get vertical panning; a matured long press cancels it (see `use-drag-engine.ts`) */
+@media (pointer: coarse) {
+  .cal-hour-lines {
+    touch-action: pan-y;
+  }
+}
+
+/* long-press create preview; the engine writes opacity/transform/rect from its rAF loop */
+.cal-press {
+  position: absolute;
+  z-index: 24;
+  pointer-events: none;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed color-mix(in oklab, var(--primary) 55%, transparent);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+.cal-press[hidden] {
+  display: none;
+}
+
+/* touch targets (WCAG 2.2 §2.5.8): grow the box where there is slack, else a `::before` hit area
+   (`::before`, not `::after`: the duplicate-drag tell owns `[data-cal-event]::after`) */
+@media (pointer: coarse) {
+  /* a 15-minute event is 16px at default zoom; the taller minimum overlaps like any overlapping event.
+     Month chips are not here: their pitch grows instead (`useCoarsePointer` in month-view.tsx) */
+  [data-cal-canvas] [data-cal-event],
+  [data-cal-lane] [data-cal-event] {
+    min-height: 24px;
+  }
+
+  /* `> div > button` is the header row only; chips and `+N more` are direct children of the cell */
+  [data-month-day] > div > button {
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  /* `+N more` cannot grow without pushing a chip out, so it gets hit area instead */
+  [data-cal-more]::before {
+    content: "";
+    position: absolute;
+    inset-block: -7px;
+    inset-inline: -8px;
+    min-height: 24px;
+  }
+
+  /* menu rows go to the 44px comfort size */
+  [data-kloq-root] [data-slot="context-menu-item"],
+  [data-kloq-root] [data-slot="context-menu-link-item"],
+  [data-kloq-root] [data-slot="context-menu-checkbox-item"],
+  [data-kloq-root] [data-slot="context-menu-radio-item"],
+  [data-kloq-root] [data-slot="context-menu-sub-trigger"],
+  [data-kloq-root] [data-slot="command-item"] {
+    min-height: 44px;
+  }
+
+  /* the chrome buttons are coss `Button`s and already carry a coarse-pointer pseudo-target */
+}
+
+/* density: keyed on `<html data-kloq-density>` (stamped by `lib/density.ts`).
+   Vertical padding is deliberately not set here: it would clip `event-block.tsx`'s `py-0` on short blocks. */
+[data-kloq-root] {
+  --kloq-event-font-size: 13px;
+  --kloq-event-time-font-size: 11px;
+  --kloq-event-padding-start: 10px;
+  --kloq-event-padding-end: 8px;
+  --kloq-chip-font-size: 12px;
+}
+
+[data-kloq-density="compact"] [data-kloq-root],
+[data-kloq-root][data-kloq-density="compact"] {
+  --kloq-event-font-size: 12px;
+  --kloq-event-time-font-size: 10px;
+  --kloq-event-padding-start: 7px;
+  --kloq-event-padding-end: 5px;
+  --kloq-chip-font-size: 11px;
+}
+
+[data-kloq-density] [data-cal-event] {
+  padding-inline: var(--kloq-event-padding-start) var(--kloq-event-padding-end);
+}
+[data-kloq-density] [data-cal-event] > div > span {
+  font-size: var(--kloq-event-font-size);
+}
+[data-kloq-density] [data-cal-event] [data-slot="event-time"] {
+  font-size: var(--kloq-event-time-font-size);
+}
+
+/* the all-day chip's label is a direct child */
+[data-kloq-density] [data-cal-event] > span:not([aria-hidden]) {
+  font-size: var(--kloq-chip-font-size);
+}
+
+/* columns too narrow for the full block (a week forced into a phone-width box): the title alone,
+   edge to edge, clipped rather than ellipsised */
+[data-cramped] [data-cal-event] {
+  padding-inline: 4px 1px;
+}
+[data-cramped] [data-cal-event] [data-slot="event-bar"],
+[data-cramped] [data-cal-event] [data-slot="event-time"],
+[data-cramped] [data-cal-event] > span[aria-hidden] {
+  display: none;
+}
+[data-cramped] [data-cal-event] > div > span,
+[data-cramped] [data-cal-event] > span:not([aria-hidden]) {
+  font-size: var(--text-2xs);
+  text-overflow: clip;
+}

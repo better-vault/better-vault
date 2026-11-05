@@ -137,5 +137,8 @@
     "name": "Name",
     "contents": "Contents",
     "modified": "Modified"
+  },
+  "calendar": {
+    "title": "Calendar"
   }
 }

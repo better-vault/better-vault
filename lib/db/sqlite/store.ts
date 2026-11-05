@@ -9,6 +9,7 @@ import type {
   StoredMessage,
   StudioOutput,
   Vault,
+  CalendarEntry,
 } from "../types";
 
 /**
@@ -44,6 +45,7 @@ type DocTable = Exclude<TableName, "settings" | "blobs">;
 
 /** The columns of each table, besides `id` and `doc`, and the fields they copy. */
 const columns: Record<DocTable, Record<string, string>> = {
+  calendar: { start: "start" },
   vaults: { updated_at: "updatedAt" },
   folders: { parent_id: "parentId", updated_at: "updatedAt" },
   notebooks: { updated_at: "updatedAt" },
@@ -106,6 +108,10 @@ const migrations: string[] = [
   // 4: vaults. Notebooks and folders without a vault are in the default one.
   `
   CREATE TABLE vaults (id TEXT PRIMARY KEY, updated_at REAL NOT NULL, doc TEXT NOT NULL);
+  `,
+  // 5: calendar entries.
+  `
+  CREATE TABLE calendar (id TEXT PRIMARY KEY, start TEXT NOT NULL, doc TEXT NOT NULL);
   `,
 ];
 
@@ -183,6 +189,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     db.prepare(`DELETE FROM ${table} WHERE ${column} = ?`).run(value);
 
   const content: Exclude<TableName, "settings">[] = [
+    "calendar",
     "vaults",
     "folders",
     "notebooks",
@@ -251,6 +258,13 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         .all() as { id: string; n: number }[];
       return Object.fromEntries(rows.map((row) => [row.id, Number(row.n)]));
     },
+
+    listCalendar: () => docs<CalendarEntry>(db.prepare("SELECT doc FROM calendar").all()),
+    saveCalendar: (entries) =>
+      transaction(db, () => {
+        db.exec("DELETE FROM calendar");
+        for (const entry of entries) put("calendar", entry);
+      }),
 
     listVaults: () => docs<Vault>(db.prepare("SELECT doc FROM vaults ORDER BY id").all()),
     putVault: (vault) => {
@@ -420,6 +434,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     },
 
     exportAll: (): StoreContent => ({
+      calendar: docs(db.prepare("SELECT doc FROM calendar").all()),
       vaults: docs(db.prepare("SELECT doc FROM vaults").all()),
       folders: docs(db.prepare("SELECT doc FROM folders").all()),
       notebooks: docs(db.prepare("SELECT doc FROM notebooks").all()),
@@ -431,6 +446,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     }),
     importAll: (data, chunks) =>
       transaction(db, () => {
+        for (const row of data.calendar) put("calendar", row);
         for (const row of data.vaults) put("vaults", row);
         for (const row of data.folders) put("folders", row);
         for (const row of data.notebooks) put("notebooks", row);

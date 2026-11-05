@@ -1,6 +1,7 @@
 # Vendored registry components keep their upstream formatting.
 components/panelui/
 components/ui/
+components/kloq/
 studio/tools/anatomy/kit/
 package-lock.json
 dist/
