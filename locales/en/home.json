@@ -121,7 +121,7 @@
     "sidebar": "Vault sidebar",
     "switch": "Switch vault",
     "appTitle": "better-vault",
-    "favorites": "Favorites",
+    "library": "Library",
     "all": "All notebooks",
     "emptyFolder": "Nothing here yet",
     "itemCount_one": "{{count}} item",

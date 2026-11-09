@@ -54,7 +54,7 @@ const row =
   "relative flex h-8 w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-xl px-2.5 text-start text-sm outline-none transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
- * The notebooks page's side panel, laid out like Finder's: favourites
+ * The notebooks page's side panel, laid out like Finder's: the library
  * (recent, everything, pinned notebooks) above the vaults, which work like
  * locations: choose one to see what is in it.
  */
@@ -82,7 +82,7 @@ export function VaultSidebar({
 
       <ScrollArea className="min-h-0 flex-1">
         <nav className="flex flex-col gap-5 px-2 pb-3">
-          <Group title={t("vaults.favorites")}>
+          <Group title={t("vaults.library")}>
             <button
               type="button"
               aria-current={section === "recents" ? "page" : undefined}

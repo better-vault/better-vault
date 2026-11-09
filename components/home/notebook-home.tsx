@@ -85,7 +85,7 @@ const saved = <T extends string>(key: string, values: readonly T[], fallback: T)
 
 /**
  * The notebooks page, laid out like a Finder window: a side panel of
- * favourites and vaults, a toolbar, the current folder's folders and
+ * the library and vaults, a toolbar, the current folder's folders and
  * notebooks as icons or a list, and a path bar. Files dropped anywhere start
  * a notebook with them.
  */
