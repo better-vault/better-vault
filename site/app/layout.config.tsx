@@ -44,7 +44,7 @@ const downloadLink: LinkItemType = {
 };
 
 /** The call to action: the guide to installing and using better-vault. */
-const startLink: LinkItemType = { type: "button", text: "Get started", url: "/docs/quickstart", secondary: true };
+const startLink: LinkItemType = { type: "button", text: "Get started", url: "/download", secondary: true };
 
 const PLAIN_NAV_LINK =
   "inline-flex items-center gap-1.5 p-2 text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground";

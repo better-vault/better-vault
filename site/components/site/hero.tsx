@@ -110,7 +110,7 @@ export function Hero() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link href="/docs/quickstart" className={buttonVariants({ size: "lg" })}>
+          <Link href="/download" className={buttonVariants({ size: "lg" })}>
             Get started
             <HugeiconsIcon icon={ArrowRight01Icon} aria-hidden="true" />
           </Link>

@@ -54,7 +54,7 @@ function jsonLd() {
         description: site.definition,
         url: site.url,
         downloadUrl: absoluteUrl("/download"),
-        installUrl: absoluteUrl("/docs/quickstart"),
+        installUrl: absoluteUrl("/download"),
         applicationCategory: "EducationalApplication",
         applicationSubCategory: "AI research notebook",
         operatingSystem: "macOS, Windows, Linux",
@@ -290,7 +290,7 @@ export default function HomePage() {
           </h2>
           <p className="text-muted-foreground">Free and open source. Nothing to sign up for.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/docs/quickstart" className={buttonVariants({ size: "lg" })}>
+            <Link href="/download" className={buttonVariants({ size: "lg" })}>
               Get started
               <HugeiconsIcon icon={ArrowRight01Icon} aria-hidden="true" />
             </Link>
