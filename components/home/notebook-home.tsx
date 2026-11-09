@@ -121,10 +121,15 @@ export function NotebookHome() {
 
   const viewParam = params.get("view");
   const section: HomeSection =
-    viewParam === "recents" || viewParam === "calendar" ? viewParam : "all";
+    viewParam === "recents" || viewParam === "calendar" || viewParam === "vault"
+      ? viewParam
+      : "all";
+  // "vault" shows the same list as "all"; it only records that the vault was
+  // chosen in the sidebar, so the sidebar highlights the vault instead.
+  const listing = section === "all" || section === "vault";
   const folderParam = params.get("folder");
   const current =
-    section === "all" && folderParam && folders.some((folder) => folder.id === folderParam)
+    listing && folderParam && folders.some((folder) => folder.id === folderParam)
       ? folderParam
       : null;
   const path = ancestors(current, folders);
@@ -140,7 +145,11 @@ export function NotebookHome() {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
   }, [title, tCommon]);
 
-  const openFolder = (id: string | null) => setParams(id ? { folder: id } : {});
+  const openFolder = (id: string | null) =>
+    setParams({
+      ...(section === "vault" ? { view: "vault" } : {}),
+      ...(id ? { folder: id } : {}),
+    });
   const showSection = (next: HomeSection) => setParams(next === "all" ? {} : { view: next });
 
   const order = <T extends { updatedAt: number }>(items: T[], name: (item: T) => string) =>
@@ -464,7 +473,7 @@ export function NotebookHome() {
         >
           {vault ? (
             <PathStep
-              active={!current && section === "all"}
+              active={!current && listing}
               onOpen={() => openFolder(null)}
               onDropCards={(event) => void dropCards(event, null)}
             >

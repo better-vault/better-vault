@@ -32,8 +32,12 @@ import { NOTEBOOK_DRAG, useDropTarget } from "./home-cards";
 import { NotebookDialog } from "./notebook-dialog";
 import { useVaultName } from "./vault-name";
 
-/** What the page shows: everything in the vault (by folder) or its recent notebooks. */
-export type HomeSection = "all" | "recents" | "calendar";
+/**
+ * What the page shows: everything in the vault (by folder), its recent
+ * notebooks or the calendar. "vault" is "all" reached by choosing the vault
+ * in the sidebar, so the sidebar highlights the vault row, not "All notebooks".
+ */
+export type HomeSection = "all" | "vault" | "recents" | "calendar";
 
 interface VaultSidebarProps {
   vaults: Vault[];
@@ -138,10 +142,11 @@ export function VaultSidebar({
               <VaultRow
                 key={each.id}
                 vault={each}
-                active={each.id === vault.id}
+                current={each.id === vault.id}
+                active={each.id === vault.id && section === "vault"}
                 onChoose={() => {
                   setCurrentVault(each.id);
-                  onSection("all");
+                  onSection("vault");
                 }}
               />
             ))}
@@ -176,7 +181,7 @@ export function VaultSidebar({
         onSubmit={async ({ title, icon, color }) => {
           const id = await createVault({ name: title, icon, color });
           setCurrentVault(id);
-          onSection("all");
+          onSection("vault");
         }}
       />
     </aside>
@@ -195,10 +200,14 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 /** A vault in the list, like a location in Finder; the chosen one has its menu. */
 function VaultRow({
   vault,
+  current,
   active,
   onChoose,
 }: {
   vault: Vault;
+  /** The vault the page is in; its row keeps its menu and bold name. */
+  current: boolean;
+  /** The vault itself is the page shown (not a section inside it). */
   active: boolean;
   onChoose: () => void;
 }) {
@@ -208,12 +217,17 @@ function VaultRow({
   const [deleting, setDeleting] = useState(false);
   const name = vaultName(vault);
   return (
-    <div className={cn("group flex items-center rounded-xl", active && "bg-foreground/10")}>
+    <div
+      className={cn(
+        "group flex items-center rounded-xl transition-colors",
+        active ? "bg-foreground/10" : "hover:bg-foreground/5",
+      )}
+    >
       <button
         type="button"
-        aria-current={active ? "true" : undefined}
+        aria-current={active ? "page" : current ? "location" : undefined}
         onClick={onChoose}
-        className={cn(row, "hover:bg-transparent", active && "font-medium")}
+        className={cn(row, "hover:bg-transparent", current && "font-medium")}
       >
         <span
           className={cn(
@@ -225,7 +239,7 @@ function VaultRow({
         </span>
         <span className="min-w-0 truncate">{name}</span>
       </button>
-      {active ? (
+      {current ? (
         <Menu>
           <Menu.Trigger
             aria-label={t("vaults.menu")}
