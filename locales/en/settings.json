@@ -18,7 +18,11 @@
     "storageHint_other": "{{count}} connected",
     "storageNone": "Google Drive, S3, R2",
     "calendar": "Calendar",
-    "calendarHint": "Preferences and subscribed calendars"
+    "calendarHint": "Preferences and subscribed calendars",
+    "studio": "Studio",
+    "studioHint_one": "{{count}} tool turned off",
+    "studioHint_other": "{{count}} tools turned off",
+    "studioHintAll": "All tools on"
   },
   "providers": {
     "title": "AI providers",
@@ -360,5 +364,10 @@
       "add": "Add to calendar",
       "added": "“{{title}}” added to your calendar"
     }
+  },
+  "studio": {
+    "title": "Studio",
+    "description": "Choose which tools the Studio offers. A tool you turn off leaves the Studio sheet; what it already made stays in your notebooks.",
+    "lastOne": "At least one tool stays on"
   }
 }

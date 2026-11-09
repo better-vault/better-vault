@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Sheet } from "@/components/panelui/sheet";
 import { useWorkspace } from "@/components/workspace/workspace-context";
 import { availableImageModels, useSettings } from "@/lib/db/settings";
+import { useStudioSettings } from "@/lib/studio/settings";
 import { toolDefinitions } from "@/studio/definitions";
 import { studioToolIds, studioTools, type StudioToolId } from "@/studio/tools";
 import { OutputList } from "./output-list";
@@ -28,6 +29,9 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
   const runner = useStudioRunner();
   const settings = useSettings();
   const noImageModel = settings ? availableImageModels(settings).length === 0 : false;
+  const studioSettings = useStudioSettings();
+  // Tools turned off in Settings → Studio leave the sheet; their outputs stay listed below.
+  const shownTools = studioToolIds.filter((id) => !studioSettings?.hidden.includes(id));
 
   // A local tool (the whiteboard) has no dialog: it is made at once and opened.
   async function choose(id: StudioToolId) {
@@ -56,8 +60,13 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
       >
         <Sheet.Header title={t("title")} description={t("description")} />
         <Sheet.Body>
+          {shownTools.length === 0 ? (
+            <p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">
+              {t("allHidden")}
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-2">
-            {studioToolIds.map((id) => (
+            {shownTools.map((id) => (
               <ToolTile
                 key={id}
                 tool={studioTools[id]}
@@ -65,9 +74,7 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
                 badge={toolDefinitions[id]?.imageModel && noImageModel ? t("needsKey") : undefined}
                 // An odd one out spans the whole row.
                 className={
-                  studioToolIds.length % 2 === 1 && id === studioToolIds.at(-1)
-                    ? "col-span-2"
-                    : undefined
+                  shownTools.length % 2 === 1 && id === shownTools.at(-1) ? "col-span-2" : undefined
                 }
               />
             ))}

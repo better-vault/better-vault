@@ -7,6 +7,7 @@ import {
   LanguageSkillIcon,
   PaintBoardIcon,
   Settings01Icon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
 import { useEffect, useRef, useState, type ReactElement } from "react";
@@ -28,6 +29,8 @@ import { useProfile } from "@/lib/db/profile";
 import { AboutPanel } from "./about-panel";
 import { AccountPanel } from "./account-panel";
 import { StoragePanel } from "./storage-panel";
+import { StudioPanel } from "./studio-panel";
+import { useStudioSettings } from "@/lib/studio/settings";
 import { storageIds } from "@/lib/storage/catalog";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { AppearancePanel } from "./appearance-panel";
@@ -54,6 +57,7 @@ export const settingsPages = [
   "providers",
   "storage",
   "appearance",
+  "studio",
   "calendar",
   "language",
   "data",
@@ -101,6 +105,8 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
   const updates = useUpdates();
   const profile = useProfile();
   const storage = useStorageSettings();
+  const studio = useStudioSettings();
+  const hiddenTools = studio?.hidden.length ?? 0;
   const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)).length : 0;
   const updateVersion =
     updates.state.status === "available" ||
@@ -158,6 +164,16 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 hint={`${t(`appearance.${theme}`)} · ${t(`appearance.accents.${accent}`)}`}
               />
               <SettingsRow
+                to="studio"
+                icon={SparklesIcon}
+                label={t("rows.studio")}
+                hint={
+                  hiddenTools > 0
+                    ? t("rows.studioHint", { count: hiddenTools })
+                    : t("rows.studioHintAll")
+                }
+              />
+              <SettingsRow
                 to="calendar"
                 icon={Calendar03Icon}
                 label={t("rows.calendar")}
@@ -204,6 +220,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
           </Sheet.Next>
           <Sheet.Next name="appearance" closeLabel={tCommon("actions.close")}>
             <AppearancePanel />
+          </Sheet.Next>
+          <Sheet.Next name="studio" closeLabel={tCommon("actions.close")}>
+            <StudioPanel />
           </Sheet.Next>
           <Sheet.Next name="calendar" closeLabel={tCommon("actions.close")}>
             <CalendarPanel
