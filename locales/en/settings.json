@@ -18,7 +18,7 @@
     "storageHint_other": "{{count}} connected",
     "storageNone": "Google Drive, S3, R2",
     "calendar": "Calendar",
-    "calendarHint": "Connected calendars and preferences"
+    "calendarHint": "Preferences and subscribed calendars"
   },
   "providers": {
     "title": "AI providers",
@@ -271,8 +271,8 @@
   },
   "calendar": {
     "title": "Calendar",
-    "description": "Connect the calendars you already use and choose how yours looks. These arrive in a later version; your entries are kept on this device until then.",
-    "accounts": "Connected calendars",
+    "description": "Choose how your calendar looks and follow calendars by their .ics address. Entries stay on this device.",
+    "accounts": "Connected accounts",
     "preferences": "Preferences",
     "items": {
       "google": {
@@ -301,12 +301,64 @@
       },
       "defaultView": {
         "label": "Default view",
-        "hint": "Day, week, month or agenda"
+        "hint": "What the calendar shows when it opens"
       },
       "timeFormat": {
         "label": "Time format",
         "hint": "12-hour or 24-hour clock"
+      },
+      "weekNumbers": {
+        "label": "Week numbers",
+        "hint": "Show the week of the year beside the day and week views"
+      },
+      "workingHours": {
+        "label": "Working hours",
+        "hint": "Tint the hours you work on the grid"
       }
+    },
+    "subscriptions": "Subscribed calendars",
+    "days": {
+      "monday": "Monday",
+      "sunday": "Sunday",
+      "saturday": "Saturday"
+    },
+    "views": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "agenda": "Agenda"
+    },
+    "timeFormats": {
+      "auto": "Automatic",
+      "12": "12-hour",
+      "24": "24-hour"
+    },
+    "workingFrom": "From",
+    "workingTo": "To",
+    "refresh": "Refresh",
+    "refreshed": "Calendar refreshed",
+    "unsubscribe": "Unsubscribe",
+    "unsubscribed": "Calendar removed",
+    "colors": {
+      "blue": "Blue",
+      "violet": "Violet",
+      "emerald": "Green",
+      "amber": "Amber",
+      "rose": "Rose"
+    },
+    "subscribe": {
+      "title": "Subscribe to a calendar",
+      "description": "Paste the .ics or webcal:// address of a calendar, such as a class timetable or public holidays. It is fetched again every few hours.",
+      "url": "Calendar address",
+      "fetch": "Fetch calendar",
+      "fetching": "Fetching…",
+      "reviewTitle": "Add this calendar",
+      "found_one": "Found {{count}} entry. Give the calendar a name and a colour.",
+      "found_other": "Found {{count}} entries. Give the calendar a name and a colour.",
+      "name": "Title",
+      "color": "Colour",
+      "add": "Add to calendar",
+      "added": "“{{title}}” added to your calendar"
     }
   }
 }

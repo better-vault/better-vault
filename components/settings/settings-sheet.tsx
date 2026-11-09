@@ -32,6 +32,7 @@ import { storageIds } from "@/lib/storage/catalog";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
 import { AppearancePanel } from "./appearance-panel";
 import { CalendarPanel } from "./calendar-panel";
+import { CalendarSubscribeDialog } from "./calendar-subscribe-dialog";
 import { ChatGPTDialog } from "./chatgpt-dialog";
 import { DataPanel } from "./data-panel";
 import { LanguagePanel } from "./language-panel";
@@ -93,6 +94,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
   };
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [chatGPTOpen, setChatGPTOpen] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
   const { t: tCommon } = useTranslation();
   const { theme, accent } = useTheme();
   const settings = useSettings();
@@ -160,11 +162,6 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 icon={Calendar03Icon}
                 label={t("rows.calendar")}
                 hint={t("rows.calendarHint")}
-                end={
-                  <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {t("storage.soon")}
-                  </span>
-                }
               />
               <SettingsRow
                 to="language"
@@ -209,7 +206,12 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
             <AppearancePanel />
           </Sheet.Next>
           <Sheet.Next name="calendar" closeLabel={tCommon("actions.close")}>
-            <CalendarPanel />
+            <CalendarPanel
+              onSubscribe={() => {
+                setOpen(false);
+                setSubscribeOpen(true);
+              }}
+            />
           </Sheet.Next>
           <Sheet.Next name="language" closeLabel={tCommon("actions.close")}>
             <LanguagePanel />
@@ -228,6 +230,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
         </Sheet.Content>
       </Sheet>
       <ChatGPTDialog open={chatGPTOpen} onOpenChange={setChatGPTOpen} />
+      <CalendarSubscribeDialog open={subscribeOpen} onOpenChange={setSubscribeOpen} />
       <ConfirmDialog
         open={confirmDeleteAll}
         onOpenChange={setConfirmDeleteAll}
