@@ -53,17 +53,60 @@ function entriesOf(text: string, subscription: CalendarSubscription): CalendarEn
     calendarId: subscription.id,
     idPrefix: `${subscription.id}:`,
   });
-  return events.map((event) => ({ ...event, readOnly: true }) as unknown as CalendarEntry);
+  return events as unknown as CalendarEntry[];
 }
 
-/** Swaps one subscription's entries for new ones, keeping everything else. */
-async function replaceEntries(subscriptionId: string, next: CalendarEntry[]) {
+/** What counts as an edit: the fields a person changes in the calendar. */
+function fingerprint(entry: CalendarEntry): string {
+  return JSON.stringify([
+    entry.title,
+    entry.start,
+    entry.end,
+    entry.allDay ?? false,
+    entry.location ?? "",
+    entry.description ?? "",
+    entry.color ?? "",
+  ]);
+}
+
+/**
+ * Puts a subscription's fresh entries in the calendar. Entries the user
+ * edited or deleted since the last fetch stay as they are; the rest follow
+ * the feed. Returns the new fingerprints to remember.
+ */
+async function mergeEntries(
+  subscription: CalendarSubscription,
+  fresh: CalendarEntry[],
+): Promise<Record<string, string>> {
   const all = await calendarStore.load();
+  const originals = subscription.originals ?? {};
+  const mine = new Map(
+    all.filter((entry) => entry.calendarId === subscription.id).map((entry) => [entry.id, entry]),
+  );
+  const edited = (id: string) => {
+    const before = originals[id];
+    if (before === undefined) return false;
+    const current = mine.get(id);
+    return current === undefined || fingerprint(current) !== before;
+  };
+  const kept: CalendarEntry[] = [];
+  const next: Record<string, string> = {};
+  for (const entry of fresh) {
+    next[entry.id] = fingerprint(entry);
+    if (!edited(entry.id)) kept.push(entry);
+    else if (mine.has(entry.id)) kept.push(mine.get(entry.id)!);
+    // edited and missing: the user deleted it, so it stays deleted
+  }
+  // Entries the feed dropped are kept only if the user edited them.
+  for (const [id, entry] of mine) {
+    if (!(id in next) && edited(id)) kept.push(entry);
+  }
   await calendarStore.save([
-    ...all.filter((entry) => entry.calendarId !== subscriptionId),
-    ...next,
+    ...all.filter((entry) => entry.calendarId !== subscription.id),
+    ...kept,
   ]);
   window.dispatchEvent(new Event(CALENDAR_RELOAD));
+  return next;
 }
 
 export async function addSubscription(
@@ -77,7 +120,7 @@ export async function addSubscription(
     color,
     fetchedAt: Date.now(),
   };
-  await replaceEntries(subscription.id, entriesOf(preview.text, subscription));
+  subscription.originals = await mergeEntries(subscription, entriesOf(preview.text, subscription));
   await updateCalendarSettings((current) => ({
     subscriptions: [...current.subscriptions, subscription],
   }));
@@ -86,16 +129,18 @@ export async function addSubscription(
 
 export async function refreshSubscription(subscription: CalendarSubscription): Promise<void> {
   const preview = await previewCalendar(subscription.url);
-  await replaceEntries(subscription.id, entriesOf(preview.text, subscription));
+  const originals = await mergeEntries(subscription, entriesOf(preview.text, subscription));
   await updateCalendarSettings((current) => ({
     subscriptions: current.subscriptions.map((each) =>
-      each.id === subscription.id ? { ...each, fetchedAt: Date.now() } : each,
+      each.id === subscription.id ? { ...each, fetchedAt: Date.now(), originals } : each,
     ),
   }));
 }
 
 export async function removeSubscription(id: string): Promise<void> {
-  await replaceEntries(id, []);
+  const all = await calendarStore.load();
+  await calendarStore.save(all.filter((entry) => entry.calendarId !== id));
+  window.dispatchEvent(new Event(CALENDAR_RELOAD));
   await updateCalendarSettings((current) => ({
     subscriptions: current.subscriptions.filter((each) => each.id !== id),
   }));
@@ -104,7 +149,11 @@ export async function removeSubscription(id: string): Promise<void> {
 /** Refreshes subscriptions older than six hours; failures keep the old entries. */
 export async function refreshStaleSubscriptions(): Promise<void> {
   const { subscriptions } = await getCalendarSettings();
-  const stale = subscriptions.filter((each) => Date.now() - each.fetchedAt > REFRESH_EVERY);
+  // Subscriptions from before edits were tracked (no `originals`) refresh at once,
+  // which also makes their entries editable.
+  const stale = subscriptions.filter(
+    (each) => !each.originals || Date.now() - each.fetchedAt > REFRESH_EVERY,
+  );
   for (const subscription of stale) {
     await refreshSubscription(subscription).catch(() => {});
   }

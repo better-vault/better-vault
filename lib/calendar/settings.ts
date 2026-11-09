@@ -16,6 +16,12 @@ export interface CalendarSubscription {
   color: CalendarColor;
   /** When its entries were last fetched, in ms. */
   fetchedAt: number;
+  /**
+   * Each entry as the feed last sent it (a short fingerprint by entry id).
+   * An entry that no longer matches was edited by the user, and an id with
+   * no entry was deleted: refreshing leaves both as the user left them.
+   */
+  originals?: Record<string, string>;
 }
 
 /** Settings → Calendar, kept with the other settings on this device. */
