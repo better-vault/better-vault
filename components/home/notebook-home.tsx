@@ -243,12 +243,19 @@ export function NotebookHome() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* The toolbar: history, the title, the view, actions and search. */}
-        <header data-window-bar className="flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6">
+        {/* On the calendar, the calendar's own bar replaces this one (phones keep it for the menus). */}
+        <header
+          data-window-bar
+          className={cn(
+            "flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6",
+            section === "calendar" && "md:hidden",
+          )}
+        >
           <div className="flex items-center gap-2 md:hidden">
             <Logo size={24} />
             {vaults && vault ? <MobileVaults vaults={vaults} current={vault.id} /> : null}
           </div>
-          <Pill className="hidden sm:flex">
+          <Pill className={cn("hidden sm:flex", section === "calendar" && "sm:hidden")}>
             <ToolButton label={t("toolbar.back")} onClick={() => navigate(-1)}>
               <Icon icon={ArrowLeft01Icon} size={18} className="rtl:rotate-180" />
             </ToolButton>
@@ -328,6 +335,7 @@ export function NotebookHome() {
 
           <button
             type="button"
+            hidden={section === "calendar"}
             onClick={openCommandPalette}
             aria-label={t("vaults.search")}
             title={`${t("vaults.search")} (${shortcutKeys("k").join(" ")})`}
@@ -353,7 +361,7 @@ export function NotebookHome() {
         </header>
 
         {section === "calendar" ? (
-          <main className="min-h-0 flex-1 px-2 pb-2 sm:px-4">
+          <main className="min-h-0 flex-1 px-2 pb-2 md:p-2 md:ps-2">
             <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
               <Suspense
                 fallback={
