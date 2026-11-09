@@ -140,5 +140,8 @@
   },
   "calendar": {
     "title": "Calendar"
+  },
+  "actions": {
+    "openNewTab": "Open in new tab"
   }
 }

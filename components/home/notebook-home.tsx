@@ -25,6 +25,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
+import { MenuActions, type MenuAction } from "@/components/common/action-menu";
+import { ContextMenu, ContextMenuTrigger } from "@/components/common/context-menu";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
@@ -144,6 +146,62 @@ export function NotebookHome() {
   useEffect(() => {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
   }, [title, tCommon]);
+
+  // The right-click menu of the page's empty space; cards have menus of their own.
+  const pageActions: MenuAction[] = [
+    {
+      kind: "item",
+      id: "new-notebook",
+      label: t("newNotebook"),
+      icon: Add01Icon,
+      onSelect: () => setCreating({ files: [] }),
+    },
+    {
+      kind: "item",
+      id: "new-folder",
+      label: t("folders.new"),
+      icon: FolderAddIcon,
+      onSelect: () => setCreatingFolder(true),
+    },
+    {
+      kind: "item",
+      id: "import",
+      label: t("vaults.importFiles"),
+      icon: FileImportIcon,
+      onSelect: () => importInput.current?.click(),
+    },
+    { kind: "separator", id: "s1" },
+    {
+      kind: "radio",
+      id: "view",
+      label: t("toolbar.view"),
+      value: view,
+      options: [
+        { value: "grid", label: t("toolbar.grid") },
+        { value: "list", label: t("toolbar.list") },
+      ],
+      onChange: (next) => {
+        const value = next === "list" ? "list" : "grid";
+        setView(value);
+        remember(viewKey, value);
+      },
+    },
+    {
+      kind: "radio",
+      id: "sort",
+      label: t("sort.label"),
+      value: sort,
+      options: [
+        { value: "recent", label: t("sort.recent") },
+        { value: "name", label: t("sort.name") },
+      ],
+      onChange: (next) => {
+        const value = next === "name" ? "name" : "recent";
+        setSort(value);
+        remember(sortKey, value);
+      },
+    },
+  ];
 
   const openFolder = (id: string | null) =>
     setParams({
@@ -375,100 +433,109 @@ export function NotebookHome() {
             </div>
           </main>
         ) : (
-          <ScrollArea className="min-h-0 flex-1">
-            <main className="px-4 pt-2 pb-10 sm:px-6">
-              {empty ? (
-                <div className="flex flex-col items-center gap-3 py-20 text-center">
-                  <span
-                    className={cn(
-                      "flex size-16 items-center justify-center rounded-[1.25rem]",
-                      itemColor(vault?.color).tile,
-                    )}
-                  >
-                    <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
-                  </span>
-                  <p className="font-semibold">
-                    {section === "recents" || current
-                      ? t("vaults.emptyFolder")
-                      : t("vaults.emptyTitle")}
-                  </p>
-                  <p className="max-w-sm text-sm text-muted-foreground">{t("vaults.emptyBody")}</p>
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setCreating({ files: [] })}
-                      className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <Icon icon={Add01Icon} size={16} />
-                      {t("newNotebook")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => importInput.current?.click()}
-                      className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 ring-border outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <Icon icon={FileImportIcon} size={16} />
-                      {t("vaults.importFiles")}
-                    </button>
-                  </div>
-                </div>
-              ) : view === "grid" ? (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
-                  {shownFolders.map((folder) => (
-                    <FolderItem
-                      key={folder.id}
-                      folder={folder}
-                      folders={folders}
-                      size={sizeOf(folder.id)}
-                      view="grid"
-                      onOpen={() => openFolder(folder.id)}
-                      onDropCards={(event) => void dropCards(event, folder.id)}
-                    />
-                  ))}
-                  {shownNotebooks?.map((notebook) => (
-                    <NotebookItem
-                      key={notebook.id}
-                      notebook={notebook}
-                      folders={folders}
-                      vaults={vaults ?? []}
-                      sources={counts?.get(notebook.id)?.sources ?? 0}
-                      view="grid"
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-0.5">
-                  <ListHeader>
-                    <span>{t("toolbar.name")}</span>
-                    <span>{t("toolbar.contents")}</span>
-                    <span>{t("toolbar.modified")}</span>
-                    <span />
-                  </ListHeader>
-                  {shownFolders.map((folder) => (
-                    <FolderItem
-                      key={folder.id}
-                      folder={folder}
-                      folders={folders}
-                      size={sizeOf(folder.id)}
-                      view="list"
-                      onOpen={() => openFolder(folder.id)}
-                      onDropCards={(event) => void dropCards(event, folder.id)}
-                    />
-                  ))}
-                  {shownNotebooks?.map((notebook) => (
-                    <NotebookItem
-                      key={notebook.id}
-                      notebook={notebook}
-                      folders={folders}
-                      vaults={vaults ?? []}
-                      sources={counts?.get(notebook.id)?.sources ?? 0}
-                      view="list"
-                    />
-                  ))}
-                </div>
-              )}
-            </main>
-          </ScrollArea>
+          <ContextMenu>
+            <ContextMenuTrigger render={<div className="flex min-h-0 flex-1 flex-col" />}>
+              <ScrollArea className="min-h-0 flex-1">
+                <main className="min-h-full px-4 pt-2 pb-10 sm:px-6">
+                  {empty ? (
+                    <div className="flex flex-col items-center gap-3 py-20 text-center">
+                      <span
+                        className={cn(
+                          "flex size-16 items-center justify-center rounded-[1.25rem]",
+                          itemColor(vault?.color).tile,
+                        )}
+                      >
+                        <Icon icon={notebookIcon(vault?.icon ?? "notebook")} size={28} />
+                      </span>
+                      <p className="font-semibold">
+                        {section === "recents" || current
+                          ? t("vaults.emptyFolder")
+                          : t("vaults.emptyTitle")}
+                      </p>
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        {t("vaults.emptyBody")}
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCreating({ files: [] })}
+                          className="flex h-9 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <Icon icon={Add01Icon} size={16} />
+                          {t("newNotebook")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => importInput.current?.click()}
+                          className="flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 ring-border outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <Icon icon={FileImportIcon} size={16} />
+                          {t("vaults.importFiles")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : view === "grid" ? (
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
+                      {shownFolders.map((folder) => (
+                        <FolderItem
+                          key={folder.id}
+                          folder={folder}
+                          folders={folders}
+                          size={sizeOf(folder.id)}
+                          view="grid"
+                          onOpen={() => openFolder(folder.id)}
+                          onDropCards={(event) => void dropCards(event, folder.id)}
+                        />
+                      ))}
+                      {shownNotebooks?.map((notebook) => (
+                        <NotebookItem
+                          key={notebook.id}
+                          notebook={notebook}
+                          folders={folders}
+                          vaults={vaults ?? []}
+                          sources={counts?.get(notebook.id)?.sources ?? 0}
+                          view="grid"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-0.5">
+                      <ListHeader>
+                        <span>{t("toolbar.name")}</span>
+                        <span>{t("toolbar.contents")}</span>
+                        <span>{t("toolbar.modified")}</span>
+                        <span />
+                      </ListHeader>
+                      {shownFolders.map((folder) => (
+                        <FolderItem
+                          key={folder.id}
+                          folder={folder}
+                          folders={folders}
+                          size={sizeOf(folder.id)}
+                          view="list"
+                          onOpen={() => openFolder(folder.id)}
+                          onDropCards={(event) => void dropCards(event, folder.id)}
+                        />
+                      ))}
+                      {shownNotebooks?.map((notebook) => (
+                        <NotebookItem
+                          key={notebook.id}
+                          notebook={notebook}
+                          folders={folders}
+                          vaults={vaults ?? []}
+                          sources={counts?.get(notebook.id)?.sources ?? 0}
+                          view="list"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </main>
+              </ScrollArea>
+            </ContextMenuTrigger>
+            <Menu.Content sideOffset={0}>
+              <MenuActions actions={pageActions} />
+            </Menu.Content>
+          </ContextMenu>
         )}
 
         {/* The path bar: the vault and the folders down to this one, each a drop target. */}

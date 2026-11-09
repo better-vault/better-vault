@@ -3,6 +3,7 @@ import {
   Calendar03Icon,
   Clock01Icon,
   Delete02Icon,
+  FolderOpenIcon,
   GridViewIcon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
@@ -28,6 +29,8 @@ import { itemColor } from "@/lib/notebooks/colors";
 import { notebookIcon } from "@/lib/notebooks/icons";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { MenuActions, type MenuAction } from "@/components/common/action-menu";
+import { ContextMenu, ContextMenuTrigger } from "@/components/common/context-menu";
 import { NOTEBOOK_DRAG, useDropTarget } from "./home-cards";
 import { NotebookDialog } from "./notebook-dialog";
 import { useVaultName } from "./vault-name";
@@ -212,55 +215,83 @@ function VaultRow({
   onChoose: () => void;
 }) {
   const { t } = useTranslation("home");
+  const { t: tCommon } = useTranslation();
   const vaultName = useVaultName();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const name = vaultName(vault);
+  const actions: MenuAction[] = [
+    {
+      kind: "item",
+      id: "open",
+      label: tCommon("actions.open"),
+      icon: FolderOpenIcon,
+      onSelect: onChoose,
+    },
+    {
+      kind: "item",
+      id: "edit",
+      label: t("vaults.edit"),
+      icon: PencilEdit01Icon,
+      onSelect: () => setEditing(true),
+    },
+    ...(vault.id !== DEFAULT_VAULT
+      ? [
+          { kind: "separator", id: "s1" } satisfies MenuAction,
+          {
+            kind: "item",
+            id: "delete",
+            label: t("vaults.delete"),
+            icon: Delete02Icon,
+            destructive: true,
+            onSelect: () => setDeleting(true),
+          } satisfies MenuAction,
+        ]
+      : []),
+  ];
   return (
-    <div
-      className={cn(
-        "group flex items-center rounded-xl transition-colors",
-        active ? "bg-foreground/10" : "hover:bg-foreground/5",
-      )}
-    >
-      <button
-        type="button"
-        aria-current={active ? "page" : current ? "location" : undefined}
-        onClick={onChoose}
-        className={cn(row, "hover:bg-transparent", current && "font-medium")}
-      >
-        <span
+    <>
+      <ContextMenu>
+        <ContextMenuTrigger
           className={cn(
-            "flex size-6 shrink-0 items-center justify-center rounded-lg",
-            itemColor(vault.color).tile,
+            "group flex items-center rounded-xl transition-colors",
+            active ? "bg-foreground/10" : "hover:bg-foreground/5",
           )}
         >
-          <Icon icon={notebookIcon(vault.icon ?? "notebook")} size={14} />
-        </span>
-        <span className="min-w-0 truncate">{name}</span>
-      </button>
-      {current ? (
-        <Menu>
-          <Menu.Trigger
-            aria-label={t("vaults.menu")}
-            className="me-1 flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          <button
+            type="button"
+            aria-current={active ? "page" : current ? "location" : undefined}
+            onClick={onChoose}
+            className={cn(row, "hover:bg-transparent", current && "font-medium")}
           >
-            <Icon icon={MoreHorizontalIcon} size={16} />
-          </Menu.Trigger>
-          <Menu.Content align="end">
-            <Menu.Item onClick={() => setEditing(true)}>
-              <Icon icon={PencilEdit01Icon} />
-              {t("vaults.edit")}
-            </Menu.Item>
-            {vault.id !== DEFAULT_VAULT ? (
-              <Menu.Item variant="destructive" onClick={() => setDeleting(true)}>
-                <Icon icon={Delete02Icon} />
-                {t("vaults.delete")}
-              </Menu.Item>
-            ) : null}
-          </Menu.Content>
-        </Menu>
-      ) : null}
+            <span
+              className={cn(
+                "flex size-6 shrink-0 items-center justify-center rounded-lg",
+                itemColor(vault.color).tile,
+              )}
+            >
+              <Icon icon={notebookIcon(vault.icon ?? "notebook")} size={14} />
+            </span>
+            <span className="min-w-0 truncate">{name}</span>
+          </button>
+          {current ? (
+            <Menu>
+              <Menu.Trigger
+                aria-label={t("vaults.menu")}
+                className="me-1 flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Icon icon={MoreHorizontalIcon} size={16} />
+              </Menu.Trigger>
+              <Menu.Content align="end">
+                <MenuActions actions={actions} />
+              </Menu.Content>
+            </Menu>
+          ) : null}
+        </ContextMenuTrigger>
+        <Menu.Content sideOffset={0}>
+          <MenuActions actions={actions} />
+        </Menu.Content>
+      </ContextMenu>
       <NotebookDialog
         open={editing}
         onOpenChange={setEditing}
@@ -282,6 +313,6 @@ function VaultRow({
         confirmLabel={t("vaults.deleteConfirm")}
         onConfirm={() => deleteVault(vault.id)}
       />
-    </div>
+    </>
   );
 }
