@@ -22,7 +22,10 @@
     "studio": "Studio",
     "studioHint_one": "{{count}} tool turned off",
     "studioHint_other": "{{count}} tools turned off",
-    "studioHintAll": "All tools on"
+    "studioHintAll": "All tools on",
+    "mcp": "MCP",
+    "mcpOn": "Agents can connect",
+    "mcpOff": "Let AI agents use your notes and skills"
   },
   "providers": {
     "title": "AI providers",
@@ -372,5 +375,42 @@
     "visuals": "Visuals in answers",
     "visualsHint": "Chat answers may show diagrams, tables, charts and flashcards when they explain better than text.",
     "tools": "Tools"
+  },
+  "mcp": {
+    "title": "MCP",
+    "description": "Let AI agents on this computer, such as Claude Code, Cursor and Codex, read your notebooks and notes and share skills with you, through the Model Context Protocol.",
+    "desktopOnly": "MCP needs the desktop app",
+    "desktopOnlyBody": "Agents connect to a server on your own computer, which a browser tab can't run. The desktop app runs it, and your data stays on your device.",
+    "download": "Download the desktop app",
+    "enable": "Allow agents to connect",
+    "status": {
+      "off": "Off. Nothing can connect.",
+      "running": "Listening on {{url}}, for this computer only",
+      "error": "Could not start: {{error}}"
+    },
+    "permissions": "What agents may do",
+    "readOnly": "Read only",
+    "readOnlyHint": "Agents can read but never change anything",
+    "allowNotes": "Write notes",
+    "allowNotesHint": "Create notes and replace their text",
+    "allowSkills": "Write skills",
+    "allowSkillsHint": "Create, edit and delete skills",
+    "connection": "Connection",
+    "address": "Address",
+    "token": "Token",
+    "copy": "Copy",
+    "copied": "Copied",
+    "showToken": "Show token",
+    "hideToken": "Hide token",
+    "regenerate": "New token (agents must be set up again)",
+    "setup": "Set up an agent",
+    "hints": {
+      "claude-code": "Run this in a terminal. Claude Code then lists better-vault's tools in /mcp.",
+      "cursor": "Add this to .cursor/mcp.json in a project, or to your global Cursor settings.",
+      "codex": "Add this to ~/.codex/config.toml.",
+      "claude-desktop": "Add this to claude_desktop_config.json; mcp-remote bridges Claude Desktop to the local server."
+    },
+    "activity": "Recent activity",
+    "noActivity": "No agent has connected yet."
   }
 }

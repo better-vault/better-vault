@@ -8,6 +8,7 @@ import {
   PaintBoardIcon,
   Settings01Icon,
   SparklesIcon,
+  PlugSocketIcon,
 } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
 import { useEffect, useRef, useState, type ReactElement } from "react";
@@ -30,6 +31,7 @@ import { AboutPanel } from "./about-panel";
 import { AccountPanel } from "./account-panel";
 import { StoragePanel } from "./storage-panel";
 import { StudioPanel } from "./studio-panel";
+import { McpPanel } from "./mcp-panel";
 import { useStudioSettings } from "@/lib/studio/settings";
 import { storageIds } from "@/lib/storage/catalog";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
@@ -58,6 +60,7 @@ export const settingsPages = [
   "storage",
   "appearance",
   "studio",
+  "mcp",
   "calendar",
   "language",
   "data",
@@ -174,6 +177,12 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 }
               />
               <SettingsRow
+                to="mcp"
+                icon={PlugSocketIcon}
+                label={t("rows.mcp")}
+                hint={t("rows.mcpOff")}
+              />
+              <SettingsRow
                 to="calendar"
                 icon={Calendar03Icon}
                 label={t("rows.calendar")}
@@ -223,6 +232,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
           </Sheet.Next>
           <Sheet.Next name="studio" closeLabel={tCommon("actions.close")}>
             <StudioPanel />
+          </Sheet.Next>
+          <Sheet.Next name="mcp" closeLabel={tCommon("actions.close")}>
+            <McpPanel />
           </Sheet.Next>
           <Sheet.Next name="calendar" closeLabel={tCommon("actions.close")}>
             <CalendarPanel

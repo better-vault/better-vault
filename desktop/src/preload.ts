@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
-import type { DesktopBridge, UpdateState } from "../../lib/desktop/bridge";
+import type { DesktopBridge, McpState, UpdateState } from "../../lib/desktop/bridge";
 
 // Runs before the page, isolated from it. It gives the page `window.betterVault`
 // and nothing else from Electron.
@@ -29,6 +29,12 @@ const bridge: DesktopBridge = {
     download: () => ipcRenderer.invoke("updates:download"),
     install: () => ipcRenderer.invoke("updates:install"),
     onOpen: (listener) => listen<void>("updates:open", () => listener()),
+  },
+  mcp: {
+    state: () => ipcRenderer.invoke("mcp:state"),
+    onState: (listener) => listen<McpState>("mcp:state", listener),
+    update: (patch) => ipcRenderer.invoke("mcp:update", patch),
+    regenerateToken: () => ipcRenderer.invoke("mcp:regenerate"),
   },
 };
 

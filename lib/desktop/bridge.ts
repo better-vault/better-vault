@@ -13,6 +13,28 @@ export type UpdateState =
   | { status: "ready"; version: string }
   | { status: "error"; message: string };
 
+/** One call an agent made through MCP, for Settings → MCP. */
+export interface McpActivity {
+  client: string;
+  tool: string;
+  at: number;
+}
+
+/** The desktop app's MCP server (desktop/src/mcp.ts), as Settings → MCP shows it. */
+export interface McpState {
+  enabled: boolean;
+  running: boolean;
+  port: number;
+  url: string;
+  token: string;
+  readOnly: boolean;
+  allowNotes: boolean;
+  allowSkills: boolean;
+  /** Why it could not start, such as the port being taken. */
+  error: string | null;
+  activity: McpActivity[];
+}
+
 /**
  * What the desktop app's preload script (`desktop/src/preload.ts`) puts on
  * `window.betterVault`. On the web it is missing.
@@ -38,6 +60,14 @@ export interface DesktopBridge {
     install(): Promise<void>;
     /** Called when the app menu's "Check for Updates…" is chosen. Returns an unsubscribe. */
     onOpen(listener: () => void): () => void;
+  };
+  mcp: {
+    state(): Promise<McpState>;
+    onState(listener: (state: McpState) => void): () => void;
+    update(
+      patch: Partial<Pick<McpState, "enabled" | "port" | "readOnly" | "allowNotes" | "allowSkills">>,
+    ): Promise<McpState>;
+    regenerateToken(): Promise<McpState>;
   };
 }
 

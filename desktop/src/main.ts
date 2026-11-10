@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, nativeTheme, shell, type WebFrameMain } from "electron";
 import path from "node:path";
 import { openDatabase } from "./database";
+import { startMcp } from "./mcp";
 import { setMenu } from "./menu";
 import { handleScheme, origin, registerScheme } from "./protocol";
 import { startUpdates } from "./updates";
@@ -127,7 +128,9 @@ app.whenReady().then(() => {
   try {
     // Where the API keeps the ChatGPT sign-in (lib/chatgpt/store.ts).
     process.env.BETTER_VAULT_DATA_DIR = app.getPath("userData");
-    closeDatabase = openDatabase(isTrusted).close;
+    const database = openDatabase(isTrusted);
+    closeDatabase = database.close;
+    startMcp(database.store, isTrusted, app.getVersion());
     handleScheme(devServer ?? path.join(__dirname, "..", "renderer"));
   } catch (error) {
     dialog.showErrorBox(
