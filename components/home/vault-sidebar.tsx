@@ -81,7 +81,8 @@ export function VaultSidebar({
       aria-label={t("vaults.sidebar")}
       className="m-2 me-0 hidden w-60 shrink-0 flex-col rounded-3xl bg-muted/60 ring-1 ring-border/60 md:flex"
     >
-      <div data-window-bar className="flex h-14 shrink-0 items-center gap-2.5 px-4">
+      {/* A minimum height, not a fixed one: on macOS the window buttons' room is added above. */}
+      <div data-window-bar className="flex min-h-14 shrink-0 items-center gap-2.5 px-4 pb-1">
         <Logo size={24} />
         <span className="truncate text-sm font-semibold">{t("vaults.appTitle")}</span>
       </div>

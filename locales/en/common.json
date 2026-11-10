@@ -82,5 +82,65 @@
       "vaults": "Vaults"
     },
     "calendar": "Open the calendar"
+  },
+  "onboarding": {
+    "label": "Welcome to better-vault",
+    "next": "Continue",
+    "withoutAccount": "Continue without an account",
+    "popupBlocked": "Allow pop-ups for this page to sign in.",
+    "intro": {
+      "title": "Welcome to better-vault",
+      "body": "Your notebooks, your sources, and the AI model you choose.",
+      "points": {
+        "local": "Everything you add stays on this device.",
+        "models": "Bring your own key for OpenAI, Anthropic, Google and more, or use Better Vault AI.",
+        "notes": "Write linked notes, see how ideas connect, and let your AI agents share skills."
+      }
+    },
+    "account": {
+      "title": "Create an account",
+      "body": "An account is only for Better Vault AI and Cloud. You can add one later in Settings.",
+      "google": "Continue with Google",
+      "email": "Continue with email",
+      "keys": "Your notebooks and your own API keys never leave this device."
+    },
+    "username": {
+      "title": "Choose a username",
+      "body": "It's how you appear in better-vault.",
+      "label": "Username",
+      "hint": "3 to 30 letters, numbers, dots or underscores.",
+      "invalid": "Use 3 to 30 letters, numbers, dots or underscores.",
+      "taken": "That username is taken.",
+      "free": "It's yours.",
+      "checking": "Checking…"
+    },
+    "plan": {
+      "title": "Choose a plan",
+      "body": "Better Vault AI runs Claude Haiku for you, without a key. You can change or cancel any time.",
+      "free": {
+        "name": "Free",
+        "detail": "Everything, with your own API keys",
+        "price": "$0"
+      },
+      "pro": {
+        "name": "Pro",
+        "detail": "1,250 AI credits a month, 20 GB of cloud storage",
+        "price": "$4.99/mo"
+      },
+      "max": {
+        "name": "Max",
+        "detail": "3,500 AI credits a month, 50 GB of cloud storage",
+        "price": "$9.99/mo"
+      },
+      "later": "Maybe later"
+    },
+    "local": {
+      "title": "Use better-vault on this device",
+      "body": "No account, no sign-up. You can create an account later in Settings.",
+      "name": "Your name",
+      "hint": "Optional. It's kept on this device only.",
+      "start": "Start",
+      "back": "Create an account instead"
+    }
   }
 }

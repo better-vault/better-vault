@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
+import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Select } from "@/components/panelui/select";
 import { Sheet } from "@/components/panelui/sheet";
@@ -43,34 +45,25 @@ export function SubscriptionPanel() {
   };
 
   const plans = (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex flex-col gap-3">
       {(["pro", "max"] as const).map((plan) => (
-        <div
+        <PlanCard
           key={plan}
-          className={cn(
-            "flex flex-col gap-1 rounded-2xl p-3 ring-1 ring-border",
-            plan === "pro" && "bg-muted/50",
-          )}
-        >
-          <span className="text-sm font-semibold">{t(`subscription.plans.${plan}`)}</span>
-          <span className="text-lg font-semibold tabular-nums">
-            {t(`subscription.prices.${plan}`)}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {t(`subscription.includes.${plan}`)}
-          </span>
-          {account ? (
-            <Button
-              size="sm"
-              className="mt-1"
-              variant={plan === "pro" ? "default" : "secondary"}
-              disabled={busy !== null}
-              onClick={() => void run(plan, () => startCheckout(plan))}
-            >
-              {t("subscription.choose")}
-            </Button>
-          ) : null}
-        </div>
+          plan={plan}
+          featured={plan === "pro"}
+          action={
+            account ? (
+              <Button
+                className="w-full"
+                variant={plan === "pro" ? "default" : "outline"}
+                disabled={busy !== null}
+                onClick={() => void run(plan, () => startCheckout(plan))}
+              >
+                {t("subscription.choosePlan", { plan: t(`subscription.plans.${plan}`) })}
+              </Button>
+            ) : null
+          }
+        />
       ))}
     </div>
   );
@@ -232,6 +225,65 @@ export function SubscriptionPanel() {
         </div>
       </Sheet.Body>
     </>
+  );
+}
+
+/** One plan: its name and price, what it includes, and its button. */
+function PlanCard({
+  plan,
+  featured,
+  action,
+}: {
+  plan: "pro" | "max";
+  featured: boolean;
+  action: ReactNode;
+}) {
+  const { t, i18n } = useTranslation("settings");
+  const credits = plan === "pro" ? 1250 : 3500;
+  const storage = plan === "pro" ? 20 : 50;
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-4 rounded-2xl p-4",
+        featured ? "bg-muted/60 ring-2 ring-foreground/80" : "ring-1 ring-border",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="flex items-center gap-2 text-base font-semibold">
+            {t(`subscription.plans.${plan}`)}
+            {featured ? (
+              <span className="rounded-full bg-foreground px-2 py-0.5 text-[0.6875rem] font-medium text-background">
+                {t("subscription.popular")}
+              </span>
+            ) : null}
+          </span>
+          <span className="text-xs text-muted-foreground">{t(`subscription.tagline.${plan}`)}</span>
+        </div>
+        <span className="flex shrink-0 items-baseline gap-0.5">
+          <span className="text-2xl font-semibold tracking-tight tabular-nums">
+            {t(`subscription.amount.${plan}`)}
+          </span>
+          <span className="text-xs text-muted-foreground">{t("subscription.perMonth")}</span>
+        </span>
+      </div>
+      <ul className="flex flex-col gap-2 text-sm">
+        {[
+          t("subscription.features.credits", {
+            count: credits,
+            formatted: credits.toLocaleString(i18n.language),
+          }),
+          t("subscription.features.storage", { size: storage }),
+          t("subscription.features.haiku"),
+        ].map((feature) => (
+          <li key={feature} className="flex items-start gap-2">
+            <Icon icon={Tick02Icon} size={16} className="mt-0.5 shrink-0 text-muted-foreground" />
+            {feature}
+          </li>
+        ))}
+      </ul>
+      {action}
+    </div>
   );
 }
 

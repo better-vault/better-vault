@@ -423,15 +423,6 @@
       "pro": "Pro",
       "max": "Max"
     },
-    "prices": {
-      "pro": "$4.99 a month",
-      "max": "$9.99 a month"
-    },
-    "includes": {
-      "pro": "1,250 AI credits a month and 20 GB of cloud storage",
-      "max": "3,500 AI credits a month and 50 GB of cloud storage"
-    },
-    "choose": "Choose",
     "signIn": "Sign in",
     "createAccount": "Create account",
     "signOut": "Sign out",
@@ -461,6 +452,23 @@
       "keys": "Your own API keys keep working and stay on this device",
       "use": "Use Better Vault AI",
       "later": "Not now"
+    },
+    "choosePlan": "Get {{plan}}",
+    "popular": "Popular",
+    "perMonth": "/month",
+    "amount": {
+      "pro": "$4.99",
+      "max": "$9.99"
+    },
+    "tagline": {
+      "pro": "For everyday studying and research",
+      "max": "For heavy use and big libraries"
+    },
+    "features": {
+      "credits_one": "{{formatted}} AI credit every month",
+      "credits_other": "{{formatted}} AI credits every month",
+      "storage": "{{size}} GB of Better Vault Cloud",
+      "haiku": "Claude Haiku without an API key"
     }
   }
 }
