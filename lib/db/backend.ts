@@ -9,6 +9,8 @@ import type {
   StudioOutput,
   Vault,
   CalendarEntry,
+  Note,
+  Skill,
 } from "./types";
 
 /**
@@ -39,6 +41,22 @@ export interface Backend {
   putVault(vault: Vault): Promise<void>;
   /** Deletes a vault's row only; `lib/db/vaults.ts` deletes what is in it first. */
   deleteVault(id: string): Promise<void>;
+
+  /** Every note, of every vault (the graph and links cross vaults). */
+  listNotes(): Promise<Note[]>;
+  getNote(id: string): Promise<Note | undefined>;
+  /** Adds a note or replaces it. */
+  putNote(note: Note): Promise<void>;
+  /** Replaces several notes at once, such as after a rename rewrote their links. */
+  putNotes(notes: Note[]): Promise<void>;
+  deleteNote(id: string): Promise<void>;
+
+  /** Every skill, of every vault. */
+  listSkills(): Promise<Skill[]>;
+  getSkill(id: string): Promise<Skill | undefined>;
+  /** Adds a skill or replaces it. */
+  putSkill(skill: Skill): Promise<void>;
+  deleteSkill(id: string): Promise<void>;
 
   listFolders(): Promise<Folder[]>;
   addFolder(folder: Folder): Promise<void>;
@@ -98,11 +116,11 @@ export interface Backend {
   putSetting(key: string, value: unknown): Promise<void>;
   clearSettings(): Promise<void>;
 
-  /** Every folder, notebook, source, conversation, message, output and file. */
+  /** Every vault, note, skill, folder, notebook, source, conversation, message, output and file. */
   exportAll(): Promise<StoreContent>;
   /** Adds content, replacing rows with the same id and the passages of its sources. */
   importAll(content: StoreContent, chunks: Chunk[]): Promise<void>;
-  /** Deletes every folder and notebook and everything in them. Settings are kept. */
+  /** Deletes every vault, note, skill, folder and notebook and everything in them. Settings are kept. */
   clearAll(): Promise<void>;
   /** The number of rows in a table. Used by tests. */
   count(table: TableName): Promise<number>;
@@ -111,6 +129,8 @@ export interface Backend {
 export interface StoreContent {
   calendar: CalendarEntry[];
   vaults: Vault[];
+  notes: Note[];
+  skills: Skill[];
   folders: Folder[];
   notebooks: Notebook[];
   sources: Source[];
@@ -123,6 +143,8 @@ export interface StoreContent {
 export const tableNames = [
   "calendar",
   "vaults",
+  "notes",
+  "skills",
   "folders",
   "notebooks",
   "sources",
@@ -157,6 +179,11 @@ export const writes = {
   saveCalendar: ["calendar"],
   putVault: ["vaults"],
   deleteVault: ["vaults"],
+  putNote: ["notes"],
+  putNotes: ["notes"],
+  deleteNote: ["notes"],
+  putSkill: ["skills"],
+  deleteSkill: ["skills"],
   addFolder: ["folders"],
   patchFolder: ["folders"],
   deleteFolder: ["folders", "notebooks"],
@@ -178,6 +205,8 @@ export const writes = {
   importAll: [
     "calendar",
     "vaults",
+    "notes",
+    "skills",
     "folders",
     "notebooks",
     "sources",
@@ -190,6 +219,8 @@ export const writes = {
   clearAll: [
     "calendar",
     "vaults",
+    "notes",
+    "skills",
     "folders",
     "notebooks",
     "sources",
@@ -214,6 +245,15 @@ export const backendMethods = [
   "listVaults",
   "putVault",
   "deleteVault",
+  "listNotes",
+  "getNote",
+  "putNote",
+  "putNotes",
+  "deleteNote",
+  "listSkills",
+  "getSkill",
+  "putSkill",
+  "deleteSkill",
   "listFolders",
   "addFolder",
   "patchFolder",

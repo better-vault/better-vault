@@ -26,6 +26,8 @@ import {
   isProviderReady,
   updateProvider,
 } from "./settings";
+import { createNote, renameNote, saveNoteBody } from "./notes";
+import { createSkill, deleteSkill, saveSkill } from "./skills";
 import { addSource, attachImages, deleteSource, getChunks } from "./sources";
 import {
   DEFAULT_VAULT,
@@ -229,6 +231,80 @@ describe.each(backends)("%s store", (name, create) => {
     });
   });
 
+  describe("notes", () => {
+    it("reads links and tags on save and renames links everywhere", async () => {
+      const work = await createVault({ name: "Work" });
+      const plan = await createNote({ vaultId: DEFAULT_VAULT, title: "Plan" });
+      const log = await createNote({
+        vaultId: DEFAULT_VAULT,
+        title: "Log",
+        body: "See [[Plan#Goals|goals]] and #daily",
+      });
+      const elsewhere = await createNote({ vaultId: work, title: "Elsewhere", body: "![[Plan]]" });
+      expect((await store().getNote(log.id))?.links).toEqual([
+        { kind: "note", target: "Plan", heading: "Goals", alias: "goals", embed: false },
+      ]);
+      expect((await store().getNote(log.id))?.tags).toEqual(["daily"]);
+
+      expect(await renameNote(plan.id, "Roadmap")).toBe("Roadmap");
+      expect((await store().getNote(log.id))?.body).toBe("See [[Roadmap#Goals|goals]] and #daily");
+      expect((await store().getNote(elsewhere.id))?.body).toBe("![[Roadmap]]");
+
+      // A second "Untitled" in the same vault gets a number; another vault may reuse it.
+      const a = await createNote({ vaultId: DEFAULT_VAULT });
+      const b = await createNote({ vaultId: DEFAULT_VAULT });
+      const c = await createNote({ vaultId: work });
+      expect([a.title, b.title, c.title]).toEqual(["Untitled", "Untitled 1", "Untitled"]);
+    });
+
+    it("saves bodies, deletes notes with their vault and keeps them in backups", async () => {
+      const work = await createVault({ name: "Work" });
+      const kept = await createNote({ vaultId: DEFAULT_VAULT, title: "Kept" });
+      await createNote({ vaultId: work, title: "Gone" });
+      await saveNoteBody(kept.id, "---\naliases: [K]\n---\nText #tag");
+      expect((await store().getNote(kept.id))?.aliases).toEqual(["K"]);
+
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteVault(work);
+      expect((await store().listNotes()).map((note) => note.title)).toEqual(["Kept"]);
+      await deleteAllData();
+      expect(await store().count("notes")).toBe(0);
+      await importBackup(backup);
+      expect((await store().listNotes()).map((note) => note.title).sort()).toEqual([
+        "Gone",
+        "Kept",
+      ]);
+    });
+  });
+
+  describe("skills", () => {
+    it("keeps names unique in a vault, saves edits and round-trips backups", async () => {
+      const one = await createSkill(DEFAULT_VAULT, {
+        name: "Write Summaries",
+        description: "How to summarise",
+        body: "Be brief.",
+      });
+      const two = await createSkill(DEFAULT_VAULT, {
+        name: "write summaries",
+        description: "",
+        body: "",
+      });
+      expect([one.name, two.name]).toEqual(["write-summaries", "write-summaries-2"]);
+      await saveSkill(two.id, { body: "Use bullets." }, "Claude Code");
+      const saved = await store().getSkill(two.id);
+      expect([saved?.body, saved?.updatedBy]).toEqual(["Use bullets.", "Claude Code"]);
+
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteSkill(one.id);
+      await deleteAllData();
+      await importBackup(backup);
+      expect((await store().listSkills()).map((skill) => skill.name).sort()).toEqual([
+        "write-summaries",
+        "write-summaries-2",
+      ]);
+    });
+  });
+
   describe("search", () => {
     it("lists the sources and outputs of every notebook", async () => {
       const a = await createNotebook("A");
@@ -362,7 +438,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(5);
+      expect(backup.format).toBe(6);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");

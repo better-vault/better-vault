@@ -9,6 +9,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
   const content = [
     db.calendar,
     db.vaults,
+    db.notes,
+    db.skills,
     db.folders,
     db.notebooks,
     db.sources,
@@ -54,6 +56,22 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.calendar.clear();
         await db.calendar.bulkPut(entries);
       }),
+
+    listNotes: () => db.notes.toArray(),
+    getNote: (id) => db.notes.get(id),
+    putNote: async (note) => {
+      await db.notes.put(note);
+    },
+    putNotes: async (notes) => {
+      await db.notes.bulkPut(notes);
+    },
+    deleteNote: (id) => db.notes.delete(id),
+    listSkills: () => db.skills.toArray(),
+    getSkill: (id) => db.skills.get(id),
+    putSkill: async (skill) => {
+      await db.skills.put(skill);
+    },
+    deleteSkill: (id) => db.skills.delete(id),
 
     listVaults: () => db.vaults.toArray(),
     putVault: async (vault) => {
@@ -189,6 +207,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       const [
         calendar,
         vaults,
+        notes,
+        skills,
         folders,
         notebooks,
         sources,
@@ -199,6 +219,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       ] = await Promise.all([
         db.calendar.toArray(),
         db.vaults.toArray(),
+        db.notes.toArray(),
+        db.skills.toArray(),
         db.folders.toArray(),
         db.notebooks.toArray(),
         db.sources.toArray(),
@@ -210,6 +232,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       return {
         calendar,
         vaults,
+        notes,
+        skills,
         folders,
         notebooks,
         sources,
@@ -223,6 +247,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       db.transaction("rw", content, async () => {
         await db.calendar.bulkPut(data.calendar);
         await db.vaults.bulkPut(data.vaults);
+        await db.notes.bulkPut(data.notes);
+        await db.skills.bulkPut(data.skills);
         await db.folders.bulkPut(data.folders);
         await db.notebooks.bulkPut(data.notebooks);
         await db.conversations.bulkPut(data.conversations);

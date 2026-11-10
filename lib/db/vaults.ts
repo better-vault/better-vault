@@ -60,8 +60,8 @@ export async function updateVault(id: string, look: VaultLook) {
 }
 
 /**
- * Deletes a vault with every notebook and folder in it, and everything in
- * those. The default vault stays.
+ * Deletes a vault with every notebook, folder, note and skill in it, and
+ * everything in those. The default vault stays.
  */
 export async function deleteVault(id: string) {
   if (id === DEFAULT_VAULT) return;
@@ -69,6 +69,10 @@ export async function deleteVault(id: string) {
   for (const notebook of notebooks) await store().deleteNotebook(notebook.id);
   const folders = (await store().listFolders()).filter((item) => vaultOf(item) === id);
   for (const folder of folders) await store().deleteFolder(folder.id);
+  for (const note of (await store().listNotes()).filter((item) => item.vaultId === id))
+    await store().deleteNote(note.id);
+  for (const skill of (await store().listSkills()).filter((item) => item.vaultId === id))
+    await store().deleteSkill(skill.id);
   await store().deleteVault(id);
   if (currentVaultId() === id) setCurrentVault(DEFAULT_VAULT);
 }

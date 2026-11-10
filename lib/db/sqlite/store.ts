@@ -9,6 +9,8 @@ import type {
   StoredMessage,
   StudioOutput,
   Vault,
+  Note,
+  Skill,
   CalendarEntry,
 } from "../types";
 
@@ -47,6 +49,8 @@ type DocTable = Exclude<TableName, "settings" | "blobs">;
 const columns: Record<DocTable, Record<string, string>> = {
   calendar: { start: "start" },
   vaults: { updated_at: "updatedAt" },
+  notes: { vault_id: "vaultId", updated_at: "updatedAt" },
+  skills: { vault_id: "vaultId", name: "name" },
   folders: { parent_id: "parentId", updated_at: "updatedAt" },
   notebooks: { updated_at: "updatedAt" },
   sources: { notebook_id: "notebookId", created_at: "createdAt" },
@@ -112,6 +116,13 @@ const migrations: string[] = [
   // 5: calendar entries.
   `
   CREATE TABLE calendar (id TEXT PRIMARY KEY, start TEXT NOT NULL, doc TEXT NOT NULL);
+  `,
+  // 6: notes and skills, each in a vault.
+  `
+  CREATE TABLE notes (id TEXT PRIMARY KEY, vault_id TEXT NOT NULL, updated_at REAL NOT NULL, doc TEXT NOT NULL);
+  CREATE INDEX notes_vault ON notes (vault_id);
+  CREATE TABLE skills (id TEXT PRIMARY KEY, vault_id TEXT NOT NULL, name TEXT NOT NULL, doc TEXT NOT NULL);
+  CREATE INDEX skills_vault ON skills (vault_id);
   `,
 ];
 
@@ -191,6 +202,8 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
   const content: Exclude<TableName, "settings">[] = [
     "calendar",
     "vaults",
+    "notes",
+    "skills",
     "folders",
     "notebooks",
     "sources",
@@ -265,6 +278,27 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         db.exec("DELETE FROM calendar");
         for (const entry of entries) put("calendar", entry);
       }),
+
+    listNotes: () => docs<Note>(db.prepare("SELECT doc FROM notes").all()),
+    getNote: (id) => get<Note>("notes", id),
+    putNote: (note) => {
+      put("notes", note);
+    },
+    putNotes: (notes) =>
+      transaction(db, () => {
+        for (const note of notes) put("notes", note);
+      }),
+    deleteNote: (id) => {
+      deleteWhere("notes", "id", id);
+    },
+    listSkills: () => docs<Skill>(db.prepare("SELECT doc FROM skills").all()),
+    getSkill: (id) => get<Skill>("skills", id),
+    putSkill: (skill) => {
+      put("skills", skill);
+    },
+    deleteSkill: (id) => {
+      deleteWhere("skills", "id", id);
+    },
 
     listVaults: () => docs<Vault>(db.prepare("SELECT doc FROM vaults ORDER BY id").all()),
     putVault: (vault) => {
@@ -436,6 +470,8 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     exportAll: (): StoreContent => ({
       calendar: docs(db.prepare("SELECT doc FROM calendar").all()),
       vaults: docs(db.prepare("SELECT doc FROM vaults").all()),
+      notes: docs(db.prepare("SELECT doc FROM notes").all()),
+      skills: docs(db.prepare("SELECT doc FROM skills").all()),
       folders: docs(db.prepare("SELECT doc FROM folders").all()),
       notebooks: docs(db.prepare("SELECT doc FROM notebooks").all()),
       sources: docs(db.prepare("SELECT doc FROM sources").all()),
@@ -448,6 +484,8 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       transaction(db, () => {
         for (const row of data.calendar) put("calendar", row);
         for (const row of data.vaults) put("vaults", row);
+        for (const row of data.notes) put("notes", row);
+        for (const row of data.skills) put("skills", row);
         for (const row of data.folders) put("folders", row);
         for (const row of data.notebooks) put("notebooks", row);
         for (const row of data.conversations) put("conversations", row);

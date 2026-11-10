@@ -40,6 +40,60 @@ export interface Vault {
 }
 
 /**
+ * A note: Markdown written in Obsidian's style, kept in a vault. Its body
+ * can link to other notes, notebooks and sources, in any vault, with
+ * `[[wikilinks]]`. `tags`, `aliases` and `links` are read from the body each
+ * time it is saved (`lib/notes/syntax.ts`), so backlinks and the graph need
+ * no table of their own.
+ */
+export interface Note {
+  id: string;
+  vaultId: string;
+  title: string;
+  body: string;
+  /** The notebook it was written from, if any (the Studio's Notes tool). */
+  notebookId?: string | null;
+  /** A folder path inside the vault's notes, like "Projects/2026"; empty at the top. */
+  folder: string;
+  tags: string[];
+  aliases: string[];
+  links: NoteLink[];
+  pinned?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** A `[[link]]` or `![[embed]]` in a note's body, as written. */
+export interface NoteLink {
+  /** `nb:` points at a notebook, `src:` at a source; anything else at a note. */
+  kind: "note" | "notebook" | "source";
+  /** The name written, without the prefix, heading, block or alias. May hold `Vault/`. */
+  target: string;
+  heading?: string;
+  block?: string;
+  alias?: string;
+  embed: boolean;
+}
+
+/**
+ * A skill: instructions for AI agents, kept as Markdown with `name` and
+ * `description` frontmatter (the SKILL.md format), in a vault. Chats can
+ * use them, and agents read and edit them through the desktop app's MCP server.
+ */
+export interface Skill {
+  id: string;
+  vaultId: string;
+  name: string;
+  description: string;
+  /** The instructions, without the frontmatter. */
+  body: string;
+  /** Who changed it last: "you", or the name of the MCP client. */
+  updatedBy: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
  * An entry in the calendar: kloq's `CalEvent` (components/kloq), stored as
  * it is. Timed entries hold offset-qualified instants, all-day entries
  * date-only ones with an exclusive end (RFC 5545).

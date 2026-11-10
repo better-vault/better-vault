@@ -13,6 +13,8 @@ import type {
   StudioOutput,
   Vault,
   CalendarEntry,
+  Note,
+  Skill,
 } from "./types";
 
 export type * from "./types";
@@ -32,6 +34,8 @@ export class BetterVaultDatabase extends Dexie {
   folders!: EntityTable<Folder, "id">;
   vaults!: EntityTable<Vault, "id">;
   calendar!: EntityTable<CalendarEntry, "id">;
+  notes!: EntityTable<Note, "id">;
+  skills!: EntityTable<Skill, "id">;
   blobs!: EntityTable<StoredBlob, "id">;
 
   constructor(name = "better-vault") {
@@ -127,6 +131,11 @@ export class BetterVaultDatabase extends Dexie {
     // Version 7: calendar entries.
     this.version(7).stores({
       calendar: "id",
+    });
+    // Version 8: notes and skills, each in a vault.
+    this.version(8).stores({
+      notes: "id, vaultId, updatedAt",
+      skills: "id, vaultId, name",
     });
   }
 }
