@@ -86,23 +86,16 @@
   "onboarding": {
     "label": "Welcome to better-vault",
     "next": "Continue",
-    "withoutAccount": "Continue without an account",
+    "withoutAccount": "Use without an account",
     "popupBlocked": "Allow pop-ups for this page to sign in.",
-    "intro": {
-      "title": "Welcome to better-vault",
-      "body": "Your notebooks, your sources, and the AI model you choose.",
-      "points": {
-        "local": "Everything you add stays on this device.",
-        "models": "Bring your own key for OpenAI, Anthropic, Google and more, or use Better Vault AI.",
-        "notes": "Write linked notes, see how ideas connect, and let your AI agents share skills."
-      }
-    },
     "account": {
       "title": "Create an account",
-      "body": "An account is only for Better Vault AI and Cloud. You can add one later in Settings.",
+      "body": "An account is only for Better Vault AI and Cloud. Your notebooks and API keys never leave this device.",
       "google": "Continue with Google",
       "email": "Continue with email",
-      "keys": "Your notebooks and your own API keys never leave this device."
+      "keys": "Your notebooks and your own API keys never leave this device.",
+      "skip": "Skip for now",
+      "signedIn": "Signed in as {{email}}"
     },
     "username": {
       "title": "Choose a username",
@@ -132,15 +125,34 @@
         "detail": "3,500 AI credits a month, 50 GB of cloud storage",
         "price": "$9.99/mo"
       },
-      "later": "Maybe later"
+      "later": "Maybe later",
+      "subscribe": "Continue to {{plan}}",
+      "needsAccount": "Go back a step and create an account to subscribe. You can also subscribe later in Settings → Subscription."
     },
-    "local": {
-      "title": "Use better-vault on this device",
-      "body": "No account, no sign-up. You can create an account later in Settings.",
+    "stepOf": "Step {{step}} of {{total}}",
+    "back": "Back",
+    "finish": "Start using better-vault",
+    "profile": {
+      "title": "Welcome to better-vault",
+      "body": "Your notebooks, sources and notes stay on this device. Start with how you'd like to appear.",
+      "picture": "Add a picture",
+      "pictureHint": "Optional, kept on this device",
+      "pictureFailed": "That picture couldn't be used.",
       "name": "Your name",
-      "hint": "Optional. It's kept on this device only.",
-      "start": "Start",
-      "back": "Create an account instead"
+      "nameHint": "Optional. Shown in the app, on this device only."
+    },
+    "preview": {
+      "you": "You",
+      "thisDevice": "On this device",
+      "ask": "Ask your sources…",
+      "betterVault": "Better Vault AI",
+      "ownKey": "Your own key",
+      "caption": {
+        "profile": "Your name and picture appear in the app.",
+        "account": "An account adds Better Vault AI and Cloud.",
+        "username": "Your username, for your account.",
+        "plan": "Pro and Max add Better Vault AI to the model picker."
+      }
     }
   }
 }
