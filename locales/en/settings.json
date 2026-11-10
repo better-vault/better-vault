@@ -200,7 +200,7 @@
   },
   "account": {
     "title": "Account",
-    "description": "How better-vault knows you on this device. Nothing here leaves it.",
+    "description": "Your name and picture, your better-vault account and what is stored here. Notebooks stay on this device.",
     "noName": "Your name",
     "inThisBrowser": "Saved in this browser",
     "onThisComputer": "Saved on this computer",
@@ -222,7 +222,15 @@
     "notebooks": "Notebooks",
     "folders": "Folders",
     "sources": "Sources",
-    "space": "{{size}} used by better-vault in this browser."
+    "space": "{{size}} used by better-vault in this browser.",
+    "betterVault": "better-vault account",
+    "email": "Email",
+    "username": "Username",
+    "noUsername": "Not set",
+    "freePlan": "Free, with your own keys",
+    "signInTitle": "Sign in to better-vault",
+    "signInBody": "An account is optional. It's only for Better Vault AI and Cloud; your notebooks never leave this device.",
+    "signOut": "Sign out"
   },
   "storage": {
     "title": "Storage",
@@ -418,18 +426,15 @@
   },
   "subscription": {
     "title": "Subscription",
-    "description": "Better Vault AI answers your questions without an API key, and Better Vault Cloud keeps your backups. Both are optional: the app stays free with your own keys.",
+    "description": "Optional plans for Better Vault AI and Cloud. The app stays free with your own keys.",
     "plans": {
       "pro": "Pro",
       "max": "Max"
     },
     "signIn": "Sign in",
     "createAccount": "Create account",
-    "signOut": "Sign out",
     "popupBlocked": "Allow pop-ups for this page to sign in.",
     "keysStay": "Your own API keys stay on this device and are never sent to Better Vault.",
-    "noPlan": "No plan yet",
-    "noPlanHint": "Choose a plan to use Better Vault AI and Cloud.",
     "renews": "Renews on {{date}}",
     "cancels": "Ends on {{date}}; it won't renew",
     "credits": "AI credits",
@@ -454,7 +459,6 @@
       "later": "Not now"
     },
     "choosePlan": "Get {{plan}}",
-    "popular": "Popular",
     "perMonth": "/month",
     "amount": {
       "pro": "$4.99",
@@ -468,7 +472,14 @@
       "credits_one": "{{formatted}} AI credit every month",
       "credits_other": "{{formatted}} AI credits every month",
       "storage": "{{size}} GB of Better Vault Cloud",
-      "haiku": "Better Vault AI, no API key needed"
-    }
+      "haiku": "Better Vault AI, no API key needed",
+      "keys": "Your own API keys keep working"
+    },
+    "heroTitle": "Better Vault AI and Cloud",
+    "heroBody": "Ask questions without an API key, and keep backups in the cloud.",
+    "soon": "Coming soon",
+    "soonHint": "Pro and Max open soon. You can sign in now, and subscribe here once they do.",
+    "choose": "Choose a plan",
+    "planName": "{{plan}} plan"
   }
 }
