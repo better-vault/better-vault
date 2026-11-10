@@ -3,6 +3,7 @@ import {
   Calendar03Icon,
   Clock01Icon,
   Note01Icon,
+  MagicWand01Icon,
   Delete02Icon,
   FolderOpenIcon,
   GridViewIcon,
@@ -41,7 +42,7 @@ import { useVaultName } from "./vault-name";
  * notebooks or the calendar. "vault" is "all" reached by choosing the vault
  * in the sidebar, so the sidebar highlights the vault row, not "All notebooks".
  */
-export type HomeSection = "all" | "vault" | "recents" | "calendar" | "notes";
+export type HomeSection = "all" | "vault" | "recents" | "calendar" | "notes" | "skills";
 
 interface VaultSidebarProps {
   vaults: Vault[];
@@ -119,6 +120,15 @@ export function VaultSidebar({
             >
               <Icon icon={Note01Icon} size={18} className="text-muted-foreground" />
               {tNotes("title")}
+            </button>
+            <button
+              type="button"
+              aria-current={section === "skills" ? "page" : undefined}
+              onClick={() => onSection("skills")}
+              className={cn(row, section === "skills" && "bg-foreground/10 font-medium")}
+            >
+              <Icon icon={MagicWand01Icon} size={18} className="text-muted-foreground" />
+              {tNotes("skillsTitle")}
             </button>
             <button
               type="button"

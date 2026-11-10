@@ -143,6 +143,7 @@
       "title": "Delete “{{name}}”?",
       "body": "The skill is deleted from this device, for chats and agents alike.",
       "confirm": "Delete skill"
-    }
+    },
+    "search": "Search skills"
   }
 }

@@ -71,6 +71,7 @@ import { useVaultName } from "./vault-name";
 /** The calendar is large; it loads the first time it is opened. */
 const CalendarView = lazy(() => import("@/components/calendar/calendar-view"));
 const NotesWorkspace = lazy(() => import("@/components/notes/notes-workspace"));
+const SkillsWorkspace = lazy(() => import("@/components/skills/skills-workspace"));
 
 const sortKey = "better-vault:home-sort";
 const viewKey = "better-vault:home-view";
@@ -128,11 +129,12 @@ export function NotebookHome() {
     viewParam === "recents" ||
     viewParam === "calendar" ||
     viewParam === "vault" ||
-    viewParam === "notes"
+    viewParam === "notes" ||
+    viewParam === "skills"
       ? viewParam
       : "all";
   // The calendar and notes fill the page: they have bars of their own.
-  const fullPage = section === "calendar" || section === "notes";
+  const fullPage = section === "calendar" || section === "notes" || section === "skills";
   // "vault" shows the same list as "all"; it only records that the vault was
   // chosen in the sidebar, so the sidebar highlights the vault instead.
   const listing = section === "all" || section === "vault";
@@ -146,11 +148,13 @@ export function NotebookHome() {
   const title =
     section === "notes"
       ? tNotes("title")
-      : section === "calendar"
-        ? t("calendar.title")
-        : section === "recents"
-          ? t("vaults.recent")
-          : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
+      : section === "skills"
+        ? tNotes("skillsTitle")
+        : section === "calendar"
+          ? t("calendar.title")
+          : section === "recents"
+            ? t("vaults.recent")
+            : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
 
   useEffect(() => {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
@@ -437,7 +441,13 @@ export function NotebookHome() {
                   </div>
                 }
               >
-                {section === "notes" ? <NotesWorkspace /> : <CalendarView />}
+                {section === "notes" ? (
+                  <NotesWorkspace />
+                ) : section === "skills" ? (
+                  <SkillsWorkspace />
+                ) : (
+                  <CalendarView />
+                )}
               </Suspense>
             </div>
           </main>
