@@ -30,6 +30,7 @@ import {
   setUsername,
   signIn,
   startCheckout,
+  subscriptionsOpen,
   useAccount,
   usernameAvailable,
 } from "@/lib/account/account";
@@ -69,6 +70,8 @@ function Onboarding() {
   const [name, setName] = useState<string | null>(null);
   const [username, setUsernameDraft] = useState("");
   const [plan, setPlan] = useState<Plan>("free");
+  // Paid plans can't be chosen until the backend opens them.
+  const open = subscriptionsOpen(account);
   const [busy, setBusy] = useState(false);
   const shownName = name ?? profile?.name ?? "";
 
@@ -102,7 +105,8 @@ function Onboarding() {
     setBusy(true);
     try {
       await saveName();
-      if (plan !== "free" && account && account.account.plan !== plan) await startCheckout(plan);
+      if (open && plan !== "free" && account && account.account.plan !== plan)
+        await startCheckout(plan);
       await finish();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -200,9 +204,10 @@ function Onboarding() {
                       type="button"
                       role="radio"
                       aria-checked={plan === each}
+                      disabled={each !== "free" && !open}
                       onClick={() => setPlan(each)}
                       className={cn(
-                        "flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm ring-1 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm ring-1 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:opacity-60",
                         plan === each
                           ? "bg-foreground text-background ring-foreground"
                           : "ring-border hover:bg-accent",
@@ -215,7 +220,9 @@ function Onboarding() {
                           plan === each ? "text-background/70" : "text-muted-foreground",
                         )}
                       >
-                        {t(`onboarding.plan.${each}.price`)}
+                        {each !== "free" && !open
+                          ? t("onboarding.plan.soon")
+                          : t(`onboarding.plan.${each}.price`)}
                       </span>
                     </button>
                   ))}
@@ -223,7 +230,11 @@ function Onboarding() {
                 <p className="text-sm text-muted-foreground">
                   {t(`onboarding.plan.${plan}.detail`)}
                 </p>
-                {plan !== "free" && !account ? (
+                {!open ? (
+                  <p className="rounded-2xl bg-muted/50 p-3 text-xs text-muted-foreground">
+                    {t("onboarding.plan.soonHint")}
+                  </p>
+                ) : plan !== "free" && !account ? (
                   <p className="rounded-2xl bg-muted/50 p-3 text-xs text-muted-foreground">
                     {t("onboarding.plan.needsAccount")}
                   </p>

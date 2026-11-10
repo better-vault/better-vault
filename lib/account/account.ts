@@ -38,6 +38,15 @@ export interface AccountState {
   checkedAt: number;
   /** The plan the welcome dialog last thanked the user for. */
   welcomed: string | null;
+  /** "soon" while plans can't be bought yet (the backend says which). */
+  subscriptions?: "open" | "soon";
+}
+
+type Me = { user: AccountUser; account: AccountPlan; subscriptions?: "open" | "soon" };
+
+/** Whether plans can be bought yet. Without an account, or from an older backend, they can't. */
+export function subscriptionsOpen(state: AccountState | null | undefined): boolean {
+  return state?.subscriptions === "open";
 }
 
 const KEY = "account";
@@ -88,11 +97,8 @@ export async function refreshAccount(): Promise<AccountState | null> {
   const saved = await getAccount();
   if (!saved) return null;
   try {
-    const { user, account } = await api<{ user: AccountUser; account: AccountPlan }>(
-      "/v1/me",
-      saved.token,
-    );
-    const next: AccountState = { ...saved, user, account, checkedAt: Date.now() };
+    const { user, account, subscriptions } = await api<Me>("/v1/me", saved.token);
+    const next: AccountState = { ...saved, user, account, subscriptions, checkedAt: Date.now() };
     await store().putSetting(KEY, next);
     await syncProvider(next);
     return next;
@@ -161,7 +167,7 @@ async function obtainToken(mode: "signin" | "signup"): Promise<string> {
 
 export async function signIn(mode: "signin" | "signup" = "signin"): Promise<AccountState> {
   const token = await obtainToken(mode);
-  const { user, account } = await api<{ user: AccountUser; account: AccountPlan }>("/v1/me", token);
+  const { user, account, subscriptions } = await api<Me>("/v1/me", token);
   const previous = await getAccount();
   const state: AccountState = {
     token,
@@ -169,6 +175,7 @@ export async function signIn(mode: "signin" | "signup" = "signin"): Promise<Acco
     account,
     checkedAt: Date.now(),
     welcomed: previous?.user.id === user.id ? previous.welcomed : account.plan,
+    subscriptions,
   };
   await store().putSetting(KEY, state);
   await syncProvider(state);

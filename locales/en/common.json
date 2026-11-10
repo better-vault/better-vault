@@ -127,7 +127,9 @@
       },
       "later": "Maybe later",
       "subscribe": "Continue to {{plan}}",
-      "needsAccount": "Go back a step and create an account to subscribe. You can also subscribe later in Settings → Subscription."
+      "needsAccount": "Go back a step and create an account to subscribe. You can also subscribe later in Settings → Subscription.",
+      "soon": "Coming soon",
+      "soonHint": "Pro and Max are coming soon. You can create your account now, and subscribe later in Settings → Subscription."
     },
     "stepOf": "Step {{step}} of {{total}}",
     "back": "Back",
