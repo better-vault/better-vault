@@ -40,4 +40,4 @@ The desktop app will grow too: API keys kept in the operating system's keychain,
 
 ## Not planned
 
-**Video overviews** are out of scope; better-vault focuses on cited chat and written, visual and spoken outputs. **Accounts and server storage** are out of scope too, because better-vault stays local-first and your data lives on your device.
+**Video overviews** are out of scope; better-vault focuses on cited chat and written, visual and spoken outputs. **Keeping notebooks on a server** is out of scope too: better-vault stays local-first, and an account is only an option for Better Vault AI and the backups you choose to put in Better Vault Cloud.
