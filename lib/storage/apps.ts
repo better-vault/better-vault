@@ -5,7 +5,6 @@ export const oauthApps = {
     apiKey: import.meta.env.VITE_GOOGLE_API_KEY ?? "",
     appId: import.meta.env.VITE_GOOGLE_APP_ID ?? "",
     desktopClientId: import.meta.env.VITE_GOOGLE_DESKTOP_CLIENT_ID ?? "",
-    desktopClientSecret: import.meta.env.VITE_GOOGLE_DESKTOP_CLIENT_SECRET ?? "",
   },
   microsoft: { clientId: import.meta.env.VITE_MICROSOFT_CLIENT_ID ?? "" },
 };

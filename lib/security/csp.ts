@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "@/lib/account/config";
 import { createHash } from "node:crypto";
 
 /**
@@ -50,6 +51,8 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
       // OneDrive's upload sessions answer with addresses on these hosts.
       "https://*.sharepoint.com",
       "https://*.files.1drv.com",
+      // better-vault's own backend: account, subscription and Better Vault Cloud.
+      new URL(BACKEND_URL).origin,
     ],
     "frame-src": google.frame,
     "worker-src": ["'self'", "blob:"],

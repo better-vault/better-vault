@@ -1,4 +1,5 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { BACKEND_URL, BETTER_VAULT_MODEL } from "@/lib/account/config";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createElevenLabs } from "@ai-sdk/elevenlabs";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
@@ -55,6 +56,11 @@ async function baseLanguageModel(
       return createOpenAI({ apiKey: credentials.apiKey })(ref.modelId);
     case "anthropic":
       return createAnthropic({ apiKey: credentials.apiKey })(ref.modelId);
+    case "bettervault":
+      // The backend speaks Anthropic's API, meters it and runs only Haiku.
+      return createAnthropic({ apiKey: credentials.apiKey, baseURL: `${BACKEND_URL}/v1/ai` })(
+        BETTER_VAULT_MODEL,
+      );
     case "google":
       return createGoogleGenerativeAI({ apiKey: credentials.apiKey })(ref.modelId);
     case "deepseek":
@@ -110,6 +116,7 @@ export function createWebSearchTools(
     case "openai":
       return { web_search: createOpenAI({ apiKey: credentials.apiKey }).tools.webSearch({}) };
     case "anthropic":
+    case "bettervault":
       return {
         web_search: createAnthropic({ apiKey: credentials.apiKey }).tools.webSearch_20260318({
           maxUses: 5,

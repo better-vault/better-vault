@@ -12,6 +12,7 @@ export const providerIds = [
   "lmstudio",
   "deepseek",
   "elevenlabs",
+  "bettervault",
 ] as const;
 
 export type ProviderId = (typeof providerIds)[number];
@@ -82,6 +83,7 @@ export const chatProviderIds = [
   "ollama",
   "lmstudio",
   "deepseek",
+  "bettervault",
 ] as const satisfies readonly ProviderId[];
 
 /** Providers that turn text into speech (audio overviews). */
@@ -133,6 +135,23 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     contextTokens: 200_000,
     imageModels: [],
     efforts: ["provider-default", "low", "medium", "high", "xhigh", "max"],
+  },
+  bettervault: {
+    id: "bettervault",
+    kind: "chat",
+    // A brand name like the others: the subscription's own AI.
+    name: "Better Vault",
+    local: false,
+    // The "key" is the signed-in account's session token, set by signing in;
+    // the user's own provider keys never go to Better Vault.
+    needsKey: true,
+    webSearch: true,
+    suggestedModels: ["claude-haiku-5-5"],
+    // Kept under 100K tokens a question, where the model is cheapest, so credits last.
+    contextChars: 240_000,
+    contextTokens: 1_000_000,
+    imageModels: [],
+    efforts: ["provider-default", "low", "medium", "high"],
   },
   google: {
     id: "google",

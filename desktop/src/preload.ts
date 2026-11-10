@@ -30,6 +30,9 @@ const bridge: DesktopBridge = {
     install: () => ipcRenderer.invoke("updates:install"),
     onOpen: (listener) => listen<void>("updates:open", () => listener()),
   },
+  account: {
+    signIn: (mode) => ipcRenderer.invoke("account:signIn", mode),
+  },
   mcp: {
     state: () => ipcRenderer.invoke("mcp:state"),
     onState: (listener) => listen<McpState>("mcp:state", listener),

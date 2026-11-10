@@ -25,7 +25,10 @@
     "studioHintAll": "All tools on",
     "mcp": "MCP",
     "mcpOn": "Agents can connect",
-    "mcpOff": "Let AI agents use your notes and skills"
+    "mcpOff": "Let AI agents use your notes and skills",
+    "subscription": "Subscription",
+    "subscriptionNone": "Better Vault AI and Cloud",
+    "subscriptionPlan": "{{plan}} plan"
   },
   "providers": {
     "title": "AI providers",
@@ -412,5 +415,52 @@
     },
     "activity": "Recent activity",
     "noActivity": "No agent has connected yet."
+  },
+  "subscription": {
+    "title": "Subscription",
+    "description": "Better Vault AI runs Claude Haiku for you, and Better Vault Cloud keeps your backups. Both are optional: the app stays free with your own keys.",
+    "plans": {
+      "pro": "Pro",
+      "max": "Max"
+    },
+    "prices": {
+      "pro": "$4.99 a month",
+      "max": "$9.99 a month"
+    },
+    "includes": {
+      "pro": "1,250 AI credits a month and 20 GB of cloud storage",
+      "max": "3,500 AI credits a month and 50 GB of cloud storage"
+    },
+    "choose": "Choose",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "signOut": "Sign out",
+    "popupBlocked": "Allow pop-ups for this page to sign in.",
+    "keysStay": "Your own API keys stay on this device and are never sent to Better Vault.",
+    "noPlan": "No plan yet",
+    "noPlanHint": "Choose a plan to use Better Vault AI and Cloud.",
+    "renews": "Renews on {{date}}",
+    "cancels": "Ends on {{date}}; it won't renew",
+    "credits": "AI credits",
+    "creditsLeft": "{{left}} of {{total}} left until {{date}}",
+    "storage": "Cloud storage",
+    "storageUsed": "{{used}} GB of {{total}} GB used",
+    "overage": "Extra usage",
+    "overageHint": "Keep using AI after your credits run out, at $2 per 1,000 credits, up to a limit you choose.",
+    "cap": "Up to ${{amount}} a month",
+    "capLabel": "Extra usage limit",
+    "manage": "Manage or cancel",
+    "manageHint": "Change plan, see invoices or cancel in Polar's customer portal.",
+    "refresh": "Refresh",
+    "welcome": {
+      "title": "Welcome to {{plan}}",
+      "body": "Thank you for supporting better-vault, {{name}}.",
+      "credits_one": "{{count}} AI credit every month with Better Vault AI",
+      "credits_other": "{{count}} AI credits every month with Better Vault AI",
+      "storage": "{{size}} GB of Better Vault Cloud for backups",
+      "keys": "Your own API keys keep working and stay on this device",
+      "use": "Use Better Vault AI",
+      "later": "Not now"
+    }
   }
 }

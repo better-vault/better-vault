@@ -32,6 +32,9 @@ import { AccountPanel } from "./account-panel";
 import { StoragePanel } from "./storage-panel";
 import { StudioPanel } from "./studio-panel";
 import { McpPanel } from "./mcp-panel";
+import { SubscriptionPanel } from "./subscription-panel";
+import { useAccount } from "@/lib/account/account";
+import { Logo } from "@/components/brand/logo";
 import { useStudioSettings } from "@/lib/studio/settings";
 import { storageIds } from "@/lib/storage/catalog";
 import { isStorageReady, useStorageSettings } from "@/lib/storage/settings";
@@ -56,6 +59,7 @@ interface SettingsSheetProps {
 
 export const settingsPages = [
   "account",
+  "subscription",
   "providers",
   "storage",
   "appearance",
@@ -109,6 +113,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
   const profile = useProfile();
   const storage = useStorageSettings();
   const studio = useStudioSettings();
+  const account = useAccount();
   const hiddenTools = studio?.hidden.length ?? 0;
   const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)).length : 0;
   const updateVersion =
@@ -141,6 +146,18 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 icon={<Avatar profile={profile} size={36} />}
                 label={profile?.name || t("rows.account")}
                 hint={profile?.name ? t("rows.accountHint") : t("rows.accountSetUp")}
+              />
+              <SettingsRow
+                to="subscription"
+                icon={<Logo size={22} />}
+                label={t("rows.subscription")}
+                hint={
+                  account?.account.plan
+                    ? t("rows.subscriptionPlan", {
+                        plan: t(`subscription.plans.${account.account.plan}`),
+                      })
+                    : t("rows.subscriptionNone")
+                }
               />
               <SettingsRow
                 to="providers"
@@ -215,6 +232,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
 
           <Sheet.Next name="account" closeLabel={tCommon("actions.close")}>
             <AccountPanel />
+          </Sheet.Next>
+          <Sheet.Next name="subscription" closeLabel={tCommon("actions.close")}>
+            <SubscriptionPanel />
           </Sheet.Next>
           <Sheet.Next name="providers" closeLabel={tCommon("actions.close")}>
             <ProvidersPanel

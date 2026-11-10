@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, nativeTheme, shell, type WebFrameMain } fro
 import path from "node:path";
 import { openDatabase } from "./database";
 import { startMcp } from "./mcp";
+import { startAccount } from "./account";
 import { setMenu } from "./menu";
 import { handleScheme, origin, registerScheme } from "./protocol";
 import { startUpdates } from "./updates";
@@ -131,6 +132,7 @@ app.whenReady().then(() => {
     const database = openDatabase(isTrusted);
     closeDatabase = database.close;
     startMcp(database.store, isTrusted, app.getVersion());
+    startAccount(isTrusted);
     handleScheme(devServer ?? path.join(__dirname, "..", "renderer"));
   } catch (error) {
     dialog.showErrorBox(

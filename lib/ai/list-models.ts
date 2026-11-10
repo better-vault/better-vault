@@ -118,6 +118,8 @@ async function listModelIds(
     }
     case "opencode":
       return listOpenCodeModels(credentials.baseURL);
+    case "bettervault":
+      return [...info.suggestedModels];
     case "elevenlabs": {
       // Its speech models; the voices are listed by /api/voices.
       return [...info.suggestedModels];

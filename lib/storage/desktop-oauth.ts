@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "@/lib/account/config";
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
@@ -65,8 +66,8 @@ const endpoints = {
 
 function clientOf(service: OAuthService) {
   return service === "google"
-    ? { id: oauthApps.google.desktopClientId, secret: oauthApps.google.desktopClientSecret }
-    : { id: oauthApps.microsoft.clientId, secret: "" };
+    ? { id: oauthApps.google.desktopClientId }
+    : { id: oauthApps.microsoft.clientId };
 }
 
 interface TokenAnswer {
@@ -81,22 +82,50 @@ async function tokenRequest(
   service: OAuthService,
   params: Record<string, string>,
 ): Promise<TokenAnswer> {
-  const client = clientOf(service);
-  const body = new URLSearchParams({ client_id: client.id, ...params });
-  if (client.secret) body.set("client_secret", client.secret);
-  if (service === "microsoft") body.set("scope", endpoints.microsoft.scope);
-  const response = await fetch(endpoints[service].token, {
+  const answer =
+    service === "google" ? await googleTokenRequest(params) : await microsoftTokenRequest(params);
+  if (!answer.access_token)
+    throw new Error(answer.error_description ?? answer.error ?? "Sign-in failed.");
+  return answer;
+}
+
+async function microsoftTokenRequest(params: Record<string, string>): Promise<TokenAnswer> {
+  const body = new URLSearchParams({ client_id: clientOf("microsoft").id, ...params });
+  body.set("scope", endpoints.microsoft.scope);
+  const response = await fetch(endpoints.microsoft.token, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body,
     signal: AbortSignal.timeout(15_000),
   });
-  const answer = (await response.json().catch(() => ({}))) as TokenAnswer;
-  if (!response.ok || !answer.access_token)
-    throw new Error(
-      answer.error_description ?? answer.error ?? `Sign-in failed (${response.status}).`,
-    );
-  return answer;
+  return (await response.json().catch(() => ({}))) as TokenAnswer;
+}
+
+/**
+ * Google wants its desktop client's secret to exchange and refresh codes.
+ * It no longer ships in the app: better-vault's backend adds it and passes
+ * the answer back, storing nothing.
+ */
+async function googleTokenRequest(params: Record<string, string>): Promise<TokenAnswer> {
+  const refreshing = params.grant_type === "refresh_token";
+  const response = await fetch(
+    `${BACKEND_URL}/v1/oauth/google/${refreshing ? "refresh" : "token"}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(
+        refreshing
+          ? { refreshToken: params.refresh_token }
+          : {
+              code: params.code,
+              redirectUri: params.redirect_uri,
+              codeVerifier: params.code_verifier,
+            },
+      ),
+      signal: AbortSignal.timeout(15_000),
+    },
+  );
+  return (await response.json().catch(() => ({}))) as TokenAnswer;
 }
 
 /** Who signed in, for Settings. */

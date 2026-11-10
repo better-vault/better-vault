@@ -19,8 +19,8 @@ const oauthKeys = [
   "VITE_GOOGLE_API_KEY",
   "VITE_GOOGLE_APP_ID",
   "VITE_GOOGLE_DESKTOP_CLIENT_ID",
-  "VITE_GOOGLE_DESKTOP_CLIENT_SECRET",
   "VITE_MICROSOFT_CLIENT_ID",
+  "VITE_BETTER_VAULT_API",
 ] as const;
 
 const env = { ...loadEnv(process.env.NODE_ENV ?? "development", appRoot, "VITE_"), ...process.env };

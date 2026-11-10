@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AccountWatcher } from "@/components/account/welcome-dialog";
 import { CommandPalette } from "@/components/command/command-palette";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,6 +19,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <CommandPalette />
           <Toaster />
           <UpdatesHost />
+          <AccountWatcher />
         </TooltipProvider>
       </I18nProvider>
     </ThemeProvider>

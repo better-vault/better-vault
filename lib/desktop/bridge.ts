@@ -61,6 +61,11 @@ export interface DesktopBridge {
     /** Called when the app menu's "Check for Updates…" is chosen. Returns an unsubscribe. */
     onOpen(listener: () => void): () => void;
   };
+  /** Signing in to a better-vault account in the system browser (desktop/src/account.ts). */
+  account?: {
+    /** Opens sign-in in the browser and resolves with the session token. */
+    signIn(mode: "signin" | "signup"): Promise<string>;
+  };
   mcp: {
     state(): Promise<McpState>;
     onState(listener: (state: McpState) => void): () => void;
