@@ -114,30 +114,47 @@ async function forget() {
 async function obtainToken(mode: "signin" | "signup"): Promise<string> {
   const bridge = desktopBridge();
   if (bridge?.account) return bridge.account.signIn(mode);
-  const state = crypto.randomUUID();
+  // A long random state: the app alone knows it, and collects its token with it.
+  const state = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
   const url = `${BACKEND_URL}/v1/login?${new URLSearchParams({ return: window.location.origin, state, mode })}`;
   const popup = window.open(url, "better-vault-sign-in", "width=480,height=720");
   if (!popup) throw new Error("popup-blocked");
   return new Promise<string>((resolve, reject) => {
     const backend = new URL(BACKEND_URL).origin;
+    let finished = false;
+    const done = (token: string | null) => {
+      if (finished) return;
+      finished = true;
+      clearInterval(timer);
+      window.removeEventListener("message", onMessage);
+      if (token) resolve(token);
+      else reject(new Error("cancelled"));
+    };
+    // The popup can say so directly, unless visiting Google's page cut it off from this window…
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { type?: string; token?: string; state?: string };
       if (event.origin !== backend || data?.type !== "better-vault-auth" || data.state !== state)
         return;
-      cleanup();
-      if (data.token) resolve(data.token);
-      else reject(new Error("cancelled"));
+      done(data.token ?? null);
     };
-    const timer = setInterval(() => {
-      if (popup.closed) {
-        cleanup();
-        reject(new Error("cancelled"));
+    // …so the token also waits at the backend, collected here with the state.
+    let closedAt: number | null = null;
+    const timer = setInterval(async () => {
+      try {
+        const response = await fetch(
+          `${BACKEND_URL}/v1/login/claim?${new URLSearchParams({ state })}`,
+        );
+        const body = (await response.json().catch(() => ({}))) as { token?: string };
+        if (body.token) return done(body.token);
+      } catch {
+        // Offline for a moment: try again on the next tick.
       }
-    }, 600);
-    const cleanup = () => {
-      clearInterval(timer);
-      window.removeEventListener("message", onMessage);
-    };
+      // A closed window gets a few more seconds, for a token saved just before it closed.
+      if (popup.closed) {
+        closedAt ??= Date.now();
+        if (Date.now() - closedAt > 4000) done(null);
+      }
+    }, 1200);
     window.addEventListener("message", onMessage);
   });
 }
