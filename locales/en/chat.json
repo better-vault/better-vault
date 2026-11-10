@@ -110,5 +110,27 @@
     "reasoning_other": "{{tokens}} tokens of thinking in the last answer",
     "estimate": "At the last answer. The provider counts the tokens; the split between parts is estimated.",
     "empty": "Ask a question to see how much of the model's context it uses."
+  },
+  "visual": {
+    "drawing": "Drawing a visual…",
+    "copy": "Copy as text",
+    "download": "Download",
+    "table": "Table",
+    "chart": "Chart",
+    "question": "Question",
+    "answer": "Answer",
+    "showBack": "Show the answer",
+    "showFront": "Show the question",
+    "previous": "Previous card",
+    "next": "Next card",
+    "flip": "Flip"
+  },
+  "skills": {
+    "menu": "Skills",
+    "none": "No skills in this vault yet",
+    "manage": "Manage skills",
+    "attached_one": "{{count}} skill",
+    "attached_other": "{{count}} skills",
+    "clear": "Remove skills from this chat"
   }
 }

@@ -11,6 +11,7 @@ import { providers } from "@/lib/ai/catalog";
 import { describeError } from "@/lib/ai/errors";
 import { chatSystemPrompt } from "@/lib/ai/prompts";
 import { createLanguageModel, createWebSearchTools } from "@/lib/ai/providers";
+import { createVisualTools } from "../visual-tools";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
 import type { ChatMessage, ChatMessageMetadata, TokenUsage } from "@/lib/chat/types";
 import { toPassageRefs, stripCitations, type Passage } from "@/lib/grounding/passages";
@@ -33,6 +34,19 @@ const bodySchema = z.object({
   credentials: credentialsSchema,
   effort: effortSchema,
   passages: z.array(passageSchema).max(2000),
+  /** Skills the user attached to the chat (SKILL.md files from the vault). */
+  skills: z
+    .array(
+      z.object({
+        name: z.string().max(80),
+        description: z.string().max(2000),
+        body: z.string().max(40_000),
+      }),
+    )
+    .max(8)
+    .default([]),
+  /** Whether the model may answer with visuals (generative UI). */
+  visuals: z.boolean().default(true),
 });
 
 /** Earlier answers cite passages by numbers that no longer exist; drop them. */
@@ -84,9 +98,13 @@ export async function POST(request: Request) {
     return Response.json({ error: describeError(error) }, { status: 400 });
   }
 
-  const tools = mode === "web" ? createWebSearchTools(model, credentials) : undefined;
-  const system = chatSystemPrompt(mode, passages);
-  const instructions = chatSystemPrompt(mode, []).length;
+  // Local models often can't call tools, so they answer in text only.
+  const visuals = parsed.data.visuals && !providers[model.provider].local;
+  const searchTools = mode === "web" ? createWebSearchTools(model, credentials) : undefined;
+  const tools = visuals ? { ...searchTools, ...createVisualTools() } : searchTools;
+  const options = { skills: parsed.data.skills, visuals };
+  const system = chatSystemPrompt(mode, passages, options);
+  const instructions = chatSystemPrompt(mode, [], options).length;
   const result = streamText({
     model: languageModel,
     system,

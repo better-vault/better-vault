@@ -368,6 +368,9 @@
   "studio": {
     "title": "Studio",
     "description": "Choose which tools the Studio offers. A tool you turn off leaves the Studio sheet; what it already made stays in your notebooks.",
-    "lastOne": "At least one tool stays on"
+    "lastOne": "At least one tool stays on",
+    "visuals": "Visuals in answers",
+    "visualsHint": "Chat answers may show diagrams, tables, charts and flashcards when they explain better than text.",
+    "tools": "Tools"
   }
 }

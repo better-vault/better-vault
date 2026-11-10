@@ -22,6 +22,8 @@ import {
 } from "@/lib/db/settings";
 import { getChunks, listSources } from "@/lib/db/sources";
 import { selectPassages } from "@/lib/grounding/passages";
+import { listSkills } from "@/lib/db/skills";
+import { getStudioSettings } from "@/lib/studio/settings";
 
 /** How many earlier messages are sent with each question. */
 const HISTORY = 24;
@@ -34,6 +36,9 @@ interface ChatSession {
   error: Error | undefined;
   mode: ChatMode;
   setMode: (mode: ChatMode) => void;
+  /** Skills (ids) attached to this chat; their instructions go with each question. */
+  skills: string[];
+  setSkills: (ids: string[]) => void;
   send: (text: string) => Promise<void>;
   retry: () => Promise<void>;
   stop: () => void;
@@ -78,6 +83,7 @@ export function ChatProvider({
     null,
   );
   const [mode, setMode] = useState<ChatMode>("sources");
+  const [skills, setSkills] = useState<string[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -121,6 +127,8 @@ export function ChatProvider({
       chat={current.chat}
       mode={mode}
       setMode={setMode}
+      skills={skills}
+      setSkills={setSkills}
       startNew={startNew}
       open={open}
     >
@@ -140,11 +148,15 @@ function ChatRunner({
   chat: instance,
   mode,
   setMode,
+  skills,
+  setSkills,
   startNew,
   open,
   children,
 }: {
   notebookId: string;
+  skills: string[];
+  setSkills: (ids: string[]) => void;
   chat: Chat<ChatMessage>;
   mode: ChatMode;
   setMode: (mode: ChatMode) => void;
@@ -168,15 +180,20 @@ function ChatRunner({
         budget: contextCharsFor(settings, model.provider),
         query: question,
       });
+      const [allSkills, studio] = await Promise.all([listSkills(), getStudioSettings()]);
       return {
         mode: mode === "web" && providers[model.provider].webSearch ? "web" : "sources",
         model,
         credentials: credentialsFor(settings, model.provider),
         effort: effortFor(settings, model.provider),
         passages,
+        skills: allSkills
+          .filter((skill) => skills.includes(skill.id))
+          .map(({ name, description, body }) => ({ name, description, body })),
+        visuals: studio.visuals,
       };
     },
-    [notebookId, mode],
+    [notebookId, mode, skills],
   );
 
   const { sendMessage, regenerate, stop, messages, status, error } = chat;
@@ -189,6 +206,8 @@ function ChatRunner({
       error,
       mode,
       setMode,
+      skills,
+      setSkills,
       send: async (text) => {
         const body = await requestFor(text);
         await sendMessage({ text, metadata: { createdAt: Date.now() } }, { body });
@@ -204,6 +223,8 @@ function ChatRunner({
     [
       instance.id,
       messages,
+      skills,
+      setSkills,
       status,
       error,
       mode,

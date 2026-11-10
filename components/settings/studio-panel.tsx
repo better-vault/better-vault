@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
-import { setStudioToolShown, useStudioSettings } from "@/lib/studio/settings";
+import { setChatVisuals, setStudioToolShown, useStudioSettings } from "@/lib/studio/settings";
 import { cn } from "@/lib/utils";
 import { studioToolIds, studioTools } from "@/studio/tools";
 
@@ -21,6 +21,17 @@ export function StudioPanel() {
     <>
       <Sheet.Header title={t("studio.title")} description={t("studio.description")} />
       <Sheet.Body>
+        <label className="mb-4 flex cursor-pointer items-center gap-3 rounded-2xl bg-muted/50 px-3 py-2.5">
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium">{t("studio.visuals")}</span>
+            <span className="block text-xs text-muted-foreground">{t("studio.visualsHint")}</span>
+          </span>
+          <Switch
+            checked={settings.visuals}
+            onCheckedChange={(next) => void setChatVisuals(next)}
+          />
+        </label>
+        <h3 className="pb-1 text-xs font-medium text-muted-foreground">{t("studio.tools")}</h3>
         <ul className="-mx-2 flex flex-col gap-0.5 pb-4">
           {studioToolIds.map((id) => {
             const tool = studioTools[id];

@@ -4,6 +4,8 @@ import {
   PencilEdit02Icon,
   FileAddIcon,
   Globe02Icon,
+  Cancel01Icon,
+  MagicWand01Icon,
 } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,6 +27,8 @@ import {
   useSettings,
 } from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
+import { useSkills } from "@/lib/db/skills";
+import { useNavigate } from "react-router";
 import { useChatSession } from "./chat-provider";
 import { EffortMenu } from "./effort-menu";
 import { UsageRing } from "./usage-ring";
@@ -36,6 +40,14 @@ export function PromptBar() {
   const { t: tSettings } = useTranslation("settings");
   const { notebook, setTab, setSettingsOpen, setAddSourceOpen } = useWorkspace();
   const chat = useChatSession();
+  const navigate = useNavigate();
+  const allSkills = useSkills();
+  const vaultSkills = (allSkills ?? []).filter(
+    (skill) => skill.vaultId === (notebook.vaultId ?? "default"),
+  );
+  const attachedSkills = chat.skills.filter((id) =>
+    vaultSkills.some((skill) => skill.id === id),
+  ).length;
   const settings = useSettings();
   const sources = useSources(notebook.id);
   const [draft, setDraft] = useState("");
@@ -127,7 +139,50 @@ export function PromptBar() {
                     <Icon icon={PencilEdit02Icon} />
                     {t("newChat")}
                   </Menu.Item>
+                  <Menu.Sub>
+                    <Menu.SubTrigger>
+                      <Icon icon={MagicWand01Icon} />
+                      {t("skills.menu")}
+                    </Menu.SubTrigger>
+                    <Menu.SubContent>
+                      {vaultSkills.length === 0 ? (
+                        <Menu.Item disabled>{t("skills.none")}</Menu.Item>
+                      ) : (
+                        vaultSkills.map((skill) => (
+                          <Menu.CheckboxItem
+                            key={skill.id}
+                            checked={chat.skills.includes(skill.id)}
+                            onCheckedChange={(on) =>
+                              chat.setSkills(
+                                on
+                                  ? [...chat.skills, skill.id]
+                                  : chat.skills.filter((id) => id !== skill.id),
+                              )
+                            }
+                          >
+                            <span className="font-mono text-xs">{skill.name}</span>
+                          </Menu.CheckboxItem>
+                        ))
+                      )}
+                      <Menu.Separator />
+                      <Menu.Item onClick={() => navigate("/?view=skills")}>
+                        {t("skills.manage")}
+                      </Menu.Item>
+                    </Menu.SubContent>
+                  </Menu.Sub>
                 </Prompt.Menu>
+                {attachedSkills > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => chat.setSkills([])}
+                    title={t("skills.clear")}
+                    className="flex h-7 cursor-pointer items-center gap-1 rounded-full bg-primary/10 px-2 text-xs text-primary outline-none hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Icon icon={MagicWand01Icon} size={12} />
+                    {t("skills.attached", { count: attachedSkills })}
+                    <Icon icon={Cancel01Icon} size={11} />
+                  </button>
+                ) : null}
                 <Segmented<ChatMode>
                   size="sm"
                   aria-label={t("mode.label")}

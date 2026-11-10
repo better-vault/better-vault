@@ -1,10 +1,21 @@
 import type { ChatMode } from "@/lib/chat/types";
+import { VISUALS_PROMPT } from "@/lib/chat/visuals";
 import { formatPassages, type Passage } from "@/lib/grounding/passages";
 
 const STYLE = `Write in the language of the user's latest message. Use Markdown: short paragraphs, lists where they help, and **bold** for key terms. Do not start with a heading unless asked.`;
 
-/** The instructions for a chat turn, with the notebook's passages. */
-export function chatSystemPrompt(mode: ChatMode, passages: readonly Passage[]): string {
+export interface ChatSkill {
+  name: string;
+  description: string;
+  body: string;
+}
+
+/** The instructions for a chat turn, with the notebook's passages, the skills chosen and whether visuals may be shown. */
+export function chatSystemPrompt(
+  mode: ChatMode,
+  passages: readonly Passage[],
+  { skills = [], visuals = false }: { skills?: readonly ChatSkill[]; visuals?: boolean } = {},
+): string {
   const rules =
     mode === "sources"
       ? `Answer using ONLY the numbered passages from the notebook's sources below.
@@ -20,9 +31,18 @@ export function chatSystemPrompt(mode: ChatMode, passages: readonly Passage[]): 
         : "\nThe notebook has no selected sources; rely on web search."
       : "";
 
+  const skillText = skills.length
+    ? `\n\nThe user attached these skills. Follow their instructions where they apply:\n${skills
+        .map(
+          (skill) =>
+            `<skill name="${skill.name}">\n${skill.description ? `${skill.description}\n\n` : ""}${skill.body}\n</skill>`,
+        )
+        .join("\n")}`
+    : "";
+
   return `You are better-vault, a research assistant inside the user's notebook.
 ${rules}${empty}
-${STYLE}
+${STYLE}${visuals ? `\n${VISUALS_PROMPT}` : ""}${skillText}
 
 ${formatPassages(passages)}`;
 }
