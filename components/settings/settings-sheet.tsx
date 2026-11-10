@@ -143,9 +143,25 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
             <nav className="-mx-2 flex flex-col gap-0.5">
               <SettingsRow
                 to="account"
-                icon={<Avatar profile={profile} size={36} />}
-                label={profile?.name || t("rows.account")}
-                hint={profile?.name ? t("rows.accountHint") : t("rows.accountSetUp")}
+                icon={
+                  <Avatar
+                    profile={
+                      profile && {
+                        ...profile,
+                        avatar: profile.avatar ?? account?.user.image ?? null,
+                      }
+                    }
+                    size={36}
+                  />
+                }
+                label={profile?.name || account?.user.name || t("rows.account")}
+                hint={
+                  account
+                    ? account.user.email
+                    : profile?.name
+                      ? t("rows.accountHint")
+                      : t("rows.accountSetUp")
+                }
               />
               <SettingsRow
                 to="subscription"

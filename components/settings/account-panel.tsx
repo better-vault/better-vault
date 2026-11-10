@@ -1,14 +1,23 @@
-import { AiBrain01Icon, Camera01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
+import {
+  AiBrain01Icon,
+  Camera01Icon,
+  Delete02Icon,
+  Logout03Icon,
+  Mail01Icon,
+  UserCircleIcon,
+} from "@hugeicons/core-free-icons";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Avatar } from "@/components/account/avatar";
+import { Logo } from "@/components/brand/logo";
 import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
 import { ProviderIcon } from "@/components/provider-icon";
 import { Button } from "@/components/panelui/button";
 import { Input } from "@/components/panelui/input";
 import { Sheet } from "@/components/panelui/sheet";
+import { signIn, signOut, useAccount } from "@/lib/account/account";
 import { providerIds, providers } from "@/lib/ai/catalog";
 import { desktopBridge } from "@/lib/desktop/bridge";
 import { useFolders } from "@/lib/db/folders";
@@ -20,12 +29,15 @@ import { SettingsRow } from "./settings-row";
 
 /**
  * Settings → Account: the name and picture this device knows you by, the
- * accounts and keys connected to the app, and what is stored here. There is
- * no sign-up: everything stays on this device.
+ * optional better-vault account (who is signed in, and signing out), the
+ * keys connected to the app, and what is stored here. Notebooks stay on this
+ * device whether or not you sign in.
  */
 export function AccountPanel() {
   const { t } = useTranslation("settings");
   const profile = useProfile();
+  const account = useAccount();
+  const [busy, setBusy] = useState<string | null>(null);
   const settings = useSettings();
   const notebooks = useNotebooks();
   const folders = useFolders();
@@ -46,6 +58,29 @@ export function AccountPanel() {
   const chatgpt = settings?.providers.openai.chatgpt ?? null;
   const ready = settings ? providerIds.filter((id) => isProviderReady(settings, id)) : [];
   const sources = counts ? [...counts.values()].reduce((sum, count) => sum + count.sources, 0) : 0;
+
+  const user = account?.user;
+  // The picture chosen here, else the one from the sign-in (Google's).
+  const shownProfile = profile
+    ? {
+        ...profile,
+        name: profile.name || user?.name || "",
+        avatar: profile.avatar ?? user?.image ?? null,
+      }
+    : profile;
+
+  async function run(what: string, action: () => Promise<unknown>) {
+    setBusy(what);
+    try {
+      await action();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message !== "cancelled")
+        toast.error(message === "popup-blocked" ? t("subscription.popupBlocked") : message);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function choosePicture(file: File) {
     try {
@@ -70,17 +105,21 @@ export function AccountPanel() {
               aria-label={profile?.avatar ? t("account.changePicture") : t("account.addPicture")}
               className="group relative cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Avatar profile={profile} size={88} />
+              <Avatar profile={shownProfile} size={88} />
               <span className="absolute -end-0.5 -bottom-0.5 flex size-8 items-center justify-center rounded-full border-2 border-popover bg-primary text-primary-foreground transition-transform group-hover:scale-105">
                 <Icon icon={Camera01Icon} size={15} />
               </span>
             </button>
             <div className="min-w-0">
               <p className="truncate text-lg font-semibold tracking-tight">
-                {profile?.name || t("account.noName")}
+                {shownProfile?.name || t("account.noName")}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {desktop ? t("account.onThisComputer") : t("account.inThisBrowser")}
+              <p className="truncate text-xs text-muted-foreground">
+                {user
+                  ? user.email
+                  : desktop
+                    ? t("account.onThisComputer")
+                    : t("account.inThisBrowser")}
               </p>
             </div>
             {profile?.avatar ? (
@@ -123,6 +162,61 @@ export function AccountPanel() {
               }}
             />
           </Field>
+
+          <section className="flex flex-col gap-2">
+            <h3 className="px-0.5 text-xs font-medium text-muted-foreground">
+              {t("account.betterVault")}
+            </h3>
+            {user ? (
+              <div className="-mx-2 flex flex-col gap-0.5">
+                <InfoRow icon={Mail01Icon} label={t("account.email")} value={user.email} />
+                <InfoRow
+                  icon={UserCircleIcon}
+                  label={t("account.username")}
+                  value={user.username ? `@${user.username}` : t("account.noUsername")}
+                />
+                <SettingsRow
+                  to="subscription"
+                  icon={<Logo size={20} />}
+                  label={t("rows.subscription")}
+                  hint={
+                    account?.account.plan
+                      ? t("rows.subscriptionPlan", {
+                          plan: t(`subscription.plans.${account.account.plan}`),
+                        })
+                      : t("account.freePlan")
+                  }
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 rounded-2xl bg-muted/50 p-4">
+                <div className="flex items-start gap-3">
+                  <Logo size={32} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{t("account.signInTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("account.signInBody")}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    disabled={busy !== null}
+                    onClick={() => void run("signin", () => signIn("signin"))}
+                  >
+                    {t("subscription.signIn")}
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    variant="outline"
+                    disabled={busy !== null}
+                    onClick={() => void run("signup", () => signIn("signup"))}
+                  >
+                    {t("subscription.createAccount")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </section>
 
           <section className="flex flex-col gap-2">
             <h3 className="px-0.5 text-xs font-medium text-muted-foreground">
@@ -174,9 +268,46 @@ export function AccountPanel() {
               </p>
             ) : null}
           </section>
+
+          {user ? (
+            <Button
+              variant="destructive"
+              size="lg"
+              className="w-full"
+              disabled={busy !== null}
+              aria-busy={busy === "signout"}
+              onClick={() => void run("signout", signOut)}
+            >
+              <Icon icon={Logout03Icon} size={18} />
+              {t("account.signOut")}
+            </Button>
+          ) : null}
         </div>
       </Sheet.Body>
     </>
+  );
+}
+
+/** A row that only shows a value, in the same shape as a settings row. */
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: typeof Mail01Icon;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl px-2.5 py-2.5">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
+        <Icon icon={icon} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{label}</span>
+        <span className="block truncate text-xs text-muted-foreground">{value}</span>
+      </span>
+    </div>
   );
 }
 
