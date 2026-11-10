@@ -4,7 +4,7 @@
  * A build can point elsewhere with VITE_BETTER_VAULT_API.
  */
 export const BACKEND_URL = (
-  import.meta.env.VITE_BETTER_VAULT_API || "https://better-vault-backend.xamza2009.workers.dev"
+  import.meta.env.VITE_BETTER_VAULT_API || "https://api.better-vault.dev"
 ).replace(/\/+$/, "");
 
 /** The model Better Vault AI runs; the backend allows no other. */
