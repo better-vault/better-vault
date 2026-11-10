@@ -6,7 +6,7 @@
   "search": "Search notes",
   "searchAll": "Search in all notes",
   "empty": "No notes yet",
-  "emptyBody": "Write in Markdown and connect ideas with [[links]], like in Obsidian.",
+  "emptyBody": "Write in Markdown and connect ideas with [[links]].",
   "noMatches": "Nothing matches “{{query}}”.",
   "placeholder": "Start writing… Type [[ to link a note, # for a tag.",
   "editorLabel": "Note text",
@@ -97,7 +97,7 @@
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
-    "description": "The same keys as Obsidian.",
+    "description": "Every key the notes page knows.",
     "groups": {
       "workspace": "Workspace",
       "editing": "Editing"

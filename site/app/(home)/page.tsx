@@ -185,7 +185,7 @@ export default function HomePage() {
       <Section
         id="notes"
         title="Notes that connect everything"
-        intro="Write notes beside your sources, link them with [[double brackets]], and watch ideas connect across notebooks and vaults. It works like Obsidian, and it lives next to your research."
+        intro="Write notes beside your sources, link them with [[double brackets]], and watch ideas connect across notebooks and vaults. Your notes live right next to your research."
       >
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <div className="rounded-3xl border bg-card p-4">

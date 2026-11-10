@@ -74,8 +74,8 @@ export const notesFeatures: { title: string; body: string }[] = [
     body: "See every note and link at once, with each vault in its own colour, or only what is near the note you're on.",
   },
   {
-    title: "Canvas and Obsidian's keys",
-    body: "Lay ideas out as cards joined by arrows, saved as an Obsidian .canvas file. ⌘O, ⌘E, ⌘G and the other shortcuts work as you'd expect.",
+    title: "Canvas and shortcuts",
+    body: "Lay ideas out as cards joined by arrows, saved as an open .canvas file. ⌘O, ⌘E, ⌘G and the other shortcuts keep your hands on the keyboard.",
   },
   {
     title: "Skills your agents share",

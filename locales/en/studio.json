@@ -61,7 +61,7 @@
     },
     "notes": {
       "name": "Notes",
-      "description": "Write linked notes beside this notebook, like Obsidian."
+      "description": "Write linked notes beside this notebook."
     },
     "canvas": {
       "name": "Canvas",
@@ -419,7 +419,7 @@
       "json": "Board file (.json)",
       "image": "Original image",
       "mp3": "Audio (MP3)",
-      "canvas": "Obsidian canvas (.canvas)"
+      "canvas": "JSON Canvas (.canvas)"
     },
     "metaLocal": "Edited {{time}}",
     "annotate": "Annotate",
