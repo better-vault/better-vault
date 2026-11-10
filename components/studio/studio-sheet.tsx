@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Sheet } from "@/components/panelui/sheet";
 import { useWorkspace } from "@/components/workspace/workspace-context";
@@ -27,14 +28,22 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
   const { t: tCommon } = useTranslation();
   const { notebook, openOutput, openTool } = useWorkspace();
   const runner = useStudioRunner();
+  const navigate = useNavigate();
   const settings = useSettings();
   const noImageModel = settings ? availableImageModels(settings).length === 0 : false;
   const studioSettings = useStudioSettings();
   // Tools turned off in Settings → Studio leave the sheet; their outputs stay listed below.
   const shownTools = studioToolIds.filter((id) => !studioSettings?.hidden.includes(id));
 
-  // A local tool (the whiteboard) has no dialog: it is made at once and opened.
+  // Notes live in the vault, not in the notebook: the tile opens the notes
+  // page showing this notebook's notes. A local tool (the whiteboard, the
+  // canvas) has no dialog: it is made at once and opened.
   async function choose(id: StudioToolId) {
+    if (id === "notes") {
+      onOpenChange(false);
+      navigate(`/?view=notes&notebook=${encodeURIComponent(notebook.id)}`);
+      return;
+    }
     const local = toolDefinitions[id]?.local;
     if (!local) {
       openTool(id);

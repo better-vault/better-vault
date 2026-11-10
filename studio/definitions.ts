@@ -1,5 +1,6 @@
 import type { StudioToolId } from "./tools";
 import { anatomyTool } from "./tools/anatomy/definition";
+import { canvasTool } from "./tools/canvas/definition";
 import { audioOverviewTool } from "./tools/audio-overview/definition";
 import { dataTableTool } from "./tools/data-table/definition";
 import { flashcardsTool } from "./tools/flashcards/definition";
@@ -23,4 +24,5 @@ export const toolDefinitions: Partial<Record<StudioToolId, AnyToolDefinition>> =
   "slide-deck": slideDeckTool,
   infographic: infographicTool,
   whiteboard: whiteboardTool,
+  canvas: canvasTool,
 };

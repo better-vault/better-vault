@@ -9,6 +9,8 @@ import {
   Presentation01Icon,
   Table02Icon,
   WhiteboardIcon,
+  DashboardSquare02Icon,
+  Note01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 
@@ -24,6 +26,8 @@ export const studioToolIds = [
   "slide-deck",
   "infographic",
   "whiteboard",
+  "canvas",
+  "notes",
 ] as const;
 
 export type StudioToolId = (typeof studioToolIds)[number];
@@ -71,6 +75,14 @@ export const studioTools: Record<StudioToolId, StudioToolMeta> = {
     available: true,
     isNew: true,
   },
+  canvas: {
+    id: "canvas",
+    icon: DashboardSquare02Icon,
+    tint: "text-chart-5",
+    available: true,
+    isNew: true,
+  },
+  notes: { id: "notes", icon: Note01Icon, tint: "text-chart-2", available: true, isNew: true },
 };
 
 export function isStudioToolId(value: unknown): value is StudioToolId {

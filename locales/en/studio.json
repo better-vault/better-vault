@@ -58,6 +58,14 @@
     "audio-overview": {
       "name": "Audio Overview",
       "description": "Two hosts or one narrator talk your sources through."
+    },
+    "notes": {
+      "name": "Notes",
+      "description": "Write linked notes beside this notebook, like Obsidian."
+    },
+    "canvas": {
+      "name": "Canvas",
+      "description": "Lay out notes, ideas and links as cards joined by arrows."
     }
   },
   "view": {
@@ -410,7 +418,8 @@
       "pdf": "PDF (print)",
       "json": "Board file (.json)",
       "image": "Original image",
-      "mp3": "Audio (MP3)"
+      "mp3": "Audio (MP3)",
+      "canvas": "Obsidian canvas (.canvas)"
     },
     "metaLocal": "Edited {{time}}",
     "annotate": "Annotate",
@@ -688,5 +697,48 @@
     "writerHint": "This model reads your sources and writes what is said; ElevenLabs then speaks it.",
     "noWriter": "No chat model yet. Add one in Settings → AI providers."
   },
-  "allHidden": "Every tool is turned off. Turn some back on in Settings → Studio."
+  "allHidden": "Every tool is turned off. Turn some back on in Settings → Studio.",
+  "canvas": {
+    "empty": {
+      "title": "An empty canvas",
+      "body": "Add cards from the bar above, or double-click anywhere to write."
+    },
+    "add": {
+      "text": "Text card",
+      "note": "Note card",
+      "link": "Link card",
+      "choose": "Choose a note",
+      "noNotes": "No notes in this vault yet.",
+      "url": "Web address",
+      "addLink": "Add link"
+    },
+    "card": {
+      "edit": "Edit",
+      "color": "Colour",
+      "noColor": "No colour",
+      "delete": "Delete",
+      "openNote": "Open note",
+      "missingNote": "Note not found",
+      "label": "Label"
+    },
+    "edge": {
+      "label": "Label",
+      "delete": "Delete arrow"
+    },
+    "fit": "Fit to screen",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "hint": "Drag a card's dot onto another card to join them.",
+    "colors": {
+      "1": "Red",
+      "2": "Orange",
+      "3": "Yellow",
+      "4": "Green",
+      "5": "Cyan",
+      "6": "Purple"
+    },
+    "menu": "Canvas options",
+    "rename": "Rename canvas",
+    "delete": "Delete canvas"
+  }
 }

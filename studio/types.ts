@@ -50,6 +50,7 @@ export type ExportFormat =
   | "pptx"
   | "pdf"
   | "json"
+  | "canvas"
   | "image"
   | "mp3";
 

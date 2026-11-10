@@ -3,6 +3,7 @@ import type { ToolFormProps, ToolViewerProps } from "./shared/form";
 import type { StudioToolId } from "./tools";
 import { AnatomyForm } from "./tools/anatomy/dialog";
 import { AnatomyViewer } from "./tools/anatomy/viewer";
+import { CanvasViewer } from "./tools/canvas/viewer";
 import { AudioOverviewForm } from "./tools/audio-overview/dialog";
 import { AudioOverviewViewer } from "./tools/audio-overview/viewer";
 import { DataTableForm } from "./tools/data-table/dialog";
@@ -88,4 +89,5 @@ export const toolClients: Partial<Record<StudioToolId, ToolClient>> = {
     canCreate: (options: { imageModel: unknown }) => options.imageModel !== null,
   },
   whiteboard: { Viewer: WhiteboardViewer, fill: true, bleed: true, immersive: true },
+  canvas: { Viewer: CanvasViewer, fill: true, bleed: true, immersive: true },
 };
