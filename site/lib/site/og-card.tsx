@@ -38,7 +38,8 @@ export function OgCard({ eyebrow, title, description, footer }: OgCardProps) {
         color: INK,
         fontFamily: "sans-serif",
         backgroundColor: "#0a0a0a",
-        backgroundImage: "radial-gradient(900px 500px at 12% -10%, #232323 0%, rgba(35,35,35,0) 60%)",
+        backgroundImage:
+          "radial-gradient(900px 500px at 12% -10%, #232323 0%, rgba(35,35,35,0) 60%)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
@@ -52,10 +53,20 @@ export function OgCard({ eyebrow, title, description, footer }: OgCardProps) {
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-        <div style={{ display: "flex", fontSize: 64, fontWeight: 600, lineHeight: 1.08, letterSpacing: -1.5 }}>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 64,
+            fontWeight: 600,
+            lineHeight: 1.08,
+            letterSpacing: -1.5,
+          }}
+        >
           {title}
         </div>
-        <div style={{ display: "flex", fontSize: 29, color: MUTED, lineHeight: 1.35 }}>{description}</div>
+        <div style={{ display: "flex", fontSize: 29, color: MUTED, lineHeight: 1.35 }}>
+          {description}
+        </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", height: 1, backgroundColor: LINE, marginBottom: 26 }} />

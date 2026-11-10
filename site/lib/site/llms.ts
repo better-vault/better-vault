@@ -81,7 +81,16 @@ export async function llmsFull(): Promise<string> {
   const parts: string[] = [`# ${site.name} documentation`, "", `> ${site.definition}`];
   for (const page of source.getPages()) {
     const raw = await page.data.getText("processed");
-    parts.push("", "---", "", `# ${page.data.title}`, "", `URL: ${absoluteUrl(page.url)}`, "", raw.trim());
+    parts.push(
+      "",
+      "---",
+      "",
+      `# ${page.data.title}`,
+      "",
+      `URL: ${absoluteUrl(page.url)}`,
+      "",
+      raw.trim(),
+    );
   }
   parts.push("", "---", "", "# Frequently asked questions", "");
   for (const item of faq) parts.push(`## ${item.question}`, "", item.answer, "");

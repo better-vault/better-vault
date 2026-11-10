@@ -1,0 +1,57 @@
+---
+title: "Notes, links and graph"
+description: "Write Obsidian-style notes in better-vault: link notes, notebooks and sources with [[double brackets]], see backlinks, browse the graph and use a canvas."
+---
+
+Notes are Markdown documents you write yourself, next to your notebooks, and link together the way you would in Obsidian.
+
+## Write a note
+
+Open **Notes** in the sidebar of the notebooks page and press the **+** button, or press `⌘N` (`Ctrl+N` on Windows and Linux). Click the title to rename the note, and write below it. Notes belong to a vault, so each vault has its own.
+
+The editor shows formatting as you type. Markdown marks such as `**` or `#` hide on every line your cursor isn't on, so the note reads as formatted text, and they come back where you edit. Press `⌘E` to switch between editing and reading.
+
+## Link notes, notebooks and sources
+
+Type `[[` to link another note. A menu suggests notes from every vault, and the link opens that note when you click it. A link to a note that doesn't exist yet is drawn faded, and clicking it creates the note.
+
+| You write | It links to |
+| --- | --- |
+| `[[Research plan]]` | the note named Research plan |
+| `[[Research plan#Goals]]` | the Goals heading of that note |
+| `[[Research plan\|the plan]]` | the same note, shown as "the plan" |
+| `![[Research plan]]` | the note, embedded in place |
+| `[[nb:Biology]]` | the notebook named Biology |
+| `[[src:Paper.pdf]]` | a source in any notebook |
+| `[[Work/Plan]]` | the note Plan in the vault named Work |
+
+Renaming a note updates every link to it, in every vault. Notes also understand `#tags`, `- [ ]` tasks, `==highlights==`, `> [!note]` callouts and YAML frontmatter with `tags` and `aliases`.
+
+## Backlinks and the graph
+
+The panel beside a note lists the notes that link to it, and the notes that mention its title without linking it; press **Link** to turn a mention into a link. Its **Outline** tab lists the note's headings.
+
+Press `⌘G` to open the graph. Every note is a dot and every link a line, with each vault in its own colour, so you can see how ideas connect across vaults. **Local** shows only what is near the open note, and switches add tags, notebooks and sources.
+
+## Canvas
+
+The Studio's **Canvas** tool is a board of cards joined by arrows, like Obsidian Canvas. Add text cards, note cards and web links, drag a card's dot onto another card to join them, and give arrows labels. A canvas downloads as a `.canvas` file that Obsidian opens.
+
+The Studio's **Notes** tile opens the notes written from that notebook.
+
+## Keyboard shortcuts
+
+Press `?` on the notes page to see every shortcut. They follow Obsidian's.
+
+| Action | Keys |
+| --- | --- |
+| New note | `⌘N` |
+| Quick switcher | `⌘O` |
+| Search all notes | `⇧⌘F` |
+| Switch editing and reading | `⌘E` |
+| Graph | `⌘G` |
+| Back and forward | `⌥⌘←` and `⌥⌘→` |
+| Bold, italic, highlight | `⌘B`, `⌘I`, `⇧⌘H` |
+| Insert a link | `⌘K` |
+| Toggle a checkbox | `⌘L` |
+| Open the link under the cursor | `⌘Enter` |

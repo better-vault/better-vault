@@ -29,7 +29,11 @@ export type Cell = boolean | string;
 
 export const comparison: { label: string; vault: Cell; notebooklm: Cell }[] = [
   { label: "Open source", vault: "MIT", notebooklm: false },
-  { label: "Choose your AI model", vault: "OpenAI, Claude, Gemini, local", notebooklm: "Gemini only" },
+  {
+    label: "Choose your AI model",
+    vault: "OpenAI, Claude, Gemini, local",
+    notebooklm: "Gemini only",
+  },
   { label: "Local, offline models", vault: true, notebooklm: false },
   { label: "No account needed", vault: true, notebooklm: false },
   { label: "Data stays on your device", vault: true, notebooklm: false },
@@ -56,6 +60,26 @@ export const roadmapTeaser: { icon: IconSvgElement; title: string; body: string 
     icon: PencilEdit02Icon,
     title: "Edit outputs with a prompt",
     body: "Change one slide, one section of a report or one branch of a mind map, and review a deck's outline first.",
+  },
+];
+
+/** The landing page's notes section. */
+export const notesFeatures: { title: string; body: string }[] = [
+  {
+    title: "Links that go both ways",
+    body: "Type [[ to link a note, a notebook or a source. Every note shows what links to it, and renaming a note updates every link.",
+  },
+  {
+    title: "A graph across your vaults",
+    body: "See every note and link at once, with each vault in its own colour, or only what is near the note you're on.",
+  },
+  {
+    title: "Canvas and Obsidian's keys",
+    body: "Lay ideas out as cards joined by arrows, saved as an Obsidian .canvas file. ⌘O, ⌘E, ⌘G and the other shortcuts work as you'd expect.",
+  },
+  {
+    title: "Skills your agents share",
+    body: "Keep SKILL.md instructions in a vault, use them in chat, and let Claude Code, Cursor or Codex read and edit them through MCP.",
   },
 ];
 

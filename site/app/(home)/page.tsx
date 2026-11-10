@@ -13,10 +13,18 @@ import { Hero } from "@/components/site/hero";
 import { IsoFigure } from "@/components/site/iso-figures";
 import { LayoutLink } from "@/components/site/layout-link";
 import { ModelHub } from "@/components/site/model-hub";
+import { NotesGraph } from "@/components/site/notes-graph";
 import { ProductPreview } from "@/components/site/product-preview";
 import { StudioStage } from "@/components/site/studio-stage/studio-stage";
 import { absoluteUrl, site } from "@/lib/site/config";
-import { comparison, faq, features, roadmapTeaser, type Cell } from "@/lib/site/copy";
+import {
+  comparison,
+  faq,
+  features,
+  notesFeatures,
+  roadmapTeaser,
+  type Cell,
+} from "@/lib/site/copy";
 
 export const metadata: Metadata = {
   // The layout's template would add the brand a second time.
@@ -172,6 +180,33 @@ export default function HomePage() {
         intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. A short tour plays when you get here; click anything to take over."
       >
         <StudioStage />
+      </Section>
+
+      <Section
+        id="notes"
+        title="Notes that connect everything"
+        intro="Write notes beside your sources, link them with [[double brackets]], and watch ideas connect across notebooks and vaults. It works like Obsidian, and it lives next to your research."
+      >
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <div className="rounded-3xl border bg-card p-4">
+            <NotesGraph />
+          </div>
+          <ul className="flex flex-col gap-5">
+            {notesFeatures.map((item) => (
+              <li key={item.title} className="flex flex-col gap-1">
+                <h3 className="font-medium">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <LayoutLink
+          href="/docs/notes"
+          className="inline-flex items-center gap-1 self-start text-sm font-medium underline-offset-4 hover:underline"
+        >
+          Read about notes
+          <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" aria-hidden="true" />
+        </LayoutLink>
       </Section>
 
       <Section

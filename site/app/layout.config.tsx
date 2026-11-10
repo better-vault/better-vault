@@ -43,8 +43,21 @@ const downloadLink: LinkItemType = {
   active: "url",
 };
 
-/** The call to action: the guide to installing and using better-vault. */
-const startLink: LinkItemType = { type: "button", text: "Get started", url: "/download", secondary: true };
+/** Plans: free with your own keys, Pro and Max with Better Vault AI. */
+const pricingLink: LinkItemType = {
+  type: "main",
+  text: "Pricing",
+  url: "/pricing",
+  active: "url",
+};
+
+/** The call to action: the download page. */
+const startLink: LinkItemType = {
+  type: "button",
+  text: "Get started",
+  url: "/download",
+  secondary: true,
+};
 
 const PLAIN_NAV_LINK =
   "inline-flex items-center gap-1.5 p-2 text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground";
@@ -88,10 +101,18 @@ const githubMenuLink: LinkItemType = {
 export const baseOptions: BaseLayoutProps = {
   nav: { title: navTitle, url: "/" },
   githubUrl: undefined,
-  links: [docsLink, roadmapLink, downloadLink, githubDocsLink, startLink],
+  links: [docsLink, pricingLink, roadmapLink, downloadLink, githubDocsLink, startLink],
 };
 
 export const homeOptions: BaseLayoutProps = {
   ...baseOptions,
-  links: [docsLink, roadmapLink, downloadLink, githubHomeLink, githubMenuLink, startLink],
+  links: [
+    docsLink,
+    pricingLink,
+    roadmapLink,
+    downloadLink,
+    githubHomeLink,
+    githubMenuLink,
+    startLink,
+  ],
 };

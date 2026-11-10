@@ -1,0 +1,34 @@
+---
+title: "Skills and MCP for AI agents"
+description: "Keep shared SKILL.md instructions in a better-vault vault and let AI agents like Claude Code, Cursor and Codex read your notebooks and notes through MCP."
+---
+
+Skills are instructions for AI agents that you keep in a vault, and MCP lets agents on your computer use them, along with your notebooks and notes.
+
+## Skills
+
+A skill is a Markdown file in the `SKILL.md` format: a name, a description that says when to use it, and the instructions. Open **Skills** in the sidebar of the notebooks page to write one, or import `SKILL.md` files you already have. Each skill shows who changed it last: you, or the agent that edited it.
+
+To use skills in a chat, open the prompt's **+** menu, choose **Skills** and tick the ones you want. Their instructions go with each question in that chat.
+
+## Connect an agent with MCP
+
+The desktop app runs a [Model Context Protocol](https://modelcontextprotocol.io) server on your computer, so agents can read your sources and notes and share skills with you. It is off until you turn it on, it listens only on your computer, and every request needs a token.
+
+<Steps>
+
+### Turn it on
+
+Open **Settings → MCP** in the desktop app and turn on **Allow agents to connect**. Choose whether agents may only read, or also write notes and skills.
+
+### Set up your agent
+
+Pick your agent, Claude Code, Cursor, Codex or Claude Desktop, and copy the setup shown. For Claude Code it is one command to run in a terminal.
+
+### Use it
+
+Ask your agent about your notebooks. It can list vaults and notebooks, search and read sources, read and write notes, and read, write and delete skills. Changes show up in the app at once.
+
+</Steps>
+
+The web app can't run an MCP server, so Settings → MCP there links to the desktop app. **New token** in the same page stops every agent set up with the old one.
