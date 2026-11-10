@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-10
+
+### Added
+
+- Notes: linked Markdown notes in each vault, with `[[links]]` to notes, notebooks and sources across vaults, backlinks, tags, callouts, a live-preview editor, a quick switcher, keyboard shortcuts (press `?`) and a graph of everything they connect.
+- Skills: SKILL.md files in each vault, edited in the app, attached to a chat from the prompt bar, and shared with AI agents.
+- MCP (desktop app): Settings → MCP lets AI agents such as Claude Code, Cursor and Codex read your notebooks and read or write notes and skills, through a local server that is off by default.
+- Chat: answers can include visuals (diagrams, tables, charts, timelines, steps, comparisons, key facts and flashcards), drawn by the app from what the model writes. Turn them off in Settings → Studio.
+- Studio: a Canvas board of cards joined by arrows, saved as JSON Canvas, and a Notes tile. Settings → Studio turns tools on and off.
+- Notebooks page: right-click menus on notebooks, folders, vaults and empty space.
+- Calendar: preferences (week start, default view, time format, week numbers, working hours) and subscribed calendars from a URL, with editable titles and entries.
+- An optional better-vault account, with email (confirmed by a 6-digit code) or Google. Settings → Account shows it and signs out; your notebooks stay on your device either way.
+- Onboarding on first launch: your name, an optional account and a username, or continue without one.
+- Settings → Subscription: the Pro and Max plans for Better Vault AI and Better Vault Cloud. They are coming soon; signing in works now.
+
+### Changed
+
+- The sidebar's first group is called Library, and only the chosen row is highlighted.
+- The calendar fills the page, without its own header, arrows or search.
+- Backups are format 6, with notes and skills; older backups still import.
+- Google's desktop sign-in for Drive exchanges its codes through the better-vault backend, so the client secret is no longer in the app.
+
 ## [0.6.0] - 2026-11-05
 
 ### Added
@@ -148,7 +170,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/better-vault/better-vault/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/better-vault/better-vault/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/better-vault/better-vault/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/better-vault/better-vault/compare/v0.4.1...v0.4.2
