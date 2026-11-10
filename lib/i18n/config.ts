@@ -28,6 +28,7 @@ export const namespaces = [
   "home",
   "workspace",
   "studio",
+  "notes",
   "settings",
   "chat",
   "sources",

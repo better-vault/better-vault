@@ -1,0 +1,148 @@
+{
+  "title": "Notes",
+  "skillsTitle": "Skills",
+  "new": "New note",
+  "untitled": "Untitled",
+  "search": "Search notes",
+  "searchAll": "Search in all notes",
+  "empty": "No notes yet",
+  "emptyBody": "Write in Markdown and connect ideas with [[links]], like in Obsidian.",
+  "noMatches": "Nothing matches “{{query}}”.",
+  "placeholder": "Start writing… Type [[ to link a note, # for a tag.",
+  "editorLabel": "Note text",
+  "titleLabel": "Note title",
+  "properties": "Properties",
+  "missing": "Not created yet",
+  "allVaults": "All vaults",
+  "thisVault": "This vault",
+  "pinned": "Pinned",
+  "folders": "Folders",
+  "tags": "Tags",
+  "noTags": "No tags yet. Write #tag in a note.",
+  "updated": "Edited {{time}}",
+  "words_one": "{{count}} word",
+  "words_other": "{{count}} words",
+  "fromNotebook": "From {{title}}",
+  "modes": {
+    "edit": "Editing",
+    "read": "Reading",
+    "toggle": "Switch between editing and reading"
+  },
+  "panes": {
+    "label": "Note details",
+    "backlinks": "Backlinks",
+    "outline": "Outline",
+    "linked": "Linked mentions",
+    "unlinked": "Unlinked mentions",
+    "noBacklinks": "No other note links here yet.",
+    "noUnlinked": "No other note mentions this title.",
+    "noOutline": "Headings you write appear here.",
+    "link": "Link",
+    "show": "Show details",
+    "hide": "Hide details"
+  },
+  "tabs": {
+    "close": "Close tab",
+    "graph": "Graph"
+  },
+  "actions": {
+    "rename": "Rename",
+    "delete": "Delete note",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "moveFolder": "Move to folder…",
+    "moveVault": "Move to vault",
+    "openNewTab": "Open in new tab",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "export": "Export as .md",
+    "import": "Import .md files",
+    "imported_one": "{{count}} note imported",
+    "imported_other": "{{count}} notes imported",
+    "graph": "Graph view",
+    "shortcuts": "Keyboard shortcuts",
+    "quickSwitcher": "Quick switcher",
+    "back": "Back",
+    "forward": "Forward",
+    "newFolder": "New folder"
+  },
+  "delete": {
+    "title": "Delete “{{title}}”?",
+    "body": "The note is deleted from this device. Links to it stay in other notes and point at nothing.",
+    "confirm": "Delete note"
+  },
+  "folder": {
+    "title": "Move “{{title}}”",
+    "label": "Folder",
+    "hint": "A path like Projects/2026. Leave it empty for the top level.",
+    "top": "Top level"
+  },
+  "switcher": {
+    "placeholder": "Find or create a note…",
+    "create": "Create “{{title}}”",
+    "empty": "Type a title to create a note."
+  },
+  "graph": {
+    "title": "Graph",
+    "local": "Local",
+    "global": "Whole graph",
+    "depth": "Depth",
+    "showTags": "Tags",
+    "showOrphans": "Orphans",
+    "showSources": "Notebooks and sources",
+    "search": "Highlight…",
+    "fit": "Fit to screen",
+    "empty": "Link notes with [[ ]] to see them connect here.",
+    "legend": "Vaults"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "description": "The same keys as Obsidian.",
+    "groups": {
+      "workspace": "Workspace",
+      "editing": "Editing"
+    },
+    "items": {
+      "newNote": "New note",
+      "quickSwitcher": "Quick switcher",
+      "palette": "Command palette",
+      "search": "Search in all notes",
+      "toggleMode": "Toggle editing and reading",
+      "graph": "Graph view",
+      "back": "Back",
+      "forward": "Forward",
+      "closeTab": "Close tab",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strike": "Strikethrough",
+      "highlight": "Highlight",
+      "link": "Insert link",
+      "task": "Toggle checkbox",
+      "deleteLine": "Delete line",
+      "indent": "Indent / outdent",
+      "fold": "Fold / unfold",
+      "openLink": "Open link under cursor",
+      "find": "Find in note",
+      "help": "Show shortcuts"
+    }
+  },
+  "skills": {
+    "new": "New skill",
+    "empty": "No skills yet",
+    "emptyBody": "A skill is a Markdown file of instructions (SKILL.md). Chats can use it, and AI agents can read and edit it through MCP in the desktop app.",
+    "name": "Name",
+    "nameHint": "Lowercase words joined by hyphens, as agents expect.",
+    "description": "Description",
+    "descriptionHint": "When an agent should use this skill.",
+    "body": "Instructions",
+    "import": "Import SKILL.md",
+    "export": "Export SKILL.md",
+    "updatedBy": "Edited by {{who}} {{time}}",
+    "you": "you",
+    "delete": {
+      "title": "Delete “{{name}}”?",
+      "body": "The skill is deleted from this device, for chats and agents alike.",
+      "confirm": "Delete skill"
+    }
+  }
+}

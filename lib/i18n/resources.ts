@@ -1,6 +1,7 @@
 import enChat from "@/locales/en/chat.json";
 import enCommon from "@/locales/en/common.json";
 import enHome from "@/locales/en/home.json";
+import enNotes from "@/locales/en/notes.json";
 import enSettings from "@/locales/en/settings.json";
 import enSources from "@/locales/en/sources.json";
 import enStudio from "@/locales/en/studio.json";
@@ -16,6 +17,7 @@ export const resources = {
     home: enHome,
     workspace: enWorkspace,
     studio: enStudio,
+    notes: enNotes,
     settings: enSettings,
     chat: enChat,
     sources: enSources,

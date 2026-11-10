@@ -116,3 +116,13 @@ export function useSourceWithChunks(
     ["sources", "chunks"],
   );
 }
+
+/** Every source's title and notebook, for `[[src:…]]` links in notes. */
+export function useSourceTitles(): Pick<Source, "id" | "notebookId" | "title">[] | undefined {
+  return useStoreQuery(
+    async () =>
+      (await store().listAllSources()).map(({ id, notebookId, title }) => ({ id, notebookId, title })),
+    [],
+    ["sources"],
+  );
+}

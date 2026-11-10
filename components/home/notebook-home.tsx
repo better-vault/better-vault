@@ -70,6 +70,7 @@ import { useVaultName } from "./vault-name";
 
 /** The calendar is large; it loads the first time it is opened. */
 const CalendarView = lazy(() => import("@/components/calendar/calendar-view"));
+const NotesWorkspace = lazy(() => import("@/components/notes/notes-workspace"));
 
 const sortKey = "better-vault:home-sort";
 const viewKey = "better-vault:home-view";
@@ -94,6 +95,7 @@ const saved = <T extends string>(key: string, values: readonly T[], fallback: T)
 export function NotebookHome() {
   const { t } = useTranslation("home");
   const { t: tCommon } = useTranslation();
+  const { t: tNotes } = useTranslation("notes");
   const tSources = useTranslation("sources").t;
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -123,9 +125,14 @@ export function NotebookHome() {
 
   const viewParam = params.get("view");
   const section: HomeSection =
-    viewParam === "recents" || viewParam === "calendar" || viewParam === "vault"
+    viewParam === "recents" ||
+    viewParam === "calendar" ||
+    viewParam === "vault" ||
+    viewParam === "notes"
       ? viewParam
       : "all";
+  // The calendar and notes fill the page: they have bars of their own.
+  const fullPage = section === "calendar" || section === "notes";
   // "vault" shows the same list as "all"; it only records that the vault was
   // chosen in the sidebar, so the sidebar highlights the vault instead.
   const listing = section === "all" || section === "vault";
@@ -137,11 +144,13 @@ export function NotebookHome() {
   const path = ancestors(current, folders);
   const currentFolder = path.at(-1);
   const title =
-    section === "calendar"
-      ? t("calendar.title")
-      : section === "recents"
-        ? t("vaults.recent")
-        : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
+    section === "notes"
+      ? tNotes("title")
+      : section === "calendar"
+        ? t("calendar.title")
+        : section === "recents"
+          ? t("vaults.recent")
+          : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
 
   useEffect(() => {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
@@ -306,14 +315,14 @@ export function NotebookHome() {
           data-window-bar
           className={cn(
             "flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6",
-            section === "calendar" && "md:hidden",
+            fullPage && "md:hidden",
           )}
         >
           <div className="flex items-center gap-2 md:hidden">
             <Logo size={24} />
             {vaults && vault ? <MobileVaults vaults={vaults} current={vault.id} /> : null}
           </div>
-          <Pill className={cn("hidden sm:flex", section === "calendar" && "sm:hidden")}>
+          <Pill className={cn("hidden sm:flex", fullPage && "sm:hidden")}>
             <ToolButton label={t("toolbar.back")} onClick={() => navigate(-1)}>
               <Icon icon={ArrowLeft01Icon} size={18} className="rtl:rotate-180" />
             </ToolButton>
@@ -323,7 +332,7 @@ export function NotebookHome() {
           </Pill>
           <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{title}</h1>
 
-          <Pill className={cn(section === "calendar" && "hidden")}>
+          <Pill className={cn(fullPage && "hidden")}>
             <Menu>
               <Menu.Trigger
                 aria-label={t("toolbar.view")}
@@ -367,7 +376,7 @@ export function NotebookHome() {
             </Menu>
           </Pill>
 
-          <Pill className={cn(section === "calendar" && "hidden")}>
+          <Pill className={cn(fullPage && "hidden")}>
             <ToolButton label={t("newNotebook")} onClick={() => setCreating({ files: [] })}>
               <Icon icon={Add01Icon} size={18} />
             </ToolButton>
@@ -393,7 +402,7 @@ export function NotebookHome() {
 
           <button
             type="button"
-            hidden={section === "calendar"}
+            hidden={fullPage}
             onClick={openCommandPalette}
             aria-label={t("vaults.search")}
             title={`${t("vaults.search")} (${shortcutKeys("k").join(" ")})`}
@@ -418,7 +427,7 @@ export function NotebookHome() {
           />
         </header>
 
-        {section === "calendar" ? (
+        {fullPage ? (
           <main className="min-h-0 flex-1 px-2 pb-2 md:p-2 md:ps-2">
             <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
               <Suspense
@@ -428,7 +437,7 @@ export function NotebookHome() {
                   </div>
                 }
               >
-                <CalendarView />
+                {section === "notes" ? <NotesWorkspace /> : <CalendarView />}
               </Suspense>
             </div>
           </main>
@@ -543,7 +552,7 @@ export function NotebookHome() {
           aria-label={t("breadcrumbs")}
           className={cn(
             "flex h-10 shrink-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-t px-4 text-sm text-muted-foreground sm:px-6",
-            section === "calendar" && "hidden",
+            fullPage && "hidden",
           )}
         >
           {vault ? (
