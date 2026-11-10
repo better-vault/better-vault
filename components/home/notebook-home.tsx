@@ -433,23 +433,24 @@ export function NotebookHome() {
 
         {fullPage ? (
           <main className="min-h-0 flex-1 px-2 pb-2 md:p-2 md:ps-2">
-            <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
-              <Suspense
-                fallback={
-                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                    {tCommon("status.loading")}
-                  </div>
-                }
-              >
-                {section === "notes" ? (
-                  <NotesWorkspace />
-                ) : section === "skills" ? (
-                  <SkillsWorkspace />
-                ) : (
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                  {tCommon("status.loading")}
+                </div>
+              }
+            >
+              {/* Notes and skills draw their own panels; the calendar sits on one card. */}
+              {section === "notes" ? (
+                <NotesWorkspace />
+              ) : section === "skills" ? (
+                <SkillsWorkspace />
+              ) : (
+                <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
                   <CalendarView />
-                )}
-              </Suspense>
-            </div>
+                </div>
+              )}
+            </Suspense>
           </main>
         ) : (
           <ContextMenu>

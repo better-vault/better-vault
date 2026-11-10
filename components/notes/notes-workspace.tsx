@@ -328,25 +328,30 @@ export default function NotesWorkspace() {
   const visibleTabs = tabs.filter((id) => id === GRAPH_TAB || byId.has(id));
 
   return (
-    <div className="flex h-full min-h-0">
-      {/* The list of notes. */}
-      <div className="hidden w-64 shrink-0 flex-col border-e md:flex">
-        {filterNotebook ? (
-          <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl bg-muted px-2.5 py-1.5 text-xs">
-            <span className="min-w-0 flex-1 truncate">
-              {t("fromNotebook", { title: filterNotebook.title })}
-            </span>
-            <button
-              type="button"
-              aria-label={t("thisVault")}
-              onClick={() => setParams({ view: "notes", ...(activeId ? { note: activeId } : {}) })}
-              className="flex size-5 cursor-pointer items-center justify-center rounded-full outline-none hover:bg-background focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <Icon icon={Cancel01Icon} size={12} />
-            </button>
-          </div>
-        ) : null}
+    <div className="flex h-full min-h-0 gap-2">
+      {/* Two panels: the list of notes, and the open note (or the graph). */}
+      <div className="hidden w-72 shrink-0 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border md:flex">
         <NoteList
+          title={t("title")}
+          banner={
+            filterNotebook ? (
+              <div className="flex items-center gap-2 rounded-xl bg-muted px-2.5 py-1.5 text-xs">
+                <span className="min-w-0 flex-1 truncate">
+                  {t("fromNotebook", { title: filterNotebook.title })}
+                </span>
+                <button
+                  type="button"
+                  aria-label={t("thisVault")}
+                  onClick={() =>
+                    setParams({ view: "notes", ...(activeId ? { note: activeId } : {}) })
+                  }
+                  className="flex size-5 cursor-pointer items-center justify-center rounded-full outline-none hover:bg-background focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Icon icon={Cancel01Icon} size={12} />
+                </button>
+              </div>
+            ) : null
+          }
           notes={listNotes}
           vaults={world.vaults}
           activeId={graphOpen ? null : activeId}
@@ -376,8 +381,8 @@ export default function NotesWorkspace() {
       </div>
 
       {/* Tabs, then the open note or the graph. */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-11 shrink-0 items-center gap-1 border-b px-2">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border">
+        <div className="flex h-14 shrink-0 items-center gap-1 border-b px-3">
           <button
             type="button"
             onClick={() => go("back")}

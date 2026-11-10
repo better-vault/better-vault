@@ -73,10 +73,32 @@ export default function SkillsWorkspace() {
   if (!skills) return null;
 
   return (
-    <div className="flex h-full min-h-0">
-      <div className="hidden w-64 shrink-0 flex-col border-e md:flex">
-        <div className="flex items-center gap-1 px-3 pt-3 pb-2">
-          <Input.Group size="sm" className="flex-1">
+    <div className="flex h-full min-h-0 gap-2">
+      {/* Two panels: the vault's skills, and the one open. */}
+      <div className="hidden w-72 shrink-0 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border md:flex">
+        <div className="flex h-14 shrink-0 items-center gap-1 border-b ps-4 pe-3">
+          <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{t("skillsTitle")}</h2>
+          <button
+            type="button"
+            onClick={() => importInput.current?.click()}
+            aria-label={t("skills.import")}
+            title={t("skills.import")}
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Icon icon={FileImportIcon} size={17} />
+          </button>
+          <button
+            type="button"
+            onClick={() => void create()}
+            aria-label={t("skills.new")}
+            title={t("skills.new")}
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background outline-none hover:bg-foreground/85 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+          >
+            <Icon icon={Add01Icon} size={17} />
+          </button>
+        </div>
+        <div className="border-b p-3">
+          <Input.Group size="sm">
             <Input.Addon>
               <Icon icon={Search01Icon} size={14} />
             </Input.Addon>
@@ -89,24 +111,6 @@ export default function SkillsWorkspace() {
               onChange={(event) => setQuery(event.target.value)}
             />
           </Input.Group>
-          <button
-            type="button"
-            onClick={() => void create()}
-            aria-label={t("skills.new")}
-            title={t("skills.new")}
-            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Icon icon={Add01Icon} size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={() => importInput.current?.click()}
-            aria-label={t("skills.import")}
-            title={t("skills.import")}
-            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Icon icon={FileImportIcon} size={18} />
-          </button>
           <input
             ref={importInput}
             type="file"
@@ -121,7 +125,7 @@ export default function SkillsWorkspace() {
           />
         </div>
         <ScrollArea className="min-h-0 flex-1">
-          <nav aria-label={t("skillsTitle")} className="flex flex-col gap-0.5 px-2 pb-3">
+          <nav aria-label={t("skillsTitle")} className="flex flex-col gap-0.5 px-2 py-3">
             {shown.map((skill) => (
               <button
                 key={skill.id}
@@ -147,7 +151,7 @@ export default function SkillsWorkspace() {
         </ScrollArea>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border">
         {active ? (
           <SkillEditor key={active.id} skill={active} onDeleted={() => setActiveId(null)} />
         ) : (

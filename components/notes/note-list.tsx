@@ -4,7 +4,6 @@ import {
   ArrowRight01Icon,
   FileImportIcon,
   Folder01Icon,
-  MoreHorizontalIcon,
   Note01Icon,
   PinIcon,
   Search01Icon,
@@ -23,6 +22,10 @@ import { cn } from "@/lib/utils";
 import { useNoteActions } from "./note-actions";
 
 interface NoteListProps {
+  /** The panel's title. */
+  title: string;
+  /** Shown under the search, such as which notebook's notes these are. */
+  banner?: React.ReactNode;
   notes: Note[];
   vaults: Vault[];
   activeId: string | null;
@@ -49,6 +52,8 @@ export function matchNotes(notes: Note[], query: string): Note[] {
 
 /** The notes panel: search, pinned notes, folders and the tags in use. */
 export function NoteList({
+  title,
+  banner,
   notes,
   vaults,
   activeId,
@@ -95,9 +100,31 @@ export function NoteList({
   );
 
   return (
-    <div className="flex min-h-0 flex-col">
-      <div className="flex items-center gap-1 px-3 pt-3 pb-2">
-        <Input.Group size="sm" className="flex-1">
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* The panel's head: its title, then import and a new note. */}
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b ps-4 pe-3">
+        <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{title}</h2>
+        <button
+          type="button"
+          onClick={() => importInput.current?.click()}
+          aria-label={t("actions.import")}
+          title={t("actions.import")}
+          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Icon icon={FileImportIcon} size={17} />
+        </button>
+        <button
+          type="button"
+          onClick={onCreate}
+          aria-label={t("new")}
+          title={t("new")}
+          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background outline-none hover:bg-foreground/85 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+        >
+          <Icon icon={Add01Icon} size={17} />
+        </button>
+      </div>
+      <div className="border-b p-3">
+        <Input.Group size="sm">
           <Input.Addon>
             <Icon icon={Search01Icon} size={14} />
           </Input.Addon>
@@ -111,29 +138,7 @@ export function NoteList({
             onChange={(event) => onQuery(event.target.value)}
           />
         </Input.Group>
-        <button
-          type="button"
-          onClick={onCreate}
-          aria-label={t("new")}
-          title={t("new")}
-          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Icon icon={Add01Icon} size={18} />
-        </button>
-        <Menu>
-          <Menu.Trigger
-            aria-label={t("actions.import")}
-            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Icon icon={MoreHorizontalIcon} size={18} />
-          </Menu.Trigger>
-          <Menu.Content align="end">
-            <Menu.Item onClick={() => importInput.current?.click()}>
-              <Icon icon={FileImportIcon} />
-              {t("actions.import")}
-            </Menu.Item>
-          </Menu.Content>
-        </Menu>
+        {banner ? <div className="mt-2">{banner}</div> : null}
         <input
           ref={importInput}
           type="file"
@@ -149,7 +154,7 @@ export function NoteList({
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <nav aria-label={t("title")} className="flex flex-col gap-3 px-2 pb-3">
+        <nav aria-label={t("title")} className="flex flex-col gap-3 px-2 py-3">
           {notes.length === 0 ? (
             <p className="px-2 py-6 text-center text-sm text-muted-foreground">{t("empty")}</p>
           ) : shown.length === 0 ? (
