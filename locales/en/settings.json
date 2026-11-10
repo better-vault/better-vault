@@ -418,7 +418,7 @@
   },
   "subscription": {
     "title": "Subscription",
-    "description": "Better Vault AI runs Claude Haiku for you, and Better Vault Cloud keeps your backups. Both are optional: the app stays free with your own keys.",
+    "description": "Better Vault AI answers your questions without an API key, and Better Vault Cloud keeps your backups. Both are optional: the app stays free with your own keys.",
     "plans": {
       "pro": "Pro",
       "max": "Max"
@@ -468,7 +468,7 @@
       "credits_one": "{{formatted}} AI credit every month",
       "credits_other": "{{formatted}} AI credits every month",
       "storage": "{{size}} GB of Better Vault Cloud",
-      "haiku": "Claude Haiku without an API key"
+      "haiku": "Better Vault AI, no API key needed"
     }
   }
 }

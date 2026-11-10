@@ -70,7 +70,9 @@ export interface DesktopBridge {
     state(): Promise<McpState>;
     onState(listener: (state: McpState) => void): () => void;
     update(
-      patch: Partial<Pick<McpState, "enabled" | "port" | "readOnly" | "allowNotes" | "allowSkills">>,
+      patch: Partial<
+        Pick<McpState, "enabled" | "port" | "readOnly" | "allowNotes" | "allowSkills">
+      >,
     ): Promise<McpState>;
     regenerateToken(): Promise<McpState>;
   };

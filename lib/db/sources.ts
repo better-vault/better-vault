@@ -121,7 +121,11 @@ export function useSourceWithChunks(
 export function useSourceTitles(): Pick<Source, "id" | "notebookId" | "title">[] | undefined {
   return useStoreQuery(
     async () =>
-      (await store().listAllSources()).map(({ id, notebookId, title }) => ({ id, notebookId, title })),
+      (await store().listAllSources()).map(({ id, notebookId, title }) => ({
+        id,
+        notebookId,
+        title,
+      })),
     [],
     ["sources"],
   );

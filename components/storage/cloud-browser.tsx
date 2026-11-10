@@ -112,7 +112,8 @@ function ServiceFiles({
 
   // Loads Google's Picker and sign-in now, so the click can open the sign-in popup at once.
   useEffect(() => {
-    if (usesPicker && service === "google-drive") void googlePicker.prepare().catch(() => undefined);
+    if (usesPicker && service === "google-drive")
+      void googlePicker.prepare().catch(() => undefined);
   }, [usesPicker, service]);
 
   useEffect(() => {

@@ -45,7 +45,8 @@ export function SubscriptionPanel() {
   };
 
   const plans = (
-    <div className="flex flex-col gap-3">
+    // A little room on every side: the sheet body clips, and the featured card has a ring.
+    <div className="flex flex-col gap-3 p-1">
       {(["pro", "max"] as const).map((plan) => (
         <PlanCard
           key={plan}
@@ -269,12 +270,12 @@ function PlanCard({
       </div>
       <ul className="flex flex-col gap-2 text-sm">
         {[
+          t("subscription.features.haiku"),
           t("subscription.features.credits", {
             count: credits,
             formatted: credits.toLocaleString(i18n.language),
           }),
           t("subscription.features.storage", { size: storage }),
-          t("subscription.features.haiku"),
         ].map((feature) => (
           <li key={feature} className="flex items-start gap-2">
             <Icon icon={Tick02Icon} size={16} className="mt-0.5 shrink-0 text-muted-foreground" />

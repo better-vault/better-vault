@@ -146,7 +146,7 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     // the user's own provider keys never go to Better Vault.
     needsKey: true,
     webSearch: true,
-    suggestedModels: ["claude-haiku-5-5"],
+    suggestedModels: ["better-vault"],
     // Kept under 100K tokens a question, where the model is cheapest, so credits last.
     contextChars: 240_000,
     contextTokens: 1_000_000,

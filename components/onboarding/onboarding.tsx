@@ -1,5 +1,12 @@
 import {
+  Add01Icon,
+  AiBrain01Icon,
   ArrowLeft01Icon,
+  ArrowRight01Icon,
+  CloudServerIcon,
+  FolderAddIcon,
+  PaintBoardIcon,
+  Search01Icon,
   Calendar03Icon,
   Camera01Icon,
   Clock01Icon,
@@ -17,7 +24,6 @@ import { Avatar } from "@/components/account/avatar";
 import { Logo } from "@/components/brand/logo";
 import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
-import { ProviderIcon } from "@/components/provider-icon";
 import { Button } from "@/components/panelui/button";
 import { Input } from "@/components/panelui/input";
 import {
@@ -423,7 +429,15 @@ function UsernameStep({
   );
 }
 
-/** A small better-vault window that fills in as the steps are answered. */
+const PAGE_W = 820;
+const PAGE_H = 600;
+
+/**
+ * The real notebooks page, drawn small, with the Settings sheet open as it
+ * really is: its Account row shows the name, picture and username typed,
+ * its Subscription row the plan chosen. Same classes as the live
+ * components (vault-sidebar, home-cards, settings-row), scaled to fit.
+ */
 function Preview({
   name,
   username,
@@ -440,101 +454,219 @@ function Preview({
   const { t } = useTranslation("common");
   const { t: tHome } = useTranslation("home");
   const { t: tNotes } = useTranslation("notes");
+  const { t: tSettings } = useTranslation("settings");
   const profile = useProfile();
-  const paid = plan !== "free";
-  const focus = (what: Step) => (step === what ? "ring-2 ring-primary/60" : "ring-0");
+  const frame = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.4);
+  useEffect(() => {
+    const element = frame.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / PAGE_W));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  const row =
+    "relative flex h-8 w-full min-w-0 items-center gap-2.5 rounded-xl px-2.5 text-start text-sm";
+  const lit = (on: boolean) => (on ? "ring-2 ring-primary/70" : "");
+  const tiles = [
+    { title: tHome("untitled"), tint: "bg-chart-2/15 text-chart-2" },
+    { title: tNotes("title"), tint: "bg-chart-3/15 text-chart-3" },
+    { title: tHome("folders.untitled"), tint: "bg-chart-4/15 text-chart-4" },
+  ];
   return (
     <div
-      className="relative hidden items-center justify-center overflow-hidden border-s bg-muted/40 p-10 lg:flex"
+      className="relative hidden flex-col justify-center gap-4 border-s bg-muted/40 p-6 lg:flex"
       aria-hidden
     >
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-border transition-transform duration-500">
-        <div className="flex h-8 items-center gap-1.5 border-b px-3">
-          <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-          <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-          <span className="size-2.5 rounded-full bg-muted-foreground/30" />
-        </div>
-        <div className="flex h-72">
-          <div className="flex w-40 shrink-0 flex-col gap-3 border-e bg-muted/40 p-3">
-            <div
-              className={cn(
-                "flex items-center gap-2 rounded-xl p-1.5 transition-shadow",
-                focus("profile"),
-                focus("username"),
-              )}
-            >
-              <Avatar profile={profile ? { ...profile, name } : undefined} size={26} />
-              <span className="min-w-0">
-                <span className="block truncate text-xs font-semibold">
-                  {name || t("onboarding.preview.you")}
-                </span>
-                <span className="block truncate text-[0.625rem] text-muted-foreground">
-                  {username ? `@${username}` : (email ?? t("onboarding.preview.thisDevice"))}
-                </span>
-              </span>
+      <div
+        ref={frame}
+        className="relative w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-border"
+        style={{ aspectRatio: `${PAGE_W} / ${PAGE_H}` }}
+      >
+        <div
+          className="pointer-events-none absolute start-0 top-0 flex origin-top-left bg-background select-none rtl:origin-top-right"
+          style={{ width: PAGE_W, height: PAGE_H, transform: `scale(${scale})` }}
+        >
+          {/* The sidebar, as in components/home/vault-sidebar.tsx. */}
+          <aside className="m-2 me-0 flex w-60 shrink-0 flex-col rounded-3xl bg-muted/60 ring-1 ring-border/60">
+            <div className="flex h-14 shrink-0 items-center gap-2.5 px-4">
+              <Logo size={24} />
+              <span className="truncate text-sm font-semibold">{tHome("vaults.appTitle")}</span>
             </div>
-            <div className="flex flex-col gap-0.5 text-[0.6875rem]">
-              <span className="px-1.5 pb-0.5 text-[0.625rem] text-muted-foreground">
-                {tHome("vaults.library")}
+            <nav className="flex flex-col gap-5 px-2 pb-3">
+              <section className="flex flex-col gap-0.5">
+                <h2 className="px-2.5 pb-1 text-xs font-medium text-muted-foreground">
+                  {tHome("vaults.library")}
+                </h2>
+                {(
+                  [
+                    [Clock01Icon, tHome("vaults.recent")],
+                    [GridViewIcon, tHome("vaults.all")],
+                    [Note01Icon, tNotes("title")],
+                    [MagicWand01Icon, tNotes("skillsTitle")],
+                    [Calendar03Icon, tHome("calendar.title")],
+                  ] as const
+                ).map(([icon, label], index) => (
+                  <span
+                    key={label}
+                    className={cn(row, index === 1 && "bg-foreground/10 font-medium")}
+                  >
+                    <Icon icon={icon} size={18} className="text-muted-foreground" />
+                    {label}
+                  </span>
+                ))}
+              </section>
+              <section className="flex flex-col gap-0.5">
+                <h2 className="px-2.5 pb-1 text-xs font-medium text-muted-foreground">
+                  {tHome("vaults.label")}
+                </h2>
+                <span className={cn(row, "font-medium")}>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <Icon icon={Note01Icon} size={14} />
+                  </span>
+                  {tHome("vaults.default")}
+                </span>
+              </section>
+            </nav>
+          </aside>
+
+          {/* The page, as in components/home/notebook-home.tsx. */}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <header className="flex h-16 shrink-0 items-center gap-3 px-6">
+              <div className="flex h-10 items-center gap-0.5 rounded-full bg-card px-1 ring-1 ring-border">
+                <span className="flex size-8 items-center justify-center text-muted-foreground">
+                  <Icon icon={ArrowLeft01Icon} size={18} />
+                </span>
+                <span className="flex size-8 items-center justify-center text-muted-foreground">
+                  <Icon icon={ArrowRight01Icon} size={18} />
+                </span>
+              </div>
+              <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">
+                {tHome("vaults.default")}
+              </h1>
+              <div className="flex h-10 items-center gap-0.5 rounded-full bg-card px-1 ring-1 ring-border">
+                {[GridViewIcon, Add01Icon, FolderAddIcon].map((icon, index) => (
+                  <span
+                    key={index}
+                    className="flex size-8 items-center justify-center text-muted-foreground"
+                  >
+                    <Icon icon={icon} size={18} />
+                  </span>
+                ))}
+              </div>
+              <span className="flex size-10 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border">
+                <Icon icon={Search01Icon} size={18} />
               </span>
-              {[
-                [Clock01Icon, tHome("vaults.recent")],
-                [GridViewIcon, tHome("vaults.all")],
-                [Note01Icon, tNotes("title")],
-                [MagicWand01Icon, tNotes("skillsTitle")],
-                [Calendar03Icon, tHome("calendar.title")],
-              ].map(([icon, label], index) => (
-                <span
-                  key={String(label)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-md px-1.5 py-1",
-                    index === 1 && "bg-foreground/10 font-medium",
-                  )}
+            </header>
+            <main className="grid grid-cols-5 gap-2 px-6 pt-2">
+              {tiles.map((tile) => (
+                <div
+                  key={tile.title}
+                  className="flex flex-col items-center gap-2 rounded-2xl px-2 pt-4 pb-3 text-center"
                 >
-                  <Icon
-                    icon={icon as typeof Clock01Icon}
-                    size={12}
-                    className="text-muted-foreground"
-                  />
-                  {label as string}
-                </span>
+                  <span
+                    className={cn(
+                      "flex size-20 items-center justify-center rounded-[1.375rem]",
+                      tile.tint,
+                    )}
+                  >
+                    <Icon icon={Note01Icon} size={34} />
+                  </span>
+                  <span className="w-full truncate text-sm font-medium">{tile.title}</span>
+                </div>
               ))}
-            </div>
+            </main>
           </div>
-          <div className="flex min-w-0 flex-1 flex-col justify-between p-3">
-            <div className="grid grid-cols-3 gap-2">
-              {[0, 1, 2].map((each) => (
-                <span
-                  key={each}
-                  className="flex aspect-square items-center justify-center rounded-xl bg-muted"
-                >
-                  <span className="size-5 rounded-md bg-muted-foreground/20" />
-                </span>
-              ))}
-            </div>
-            <div
-              className={cn(
-                "flex items-center gap-2 rounded-2xl bg-card p-2 ring-1 ring-border transition-shadow",
-                step === "plan" && "ring-2 ring-primary/60",
-              )}
-            >
-              <span className="flex-1 truncate text-[0.6875rem] text-muted-foreground">
-                {t("onboarding.preview.ask")}
-              </span>
-              <span
-                key={plan}
-                className="flex animate-in items-center gap-1 rounded-full bg-muted px-2 py-1 text-[0.625rem] font-medium duration-300 zoom-in-95 fade-in"
-              >
-                {paid ? <ProviderIcon provider="bettervault" size={12} /> : null}
-                {paid ? t("onboarding.preview.betterVault") : t("onboarding.preview.ownKey")}
-              </span>
+
+          {/* Settings, open over the page, as in components/settings/settings-sheet.tsx. */}
+          <div className="absolute start-3 top-3 bottom-3 flex w-[26rem] flex-col rounded-[1.75rem] bg-card p-6 shadow-2xl ring-1 ring-border">
+            <h2 className="text-lg font-semibold">{tSettings("title")}</h2>
+            <p className="pb-4 text-sm text-muted-foreground">{tSettings("description")}</p>
+            <div className="-mx-2 flex flex-col gap-0.5">
+              <SheetRow
+                className={lit(step === "profile" || step === "username")}
+                icon={<Avatar profile={profile ? { ...profile, name } : undefined} size={36} />}
+                label={name || tSettings("rows.account")}
+                hint={
+                  username
+                    ? `@${username}`
+                    : (email ??
+                      (name ? tSettings("rows.accountHint") : tSettings("rows.accountSetUp")))
+                }
+              />
+              <SheetRow
+                className={lit(step === "account" || step === "plan")}
+                icon={<Logo size={22} />}
+                label={tSettings("rows.subscription")}
+                hint={
+                  plan === "free"
+                    ? tSettings("rows.subscriptionNone")
+                    : tSettings("rows.subscriptionPlan", {
+                        plan: tSettings(`subscription.plans.${plan}`),
+                      })
+                }
+              />
+              <SheetRow
+                icon={<Icon icon={AiBrain01Icon} />}
+                label={tSettings("rows.providers")}
+                hint={
+                  plan === "free"
+                    ? tSettings("rows.providersNone")
+                    : t("onboarding.preview.betterVault")
+                }
+              />
+              <SheetRow
+                icon={<Icon icon={CloudServerIcon} />}
+                label={tSettings("rows.storage")}
+                hint={tSettings("rows.storageNone")}
+              />
+              <SheetRow
+                icon={<Icon icon={PaintBoardIcon} />}
+                label={tSettings("rows.appearance")}
+              />
             </div>
           </div>
         </div>
       </div>
-      <p className="absolute inset-x-10 bottom-6 text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         {t(`onboarding.preview.caption.${step}`)}
       </p>
+    </div>
+  );
+}
+
+/** A Settings row, drawn as components/settings/settings-row.tsx draws it. */
+function SheetRow({
+  icon,
+  label,
+  hint,
+  className,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  hint?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex w-full items-center gap-3 rounded-2xl px-2.5 py-2.5 transition-shadow",
+        className,
+      )}
+    >
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{label}</span>
+        {hint ? <span className="block truncate text-xs text-muted-foreground">{hint}</span> : null}
+      </span>
+      <Icon
+        icon={ArrowRight01Icon}
+        size={16}
+        className="shrink-0 text-muted-foreground rtl:rotate-180"
+      />
     </div>
   );
 }

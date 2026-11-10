@@ -79,7 +79,7 @@ export function AccountWatcher() {
             onClick={() => {
               void updateSettings(
                 (saved) =>
-                  void (saved.model = { provider: "bettervault", modelId: "claude-haiku-5-5" }),
+                  void (saved.model = { provider: "bettervault", modelId: "better-vault" }),
               );
               close();
             }}

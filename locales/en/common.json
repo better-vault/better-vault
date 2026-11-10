@@ -109,7 +109,7 @@
     },
     "plan": {
       "title": "Choose a plan",
-      "body": "Better Vault AI runs Claude Haiku for you, without a key. You can change or cancel any time.",
+      "body": "Better Vault AI answers your questions without an API key. Change or cancel any time.",
       "free": {
         "name": "Free",
         "detail": "Everything, with your own API keys",
@@ -117,12 +117,12 @@
       },
       "pro": {
         "name": "Pro",
-        "detail": "1,250 AI credits a month, 20 GB of cloud storage",
+        "detail": "Better Vault AI with 1,250 AI credits a month, and 20 GB of cloud storage",
         "price": "$4.99/mo"
       },
       "max": {
         "name": "Max",
-        "detail": "3,500 AI credits a month, 50 GB of cloud storage",
+        "detail": "Better Vault AI with 3,500 AI credits a month, and 50 GB of cloud storage",
         "price": "$9.99/mo"
       },
       "later": "Maybe later",

@@ -79,7 +79,7 @@ async function syncProvider(state: AccountState | null) {
   await updateProvider("bettervault", {
     enabled: active,
     apiKey: active ? state!.token : "",
-    models: active ? ["claude-haiku-5-5"] : [],
+    models: active ? ["better-vault"] : [],
   });
 }
 
