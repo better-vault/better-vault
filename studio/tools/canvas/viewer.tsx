@@ -503,10 +503,9 @@ function Board({
                         <textarea
                           autoFocus
                           defaultValue={node.text ?? ""}
-                          onBlur={(event) => {
-                            patchNode(node.id, { text: event.target.value });
-                            setEditing(null);
-                          }}
+                          // Saved as it is typed: clicking the board ends editing before a blur would.
+                          onChange={(event) => patchNode(node.id, { text: event.target.value })}
+                          onBlur={() => setEditing(null)}
                           onKeyDown={(event) => {
                             if (event.key === "Escape") event.currentTarget.blur();
                           }}
