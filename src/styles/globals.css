@@ -33,6 +33,19 @@ html[data-window-controls]
   :is(button, a, input, select, [role="tab"], [role="button"]) {
   -webkit-app-region: no-drag;
 }
+/*
+ * Drag regions follow layout and ignore stacking: a sheet or dialog portalled
+ * over the bar would hand its clicks (the sheet's X, the backdrop) to the
+ * window. While one is open, the bar stops moving the window, and anything
+ * drawn over it opts out.
+ */
+html[data-window-controls]:has([role="dialog"], [role="alertdialog"]) [data-window-bar] {
+  -webkit-app-region: no-drag;
+}
+html[data-window-controls]
+  :is([role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]) {
+  -webkit-app-region: no-drag;
+}
 
 /* Pele (Mermaid → SVG) draws with these variables; map them onto Panel tokens. */
 .pele {
