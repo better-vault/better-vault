@@ -1,25 +1,31 @@
 import { GithubIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { cacheLife } from "next/cache";
 import { fetchRepositoryInfo } from "fumadocs-ui/components/github-info";
 
 /**
- * The GitHub mark with the repository's star count. The count is cached for
- * good (`force-cache`) so the pages stay static; without a count the mark is
- * shown alone.
+ * The repository's star count, looked up at most once an hour. It is a
+ * cached function (`"use cache"`), so a slow or failed request never makes a
+ * page dynamic: with cacheComponents, a plain `fetch` during prerendering does.
  */
-export async function GithubStars() {
-  let stars: number | null = null;
+async function starCount(): Promise<number | null> {
+  "use cache";
+  cacheLife("hours");
   try {
     const info = await fetchRepositoryInfo({
       owner: "better-vault",
       repo: "better-vault",
       token: process.env.GITHUB_TOKEN,
-      fetchOptions: { cache: "force-cache" },
     });
-    stars = info.stars;
+    return info.stars;
   } catch {
-    stars = null;
+    return null;
   }
+}
+
+/** The GitHub mark with the repository's star count; without a count the mark is shown alone. */
+export async function GithubStars() {
+  const stars = await starCount();
 
   return (
     <span className="inline-flex items-center gap-1.5">
