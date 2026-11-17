@@ -82,7 +82,8 @@ export async function deleteVault(id: string) {
 const CURRENT_KEY = "better-vault:vault";
 const CHANGE = "better-vault:vault-change";
 
-function currentVaultId(): string {
+/** The vault chosen in the sidebar, as saved. */
+export function currentVaultId(): string {
   try {
     return window.localStorage.getItem(CURRENT_KEY) ?? DEFAULT_VAULT;
   } catch {

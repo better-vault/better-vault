@@ -1,0 +1,120 @@
+{
+  "title": "Bot",
+  "roster": {
+    "label": "Your bots",
+    "search": "Search bots",
+    "searchPlaceholder": "Search bots…",
+    "clearSearch": "Clear search",
+    "newBot": "New bot",
+    "noMatch": "No bot matches",
+    "empty": "No bots yet.",
+    "noMessages": "No messages yet"
+  },
+  "activity": {
+    "thinking": "Working…",
+    "waiting": "Needs your OK",
+    "done": "Done"
+  },
+  "thread": {
+    "back": "All bots",
+    "emptyTitle": "Say hello to {{name}}",
+    "emptyBody": "{{name}} can read your notebooks, notes, skills and calendar, and asks before it changes anything.",
+    "emptyDelegate": "It can also hand tasks to your other bots.",
+    "placeholder": "Message {{name}}",
+    "from": "{{name}} asked",
+    "fromUnknown": "Another bot asked",
+    "thinking": "Thinking…",
+    "error": "Something went wrong: {{error}}",
+    "retry": "Try again",
+    "noTools": "This model can't use tools, so {{name}} can chat but can't see your vault.",
+    "select": "Choose a bot to talk to."
+  },
+  "tools": {
+    "list_notebooks": "Looked at your notebooks",
+    "search_sources": "Searched sources for “{{query}}”",
+    "read_source": "Read a source",
+    "list_notes": "Looked at your notes",
+    "search_notes": "Searched notes for “{{query}}”",
+    "read_note": "Read a note",
+    "list_calendar": "Checked the calendar",
+    "list_skills": "Looked at your skills",
+    "read_skill": "Read the skill “{{name}}”",
+    "ask_bot": "Asked {{bot}}",
+    "askedWaiting": "{{bot}} is waiting for your OK",
+    "failed": "Failed"
+  },
+  "approval": {
+    "label": "Needs your OK",
+    "approve": "Do it",
+    "decline": "Not now",
+    "approved": "Done",
+    "declined": "Declined",
+    "failed": "Didn't work: {{error}}",
+    "create_note": "New note",
+    "append_to_note": "Add to a note",
+    "add_calendar_event": "New calendar event",
+    "allDay": "All day"
+  },
+  "menu": {
+    "label": "Bot options",
+    "edit": "Edit bot",
+    "clear": "Clear history",
+    "delete": "Delete bot"
+  },
+  "clear": {
+    "title": "Clear {{name}}'s history?",
+    "body": "Every message in this chat is deleted. The bot itself stays.",
+    "confirm": "Clear history"
+  },
+  "delete": {
+    "title": "Delete {{name}}?",
+    "body": "The bot and its whole chat are deleted. This can't be undone.",
+    "confirm": "Delete bot"
+  },
+  "editor": {
+    "createTitle": "New bot",
+    "createDescription": "Give it a name, a role and a face.",
+    "editTitle": "Edit bot",
+    "name": "Name",
+    "namePlaceholder": "Research Assistant",
+    "role": "Role",
+    "rolePlaceholder": "Finds answers in my sources",
+    "instructions": "Instructions",
+    "instructionsPlaceholder": "How it should work, what it should care about, how it should answer…",
+    "shape": "Shape",
+    "color": "Colour",
+    "delegate": "Can hand tasks to other bots",
+    "pinned": "Pin to the top",
+    "create": "Create bot",
+    "save": "Save"
+  },
+  "shapes": {
+    "blob": "Blob",
+    "drop": "Drop",
+    "pebble": "Pebble",
+    "bean": "Bean",
+    "cloud": "Cloud",
+    "note": "Note",
+    "magnifier": "Magnifier",
+    "bulb": "Bulb",
+    "leaf": "Leaf",
+    "bear": "Bear",
+    "mushroom": "Mushroom",
+    "calendar": "Calendar",
+    "pear": "Pear"
+  },
+  "colors": {
+    "chart-3": "Green",
+    "chart-2": "Blue",
+    "chart-5": "Violet",
+    "chart-4": "Amber",
+    "destructive": "Red",
+    "chart-1": "Graphite"
+  },
+  "starters": {
+    "chief": { "name": "Chief of Staff", "title": "Hands your tasks to the right bot" },
+    "researcher": { "name": "Researcher", "title": "Finds answers in your sources and notes" },
+    "noteTaker": { "name": "Note Taker", "title": "Writes and tidies your notes" },
+    "planner": { "name": "Planner", "title": "Keeps your calendar" }
+  }
+}

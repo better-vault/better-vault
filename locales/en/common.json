@@ -81,7 +81,8 @@
       "folders": "Folders",
       "vaults": "Vaults"
     },
-    "calendar": "Open the calendar"
+    "calendar": "Open the calendar",
+    "bot": "Open the bots"
   },
   "onboarding": {
     "label": "Welcome to better-vault",

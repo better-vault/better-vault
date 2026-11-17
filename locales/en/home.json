@@ -143,5 +143,8 @@
   },
   "actions": {
     "openNewTab": "Open in new tab"
+  },
+  "bot": {
+    "title": "Bot"
   }
 }

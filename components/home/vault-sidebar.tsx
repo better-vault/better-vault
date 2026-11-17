@@ -1,5 +1,6 @@
 import {
   Add01Icon,
+  BotIcon,
   Calendar03Icon,
   Clock01Icon,
   Note01Icon,
@@ -42,7 +43,7 @@ import { useVaultName } from "./vault-name";
  * notebooks or the calendar. "vault" is "all" reached by choosing the vault
  * in the sidebar, so the sidebar highlights the vault row, not "All notebooks".
  */
-export type HomeSection = "all" | "vault" | "recents" | "calendar" | "notes" | "skills";
+export type HomeSection = "all" | "vault" | "recents" | "calendar" | "bot" | "notes" | "skills";
 
 interface VaultSidebarProps {
   vaults: Vault[];
@@ -139,6 +140,15 @@ export function VaultSidebar({
             >
               <Icon icon={Calendar03Icon} size={18} className="text-muted-foreground" />
               {t("calendar.title")}
+            </button>
+            <button
+              type="button"
+              aria-current={section === "bot" ? "page" : undefined}
+              onClick={() => onSection("bot")}
+              className={cn(row, section === "bot" && "bg-foreground/10 font-medium")}
+            >
+              <Icon icon={BotIcon} size={18} className="text-muted-foreground" />
+              {t("bot.title")}
             </button>
             {pinned.map((notebook) => (
               <Link

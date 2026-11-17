@@ -30,6 +30,8 @@ export interface ChatMessageMetadata {
   prompt?: PromptSize;
   /** The tokens the answer took, as the provider counted them. */
   usage?: TokenUsage;
+  /** In a bot's thread: the bot that sent this message (a task handed over), not the user. */
+  from?: string;
 }
 
 export interface PromptSize {

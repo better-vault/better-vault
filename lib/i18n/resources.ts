@@ -1,3 +1,4 @@
+import enBot from "@/locales/en/bot.json";
 import enChat from "@/locales/en/chat.json";
 import enCommon from "@/locales/en/common.json";
 import enHome from "@/locales/en/home.json";
@@ -21,5 +22,6 @@ export const resources = {
     settings: enSettings,
     chat: enChat,
     sources: enSources,
+    bot: enBot,
   },
 } as const;

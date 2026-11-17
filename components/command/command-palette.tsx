@@ -1,4 +1,5 @@
 import {
+  BotIcon,
   AiBrain02Icon,
   Book02Icon,
   BubbleChatIcon,
@@ -135,6 +136,13 @@ export function CommandPalette() {
         icon: Calendar03Icon,
         keywords: ["calendar", "event", "schedule", "agenda", "entry"],
         run: () => go(`${routes.home}?view=calendar`),
+      },
+      {
+        id: "bot",
+        label: t("command.bot"),
+        icon: BotIcon,
+        keywords: ["bot", "agent", "assistant", "delegate", "chief of staff"],
+        run: () => go(`${routes.home}?view=bot`),
       },
       {
         id: "new-notebook",

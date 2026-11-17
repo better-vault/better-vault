@@ -70,6 +70,8 @@ import { useVaultName } from "./vault-name";
 
 /** The calendar is large; it loads the first time it is opened. */
 const CalendarView = lazy(() => import("@/components/calendar/calendar-view"));
+/** The Bot section loads the first time it is opened too. */
+const BotView = lazy(() => import("@/components/bot/bot-view"));
 const NotesWorkspace = lazy(() => import("@/components/notes/notes-workspace"));
 const SkillsWorkspace = lazy(() => import("@/components/skills/skills-workspace"));
 
@@ -128,13 +130,15 @@ export function NotebookHome() {
   const section: HomeSection =
     viewParam === "recents" ||
     viewParam === "calendar" ||
+    viewParam === "bot" ||
     viewParam === "vault" ||
     viewParam === "notes" ||
     viewParam === "skills"
       ? viewParam
       : "all";
   // The calendar and notes fill the page: they have bars of their own.
-  const fullPage = section === "calendar" || section === "notes" || section === "skills";
+  const fullPage =
+    section === "calendar" || section === "bot" || section === "notes" || section === "skills";
   // "vault" shows the same list as "all"; it only records that the vault was
   // chosen in the sidebar, so the sidebar highlights the vault instead.
   const listing = section === "all" || section === "vault";
@@ -152,9 +156,11 @@ export function NotebookHome() {
         ? tNotes("skillsTitle")
         : section === "calendar"
           ? t("calendar.title")
-          : section === "recents"
-            ? t("vaults.recent")
-            : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
+          : section === "bot"
+            ? t("bot.title")
+            : section === "recents"
+              ? t("vaults.recent")
+              : (currentFolder?.name ?? (vault ? vaultName(vault) : ""));
 
   useEffect(() => {
     document.title = title ? `${title} · ${tCommon("appName")}` : tCommon("appName");
@@ -445,6 +451,10 @@ export function NotebookHome() {
                 <NotesWorkspace />
               ) : section === "skills" ? (
                 <SkillsWorkspace />
+              ) : section === "bot" ? (
+                <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
+                  <BotView />
+                </div>
               ) : (
                 <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
                   <CalendarView />
