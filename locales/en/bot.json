@@ -23,11 +23,11 @@
     "placeholder": "Message {{name}}",
     "from": "{{name}} asked",
     "fromUnknown": "Another bot asked",
-    "thinking": "Thinking…",
     "error": "Something went wrong: {{error}}",
     "retry": "Try again",
     "noTools": "This model can't use tools, so {{name}} can chat but can't see your vault.",
-    "select": "Choose a bot to talk to."
+    "select": "Choose a bot to talk to.",
+    "working": "{{name}} is working…"
   },
   "tools": {
     "list_notebooks": "Looked at your notebooks",
@@ -53,7 +53,8 @@
     "create_note": "New note",
     "append_to_note": "Add to a note",
     "add_calendar_event": "New calendar event",
-    "allDay": "All day"
+    "allDay": "All day",
+    "create_bot": "New bot"
   },
   "menu": {
     "label": "Bot options",
@@ -101,7 +102,17 @@
     "bear": "Bear",
     "mushroom": "Mushroom",
     "calendar": "Calendar",
-    "pear": "Pear"
+    "pear": "Pear",
+    "raven": "Raven",
+    "cat": "Cat",
+    "owl": "Owl",
+    "fox": "Fox",
+    "bunny": "Bunny",
+    "robot": "Robot",
+    "star": "Star",
+    "fish": "Fish",
+    "heart": "Heart",
+    "vault": "Vault"
   },
   "colors": {
     "chart-3": "Green",
@@ -112,9 +123,47 @@
     "chart-1": "Graphite"
   },
   "starters": {
-    "chief": { "name": "Chief of Staff", "title": "Hands your tasks to the right bot" },
-    "researcher": { "name": "Researcher", "title": "Finds answers in your sources and notes" },
-    "noteTaker": { "name": "Note Taker", "title": "Writes and tidies your notes" },
-    "planner": { "name": "Planner", "title": "Keeps your calendar" }
+    "chief": {
+      "name": "Chief of Staff",
+      "title": "Hands your tasks to the right bot"
+    },
+    "researcher": {
+      "name": "Researcher",
+      "title": "Finds answers in your sources and notes"
+    },
+    "noteTaker": {
+      "name": "Note Taker",
+      "title": "Writes and tidies your notes"
+    },
+    "planner": {
+      "name": "Planner",
+      "title": "Keeps your calendar"
+    }
+  },
+  "access": {
+    "profileTab": "Profile",
+    "tab": "Access",
+    "intro": "Choose what this bot can see and change. Changes always wait for your OK.",
+    "notebooks": "Notebooks and sources",
+    "notes": "Notes",
+    "calendar": "Calendar",
+    "skills": "Skills",
+    "none": "Off",
+    "read": "Read",
+    "write": "Read & write",
+    "vault": "Vault",
+    "allVaults": "All vaults",
+    "vaultHint": "Limit the bot to one vault's notebooks, notes and skills.",
+    "bots": "Other bots",
+    "createBots": "Can make new bots",
+    "summary": {
+      "notebooks": "Notebooks",
+      "notes": "Notes",
+      "notesWrite": "Notes (write)",
+      "calendar": "Calendar",
+      "calendarWrite": "Calendar (write)",
+      "skills": "Skills",
+      "nothing": "No access"
+    }
   }
 }

@@ -18,6 +18,15 @@ export const botShapes = [
   },
   {
     version: 1,
+    id: "raven",
+    name: "Raven",
+    body: {
+      path: "M42 12C58 12 70 22 73 36C75 46 74 54 78 62C82 70 82 80 78 88H18C14 88 12 85 12 80C12 56 16 38 24 26C29 18 35 12 42 12ZM62 30C74 27 85 33 91 44C92 46 91 48 89 47C81 46 72 50 64 58Z",
+    },
+    eyes: { x: 43, y: 40, spacing: 15, scale: 1.1 },
+  },
+  {
+    version: 1,
     id: "drop",
     name: "Drop",
     body: {
@@ -123,6 +132,87 @@ export const botShapes = [
       path: "M50 12C58 12 62 18 62 26C62 34 76 42 80 58C84 76 70 88 50 88C30 88 16 76 20 58C24 42 38 34 38 26C38 18 42 12 50 12Z",
     },
     eyes: { x: 50, y: 62, spacing: 16, scale: 1.1 },
+  },
+  {
+    version: 1,
+    id: "cat",
+    name: "Cat",
+    body: {
+      path: "M20 30L24 12C25 9 27 9 29 11L40 22C46 21 54 21 60 22L71 11C73 9 75 9 76 12L80 30C86 38 88 48 88 56C88 76 72 88 50 88C28 88 12 76 12 56C12 48 14 38 20 30Z",
+    },
+    eyes: { x: 50, y: 54, spacing: 20, scale: 1.15 },
+  },
+  {
+    version: 1,
+    id: "owl",
+    name: "Owl",
+    body: {
+      path: "M16 18C25 22 37 27 50 33C63 27 75 22 84 18C88 30 90 44 88 58C86 76 70 88 50 88C30 88 14 76 12 58C10 44 12 30 16 18Z",
+    },
+    eyes: { x: 50, y: 56, spacing: 22, scale: 1.3 },
+  },
+  {
+    version: 1,
+    id: "fox",
+    name: "Fox",
+    body: {
+      path: "M14 14C14 11 17 10 19 12L36 26C44 23 56 23 64 26L81 12C83 10 86 11 86 14L84 40C84 62 68 80 50 88C32 80 16 62 16 40Z",
+    },
+    eyes: { x: 50, y: 46, spacing: 20, scale: 1.0 },
+  },
+  {
+    version: 1,
+    id: "bunny",
+    name: "Bunny",
+    body: {
+      path: "M32 6C37 6 40 10 40 18V46H24V18C24 10 27 6 32 6ZM68 6C73 6 76 10 76 18V46H60V18C60 10 63 6 68 6ZM50 34C70 34 84 46 84 62C84 78 70 90 50 90C30 90 16 78 16 62C16 46 30 34 50 34Z",
+    },
+    eyes: { x: 50, y: 62, spacing: 18, scale: 1.1 },
+  },
+  {
+    version: 1,
+    id: "robot",
+    name: "Robot",
+    body: {
+      path: "M24 28H76C82 28 86 32 86 38V76C86 82 82 86 76 86H24C18 86 14 82 14 76V38C14 32 18 28 24 28ZM48 14H52V30H48ZM50 8A6 6 0 1 1 50 20A6 6 0 1 1 50 8ZM8 48C8 46 9 45 11 45H16V69H11C9 69 8 68 8 66ZM84 45H89C91 45 92 46 92 48V66C92 68 91 69 89 69H84Z",
+    },
+    eyes: { x: 50, y: 56, spacing: 22, scale: 1.25 },
+  },
+  {
+    version: 1,
+    id: "star",
+    name: "Star",
+    body: {
+      path: "M50.0 14.0L61.2 38.6L88.0 41.6L68.1 59.9L73.5 86.4L50.0 73.0L26.5 86.4L31.9 59.9L12.0 41.6L38.8 38.6Z",
+    },
+    eyes: { x: 50, y: 56, spacing: 12, scale: 0.85 },
+  },
+  {
+    version: 1,
+    id: "fish",
+    name: "Fish",
+    body: {
+      path: "M10 50C16 34 34 24 52 24C66 24 74 34 76 42L88 30C90 28 92 29 92 32V68C92 71 90 72 88 70L76 58C74 66 66 76 52 76C34 76 16 66 10 50Z",
+    },
+    eyes: { x: 42, y: 48, spacing: 14, scale: 1.0 },
+  },
+  {
+    version: 1,
+    id: "heart",
+    name: "Heart",
+    body: {
+      path: "M50 86C36 74 12 60 12 38C12 24 22 16 33 16C41 16 47 20 50 26C53 20 59 16 67 16C78 16 88 24 88 38C88 60 64 74 50 86Z",
+    },
+    eyes: { x: 50, y: 44, spacing: 18, scale: 1.1 },
+  },
+  {
+    version: 1,
+    id: "vault",
+    name: "Vault",
+    body: {
+      path: "M20 14H80C85 14 88 17 88 22V76C88 81 85 84 80 84H76V88H66V84H34V88H24V84H20C15 84 12 81 12 76V22C12 17 15 14 20 14Z",
+    },
+    eyes: { x: 50, y: 48, spacing: 20, scale: 1.25 },
   },
 ] as const satisfies readonly AvatarDefinition[];
 
