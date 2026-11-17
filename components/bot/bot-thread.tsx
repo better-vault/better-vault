@@ -197,11 +197,19 @@ function ThreadBody({
   const local = model ? providers[model.provider].local : false;
   const noModel = settings !== undefined && !model;
 
+  // While the bot works and no text is arriving (waiting for the model, or
+  // running tools), it shows that it is typing.
+  const last = messages.at(-1);
+  const tail = last?.role === "assistant" ? last.parts.at(-1) : undefined;
+  const textArriving =
+    tail?.type === "text" && tail.state === "streaming" && tail.text.trim() !== "";
+  const typing = (busy || state === "thinking") && !textArriving;
+
   // Follow the conversation as it grows.
-  const lastLength = messages.at(-1)?.parts.length ?? 0;
+  const lastLength = last?.parts.length ?? 0;
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [messages.length, lastLength]);
+  }, [messages.length, lastLength, typing]);
 
   const stamps = useMemo(() => {
     const times = messages.map((message) => message.metadata?.createdAt);
@@ -279,13 +287,7 @@ function ThreadBody({
               )}
             </Fragment>
           ))}
-          {status === "submitted" && messages.at(-1)?.role === "user" ? (
-            <Message from="assistant">
-              <Message.Content>
-                <Message.Status>{t("thread.thinking")}</Message.Status>
-              </Message.Content>
-            </Message>
-          ) : null}
+          {typing ? <TypingIndicator bot={bot} /> : null}
           {errorText ? (
             <p className="text-sm text-destructive">
               {t("thread.error", { error: errorText })}{" "}
@@ -469,6 +471,29 @@ function BotTurn({
           );
         return <ToolEvent key={part.toolCallId} part={part} bots={bots} />;
       })}
+    </div>
+  );
+}
+
+/** The bot is working: its face thinks beside a bubble of pulsing dots. */
+function TypingIndicator({ bot }: { bot: Bot }) {
+  const { t } = useTranslation("bot");
+  return (
+    <div role="status" className="flex items-end gap-2">
+      <BotAvatar avatar={bot.avatar} size={28} mood="thinking" />
+      <div
+        aria-hidden
+        className="flex h-10 items-center gap-1.5 rounded-[1.25rem] rounded-es-md bg-muted px-4"
+      >
+        {[0, 1, 2].map((dot) => (
+          <span
+            key={dot}
+            className="size-2 animate-pulse rounded-full bg-muted-foreground motion-reduce:animate-none"
+            style={{ animationDelay: `${dot * 200}ms` }}
+          />
+        ))}
+      </div>
+      <span className="sr-only">{t("thread.working", { name: bot.name })}</span>
     </div>
   );
 }
