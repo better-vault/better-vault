@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-17
+
 ### Added
 
 - Bot: a new section under Calendar with bots, helpers that each have a name, a role, an animated face and one ongoing chat. Bots search your notebooks, sources, notes, skills and calendar, show a "Needs your OK" card before they create a note or add a calendar event, and a coordinating bot hands tasks to the others. It starts with Chief of Staff, Researcher, Note Taker and Planner, and you can make your own.
@@ -20,6 +22,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Fixed
 
 - Desktop app on macOS: the X that closes a sheet, and the dimmed area around it, respond to clicks again where they overlap the top bar.
+
+### Security
+
+- The website runs on Next.js 16.4.6, which fixes two cache leaks across root params (GHSA-mfr8-8qww-v76h, GHSA-vc7v-qv4w-wrv8).
 
 ## [0.7.0] - 2026-11-10
 
@@ -186,7 +192,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/better-vault/better-vault/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/better-vault/better-vault/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/better-vault/better-vault/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/better-vault/better-vault/compare/v0.4.2...v0.5.0
