@@ -1,0 +1,56 @@
+---
+title: "Bots"
+description: "Bots in better-vault are helpers with animated faces that read your notebooks, notes and calendar, ask before they change anything and hand tasks to each other."
+---
+
+Bots are helpers with a name, a role and an animated face, and each one keeps a single ongoing chat with you.
+
+Open **Bot** in the sidebar of the notebooks page, under Calendar. The roster on the left lists your bots, with pinned ones as large tiles at the top, and the chat of the bot you choose fills the rest of the page. A bot's face shows what it is doing: it thinks while it works and looks happy when it is done.
+
+## What bots can do
+
+A bot works with your own material. It can list your notebooks and search their sources, read your notes and skills, and look at your calendar, all on your device. Bots use the model you choose in their prompt bar, with the keys you entered in [AI providers](/docs/providers).
+
+A bot never changes anything without asking. When it wants to create a note, add to one or put an event in your calendar, the chat shows a **Needs your OK** card with what it is about to do. Press **Do it** to make the change, or **Not now** to tell the bot no.
+
+| Area | Without asking | After your OK |
+| --- | --- | --- |
+| Notebooks and sources | List and search them, read a source | |
+| Notes | List, search and read them | Create a note, add to a note |
+| Calendar | See what is planned | Add an event |
+| Skills | List and read them | |
+| Other bots | Hand them a task | |
+
+Local models from Ollama or LM Studio can't use these tools, so with one of them a bot can chat but can't see your vault.
+
+## Hand tasks to other bots
+
+A bot that may delegate can pass a task to another bot and wait for its answer. The task appears in the other bot's own chat, marked with who asked, so you can follow the work there. If that bot needs your OK for a change, its card waits in its own chat.
+
+The **Chief of Staff** bot does this by default: tell it what you need, and it asks the right bot for each part and sums up what they did. A bot that was handed a task can't hand it on, so bots never pass work around in circles.
+
+## Make your own bot
+
+Press **+** at the top of the roster to make a bot.
+
+<Steps>
+
+### Name it
+
+Give the bot a name and a short role, such as "Keeps my reading list". The role helps a coordinating bot decide when to ask it.
+
+### Give it a face
+
+Choose one of the shapes and a colour. The preview follows your pointer, the way the bot will in its chat.
+
+### Tell it how to work
+
+Write its instructions: what it should care about and how it should answer. Turn on **Can hand tasks to other bots** to make it a coordinator, and **Pin to the top** to show it as a large tile.
+
+</Steps>
+
+The four starter bots, Chief of Staff, Researcher, Note Taker and Planner, can be changed or deleted like any other. The menu at the top right of a chat edits the bot, clears its history or deletes it.
+
+## Where bots are kept
+
+Bots and their chats are stored with the rest of your data, in the browser on the web and in the desktop app's database, and they are included in backups. Avatars are drawn with [open-bot-avatar](https://github.com/DominikScholz/open-bot-avatar).

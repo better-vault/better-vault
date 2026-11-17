@@ -5,6 +5,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Bot: a new section under Calendar with bots, helpers that each have a name, a role, an animated face and one ongoing chat. Bots search your notebooks, sources, notes, skills and calendar, show a "Needs your OK" card before they create a note or add a calendar event, and a coordinating bot hands tasks to the others. It starts with Chief of Staff, Researcher, Note Taker and Planner, and you can make your own.
+
+### Changed
+
+- Backups are format 7, with bots and their chats; older backups still import.
+
+### Fixed
+
+- Desktop app on macOS: the X that closes a sheet, and the dimmed area around it, respond to clicks again where they overlap the top bar.
+
 ## [0.7.0] - 2026-11-10
 
 ### Added
