@@ -46,3 +46,60 @@ ${STYLE}${visuals ? `\n${VISUALS_PROMPT}` : ""}${skillText}
 
 ${formatPassages(passages)}`;
 }
+
+export interface BotPersona {
+  name: string;
+  title: string;
+  instructions: string;
+}
+
+/** The instructions for a bot's turn: its persona, the user's vault and the bots it may ask. */
+export function botSystemPrompt({
+  bot,
+  roster,
+  tools,
+  visuals,
+  now,
+  timeZone,
+  vaults,
+  currentVault,
+  delegatedBy,
+}: {
+  bot: BotPersona;
+  /** The other bots, when this one may delegate. */
+  roster: readonly { name: string; title: string }[];
+  /** Whether the model can call tools at all (local models cannot). */
+  tools: boolean;
+  visuals: boolean;
+  now: string;
+  timeZone: string;
+  vaults: readonly string[];
+  currentVault: string;
+  /** The bot that handed this task over, if any. */
+  delegatedBy?: string;
+}): string {
+  const toolRules = tools
+    ? `You work inside better-vault, the user's local-first app of notebooks (with sources), notes, skills and a calendar. Your tools read and change them on the user's device.
+- Look things up with your tools before answering questions about the user's material. Say which notebook, source or note an answer comes from.
+- create_note, append_to_note and add_calendar_event ask the user for an OK. Never say something was created, added or changed until the tool's result says it was. If the user declines, accept it and move on.
+- Times are the user's local time. Today is ${now} (${timeZone}).
+- The user's vaults: ${vaults.map((name) => `"${name}"`).join(", ")}. The current vault is "${currentVault}".`
+    : `This model cannot use tools, so you cannot see the user's notebooks, notes or calendar. Say so if asked about them.`;
+
+  const delegation =
+    tools && roster.length
+      ? `\n\nYou coordinate the user's other bots. Hand a task to one with ask_bot when it fits its role better than yours; give it every detail, since it cannot see this thread. You may ask several in turn. Then tell the user, briefly, what each one did.\n${roster
+          .map((each) => `- ${each.name}: ${each.title}`)
+          .join("\n")}`
+      : "";
+
+  const handedOver = delegatedBy
+    ? `\n\n${delegatedBy}, another of the user's bots, handed you the latest task. Do it, then answer with what you did or found; your answer goes back to ${delegatedBy}.`
+    : "";
+
+  return `You are ${bot.name}, one of the user's bots in better-vault.${bot.title ? ` Your role: ${bot.title}.` : ""}
+${bot.instructions.trim()}
+
+${toolRules}${delegation}${handedOver}
+${STYLE} Keep answers short: lead with the result.${visuals ? `\n${VISUALS_PROMPT}` : ""}`;
+}

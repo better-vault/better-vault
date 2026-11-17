@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { setDesktopRuntime } from "@/lib/ai/server-config";
+import { POST as bot } from "./routes/bot";
 import { POST as calendarFetch } from "./routes/calendar-fetch";
 import { POST as chat } from "./routes/chat";
 import { POST as chatgpt } from "./routes/chatgpt";
@@ -21,6 +22,7 @@ import { POST as voices } from "./routes/voices";
 export function createApi({ desktop = false }: { desktop?: boolean } = {}) {
   setDesktopRuntime(desktop);
   const api = new Hono().basePath("/api");
+  api.post("/bot", (c) => bot(c.req.raw));
   api.post("/calendar/fetch", (c) => calendarFetch(c.req.raw));
   api.post("/chat", (c) => chat(c.req.raw));
   api.post("/chatgpt", (c) => chatgpt(c.req.raw));
