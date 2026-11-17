@@ -11,23 +11,31 @@ Open **Bot** in the sidebar of the notebooks page, under Calendar. The roster on
 
 A bot works with your own material. It can list your notebooks and search their sources, read your notes and skills, and look at your calendar, all on your device. Bots use the model you choose in their prompt bar, with the keys you entered in [AI providers](/docs/providers).
 
-A bot never changes anything without asking. When it wants to create a note, add to one or put an event in your calendar, the chat shows a **Needs your OK** card with what it is about to do. Press **Do it** to make the change, or **Not now** to tell the bot no.
+A bot never changes anything without asking. When it wants to create a note, add to one, put an event in your calendar or make a new bot, the chat shows a **Needs your OK** card with what it is about to do. Press **Do it** to make the change, or **Not now** to tell the bot no. While a bot works, its face thinks beside a bubble of pulsing dots.
 
-| Area | Without asking | After your OK |
-| --- | --- | --- |
-| Notebooks and sources | List and search them, read a source | |
-| Notes | List, search and read them | Create a note, add to a note |
-| Calendar | See what is planned | Add an event |
-| Skills | List and read them | |
-| Other bots | Hand them a task | |
+| Area                  | Without asking                      | After your OK                |
+| --------------------- | ----------------------------------- | ---------------------------- |
+| Notebooks and sources | List and search them, read a source |                              |
+| Notes                 | List, search and read them          | Create a note, add to a note |
+| Calendar              | See what is planned                 | Add an event                 |
+| Skills                | List and read them                  |                              |
+| Other bots            | Hand them a task                    | Make a new bot               |
 
 Local models from Ollama or LM Studio can't use these tools, so with one of them a bot can chat but can't see your vault.
+
+## Choose what a bot can access
+
+Each bot has its own access, set in the **Access** tab of **Edit bot** (the menu at the top right of its chat). Turn notebooks and skills on or off, and set notes and the calendar to **Off**, **Read** or **Read & write**. Write access still asks for your OK before each change.
+
+**Vault** limits a bot to one vault, so it only sees that vault's notebooks, notes and skills. A bot asked about something it can't access says so, and points you to this tab.
 
 ## Hand tasks to other bots
 
 A bot that may delegate can pass a task to another bot and wait for its answer. The task appears in the other bot's own chat, marked with who asked, so you can follow the work there. If that bot needs your OK for a change, its card waits in its own chat.
 
 The **Chief of Staff** bot does this by default: tell it what you need, and it asks the right bot for each part and sums up what they did. A bot that was handed a task can't hand it on, so bots never pass work around in circles.
+
+A bot with **Can make new bots** turned on can also make a bot for you: ask Chief of Staff for "a bot that summarizes my vault when I ask", and it proposes one with a name, a face and only the access the job needs. The new bot joins the roster once you approve it.
 
 ## Make your own bot
 
@@ -41,11 +49,15 @@ Give the bot a name and a short role, such as "Keeps my reading list". The role 
 
 ### Give it a face
 
-Choose one of the shapes and a colour. The preview follows your pointer, the way the bot will in its chat.
+Choose one of the shapes, such as the raven from the better-vault logo, a cat, an owl or a robot, and a colour. The preview follows your pointer, the way the bot will in its chat.
 
 ### Tell it how to work
 
-Write its instructions: what it should care about and how it should answer. Turn on **Can hand tasks to other bots** to make it a coordinator, and **Pin to the top** to show it as a large tile.
+Write its instructions: what it should care about and how it should answer, and turn on **Pin to the top** to show it as a large tile.
+
+### Set its access
+
+In the **Access** tab, choose what it can read and change, and whether it can hand tasks to other bots or make new ones.
 
 </Steps>
 

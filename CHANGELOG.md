@@ -8,6 +8,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - Bot: a new section under Calendar with bots, helpers that each have a name, a role, an animated face and one ongoing chat. Bots search your notebooks, sources, notes, skills and calendar, show a "Needs your OK" card before they create a note or add a calendar event, and a coordinating bot hands tasks to the others. It starts with Chief of Staff, Researcher, Note Taker and Planner, and you can make your own.
+- Bot access: Edit bot → Access sets what each bot can use (notebooks, notes, calendar, skills, read or read and write) and can limit it to one vault.
+- Bots can make bots: a bot with "Can make new bots" proposes a new bot, with its face and access, for your OK.
+- Ten more bot faces: raven, cat, owl, fox, bunny, robot, star, fish, heart and vault.
+- A typing indicator while a bot works.
 
 ### Changed
 
