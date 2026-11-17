@@ -15,6 +15,8 @@ import type {
   CalendarEntry,
   Note,
   Skill,
+  Bot,
+  BotMessage,
 } from "./types";
 
 /** A stored file in a backup: its bytes as base64, since backups are JSON. */
@@ -28,17 +30,19 @@ export type BackupBlob = Omit<StoredBlob, "data"> & { data: string };
 export interface Backup {
   app: "better-vault";
   /**
-   * 6 adds notes and skills; 5 added calendar entries; 4 added vaults; 3 added folders and files; 2
+   * 7 adds bots and their threads; 6 added notes and skills; 5 added calendar entries; 4 added vaults; 3 added folders and files; 2
    * added conversations. Older backups still import: format 1 (one chat per
    * notebook), format 2 (no folders), format 3 (no vaults: everything is in
-   * the default vault), format 4 (no calendar) and format 5 (no notes or skills).
+   * the default vault), format 4 (no calendar), format 5 (no notes or skills) and format 6 (no bots).
    */
-  format: 6;
+  format: 7;
   exportedAt: number;
   calendar: CalendarEntry[];
   vaults: Vault[];
   notes: Note[];
   skills: Skill[];
+  bots: Bot[];
+  botMessages: BotMessage[];
   folders: Folder[];
   notebooks: Notebook[];
   sources: Source[];
@@ -57,7 +61,12 @@ const backupSchema = z.object({
     z.literal(4),
     z.literal(5),
     z.literal(6),
+    z.literal(7),
   ]),
+  bots: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
+  botMessages: z
+    .array(z.object({ id: z.string(), botId: z.string(), createdAt: z.number() }).loose())
+    .optional(),
   notes: z
     .array(z.object({ id: z.string(), vaultId: z.string(), body: z.string() }).loose())
     .optional(),
@@ -90,7 +99,7 @@ export async function exportBackup(): Promise<Backup> {
   const { blobs, ...content } = await store().exportAll();
   return {
     app: "better-vault",
-    format: 6,
+    format: 7,
     exportedAt: Date.now(),
     ...content,
     blobs: blobs.map((blob) => ({ ...blob, data: toBase64(blob.data) })),
@@ -117,6 +126,8 @@ export async function importBackup(raw: unknown): Promise<number> {
       vaults: backup.vaults,
       notes: backup.notes,
       skills: backup.skills,
+      bots: backup.bots,
+      botMessages: backup.botMessages,
       folders: backup.folders,
       notebooks: backup.notebooks,
       sources: backup.sources,
@@ -132,9 +143,20 @@ export async function importBackup(raw: unknown): Promise<number> {
 
 type OldBackup = Omit<
   Backup,
-  "format" | "conversations" | "folders" | "blobs" | "vaults" | "calendar" | "notes" | "skills"
+  | "format"
+  | "conversations"
+  | "folders"
+  | "blobs"
+  | "vaults"
+  | "calendar"
+  | "notes"
+  | "skills"
+  | "bots"
+  | "botMessages"
 > & {
-  format: 1 | 2 | 3 | 4 | 5 | 6;
+  format: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  bots?: Bot[];
+  botMessages?: BotMessage[];
   notes?: Note[];
   skills?: Skill[];
   calendar?: CalendarEntry[];
@@ -173,8 +195,10 @@ function upgradeBackup(backup: OldBackup): Backup {
   }
   return {
     ...backup,
-    format: 6,
+    format: 7,
     calendar: backup.calendar ?? [],
+    bots: backup.bots ?? [],
+    botMessages: backup.botMessages ?? [],
     notes: backup.notes ?? [],
     skills: backup.skills ?? [],
     vaults: backup.vaults ?? [],
@@ -185,7 +209,7 @@ function upgradeBackup(backup: OldBackup): Backup {
   };
 }
 
-/** Deletes every notebook, note, skill, source, chat and output. Settings and keys are kept. */
+/** Deletes every notebook, note, skill, bot, source, chat and output. Settings and keys are kept. */
 export async function deleteAllData() {
   await store().clearAll();
 }

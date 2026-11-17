@@ -11,6 +11,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     db.vaults,
     db.notes,
     db.skills,
+    db.bots,
+    db.botMessages,
     db.folders,
     db.notebooks,
     db.sources,
@@ -72,6 +74,28 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       await db.skills.put(skill);
     },
     deleteSkill: (id) => db.skills.delete(id),
+
+    listBots: () => db.bots.orderBy("order").toArray(),
+    getBot: (id) => db.bots.get(id),
+    putBot: async (bot) => {
+      await db.bots.put(bot);
+    },
+    deleteBot: (id) =>
+      db.transaction("rw", [db.bots, db.botMessages], async () => {
+        await db.botMessages.where("botId").equals(id).delete();
+        await db.bots.delete(id);
+      }),
+    loadBotThread: (botId) =>
+      db.botMessages
+        .where("[botId+createdAt]")
+        .between([botId, -Infinity], [botId, Infinity])
+        .toArray(),
+    saveBotThread: (bot, rows) =>
+      db.transaction("rw", [db.bots, db.botMessages], async () => {
+        await db.botMessages.where("botId").equals(bot.id).delete();
+        await db.botMessages.bulkPut(rows);
+        await db.bots.put(bot);
+      }),
 
     listVaults: () => db.vaults.toArray(),
     putVault: async (vault) => {
@@ -209,6 +233,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         vaults,
         notes,
         skills,
+        bots,
+        botMessages,
         folders,
         notebooks,
         sources,
@@ -221,6 +247,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         db.vaults.toArray(),
         db.notes.toArray(),
         db.skills.toArray(),
+        db.bots.toArray(),
+        db.botMessages.toArray(),
         db.folders.toArray(),
         db.notebooks.toArray(),
         db.sources.toArray(),
@@ -234,6 +262,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         vaults,
         notes,
         skills,
+        bots,
+        botMessages,
         folders,
         notebooks,
         sources,
@@ -249,6 +279,8 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.vaults.bulkPut(data.vaults);
         await db.notes.bulkPut(data.notes);
         await db.skills.bulkPut(data.skills);
+        await db.bots.bulkPut(data.bots);
+        await db.botMessages.bulkPut(data.botMessages);
         await db.folders.bulkPut(data.folders);
         await db.notebooks.bulkPut(data.notebooks);
         await db.conversations.bulkPut(data.conversations);

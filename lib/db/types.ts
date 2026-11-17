@@ -107,6 +107,51 @@ export interface CalendarEntry {
   [field: string]: unknown;
 }
 
+/**
+ * A bot: a persona with an avatar that keeps one ongoing thread. Bots read the
+ * vault through tools that run in the app, ask before they change anything,
+ * and a bot that may delegate can hand a task to the others.
+ */
+export interface Bot {
+  id: string;
+  name: string;
+  /** What it does, shown under its name ("Keeps your calendar"). */
+  title: string;
+  /** Its persona and standing instructions, given to the model with every message. */
+  instructions: string;
+  avatar: BotAvatar;
+  /** Its own model; the app's model when missing. */
+  model?: ModelRef;
+  /** Whether it may hand tasks to the other bots. */
+  canDelegate: boolean;
+  /** Shown as a large tile at the top of the roster. */
+  pinned: boolean;
+  /** Its place in the roster. */
+  order: number;
+  /** The starter bot it was made from, if any. */
+  starter?: string;
+  /** The start of its thread's last message, for the roster. */
+  preview?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface BotAvatar {
+  /** A shape from `lib/bot/avatars.ts`. */
+  shape: string;
+  /** A colour token name from `lib/bot/colors.ts`. */
+  color: string;
+}
+
+/** One message of a bot's thread. Ids are `${botId}:${messageId}`. */
+export interface BotMessage {
+  id: string;
+  botId: string;
+  /** The message's place in the thread. */
+  createdAt: number;
+  message: ChatMessage;
+}
+
 /** A folder on the notebooks page. Folders can hold folders. */
 export interface Folder {
   id: string;

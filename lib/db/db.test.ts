@@ -28,6 +28,16 @@ import {
 } from "./settings";
 import { createNote, renameNote, saveNoteBody } from "./notes";
 import { createSkill, deleteSkill, saveSkill } from "./skills";
+import {
+  createBot,
+  deleteBot,
+  listBots,
+  loadBotThread,
+  resetBotSeedingForTests,
+  saveBotThread,
+  seedBotsOnce,
+  updateBot,
+} from "./bots";
 import { addSource, attachImages, deleteSource, getChunks } from "./sources";
 import {
   DEFAULT_VAULT,
@@ -228,6 +238,63 @@ describe.each(backends)("%s store", (name, create) => {
       expect(await store().listCalendar()).toEqual([]);
       await importBackup(backup);
       expect(await store().listCalendar()).toEqual([second]);
+    });
+  });
+
+  describe("bots", () => {
+    const look = { shape: "drop", color: "chart-1" };
+
+    it("keeps bots in roster order with their threads", async () => {
+      const chief = await createBot({
+        name: "Chief",
+        title: "Runs things",
+        instructions: "",
+        avatar: look,
+        canDelegate: true,
+      });
+      const helper = await createBot({
+        name: "Helper",
+        title: "Helps",
+        instructions: "",
+        avatar: look,
+      });
+      expect((await listBots()).map((bot) => bot.name)).toEqual(["Chief", "Helper"]);
+      await saveBotThread(helper.id, [
+        userMessage("a", "First"),
+        userMessage("b", "**Second** one"),
+      ]);
+      expect((await loadBotThread(helper.id)).map((m) => m.id)).toEqual(["a", "b"]);
+      expect((await store().getBot(helper.id))?.preview).toBe("Second one");
+      await saveBotThread(helper.id, [userMessage("c")]);
+      expect((await loadBotThread(helper.id)).map((m) => m.id)).toEqual(["c"]);
+      await updateBot(chief.id, { name: "Chief of Staff", model: { provider: "openai", modelId: "x" } });
+      await updateBot(chief.id, { model: undefined });
+      const saved = await store().getBot(chief.id);
+      expect(saved?.name).toBe("Chief of Staff");
+      expect(saved && "model" in saved).toBe(false);
+      await deleteBot(helper.id);
+      expect(await store().count("botMessages")).toBe(0);
+      expect((await listBots()).map((bot) => bot.id)).toEqual([chief.id]);
+      // A run finishing after the delete does not bring the bot back.
+      await saveBotThread(helper.id, [userMessage("late")]);
+      expect(await store().count("bots")).toBe(1);
+    });
+
+    it("seeds starter bots once, and keeps bots in backups", async () => {
+      resetBotSeedingForTests();
+      const starters = () => [{ name: "Starter", title: "", instructions: "Hi", avatar: look }];
+      await seedBotsOnce(starters);
+      expect((await listBots()).map((bot) => bot.name)).toEqual(["Starter"]);
+      const [starter] = await listBots();
+      await saveBotThread(starter.id, [userMessage("a", "Hello")]);
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteAllData();
+      resetBotSeedingForTests();
+      await seedBotsOnce(starters);
+      expect(await store().count("bots")).toBe(0);
+      await importBackup(backup);
+      expect((await listBots()).map((bot) => bot.name)).toEqual(["Starter"]);
+      expect((await loadBotThread(starter.id)).map((m) => m.id)).toEqual(["a"]);
     });
   });
 
@@ -438,7 +505,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(6);
+      expect(backup.format).toBe(7);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");
