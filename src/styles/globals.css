@@ -47,6 +47,14 @@ html[data-window-controls]
   -webkit-app-region: no-drag;
 }
 
+/* A bot avatar's eyes (components/bot/bot-avatar.tsx): the darker of the page's two inks. */
+:root {
+  --bot-ink: var(--foreground);
+}
+.dark {
+  --bot-ink: var(--background);
+}
+
 /* Pele (Mermaid → SVG) draws with these variables; map them onto Panel tokens. */
 .pele {
   --pele-bg: transparent;

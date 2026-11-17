@@ -78,6 +78,7 @@
     "mdast-util-gfm": "^3.1.0",
     "micromark-extension-gfm": "^3.0.0",
     "minisearch": "^7.2.0",
+    "open-bot-avatar": "0.2.1",
     "pele": "^1.9.0",
     "perfect-freehand": "^1.2.3",
     "pptxgenjs": "^4.0.1",
