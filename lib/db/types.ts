@@ -124,6 +124,10 @@ export interface Bot {
   model?: ModelRef;
   /** Whether it may hand tasks to the other bots. */
   canDelegate: boolean;
+  /** Whether it may make new bots (after the user's OK); like `canDelegate` when missing. */
+  canCreateBots?: boolean;
+  /** What it may read and change; everything (changes after an OK) when missing. */
+  access?: BotAccess;
   /** Shown as a large tile at the top of the roster. */
   pinned: boolean;
   /** Its place in the roster. */
@@ -134,6 +138,17 @@ export interface Bot {
   preview?: string;
   createdAt: number;
   updatedAt: number;
+}
+
+/** What a bot may use. "write" changes still wait for the user's OK. */
+export interface BotAccess {
+  /** Notebooks and their sources. */
+  notebooks: boolean;
+  notes: "none" | "read" | "write";
+  calendar: "none" | "read" | "write";
+  skills: boolean;
+  /** Only this vault's notebooks, notes and skills; every vault when missing. */
+  vault?: string;
 }
 
 export interface BotAvatar {

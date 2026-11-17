@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { useVaultName } from "@/components/home/vault-name";
 import { SettingsSheet } from "@/components/settings/settings-sheet";
+import { botAccess, canCreateBots, fullAccess } from "@/lib/bot/access";
 import { starterBots } from "@/lib/bot/starters";
 import {
   createBot,
@@ -26,6 +27,8 @@ const blank: BotDetails = {
   instructions: "",
   avatar: { shape: "blob", color: "chart-2" },
   canDelegate: false,
+  canCreateBots: false,
+  access: fullAccess,
   pinned: false,
 };
 
@@ -120,6 +123,8 @@ export default function BotView() {
                 instructions: editing.bot.instructions,
                 avatar: editing.bot.avatar,
                 canDelegate: editing.bot.canDelegate,
+                canCreateBots: canCreateBots(editing.bot),
+                access: botAccess(editing.bot),
                 pinned: editing.bot.pinned,
               }
             : blank

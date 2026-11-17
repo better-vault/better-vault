@@ -6,7 +6,7 @@ import type { Bot } from "./types";
 
 /** What a new bot is made of; the rest is filled in. */
 export type NewBot = Pick<Bot, "name" | "title" | "instructions" | "avatar"> &
-  Partial<Pick<Bot, "model" | "canDelegate" | "pinned" | "starter">>;
+  Partial<Pick<Bot, "model" | "canDelegate" | "canCreateBots" | "access" | "pinned" | "starter">>;
 
 /** Bots deleted in this page. A run still finishing must not bring its bot back. */
 const deleted = new Set<string>();

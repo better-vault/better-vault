@@ -1,8 +1,9 @@
 import { generateId } from "ai";
+import { createBot } from "@/lib/db/bots";
 import { calendarStore } from "@/lib/db/calendar";
 import { createNote, saveNoteBody } from "@/lib/db/notes";
 import { store } from "@/lib/db/store";
-import type { CalendarEntry, Note, Vault } from "@/lib/db/types";
+import type { CalendarEntry, Note, Source, Vault } from "@/lib/db/types";
 import { DEFAULT_VAULT } from "@/lib/db/vaults";
 import { selectPassages } from "@/lib/grounding/passages";
 import { sameName } from "@/lib/notes/syntax";
@@ -18,6 +19,10 @@ export interface ToolContext {
   askBot: (bot: string, task: string) => Promise<unknown>;
   /** The user's time zone, for calendar entries. */
   timeZone?: string;
+  /** The tools this bot may use; any when missing. */
+  allowed?: ReadonlySet<BotToolName>;
+  /** The one vault this bot may see; every vault when missing. */
+  vault?: string;
 }
 
 /** Long texts are cut so one read cannot fill the model's context. */
@@ -33,6 +38,10 @@ export async function runBotTool(
   raw: unknown,
   context: ToolContext,
 ): Promise<unknown> {
+  if (context.allowed && !context.allowed.has(name))
+    return {
+      error: `This bot isn't allowed to use ${name}. The user can change that in Edit bot.`,
+    };
   const parsed = botToolSchemas[name].safeParse(raw);
   if (!parsed.success) return { error: `Invalid input for ${name}: ${parsed.error.message}` };
   try {
@@ -53,14 +62,27 @@ async function run<Name extends BotToolName>(
       ? list
       : [{ id: DEFAULT_VAULT, name: "" } as Vault, ...list];
   };
+  const inScope = (vaultId: string | undefined) =>
+    !context.vault || (vaultId ?? DEFAULT_VAULT) === context.vault;
   const vaultNamed = async (wanted: string | undefined) => {
-    if (!wanted) return null;
+    if (!wanted) return context.vault ?? null;
     const match = (await vaults()).find(
       (vault) => vault.id === wanted || sameName(context.vaultLabel(vault), wanted),
     );
     if (!match) throw new Error(`No vault named "${wanted}".`);
+    if (!inScope(match.id)) throw new Error("This bot may only use one vault.");
     return match.id;
   };
+  /** Notebooks this bot may see, by id. */
+  const visibleNotebooks = async () =>
+    new Set(
+      (await store().listNotebooks())
+        .filter((notebook) => inScope(notebook.vaultId))
+        .map((notebook) => notebook.id),
+    );
+  const visibleSource = async (source: Source | undefined) =>
+    source && (await visibleNotebooks()).has(source.notebookId) ? source : undefined;
+  const notes = async () => (await store().listNotes()).filter((note) => inScope(note.vaultId));
   const labelOf = async () => {
     const names = new Map((await vaults()).map((vault) => [vault.id, context.vaultLabel(vault)]));
     return (id: string | undefined) => names.get(id ?? DEFAULT_VAULT) ?? "";
@@ -68,8 +90,8 @@ async function run<Name extends BotToolName>(
   const findNote = async (id?: string, title?: string): Promise<Note> => {
     const note = id
       ? await store().getNote(id)
-      : (await store().listNotes()).find((each) => title && sameName(each.title, title));
-    if (!note) throw new Error("No such note.");
+      : (await notes()).find((each) => title && sameName(each.title, title));
+    if (!note || !inScope(note.vaultId)) throw new Error("No such note.");
     return note;
   };
 
@@ -79,7 +101,8 @@ async function run<Name extends BotToolName>(
       const vaultId = await vaultNamed(vault);
       const label = await labelOf();
       const notebooks = (await store().listNotebooks()).filter(
-        (each) => !vaultId || (each.vaultId ?? DEFAULT_VAULT) === vaultId,
+        (each) =>
+          inScope(each.vaultId) && (!vaultId || (each.vaultId ?? DEFAULT_VAULT) === vaultId),
       );
       return Promise.all(
         notebooks.map(async (notebook) => ({
@@ -96,9 +119,11 @@ async function run<Name extends BotToolName>(
     }
     case "search_sources": {
       const { query, notebookId } = input as BotToolInput<"search_sources">;
-      const sources = notebookId
-        ? await store().listSources(notebookId)
-        : await store().listAllSources();
+      const visible = await visibleNotebooks();
+      if (notebookId && !visible.has(notebookId)) throw new Error("No notebook with that id.");
+      const sources = (
+        notebookId ? await store().listSources(notebookId) : await store().listAllSources()
+      ).filter((source) => visible.has(source.notebookId));
       const chunks = await store().getChunks(sources.map((source) => source.id));
       const notebookOf = new Map(sources.map((source) => [source.id, source.notebookId]));
       return selectPassages({ sources, chunks, budget: 12_000, query })
@@ -112,7 +137,7 @@ async function run<Name extends BotToolName>(
     }
     case "read_source": {
       const { sourceId } = input as BotToolInput<"read_source">;
-      const source = await store().getSource(sourceId);
+      const source = await visibleSource(await store().getSource(sourceId));
       if (!source) throw new Error("No source with that id.");
       return { id: source.id, title: source.title, text: cut(source.text) };
     }
@@ -120,7 +145,7 @@ async function run<Name extends BotToolName>(
       const { vault } = input as BotToolInput<"list_notes">;
       const vaultId = await vaultNamed(vault);
       const label = await labelOf();
-      return (await store().listNotes())
+      return (await notes())
         .filter((note) => !vaultId || note.vaultId === vaultId)
         .slice(0, 200)
         .map((note) => ({
@@ -134,7 +159,7 @@ async function run<Name extends BotToolName>(
     case "search_notes": {
       const { query } = input as BotToolInput<"search_notes">;
       const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-      return (await store().listNotes())
+      return (await notes())
         .filter((note) =>
           words.every((word) =>
             `${note.title}\n${note.body}\n${note.tags.join(" ")}`.toLowerCase().includes(word),
@@ -167,13 +192,17 @@ async function run<Name extends BotToolName>(
         }));
     }
     case "list_skills":
-      return (await store().listSkills()).map((skill) => ({
-        name: skill.name,
-        description: skill.description,
-      }));
+      return (await store().listSkills())
+        .filter((skill) => inScope(skill.vaultId))
+        .map((skill) => ({
+          name: skill.name,
+          description: skill.description,
+        }));
     case "read_skill": {
       const { name: wanted } = input as BotToolInput<"read_skill">;
-      const skill = (await store().listSkills()).find((each) => sameName(each.name, wanted));
+      const skill = (await store().listSkills()).find(
+        (each) => inScope(each.vaultId) && sameName(each.name, wanted),
+      );
       if (!skill) throw new Error("No skill with that name.");
       return { name: skill.name, description: skill.description, body: cut(skill.body) };
     }
@@ -196,6 +225,25 @@ async function run<Name extends BotToolName>(
       );
       await calendarStore.save([...(await calendarStore.load()), entry]);
       return { ok: true, title: entry.title, start: entry.start, end: entry.end };
+    }
+    case "create_bot": {
+      const draft = input as BotToolInput<"create_bot">;
+      const bot = await createBot({
+        name: draft.name,
+        title: draft.title,
+        instructions: draft.instructions,
+        avatar: { shape: draft.shape ?? "blob", color: draft.color ?? "chart-2" },
+        access: {
+          notebooks: draft.notebooks ?? true,
+          notes: draft.notes ?? "read",
+          calendar: draft.calendar ?? "read",
+          skills: draft.skills ?? true,
+          ...(context.vault ? { vault: context.vault } : {}),
+        },
+        canDelegate: false,
+        canCreateBots: false,
+      });
+      return { ok: true, id: bot.id, name: bot.name };
     }
     case "ask_bot": {
       const { bot, task } = input as BotToolInput<"ask_bot">;

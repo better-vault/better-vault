@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { botShapeIds } from "./avatars";
+import { botColorKeys } from "./colors";
 
 /**
  * The tools a bot can call. The server only declares them: the user's data
@@ -56,6 +58,26 @@ export const botToolSchemas = {
     description: z.string().max(4000).optional(),
     location: z.string().max(200).optional(),
   }),
+  create_bot: z.object({
+    name: z.string().min(1).max(80).describe('Short and clear, such as "Vault Summarizer"'),
+    title: z.string().max(200).describe("Its role in a few words"),
+    instructions: z
+      .string()
+      .max(8000)
+      .describe("Its persona and standing instructions: what it does and how it answers"),
+    shape: z
+      .enum(botShapeIds as [string, ...string[]])
+      .optional()
+      .describe("Its avatar's shape"),
+    color: z.enum(botColorKeys as [string, ...string[]]).optional(),
+    notebooks: z.boolean().optional().describe("May read notebooks and sources (default true)"),
+    notes: z.enum(["none", "read", "write"]).optional().describe("Notes access (default read)"),
+    calendar: z
+      .enum(["none", "read", "write"])
+      .optional()
+      .describe("Calendar access (default read)"),
+    skills: z.boolean().optional().describe("May read skills (default true)"),
+  }),
   ask_bot: z.object({
     bot: z.string().describe("The other bot's name, exactly as listed"),
     task: z
@@ -84,6 +106,8 @@ export const botToolDescriptions: Record<BotToolName, string> = {
     "Create a note. The user is asked to approve it first; until the result comes back, it has not been made.",
   append_to_note: "Add text to the end of an existing note. The user is asked to approve it first.",
   add_calendar_event: "Add an event to the user's calendar. The user is asked to approve it first.",
+  create_bot:
+    "Make a new bot for the user, with a persona, a face and what it may access. The user is asked to approve it first. Use it when the user asks for a bot, or a bot for a recurring job; do not make a bot for a one-off answer.",
   ask_bot:
     "Hand a task to another of the user's bots and get its answer. Use it when the task fits that bot's role better than yours.",
 };
@@ -93,6 +117,7 @@ export const botWriteTools = new Set<BotToolName>([
   "create_note",
   "append_to_note",
   "add_calendar_event",
+  "create_bot",
 ]);
 
 export const botToolNames = Object.keys(botToolSchemas) as BotToolName[];

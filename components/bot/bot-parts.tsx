@@ -1,4 +1,5 @@
 import {
+  BotIcon,
   Calendar03Icon,
   CheckmarkCircle02Icon,
   Note01Icon,
@@ -9,6 +10,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
+import { accessSummary } from "@/lib/bot/access";
 import type { BotToolInput, BotToolName } from "@/lib/bot/tools";
 import type { ChatMessage } from "@/lib/chat/types";
 import type { Bot } from "@/lib/db/types";
@@ -109,15 +111,31 @@ export function ApprovalCard({
 }) {
   const { t, i18n } = useTranslation("bot");
   const [busy, setBusy] = useState<boolean | null>(null);
-  const name = getToolName(part) as "create_note" | "append_to_note" | "add_calendar_event";
+  const name = getToolName(part) as
+    "create_note" | "append_to_note" | "add_calendar_event" | "create_bot";
   const input = (part.input ?? {}) as Record<string, string | undefined>;
   const output = outputOf(part);
   const pending = part.state === "input-available";
   const streaming = part.state === "input-streaming";
 
-  const title = input.title ?? "";
-  const detail =
-    name === "add_calendar_event"
+  const newBot =
+    name === "create_bot" ? (part.input as BotToolInput<"create_bot"> | undefined) : undefined;
+  const title = (newBot ? newBot.name : input.title) ?? "";
+  const detail = newBot
+    ? [
+        newBot.title,
+        accessSummary({
+          notebooks: newBot.notebooks ?? true,
+          notes: newBot.notes ?? "read",
+          calendar: newBot.calendar ?? "read",
+          skills: newBot.skills ?? true,
+        })
+          .map((key) => t(`access.summary.${key}` as "access.summary.notes"))
+          .join(", ") || t("access.summary.nothing"),
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : name === "add_calendar_event"
       ? [
           input.start
             ? eventWhen(
@@ -147,11 +165,25 @@ export function ApprovalCard({
   return (
     <div className="flex w-full max-w-md flex-col gap-1 rounded-2xl border bg-card px-4 py-3.5">
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Icon icon={name === "add_calendar_event" ? Calendar03Icon : Note01Icon} size={13} />
+        <Icon
+          icon={name === "add_calendar_event" ? Calendar03Icon : newBot ? BotIcon : Note01Icon}
+          size={13}
+        />
         {pending || streaming ? t("approval.label") : t(`approval.${name}`)}
       </span>
-      <p className="truncate text-[0.9375rem] font-medium">{title || t(`approval.${name}`)}</p>
-      {detail ? <p className="line-clamp-2 text-sm text-muted-foreground">{detail}</p> : null}
+      <div className="flex items-center gap-3">
+        {newBot ? (
+          <BotAvatar
+            avatar={{ shape: newBot.shape ?? "blob", color: newBot.color ?? "chart-2" }}
+            size={44}
+            mood={pending ? "idle" : "happy"}
+          />
+        ) : null}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[0.9375rem] font-medium">{title || t(`approval.${name}`)}</p>
+          {detail ? <p className="line-clamp-2 text-sm text-muted-foreground">{detail}</p> : null}
+        </div>
+      </div>
       {pending ? (
         <div className="mt-2 flex gap-2">
           <Button

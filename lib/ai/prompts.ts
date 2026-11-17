@@ -63,31 +63,53 @@ export function botSystemPrompt({
   timeZone,
   vaults,
   currentVault,
+  scopeVault,
   delegatedBy,
 }: {
   bot: BotPersona;
   /** The other bots, when this one may delegate. */
   roster: readonly { name: string; title: string }[];
-  /** Whether the model can call tools at all (local models cannot). */
-  tools: boolean;
+  /** The tools it may call, or null when the model cannot call tools (local models). */
+  tools: readonly string[] | null;
   visuals: boolean;
   now: string;
   timeZone: string;
   vaults: readonly string[];
   currentVault: string;
+  /** The one vault it may use, if it is limited to one. */
+  scopeVault?: string;
   /** The bot that handed this task over, if any. */
   delegatedBy?: string;
 }): string {
+  const has = (name: string) => tools?.includes(name) ?? false;
+  const areas = [
+    ["notebooks and their sources", has("search_sources")],
+    [has("create_note") ? "notes (read and write)" : "notes (read only)", has("read_note")],
+    [
+      has("add_calendar_event") ? "the calendar (read and add events)" : "the calendar (read only)",
+      has("list_calendar"),
+    ],
+    ["skills", has("read_skill")],
+  ] as const;
+  const can = areas.filter(([, on]) => on).map(([area]) => area);
+  const cannot = [
+    ...(has("search_sources") ? [] : ["notebooks and sources"]),
+    ...(has("read_note") ? [] : ["notes"]),
+    ...(has("list_calendar") ? [] : ["the calendar"]),
+    ...(has("read_skill") ? [] : ["skills"]),
+  ];
   const toolRules = tools
     ? `You work inside better-vault, the user's local-first app of notebooks (with sources), notes, skills and a calendar. Your tools read and change them on the user's device.
+- You may use: ${can.length ? can.join(", ") : "none of the user's material"}.${cannot.length ? ` You have no access to ${cannot.join(", ")}: if asked about them, say so and that the user can turn access on in Edit bot (the menu at the top right of this chat).` : ""}
 - Look things up with your tools before answering questions about the user's material. Say which notebook, source or note an answer comes from.
-- create_note, append_to_note and add_calendar_event ask the user for an OK. Never say something was created, added or changed until the tool's result says it was. If the user declines, accept it and move on.
+- Changes (new notes, additions to notes, calendar events, new bots) ask the user for an OK. Never say something was created, added or changed until the tool's result says it was. If the user declines, accept it and move on.
+- ${has("create_bot") ? "When the user asks for a bot, make it with create_bot: a clear name and role, instructions that describe the job, a fitting shape and colour, and only the access the job needs." : "You cannot make bots. If the user asks for one, tell them to press + at the top of the bot list, or to ask a bot that can make bots, such as Chief of Staff."}
 - Times are the user's local time. Today is ${now} (${timeZone}).
-- The user's vaults: ${vaults.map((name) => `"${name}"`).join(", ")}. The current vault is "${currentVault}".`
+- ${scopeVault ? `You may only use the vault "${scopeVault}".` : `The user's vaults: ${vaults.map((name) => `"${name}"`).join(", ")}. The current vault is "${currentVault}".`}`
     : `This model cannot use tools, so you cannot see the user's notebooks, notes or calendar. Say so if asked about them.`;
 
   const delegation =
-    tools && roster.length
+    has("ask_bot") && roster.length
       ? `\n\nYou coordinate the user's other bots. Hand a task to one with ask_bot when it fits its role better than yours; give it every detail, since it cannot see this thread. You may ask several in turn. Then tell the user, briefly, what each one did.\n${roster
           .map((each) => `- ${each.name}: ${each.title}`)
           .join("\n")}`

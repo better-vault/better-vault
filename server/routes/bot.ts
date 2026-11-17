@@ -14,7 +14,12 @@ import { describeError } from "@/lib/ai/errors";
 import { botSystemPrompt } from "@/lib/ai/prompts";
 import { createLanguageModel } from "@/lib/ai/providers";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
-import { botToolDescriptions, botToolNames, botToolSchemas } from "@/lib/bot/tools";
+import {
+  botToolDescriptions,
+  botToolNames,
+  botToolSchemas,
+  type BotToolName,
+} from "@/lib/bot/tools";
 import type { ChatMessage, ChatMessageMetadata, TokenUsage } from "@/lib/chat/types";
 import { createVisualTools } from "../visual-tools";
 
@@ -35,12 +40,16 @@ const bodySchema = z.object({
     .array(z.object({ name: z.string().max(80), title: z.string().max(200) }))
     .max(50)
     .default([]),
+  /** The tools this bot may use (its access in Edit bot). Every one when left out. */
+  tools: z.array(z.enum(botToolNames as [BotToolName, ...BotToolName[]])).default(botToolNames),
   /** The bot that handed this task over, if any. */
   delegatedBy: z.string().max(80).optional(),
   now: z.string().max(80),
   timeZone: z.string().max(80),
   vaults: z.array(z.string().max(200)).max(100),
   currentVault: z.string().max(200),
+  /** The one vault this bot may use, by name, if it is limited to one. */
+  scopeVault: z.string().max(200).optional(),
 });
 
 function tokenUsage(usage: LanguageModelUsage): TokenUsage {
@@ -56,14 +65,12 @@ function tokenUsage(usage: LanguageModelUsage): TokenUsage {
  * The bot tools, declared without `execute`: the page runs them on the
  * user's device and adds their results, then asks again.
  */
-function botTools(canDelegate: boolean): ToolSet {
+function botTools(allowed: readonly BotToolName[]): ToolSet {
   return Object.fromEntries(
-    botToolNames
-      .filter((name) => canDelegate || name !== "ask_bot")
-      .map((name) => {
-        const inputSchema: z.ZodType<Record<string, unknown>> = botToolSchemas[name];
-        return [name, tool({ description: botToolDescriptions[name], inputSchema })];
-      }),
+    allowed.map((name) => {
+      const inputSchema: z.ZodType<Record<string, unknown>> = botToolSchemas[name];
+      return [name, tool({ description: botToolDescriptions[name], inputSchema })];
+    }),
   );
 }
 
@@ -72,6 +79,8 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   const { model, credentials, effort, roster } = parsed.data;
+  // A bot hands tasks over only when there is someone to hand them to.
+  const allowed = parsed.data.tools.filter((name) => name !== "ask_bot" || roster.length > 0);
   const messages = parsed.data.messages as unknown as ChatMessage[];
 
   let languageModel;
@@ -84,11 +93,11 @@ export async function POST(request: Request) {
   // Local models often can't call tools, so they only chat.
   const canUseTools = !providers[model.provider].local;
   const tools: ToolSet | undefined = canUseTools
-    ? { ...botTools(roster.length > 0), ...createVisualTools() }
+    ? { ...botTools(allowed), ...createVisualTools() }
     : undefined;
   const system = botSystemPrompt({
     ...parsed.data,
-    tools: canUseTools,
+    tools: canUseTools ? allowed : null,
     visuals: canUseTools,
   });
 

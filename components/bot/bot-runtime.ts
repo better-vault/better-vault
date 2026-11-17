@@ -6,7 +6,8 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useSyncExternalStore } from "react";
-import { runBotTool } from "@/lib/bot/run-tool";
+import { botAccess, botToolsFor } from "@/lib/bot/access";
+import { runBotTool, type ToolContext } from "@/lib/bot/run-tool";
 import { botWriteTools, isBotTool, type BotToolName } from "@/lib/bot/tools";
 import type { ChatMessage } from "@/lib/chat/types";
 import { getBot, listBots, loadBotThread, saveBotThread } from "@/lib/db/bots";
@@ -154,12 +155,15 @@ async function requestBody(botId: string, messages: ChatMessage[]) {
   const delegator = delegatorId ? bots.find((each) => each.id === delegatorId) : undefined;
   const current = currentVaultId();
   const label = environment.vaultLabel;
+  const scopeId = botAccess(bot).vault;
+  const scope = scopeId ? vaults.find((vault) => vault.id === scopeId) : undefined;
   return {
     messages: messages.slice(-HISTORY),
     model,
     credentials: credentialsFor(settings, model.provider),
     effort: effortFor(settings, model.provider),
     bot: { name: bot.name, title: bot.title, instructions: bot.instructions },
+    tools: botToolsFor(bot, { handedOver: Boolean(delegatorId) }),
     // A task handed over is not handed on: one level, so bots never loop.
     roster:
       bot.canDelegate && !delegatorId
@@ -172,6 +176,21 @@ async function requestBody(botId: string, messages: ChatMessage[]) {
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     vaults: vaults.map(label),
     currentVault: label(vaults.find((vault) => vault.id === current) ?? vaults[0]),
+    scopeVault: scope ? label(scope) : undefined,
+  };
+}
+
+/** What a bot's tool calls may touch: its tools and its vault, read fresh for each call. */
+async function toolContext(botId: string, messages: ChatMessage[]): Promise<ToolContext> {
+  const bot = await getBot(botId);
+  const handedOver = Boolean(delegatorOf(messages));
+  const vault = bot ? botAccess(bot).vault : undefined;
+  return {
+    currentVault: currentVaultId(),
+    vaultLabel: environment.vaultLabel,
+    askBot: (target, task) => askBot(botId, target, task),
+    allowed: new Set(bot ? botToolsFor(bot, { handedOver }) : []),
+    ...(vault ? { vault } : {}),
   };
 }
 
@@ -215,17 +234,15 @@ function createChat(botId: string, messages: ChatMessage[]): Chat<ChatMessage> {
       const name: BotToolName = toolCall.toolName;
       // Writes wait for the user's OK in the thread.
       if (botWriteTools.has(name)) return;
-      void runBotTool(name, toolCall.input, {
-        currentVault: currentVaultId(),
-        vaultLabel: environment.vaultLabel,
-        askBot: (target, task) => askBot(botId, target, task),
-      }).then((output) => {
-        void chat.addToolOutput({
-          tool: name as never,
-          toolCallId: toolCall.toolCallId,
-          output: output as never,
+      void toolContext(botId, chat.messages)
+        .then((context) => runBotTool(name, toolCall.input, context))
+        .then((output) => {
+          void chat.addToolOutput({
+            tool: name as never,
+            toolCallId: toolCall.toolCallId,
+            output: output as never,
+          });
         });
-      });
     },
     onFinish: ({ messages: finished, isError, isAbort }) => {
       void saveBotThread(botId, finished);
@@ -259,11 +276,7 @@ export async function answerApproval(
   if (!isBotTool(name)) return;
   setActivity(botId, "thinking");
   const output = approved
-    ? await runBotTool(name, part.input, {
-        currentVault: currentVaultId(),
-        vaultLabel: environment.vaultLabel,
-        askBot: async () => ({ error: "Not available here." }),
-      })
+    ? await runBotTool(name, part.input, await toolContext(botId, chat.messages))
     : { ok: false, declined: true, note: "The user said no. Do not try again unless asked." };
   await chat.addToolOutput({ tool: name as never, toolCallId, output: output as never });
   // Saved now, so a change that was made is never offered again, even if the bot's reply fails.

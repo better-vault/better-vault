@@ -6,7 +6,8 @@ import { createNotebook } from "@/lib/db/notebooks";
 import { createNote } from "@/lib/db/notes";
 import { addSource } from "@/lib/db/sources";
 import { setStoreForTests, store } from "@/lib/db/store";
-import { DEFAULT_VAULT } from "@/lib/db/vaults";
+import { createVault, DEFAULT_VAULT } from "@/lib/db/vaults";
+import { botToolsFor } from "./access";
 import { calendarEntry, localInstant, runBotTool, type ToolContext } from "./run-tool";
 
 const asked: [string, string][] = [];
@@ -101,5 +102,73 @@ describe("calendar entries", () => {
     expect(() =>
       calendarEntry({ title: "Bad", start: "2026-12-24T10:00", end: "2026-12-24T09:00" }, "UTC"),
     ).toThrow();
+  });
+});
+
+describe("bot access", () => {
+  beforeEach(async () => {
+    setStoreForTests(createDexieBackend());
+    await deleteAllData();
+  });
+
+  it("refuses tools the bot may not use, and keeps a bot to its vault", async () => {
+    const other = await createVault({ name: "Work" });
+    await createNote({ vaultId: DEFAULT_VAULT, title: "Home note" });
+    await createNote({ vaultId: other, title: "Work note" });
+    const scoped: ToolContext = { ...context, allowed: new Set(["list_notes"]), vault: other };
+    expect(await runBotTool("list_notes", {}, scoped)).toEqual([
+      expect.objectContaining({ title: "Work note" }),
+    ]);
+    expect(await runBotTool("read_note", { title: "Home note" }, scoped)).toEqual({
+      error: expect.stringContaining("isn't allowed"),
+    });
+    expect(
+      await runBotTool("read_note", { title: "Home note" }, { ...context, vault: other }),
+    ).toEqual({ error: "No such note." });
+  });
+
+  it("chooses tools from a bot's access", () => {
+    const planner = {
+      canDelegate: false,
+      access: { notebooks: false, notes: "read", calendar: "write", skills: false } as const,
+    };
+    expect(botToolsFor(planner)).toEqual([
+      "list_notes",
+      "search_notes",
+      "read_note",
+      "list_calendar",
+      "add_calendar_event",
+    ]);
+    const chief = { canDelegate: true };
+    expect(botToolsFor(chief)).toContain("create_bot");
+    expect(botToolsFor(chief, { handedOver: true })).not.toContain("ask_bot");
+    expect(botToolsFor(chief, { handedOver: true })).not.toContain("create_bot");
+  });
+
+  it("makes bots with the access asked for", async () => {
+    const made = (await runBotTool(
+      "create_bot",
+      {
+        name: "Vault Summarizer",
+        title: "Sums up my vault",
+        instructions: "Be short.",
+        shape: "raven",
+        calendar: "none",
+      },
+      context,
+    )) as { ok: boolean; id: string };
+    expect(made.ok).toBe(true);
+    const bot = await store().getBot(made.id);
+    expect(bot?.avatar.shape).toBe("raven");
+    expect(bot?.access).toEqual({ notebooks: true, notes: "read", calendar: "none", skills: true });
+    expect(
+      await runBotTool(
+        "create_bot",
+        { name: "X", title: "", instructions: "", shape: "dragon" },
+        context,
+      ),
+    ).toEqual({
+      error: expect.stringContaining("Invalid input"),
+    });
   });
 });
