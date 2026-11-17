@@ -40,7 +40,8 @@ export function BotRoster({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex h-14 shrink-0 items-center gap-1 ps-4 pe-2">
+      {/* A window bar on macOS: it moves the window and leaves room for its buttons. */}
+      <div data-window-bar className="flex min-h-14 shrink-0 items-center gap-1 ps-4 pe-2">
         {searching ? (
           <input
             autoFocus

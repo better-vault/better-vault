@@ -101,7 +101,10 @@ function ThreadHeader({
   const { t } = useTranslation("bot");
   const state = useBotActivity(bot.id);
   return (
-    <div className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3">
+    <div
+      data-window-bar
+      className="grid min-h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3"
+    >
       <div>
         <button
           type="button"
