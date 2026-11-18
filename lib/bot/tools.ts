@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { botShapeIds } from "./avatars";
+import { faceItems, headItems, neckItems } from "./look";
 import { botColorKeys } from "./colors";
 
 /**
@@ -87,10 +87,9 @@ export const botToolSchemas = {
       .string()
       .max(8000)
       .describe("Its persona and standing instructions: what it does and how it answers"),
-    shape: z
-      .enum(botShapeIds as [string, ...string[]])
-      .optional()
-      .describe("Its avatar's shape"),
+    head: z.enum(headItems).optional().describe("What the character wears on its head"),
+    face: z.enum(faceItems).optional().describe("What it wears on its face"),
+    neck: z.enum(neckItems).optional().describe("What it wears at its neck"),
     color: z.enum(botColorKeys as [string, ...string[]]).optional(),
     notebooks: z.boolean().optional().describe("May read notebooks and sources (default true)"),
     notes: z.enum(["none", "read", "write"]).optional().describe("Notes access (default read)"),

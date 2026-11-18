@@ -13,7 +13,7 @@ import { Switch } from "@/components/panelui/switch";
 import { Tabs } from "@/components/panelui/tabs";
 import { Textarea } from "@/components/panelui/textarea";
 import { botAccess } from "@/lib/bot/access";
-import { botShapeIds } from "@/lib/bot/avatars";
+import { botLook, faceItems, headItems, neckItems } from "@/lib/bot/look";
 import { botColor, botColorKeys } from "@/lib/bot/colors";
 import type { NewBot } from "@/lib/db/bots";
 import type { BotAccess } from "@/lib/db/types";
@@ -145,7 +145,7 @@ function BotForm({
             </Tabs.List>
             <Tabs.Content value="profile" className="flex flex-col gap-5 pt-5">
               <div className="flex items-center gap-4">
-                <BotAvatar avatar={details.avatar} size={72} followPointer />
+                <BotAvatar avatar={details.avatar} size={96} followPointer />
                 <div className="flex min-w-0 flex-1 flex-col gap-3">
                   <Field label={t("editor.name")} htmlFor={nameId}>
                     <Input
@@ -169,32 +169,24 @@ function BotForm({
                 </div>
               </div>
 
-              <fieldset className="flex flex-col gap-2">
-                <legend className="mb-2 text-sm font-medium">{t("editor.shape")}</legend>
-                <div
-                  className="grid grid-cols-8 gap-1 sm:grid-cols-12"
-                  role="radiogroup"
-                  aria-label={t("editor.shape")}
-                >
-                  {botShapeIds.map((shape) => (
-                    <button
-                      key={shape}
-                      type="button"
-                      role="radio"
-                      aria-checked={details.avatar.shape === shape}
-                      aria-label={t(`shapes.${shape}`)}
-                      title={t(`shapes.${shape}`)}
-                      onClick={() => set({ avatar: { ...details.avatar, shape } })}
-                      className={cn(
-                        "flex aspect-square cursor-pointer items-center justify-center rounded-xl transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
-                        details.avatar.shape === shape && "bg-muted ring-1 ring-foreground/20",
-                      )}
-                    >
-                      <BotAvatar avatar={{ ...details.avatar, shape }} size={28} />
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
+              <LookRow
+                slot="head"
+                items={headItems}
+                avatar={details.avatar}
+                onChoose={(head) => set({ avatar: { ...details.avatar, head } })}
+              />
+              <LookRow
+                slot="face"
+                items={faceItems}
+                avatar={details.avatar}
+                onChoose={(face) => set({ avatar: { ...details.avatar, face } })}
+              />
+              <LookRow
+                slot="neck"
+                items={neckItems}
+                avatar={details.avatar}
+                onChoose={(neck) => set({ avatar: { ...details.avatar, neck } })}
+              />
 
               <fieldset className="flex flex-col gap-2">
                 <legend className="mb-2 text-sm font-medium">{t("editor.color")}</legend>
@@ -336,5 +328,57 @@ function BotForm({
         </Button>
       </Dialog.Footer>
     </>
+  );
+}
+
+/** One slot of the character's look: a tile per item, each showing the character wearing it. */
+function LookRow<Item extends string>({
+  slot,
+  items,
+  avatar,
+  onChoose,
+}: {
+  slot: "head" | "face" | "neck";
+  items: readonly Item[];
+  avatar: BotDetails["avatar"];
+  onChoose: (item: Item) => void;
+}) {
+  const { t } = useTranslation("bot");
+  const current = botLook(avatar)[slot];
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 text-sm font-medium">{t(`look.${slot}`)}</legend>
+      <div
+        className="grid grid-cols-5 gap-1 sm:grid-cols-10"
+        role="radiogroup"
+        aria-label={t(`look.${slot}`)}
+      >
+        {items.map((item) => (
+          <button
+            key={item}
+            type="button"
+            role="radio"
+            aria-checked={current === item}
+            aria-label={t(`look.items.${item}` as "look.items.none")}
+            title={t(`look.items.${item}` as "look.items.none")}
+            onClick={() => onChoose(item)}
+            className={cn(
+              "flex aspect-square cursor-pointer items-center justify-center rounded-xl transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+              current === item && "bg-muted ring-1 ring-foreground/20",
+            )}
+          >
+            {/* A close crop on the slot, so small items read. */}
+            <span className="relative size-11 overflow-hidden">
+              <span
+                className="absolute"
+                style={{ left: -10, top: slot === "head" ? -1 : slot === "face" ? -13 : -20 }}
+              >
+                <BotAvatar avatar={{ ...avatar, [slot]: item }} size={64} still />
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
   );
 }

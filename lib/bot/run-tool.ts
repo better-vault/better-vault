@@ -235,7 +235,12 @@ async function run<Name extends BotToolName>(
         name: draft.name,
         title: draft.title,
         instructions: draft.instructions,
-        avatar: { shape: draft.shape ?? "blob", color: draft.color ?? "chart-2" },
+        avatar: {
+          color: draft.color ?? "chart-2",
+          ...(draft.head && draft.head !== "none" ? { head: draft.head } : {}),
+          ...(draft.face && draft.face !== "none" ? { face: draft.face } : {}),
+          ...(draft.neck && draft.neck !== "none" ? { neck: draft.neck } : {}),
+        },
         access: {
           notebooks: draft.notebooks ?? true,
           notes: draft.notes ?? "read",

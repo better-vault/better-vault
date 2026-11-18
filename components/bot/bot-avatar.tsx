@@ -1,22 +1,25 @@
 import { useEffect, useRef } from "react";
-import { mountAvatar, type AvatarOptions, type MountedAvatar } from "open-bot-avatar/dom";
-import { botShape } from "@/lib/bot/avatars";
 import { botColor } from "@/lib/bot/colors";
+import { botLook } from "@/lib/bot/look";
 import type { BotAvatar as BotLook } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
+import { mountCharacter, type CharacterOptions, type MountedCharacter } from "./character/mount";
+import type { Mood } from "./character/pose";
 
-export type BotMood = NonNullable<AvatarOptions["mood"]>;
+export type BotMood = Mood;
 
 /**
- * A bot's face, drawn by open-bot-avatar: its shape with inferred volume,
- * blinking and moods. The mood shows what the bot is doing (thinking while it
- * works, happy when it is done), so no spinner is needed.
+ * A bot's face: better-vault's character (./character), a soft rounded head
+ * that turns in 3D, in the bot's colour and wearing its items. Its mood shows
+ * what the bot is doing (thinking while it works, happy when it is done), so
+ * no spinner is needed.
  */
 export function BotAvatar({
   avatar,
   size,
   mood = "idle",
   followPointer = false,
+  still = false,
   label = "",
   className,
 }: {
@@ -24,25 +27,29 @@ export function BotAvatar({
   size: number;
   mood?: BotMood;
   followPointer?: boolean;
+  /** One drawing at rest, never animated: for rows of small previews. */
+  still?: boolean;
   /** Its accessible name; empty when a name is shown beside it. */
   label?: string;
   className?: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const mounted = useRef<MountedAvatar | null>(null);
-  const color = botColor(avatar.color);
-  const options: AvatarOptions = {
-    definition: botShape(avatar.shape),
-    color: color.body,
-    eyeColor: color.eyes,
+  const mounted = useRef<MountedCharacter | null>(null);
+  const look = botLook(avatar);
+  const color = botColor(look.color);
+  const options: CharacterOptions = {
+    look,
+    body: color.body,
+    eyes: color.eyes,
     mood,
     followPointer,
+    still,
     label,
   };
 
   useEffect(() => {
     if (!host.current) return;
-    mounted.current = mountAvatar(host.current, options);
+    mounted.current = mountCharacter(host.current, options);
     return () => {
       mounted.current?.destroy();
       mounted.current = null;

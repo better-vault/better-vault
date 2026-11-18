@@ -25,7 +25,7 @@ const blank: BotDetails = {
   name: "",
   title: "",
   instructions: "",
-  avatar: { shape: "blob", color: "chart-2" },
+  avatar: { color: "chart-2" },
   canDelegate: false,
   canCreateBots: false,
   access: fullAccess,

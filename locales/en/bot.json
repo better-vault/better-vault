@@ -77,7 +77,7 @@
   },
   "editor": {
     "createTitle": "New bot",
-    "createDescription": "Give it a name, a role and a face.",
+    "createDescription": "Give it a name, a role and a look.",
     "editTitle": "Edit bot",
     "name": "Name",
     "namePlaceholder": "Research Assistant",
@@ -85,37 +85,11 @@
     "rolePlaceholder": "Finds answers in my sources",
     "instructions": "Instructions",
     "instructionsPlaceholder": "How it should work, what it should care about, how it should answer…",
-    "shape": "Shape",
     "color": "Colour",
     "delegate": "Can hand tasks to other bots",
     "pinned": "Pin to the top",
     "create": "Create bot",
     "save": "Save"
-  },
-  "shapes": {
-    "blob": "Blob",
-    "drop": "Drop",
-    "pebble": "Pebble",
-    "bean": "Bean",
-    "cloud": "Cloud",
-    "note": "Note",
-    "magnifier": "Magnifier",
-    "bulb": "Bulb",
-    "leaf": "Leaf",
-    "bear": "Bear",
-    "mushroom": "Mushroom",
-    "calendar": "Calendar",
-    "pear": "Pear",
-    "raven": "Raven",
-    "cat": "Cat",
-    "owl": "Owl",
-    "fox": "Fox",
-    "bunny": "Bunny",
-    "robot": "Robot",
-    "star": "Star",
-    "fish": "Fish",
-    "heart": "Heart",
-    "vault": "Vault"
   },
   "colors": {
     "chart-3": "Green",
@@ -168,6 +142,32 @@
       "skills": "Skills",
       "nothing": "No access",
       "skillsWrite": "Skills (write)"
+    }
+  },
+  "look": {
+    "head": "Headwear",
+    "face": "Face",
+    "neck": "Neck",
+    "items": {
+      "none": "None",
+      "wizard-hat": "Wizard hat",
+      "top-hat": "Top hat",
+      "beanie": "Beanie",
+      "beret": "Beret",
+      "crown": "Crown",
+      "chef-hat": "Chef's hat",
+      "graduation-cap": "Graduation cap",
+      "headphones": "Headphones",
+      "antenna": "Antenna",
+      "round-glasses": "Round glasses",
+      "square-glasses": "Square glasses",
+      "sunglasses": "Sunglasses",
+      "monocle": "Monocle",
+      "mustache": "Mustache",
+      "blush": "Blush",
+      "bow-tie": "Bow tie",
+      "tie": "Tie",
+      "scarf": "Scarf"
     }
   }
 }

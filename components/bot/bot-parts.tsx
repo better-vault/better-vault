@@ -202,7 +202,12 @@ export function ApprovalCard({
       <div className="flex items-center gap-3">
         {newBot ? (
           <BotAvatar
-            avatar={{ shape: newBot.shape ?? "blob", color: newBot.color ?? "chart-2" }}
+            avatar={{
+              color: newBot.color ?? "chart-2",
+              head: newBot.head,
+              face: newBot.face,
+              neck: newBot.neck,
+            }}
             size={44}
             mood={pending ? "idle" : "happy"}
           />

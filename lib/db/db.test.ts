@@ -242,7 +242,7 @@ describe.each(backends)("%s store", (name, create) => {
   });
 
   describe("bots", () => {
-    const look = { shape: "drop", color: "chart-1" };
+    const look = { color: "chart-1", head: "crown" };
 
     it("keeps bots in roster order with their threads", async () => {
       const chief = await createBot({
@@ -267,7 +267,10 @@ describe.each(backends)("%s store", (name, create) => {
       expect((await store().getBot(helper.id))?.preview).toBe("Second one");
       await saveBotThread(helper.id, [userMessage("c")]);
       expect((await loadBotThread(helper.id)).map((m) => m.id)).toEqual(["c"]);
-      await updateBot(chief.id, { name: "Chief of Staff", model: { provider: "openai", modelId: "x" } });
+      await updateBot(chief.id, {
+        name: "Chief of Staff",
+        model: { provider: "openai", modelId: "x" },
+      });
       await updateBot(chief.id, { model: undefined });
       const saved = await store().getBot(chief.id);
       expect(saved?.name).toBe("Chief of Staff");

@@ -152,14 +152,15 @@ describe("bot access", () => {
         name: "Vault Summarizer",
         title: "Sums up my vault",
         instructions: "Be short.",
-        shape: "raven",
+        head: "top-hat",
+        face: "monocle",
         calendar: "none",
       },
       context,
     )) as { ok: boolean; id: string };
     expect(made.ok).toBe(true);
     const bot = await store().getBot(made.id);
-    expect(bot?.avatar.shape).toBe("raven");
+    expect(bot?.avatar).toEqual({ color: "chart-2", head: "top-hat", face: "monocle" });
     expect(bot?.access).toEqual({
       notebooks: true,
       notes: "read",
@@ -169,7 +170,7 @@ describe("bot access", () => {
     expect(
       await runBotTool(
         "create_bot",
-        { name: "X", title: "", instructions: "", shape: "dragon" },
+        { name: "X", title: "", instructions: "", head: "dragon" },
         context,
       ),
     ).toEqual({

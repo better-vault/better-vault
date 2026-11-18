@@ -152,11 +152,15 @@ export interface BotAccess {
   vault?: string;
 }
 
+/** How a bot's character looks: its colour and what it wears (ids from `lib/bot/look.ts`). */
 export interface BotAvatar {
-  /** A shape from `lib/bot/avatars.ts`. */
-  shape: string;
   /** A colour token name from `lib/bot/colors.ts`. */
   color: string;
+  head?: string;
+  face?: string;
+  neck?: string;
+  /** Saved before the character: a shape, read as a look by `botLook`. */
+  shape?: string;
 }
 
 /** One message of a bot's thread. Ids are `${botId}:${messageId}`. */

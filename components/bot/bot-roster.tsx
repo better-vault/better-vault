@@ -10,7 +10,13 @@ import { BotAvatar, type BotMood } from "./bot-avatar";
 import { useBotActivity, type BotActivity } from "./bot-runtime";
 
 const moodOf = (state: BotActivity): BotMood =>
-  state === "thinking" ? "thinking" : state === "done" ? "happy" : "idle";
+  state === "thinking"
+    ? "thinking"
+    : state === "done"
+      ? "happy"
+      : state === "waiting"
+        ? "waiting"
+        : "idle";
 
 /** Every bot: pinned ones as large tiles, the rest as rows with their last message. */
 export function BotRoster({
