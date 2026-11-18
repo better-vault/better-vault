@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-18
+
 ### Added
 
 - Skills: the + button opens a dialog to create a skill or fetch skills from skills.sh. Paste an `npx skills add …` command, a skills.sh link or a GitHub link, pick the skills found and import them.
@@ -13,7 +15,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Changed
 
 - Bots have a character of their own, drawn as line art in the bot's colour: a rounded, cube-like head with hatched pill eyes that turns in 3D toward the pointer, blinks, thinks, nods and hops, and wears a hat, glasses, a mustache or a bow tie of your choosing. It replaces the open-bot-avatar shapes; bots made with a shape get a matching look.
-- The Bot page shows the bot list and the chat as two separate cards, like the Skills page.
+- The Bot page shows the bot list and the chat as two separate cards, like the Skills page, and every bot in it looks toward the pointer.
+
+### Fixed
+
+- Desktop app on macOS: the Bot page's + button no longer sits on the line under its header.
 
 ## [0.8.0] - 2026-11-17
 
@@ -202,7 +208,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/better-vault/better-vault/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/better-vault/better-vault/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/better-vault/better-vault/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/better-vault/better-vault/compare/v0.5.0...v0.6.0
