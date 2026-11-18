@@ -1,16 +1,11 @@
 import type { Look } from "@/lib/bot/look";
-import { faceParts, headParts, neckParts, type Part } from "./accessories";
+import { faceParts, HATCH, headParts, neckParts, type Part } from "./accessories";
 import { prefersReducedMotion, pointerPosition, subscribe, wake } from "./clock";
 import {
-  DEPTH,
-  apply,
-  convexHull,
   faceFrame,
   planeFrame,
-  project,
   rotation,
   silhouette,
-  smoothClosedPath,
   surfaceSamples,
   toTransform,
   uprightFrame,
@@ -72,6 +67,30 @@ const EYE_X = 0.29;
 const EYE_Y = -0.03;
 const EYE_W = 7.6;
 const EYE_H = 16.5;
+/** Control points round each eye. */
+const EYE_POINTS = 14;
+
+/** Evenly spaced points round a pill (a stadium) of width w and height h, centred on 0. */
+function pillPoints(w: number, h: number, count: number): [number, number][] {
+  const r = Math.min(w, h) / 2;
+  const straight = Math.max(0, h - 2 * r);
+  const length = 2 * straight + 2 * Math.PI * r;
+  return Array.from({ length: count }, (_, at) => {
+    let s = (at / count) * length;
+    // Right side down, bottom arc, left side up, top arc.
+    if (s < straight) return [r, -straight / 2 + s];
+    s -= straight;
+    if (s < Math.PI * r) {
+      const a = s / r;
+      return [r * Math.cos(a), straight / 2 + r * Math.sin(a)];
+    }
+    s -= Math.PI * r;
+    if (s < straight) return [-r, straight / 2 - s];
+    s -= straight;
+    const a = Math.PI + s / r;
+    return [r * Math.cos(a), -straight / 2 + r * Math.sin(a)];
+  });
+}
 const DESIGN = 30;
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -88,80 +107,99 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
   let options: CharacterOptions = { mood: "idle", ...initial };
   let projection = projectionFor(options.look);
   let samples: V3[] = [];
-  let front: V3[] = [];
 
   const svg = el("svg", { viewBox: "0 0 100 100", width: "100%", height: "100%" });
   svg.style.display = "block";
   svg.style.overflow = "visible";
 
   const defs = el("defs");
-  // The face's edge into the darker sides, softened, so the turn reads as volume.
-  const soft = el("filter", {
-    id: `${id}-soft`,
-    x: "-10%",
-    y: "-10%",
-    width: "120%",
-    height: "120%",
+  // Hatching for the eyes and dark parts, in the bot's colour, as in the design.
+  const hatch = el("pattern", {
+    id: `${id}-hatch`,
+    patternUnits: "userSpaceOnUse",
+    width: "2.6",
+    height: "2.6",
+    patternTransform: "rotate(40)",
   });
-  soft.append(el("feGaussianBlur", { stdDeviation: "1.1" }));
-  defs.append(soft);
+  const hatchLine = el("path", { d: "M0 0 V2.6", stroke: "var(--bot-line)", "stroke-width": ".9" });
+  hatch.append(hatchLine);
+  defs.append(hatch);
 
-  const figure = el("g");
+  const surface = "var(--bot-surface, var(--card))";
+  const line = "var(--bot-line)";
+  const figure = el("g", { "stroke-linejoin": "round", "stroke-linecap": "round" });
   const back = el("g");
   const head = el("g");
   const frontLayer = el("g");
-  // The whole head in the side colour, then its front face in the body colour on top:
-  // head on, the sides show only as a thin bevel; turned, they show as it turns.
-  const body = el("path");
-  const face = el("path", { filter: `url(#${id}-soft)` });
-  const rim = el("path", {
-    fill: "none",
-    stroke: "var(--bot-ink)",
-    "stroke-opacity": ".12",
-    "stroke-width": ".7",
-  });
+  // The head: its outline over the page colour.
+  const body = el("path", { fill: surface, stroke: line });
   const eyes = ([-1, 1] as const).map(() => {
     const group = el("g");
-    const pill = el("rect");
+    const pill = el("rect", { stroke: line });
+    // The control points round each eye, as in the design.
+    const points = el("g", { fill: surface, stroke: line });
+    const dots = Array.from({ length: EYE_POINTS }, () => el("circle", { r: ".95" }));
+    points.append(...dots);
     const arc = el("path", {
       d: `M${-EYE_W * 0.75} 1.6 Q0 ${-EYE_H * 0.42} ${EYE_W * 0.75} 1.6`,
       fill: "none",
-      "stroke-width": "2.6",
-      "stroke-linecap": "round",
+      stroke: line,
     });
-    group.append(pill, arc);
-    return { group, pill, arc };
+    group.append(pill, points, arc);
+    return { group, pill, points, dots, arc };
   });
-  head.append(body, face, rim, ...eyes.map((eye) => eye.group));
+  head.append(body, ...eyes.map((eye) => eye.group));
   figure.append(back, head, frontLayer);
   svg.append(defs, figure);
   host.append(svg);
 
   let parts: PlacedPart[] = [];
+  /** How much of the construction shows: all of it when large, less when small. */
+  let detail: "full" | "mid" | "low" = "full";
+
+  /** Strokes keep their width on screen, so lines stay fine at every size. */
+  const fineStrokes = (root: Element, width: number) => {
+    for (const node of [root, ...root.querySelectorAll("*")]) {
+      if (node instanceof SVGGeometryElement)
+        node.setAttribute("vector-effect", "non-scaling-stroke");
+    }
+    root.setAttribute("stroke-width", String(width));
+  };
 
   function build() {
     projection = projectionFor(options.look);
-    const dense = !options.still && host.clientWidth >= 40;
+    const width = host.clientWidth || 64;
+    detail = width >= 44 ? "full" : width >= 26 ? "mid" : "low";
+    // Hatching keeps the same spacing on screen at every size, so small eyes still show it.
+    const grain = Math.min(2.8, Math.max(1, 72 / width));
+    hatch.setAttribute("width", (2.6 * grain).toFixed(2));
+    hatch.setAttribute("height", (2.6 * grain).toFixed(2));
+    hatchLine.setAttribute("d", `M0 0 V${(2.6 * grain).toFixed(2)}`);
+    hatchLine.setAttribute("stroke-width", (0.9 * grain).toFixed(2));
+    const dense = !options.still && width >= 40;
     samples = surfaceSamples(dense ? 16 : 10, dense ? 32 : 20);
-    front = samples.filter((point) => point[2] > DEPTH * 0.42);
+    svg.style.setProperty("--bot-line", options.body);
+    const fill = detail === "low" ? line : `url(#${id}-hatch)`;
     for (const placed of parts) placed.node.remove();
     const look = options.look;
     parts = [...headParts[look.head], ...faceParts[look.face], ...neckParts[look.neck]].map(
       (part) => {
-        const node = el("g");
-        node.innerHTML = part.svg;
+        const node = el("g", { fill: surface, stroke: line });
+        node.innerHTML = part.svg.replaceAll(`"${HATCH}"`, `"${fill}"`);
+        fineStrokes(node, detail === "low" ? 1 : 1.25);
         const layer = part.layer === "back" ? "back" : "front";
         (layer === "back" ? back : frontLayer).append(node);
         return { part, node, layer };
       },
     );
-    body.style.fill = `color-mix(in oklab, ${options.body} 74%, var(--bot-ink))`;
-    face.style.fill = options.body;
-    if (!dense) face.removeAttribute("filter");
-    else face.setAttribute("filter", `url(#${id}-soft)`);
+    const outlineWidth = detail === "full" ? 1.6 : detail === "mid" ? 1.35 : 1.2;
+    fineStrokes(body, outlineWidth);
     for (const eye of eyes) {
-      eye.pill.setAttribute("fill", options.eyes);
-      eye.arc.setAttribute("stroke", options.eyes);
+      eye.pill.setAttribute("fill", fill);
+      fineStrokes(eye.pill, detail === "full" ? 1.25 : 1);
+      fineStrokes(eye.points, 1);
+      eye.points.style.display = detail === "full" ? "" : "none";
+      fineStrokes(eye.arc, detail === "low" ? 1.4 : 2);
     }
     if (options.label) {
       svg.setAttribute("role", "img");
@@ -248,15 +286,11 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
       "transform",
       `translate(0 ${current.lift.toFixed(2)}) translate(${projection.cx} ${base}) scale(${current.sx.toFixed(4)} ${current.sy.toFixed(4)}) translate(${-projection.cx} ${-base})`,
     );
-    const outline = silhouette(m, samples, projection);
-    body.setAttribute("d", outline);
-    rim.setAttribute("d", outline);
-    face.setAttribute(
-      "d",
-      smoothClosedPath(convexHull(front.map((point) => project(apply(m, point), projection)))),
-    );
-
+    body.setAttribute("d", silhouette(m, samples, projection));
     // Eyes slide across the face toward where they look, and fold away as it turns.
+    const open = Math.max(0.09, (1 - current.blink) * (1 - 0.38 * current.squint));
+    const h = EYE_H * open;
+    const ring = pillPoints(EYE_W, h, EYE_POINTS);
     eyes.forEach((eye, index) => {
       const side = index === 0 ? -1 : 1;
       const frame = faceFrame(
@@ -267,14 +301,19 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
       );
       eye.group.setAttribute("transform", placed(frame));
       eye.group.setAttribute("opacity", clamp(frame.facing * 4, 0, 1).toFixed(3));
-      const open = Math.max(0.09, (1 - current.blink) * (1 - 0.38 * current.squint));
-      const h = EYE_H * open;
       eye.pill.setAttribute("x", String(-EYE_W / 2));
       eye.pill.setAttribute("width", String(EYE_W));
       eye.pill.setAttribute("y", (-h / 2).toFixed(2));
       eye.pill.setAttribute("height", h.toFixed(2));
       eye.pill.setAttribute("rx", String(Math.min(EYE_W / 2, h / 2)));
-      eye.pill.setAttribute("opacity", (1 - current.happy).toFixed(3));
+      const shown = (1 - current.happy).toFixed(3);
+      eye.pill.setAttribute("opacity", shown);
+      eye.points.setAttribute("opacity", open < 0.35 ? "0" : shown);
+      if (detail === "full")
+        eye.dots.forEach((dot, at) => {
+          dot.setAttribute("cx", ring[at][0].toFixed(2));
+          dot.setAttribute("cy", ring[at][1].toFixed(2));
+        });
       eye.arc.setAttribute("opacity", current.happy.toFixed(3));
     });
 

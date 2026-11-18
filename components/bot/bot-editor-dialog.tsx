@@ -1,5 +1,5 @@
 import { Loading03Icon } from "@hugeicons/core-free-icons";
-import { useId, useState, type ReactNode } from "react";
+import { useId, useState, type CSSProperties, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
 import { Segmented } from "@/components/common/segmented";
@@ -122,7 +122,7 @@ function BotForm({
 
   return (
     <>
-      <Dialog.Body>
+      <Dialog.Body style={{ "--bot-surface": "var(--popover)" } as CSSProperties}>
         <form
           id={formId}
           className="flex flex-col gap-5"
@@ -362,6 +362,9 @@ function LookRow<Item extends string>({
             aria-label={t(`look.items.${item}` as "look.items.none")}
             title={t(`look.items.${item}` as "look.items.none")}
             onClick={() => onChoose(item)}
+            style={
+              current === item ? ({ "--bot-surface": "var(--muted)" } as CSSProperties) : undefined
+            }
             className={cn(
               "flex aspect-square cursor-pointer items-center justify-center rounded-xl transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
               current === item && "bg-muted ring-1 ring-foreground/20",

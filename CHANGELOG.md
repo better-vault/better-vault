@@ -12,7 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
-- Bots have a character of their own: a soft, rounded head that turns in 3D toward the pointer, blinks, thinks, nods and hops, and wears a hat, glasses, a mustache or a bow tie of your choosing. It replaces the open-bot-avatar shapes; bots made with a shape get a matching look.
+- Bots have a character of their own, drawn as line art in the bot's colour: a rounded, cube-like head with hatched pill eyes that turns in 3D toward the pointer, blinks, thinks, nods and hops, and wears a hat, glasses, a mustache or a bow tie of your choosing. It replaces the open-bot-avatar shapes; bots made with a shape get a matching look.
 - The Bot page shows the bot list and the chat as two separate cards, like the Skills page.
 
 ## [0.8.0] - 2026-11-17

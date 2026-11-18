@@ -1,5 +1,5 @@
 import { Add01Icon, Search01Icon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Input } from "@/components/panelui/input";
@@ -8,6 +8,11 @@ import type { Bot } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
 import { BotAvatar, type BotMood } from "./bot-avatar";
 import { useBotActivity, type BotActivity } from "./bot-runtime";
+
+/** The character is filled with what it sits on; a chosen row is a shade lighter than the card. */
+const selectedSurface = {
+  "--bot-surface": "color-mix(in oklab, var(--foreground) 10%, var(--card))",
+} as CSSProperties;
 
 const moodOf = (state: BotActivity): BotMood =>
   state === "thinking"
@@ -122,14 +127,15 @@ function PinnedTile({
     <button
       type="button"
       aria-current={selected ? "page" : undefined}
+      style={selected ? selectedSurface : undefined}
       onClick={onSelect}
       title={bot.title || bot.name}
       className={cn(
-        "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl px-1 pt-3 pb-2.5 transition-colors outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring",
+        "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl px-1 pt-2 pb-2.5 transition-colors outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring",
         selected && "bg-foreground/10 hover:bg-foreground/10",
       )}
     >
-      <BotAvatar avatar={bot.avatar} size={56} mood={moodOf(state)} />
+      <BotAvatar avatar={bot.avatar} size={72} mood={moodOf(state)} />
       <span className="line-clamp-2 w-full text-center text-xs leading-4 font-medium">
         {bot.name}
       </span>
@@ -156,13 +162,14 @@ function BotRow({
     <button
       type="button"
       aria-current={selected ? "page" : undefined}
+      style={selected ? selectedSurface : undefined}
       onClick={onSelect}
       className={cn(
         "flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-start transition-colors outline-none hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring",
         selected && "bg-foreground/10 hover:bg-foreground/10",
       )}
     >
-      <BotAvatar avatar={bot.avatar} size={36} mood={moodOf(state)} />
+      <BotAvatar avatar={bot.avatar} size={44} mood={moodOf(state)} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{bot.name}</span>
         <span
