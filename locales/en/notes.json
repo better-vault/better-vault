@@ -144,6 +144,30 @@
       "body": "The skill is deleted from this device, for chats and agents alike.",
       "confirm": "Delete skill"
     },
-    "search": "Search skills"
+    "search": "Search skills",
+    "create": {
+      "title": "New skill",
+      "tabCreate": "Create",
+      "tabFetch": "Fetch",
+      "namePlaceholder": "meeting-notes",
+      "slug": "Saved as {{slug}}",
+      "descriptionPlaceholder": "Use when the user asks to turn a meeting transcript into notes.",
+      "bodyPlaceholder": "Step by step, what an agent should do…",
+      "submit": "Create skill",
+      "source": "Command or link",
+      "sourcePlaceholder": "npx skills add vercel-labs/agent-skills --skill web-design-guidelines",
+      "sourceHint": "Paste an npx skills add command from skills.sh, a skills.sh link or a GitHub link.",
+      "browse": "Browse skills.sh",
+      "find": "Find skills",
+      "found_one": "{{count}} skill in {{repo}}",
+      "found_other": "{{count}} skills in {{repo}}",
+      "truncated": "Only the first {{count}} are shown.",
+      "selectAll": "Select all",
+      "clearAll": "Clear",
+      "import": "Import {{count}}",
+      "imported_one": "Imported {{count}} skill",
+      "imported_other": "Imported {{count}} skills",
+      "extraFiles": "Only each skill's SKILL.md is imported, not its other files."
+    }
   }
 }

@@ -16,6 +16,7 @@ import { NoteEditor } from "@/components/notes/editor/note-editor";
 import { Input } from "@/components/panelui/input";
 import { Textarea } from "@/components/panelui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { NewSkillDialog } from "./new-skill-dialog";
 import { createSkill, deleteSkill, saveSkill, useSkills } from "@/lib/db/skills";
 import type { Skill } from "@/lib/db/types";
 import { useCurrentVault, useVaults } from "@/lib/db/vaults";
@@ -52,10 +53,7 @@ export default function SkillsWorkspace() {
   }, [mine, query]);
   const active = mine.find((skill) => skill.id === activeId) ?? null;
 
-  const create = async () => {
-    const skill = await createSkill(vaultId, { name: "new-skill", description: "", body: "" });
-    setActiveId(skill.id);
-  };
+  const [creating, setCreating] = useState(false);
 
   const importFiles = async (files: File[]) => {
     let first: string | null = null;
@@ -89,7 +87,7 @@ export default function SkillsWorkspace() {
           </button>
           <button
             type="button"
-            onClick={() => void create()}
+            onClick={() => setCreating(true)}
             aria-label={t("skills.new")}
             title={t("skills.new")}
             className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background outline-none hover:bg-foreground/85 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
@@ -165,7 +163,7 @@ export default function SkillsWorkspace() {
             <p className="text-sm text-muted-foreground">{t("skills.emptyBody")}</p>
             <button
               type="button"
-              onClick={() => void create()}
+              onClick={() => setCreating(true)}
               className="mt-1 cursor-pointer rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring"
             >
               {t("skills.new")}
@@ -173,6 +171,12 @@ export default function SkillsWorkspace() {
           </div>
         )}
       </div>
+      <NewSkillDialog
+        open={creating}
+        onOpenChange={setCreating}
+        vaultId={vaultId}
+        onCreated={setActiveId}
+      />
     </div>
   );
 }
