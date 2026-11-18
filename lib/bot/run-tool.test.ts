@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { deleteAllData } from "@/lib/db/backup";
 import { createDexieBackend } from "@/lib/db/dexie-backend";
 import { createNotebook } from "@/lib/db/notebooks";
@@ -130,7 +130,7 @@ describe("bot access", () => {
   it("chooses tools from a bot's access", () => {
     const planner = {
       canDelegate: false,
-      access: { notebooks: false, notes: "read", calendar: "write", skills: false } as const,
+      access: { notebooks: false, notes: "read", calendar: "write", skills: "none" } as const,
     };
     expect(botToolsFor(planner)).toEqual([
       "list_notes",
@@ -160,7 +160,12 @@ describe("bot access", () => {
     expect(made.ok).toBe(true);
     const bot = await store().getBot(made.id);
     expect(bot?.avatar.shape).toBe("raven");
-    expect(bot?.access).toEqual({ notebooks: true, notes: "read", calendar: "none", skills: true });
+    expect(bot?.access).toEqual({
+      notebooks: true,
+      notes: "read",
+      calendar: "none",
+      skills: "read",
+    });
     expect(
       await runBotTool(
         "create_bot",
@@ -170,5 +175,79 @@ describe("bot access", () => {
     ).toEqual({
       error: expect.stringContaining("Invalid input"),
     });
+  });
+});
+
+describe("bot skill tools", () => {
+  beforeEach(async () => {
+    setStoreForTests(createDexieBackend());
+    await deleteAllData();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  const remote = {
+    repo: "acme/skills",
+    ref: "main",
+    truncated: false,
+    skills: [
+      {
+        name: "design",
+        description: "Design well",
+        body: "# Design",
+        path: "skills/design/SKILL.md",
+      },
+    ],
+  };
+
+  it("finds skills without their bodies, and adds them after an OK", async () => {
+    const asked: unknown[] = [];
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      asked.push(JSON.parse(String(init.body)));
+      return Response.json(remote);
+    });
+    const found = (await runBotTool(
+      "find_skills",
+      { source: "npx skills add acme/skills" },
+      context,
+    )) as {
+      skills: Record<string, unknown>[];
+    };
+    expect(found.skills).toEqual([
+      { name: "design", description: "Design well", path: "skills/design/SKILL.md" },
+    ]);
+    expect(
+      await runBotTool("add_skills", { source: "acme/skills", names: ["design"] }, context),
+    ).toEqual({
+      ok: true,
+      added: ["design"],
+      from: "acme/skills",
+    });
+    expect(asked.at(-1)).toEqual({ source: "acme/skills", names: ["design"] });
+    expect((await store().listSkills()).map((skill) => skill.name)).toEqual(["design"]);
+  });
+
+  it("writes a skill, and reports GitHub's errors", async () => {
+    expect(
+      await runBotTool(
+        "create_skill",
+        { name: "Meeting Notes", description: "Notes", body: "Do it" },
+        context,
+      ),
+    ).toEqual({ ok: true, name: "meeting-notes" });
+    vi.stubGlobal("fetch", async () =>
+      Response.json({ error: "No skills were found." }, { status: 404 }),
+    );
+    expect(await runBotTool("find_skills", { source: "acme/empty" }, context)).toEqual({
+      error: "No skills were found.",
+    });
+  });
+
+  it("reads old on/off skills access as today's levels", () => {
+    expect(botToolsFor({ canDelegate: false, access: { skills: true } as never })).toContain(
+      "add_skills",
+    );
+    expect(botToolsFor({ canDelegate: false, access: { skills: false } as never })).not.toContain(
+      "find_skills",
+    );
   });
 });

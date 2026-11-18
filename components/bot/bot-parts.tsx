@@ -1,6 +1,7 @@
 import {
   BotIcon,
   Calendar03Icon,
+  MagicWand01Icon,
   CheckmarkCircle02Icon,
   Note01Icon,
   Search01Icon,
@@ -70,6 +71,7 @@ export function ToolEvent({ part, bots }: { part: ToolPart; bots: Bot[] }) {
         {t(`tools.${name}` as "tools.list_notebooks", {
           query: input.query ?? "",
           name: input.name ?? "",
+          source: input.source ?? "",
         })}
       </span>
       {failed ? <span className="text-destructive">· {t("tools.failed")}</span> : null}
@@ -112,7 +114,12 @@ export function ApprovalCard({
   const { t, i18n } = useTranslation("bot");
   const [busy, setBusy] = useState<boolean | null>(null);
   const name = getToolName(part) as
-    "create_note" | "append_to_note" | "add_calendar_event" | "create_bot";
+    | "create_note"
+    | "append_to_note"
+    | "add_calendar_event"
+    | "create_bot"
+    | "add_skills"
+    | "create_skill";
   const input = (part.input ?? {}) as Record<string, string | undefined>;
   const output = outputOf(part);
   const pending = part.state === "input-available";
@@ -120,38 +127,51 @@ export function ApprovalCard({
 
   const newBot =
     name === "create_bot" ? (part.input as BotToolInput<"create_bot"> | undefined) : undefined;
-  const title = (newBot ? newBot.name : input.title) ?? "";
-  const detail = newBot
-    ? [
-        newBot.title,
-        accessSummary({
-          notebooks: newBot.notebooks ?? true,
-          notes: newBot.notes ?? "read",
-          calendar: newBot.calendar ?? "read",
-          skills: newBot.skills ?? true,
-        })
-          .map((key) => t(`access.summary.${key}` as "access.summary.notes"))
-          .join(", ") || t("access.summary.nothing"),
-      ]
-        .filter(Boolean)
-        .join(" · ")
-    : name === "add_calendar_event"
-      ? [
-          input.start
-            ? eventWhen(
-                input as BotToolInput<"add_calendar_event">,
-                t("approval.allDay"),
-                i18n.language,
-              )
-            : "",
-          input.location ?? "",
-        ]
-          .filter(Boolean)
-          .join(" · ")
-      : ((name === "create_note" ? input.body : input.text) ?? "")
-          .replace(/[#*_>`-]+/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
+  const skillsToAdd =
+    name === "add_skills" ? (part.input as BotToolInput<"add_skills"> | undefined) : undefined;
+  const title =
+    (newBot
+      ? newBot.name
+      : skillsToAdd
+        ? skillsToAdd.names?.join(", ")
+        : name === "create_skill"
+          ? input.name
+          : input.title) ?? "";
+  const detail = skillsToAdd
+    ? t("approval.skillsFrom", { source: skillsToAdd.source ?? "" })
+    : name === "create_skill"
+      ? (input.description ?? "")
+      : newBot
+        ? [
+            newBot.title,
+            accessSummary({
+              notebooks: newBot.notebooks ?? true,
+              notes: newBot.notes ?? "read",
+              calendar: newBot.calendar ?? "read",
+              skills: newBot.skills ?? "read",
+            })
+              .map((key) => t(`access.summary.${key}` as "access.summary.notes"))
+              .join(", ") || t("access.summary.nothing"),
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        : name === "add_calendar_event"
+          ? [
+              input.start
+                ? eventWhen(
+                    input as BotToolInput<"add_calendar_event">,
+                    t("approval.allDay"),
+                    i18n.language,
+                  )
+                : "",
+              input.location ?? "",
+            ]
+              .filter(Boolean)
+              .join(" · ")
+          : ((name === "create_note" ? input.body : input.text) ?? "")
+              .replace(/[#*_>`-]+/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
 
   const answer = async (approved: boolean) => {
     setBusy(approved);
@@ -166,7 +186,15 @@ export function ApprovalCard({
     <div className="flex w-full max-w-md flex-col gap-1 rounded-2xl border bg-card px-4 py-3.5">
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Icon
-          icon={name === "add_calendar_event" ? Calendar03Icon : newBot ? BotIcon : Note01Icon}
+          icon={
+            name === "add_calendar_event"
+              ? Calendar03Icon
+              : newBot
+                ? BotIcon
+                : skillsToAdd || name === "create_skill"
+                  ? MagicWand01Icon
+                  : Note01Icon
+          }
           size={13}
         />
         {pending || streaming ? t("approval.label") : t(`approval.${name}`)}

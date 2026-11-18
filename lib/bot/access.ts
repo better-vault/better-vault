@@ -6,11 +6,22 @@ export const fullAccess: BotAccess = {
   notebooks: true,
   notes: "write",
   calendar: "write",
-  skills: true,
+  skills: "write",
 };
 
+const level = (value: unknown, fallback: BotAccess["skills"]): BotAccess["skills"] =>
+  value === "none" || value === "read" || value === "write"
+    ? value
+    : value === true
+      ? "write"
+      : value === false
+        ? "none"
+        : fallback;
+
+/** A bot's access, with defaults for what isn't set and old saved values read as today's. */
 export function botAccess(bot: Pick<Bot, "access">): BotAccess {
-  return { ...fullAccess, ...bot.access };
+  const access = { ...fullAccess, ...bot.access };
+  return { ...access, skills: level(access.skills as unknown, fullAccess.skills) };
 }
 
 export function canCreateBots(bot: Pick<Bot, "canCreateBots" | "canDelegate">): boolean {
@@ -32,7 +43,8 @@ export function botToolsFor(
   if (access.notes === "write") tools.push("create_note", "append_to_note");
   if (access.calendar !== "none") tools.push("list_calendar");
   if (access.calendar === "write") tools.push("add_calendar_event");
-  if (access.skills) tools.push("list_skills", "read_skill");
+  if (access.skills !== "none") tools.push("list_skills", "read_skill", "find_skills");
+  if (access.skills === "write") tools.push("add_skills", "create_skill");
   if (!handedOver && bot.canDelegate) tools.push("ask_bot");
   if (!handedOver && canCreateBots(bot)) tools.push("create_bot");
   return tools;
@@ -48,6 +60,6 @@ export function accessSummary(access: BotAccess): string[] {
       : access.calendar === "read"
         ? ["calendar"]
         : []),
-    ...(access.skills ? ["skills"] : []),
+    ...(access.skills === "write" ? ["skillsWrite"] : access.skills === "read" ? ["skills"] : []),
   ];
 }

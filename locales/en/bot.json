@@ -40,7 +40,8 @@
     "read_skill": "Read the skill “{{name}}”",
     "ask_bot": "Asked {{bot}}",
     "askedWaiting": "{{bot}} is waiting for your OK",
-    "failed": "Failed"
+    "failed": "Failed",
+    "find_skills": "Looked for skills in {{source}}"
   },
   "approval": {
     "label": "Needs your OK",
@@ -53,7 +54,10 @@
     "append_to_note": "Add to a note",
     "add_calendar_event": "New calendar event",
     "allDay": "All day",
-    "create_bot": "New bot"
+    "create_bot": "New bot",
+    "add_skills": "Add skills",
+    "create_skill": "New skill",
+    "skillsFrom": "From {{source}}, into your skills"
   },
   "menu": {
     "label": "Bot options",
@@ -162,7 +166,8 @@
       "calendar": "Calendar",
       "calendarWrite": "Calendar (write)",
       "skills": "Skills",
-      "nothing": "No access"
+      "nothing": "No access",
+      "skillsWrite": "Skills (write)"
     }
   }
 }

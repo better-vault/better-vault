@@ -271,10 +271,12 @@ function BotForm({
                   />
                 </AccessRow>
                 <AccessRow label={t("access.skills")}>
-                  <Switch
-                    checked={access.skills}
-                    onCheckedChange={(on) => setAccess({ skills: on })}
-                    label={t("access.skills")}
+                  <Segmented
+                    size="sm"
+                    aria-label={t("access.skills")}
+                    value={access.skills}
+                    onValueChange={(skills) => setAccess({ skills })}
+                    options={levels}
                   />
                 </AccessRow>
               </div>

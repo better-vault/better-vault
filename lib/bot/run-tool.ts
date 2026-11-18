@@ -2,11 +2,14 @@ import { generateId } from "ai";
 import { createBot } from "@/lib/db/bots";
 import { calendarStore } from "@/lib/db/calendar";
 import { createNote, saveNoteBody } from "@/lib/db/notes";
+import { createSkill } from "@/lib/db/skills";
 import { store } from "@/lib/db/store";
 import type { CalendarEntry, Note, Source, Vault } from "@/lib/db/types";
 import { DEFAULT_VAULT } from "@/lib/db/vaults";
 import { selectPassages } from "@/lib/grounding/passages";
 import { sameName } from "@/lib/notes/syntax";
+import { fetchRemoteSkills } from "@/lib/skills/fetch";
+import { skillSlug } from "@/lib/skills/format";
 import { botToolSchemas, type BotToolInput, type BotToolName } from "./tools";
 
 /** What a tool call needs from the page around it. */
@@ -237,13 +240,51 @@ async function run<Name extends BotToolName>(
           notebooks: draft.notebooks ?? true,
           notes: draft.notes ?? "read",
           calendar: draft.calendar ?? "read",
-          skills: draft.skills ?? true,
+          skills: draft.skills ?? "read",
           ...(context.vault ? { vault: context.vault } : {}),
         },
         canDelegate: false,
         canCreateBots: false,
       });
       return { ok: true, id: bot.id, name: bot.name };
+    }
+    case "find_skills": {
+      const { source } = input as BotToolInput<"find_skills">;
+      const found = await fetchRemoteSkills(source);
+      return {
+        repo: found.repo,
+        ref: found.ref,
+        skills: found.skills.map((skill) => ({
+          name: skill.name,
+          description: skill.description,
+          path: skill.path,
+        })),
+        ...(found.truncated ? { note: "There are more skills than were listed." } : {}),
+      };
+    }
+    case "add_skills": {
+      const { source, names } = input as BotToolInput<"add_skills">;
+      const found = await fetchRemoteSkills(source, names);
+      const vaultId = context.vault ?? context.currentVault;
+      const added: string[] = [];
+      for (const skill of found.skills) {
+        const made = await createSkill(vaultId, {
+          name: skill.name,
+          description: skill.description,
+          body: skill.body,
+        });
+        added.push(made.name);
+      }
+      return { ok: true, added, from: found.repo };
+    }
+    case "create_skill": {
+      const { name: skillName, description, body } = input as BotToolInput<"create_skill">;
+      const made = await createSkill(context.vault ?? context.currentVault, {
+        name: skillSlug(skillName),
+        description: description.trim(),
+        body,
+      });
+      return { ok: true, name: made.name };
     }
     case "ask_bot": {
       const { bot, task } = input as BotToolInput<"ask_bot">;

@@ -89,7 +89,10 @@ export function botSystemPrompt({
       has("add_calendar_event") ? "the calendar (read and add events)" : "the calendar (read only)",
       has("list_calendar"),
     ],
-    ["skills", has("read_skill")],
+    [
+      has("add_skills") ? "skills (read, find on GitHub and add)" : "skills (read only)",
+      has("read_skill"),
+    ],
   ] as const;
   const can = areas.filter(([, on]) => on).map(([area]) => area);
   const cannot = [
@@ -102,8 +105,9 @@ export function botSystemPrompt({
     ? `You work inside better-vault, the user's local-first app of notebooks (with sources), notes, skills and a calendar. Your tools read and change them on the user's device.
 - You may use: ${can.length ? can.join(", ") : "none of the user's material"}.${cannot.length ? ` You have no access to ${cannot.join(", ")}: if asked about them, say so and that the user can turn access on in Edit bot (the menu at the top right of this chat).` : ""}
 - Look things up with your tools before answering questions about the user's material. Say which notebook, source or note an answer comes from.
-- Changes (new notes, additions to notes, calendar events, new bots) ask the user for an OK. Never say something was created, added or changed until the tool's result says it was. If the user declines, accept it and move on.
+- Changes (new notes, additions to notes, calendar events, new bots, new skills) ask the user for an OK. Never say something was created, added or changed until the tool's result says it was. If the user declines, accept it and move on.
 - ${has("create_bot") ? "When the user asks for a bot, make it with create_bot: a clear name and role, instructions that describe the job, a fitting shape and colour, and only the access the job needs." : "You cannot make bots. If the user asks for one, tell them to press + at the top of the bot list, or to ask a bot that can make bots, such as Chief of Staff."}
+- ${has("add_skills") ? "When the user gives skills to add (an `npx skills add …` command from skills.sh, a skills.sh or GitHub link, or owner/repo), call find_skills with it first, then add_skills with the names they want (all of them unless they say otherwise). Use create_skill to write a new skill from scratch." : has("find_skills") ? "You can look at skills on GitHub with find_skills but not add them; the user can add them on the Skills page (+, then Fetch) or turn on skills writing in Edit bot." : "You cannot add skills. The user can add them on the Skills page: press +, then Fetch."}
 - Times are the user's local time. Today is ${now} (${timeZone}).
 - ${scopeVault ? `You may only use the vault "${scopeVault}".` : `The user's vaults: ${vaults.map((name) => `"${name}"`).join(", ")}. The current vault is "${currentVault}".`}`
     : `This model cannot use tools, so you cannot see the user's notebooks, notes or calendar. Say so if asked about them.`;

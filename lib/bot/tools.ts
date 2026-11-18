@@ -58,6 +58,28 @@ export const botToolSchemas = {
     description: z.string().max(4000).optional(),
     location: z.string().max(200).optional(),
   }),
+  find_skills: z.object({
+    source: z
+      .string()
+      .min(1)
+      .max(2000)
+      .describe(
+        "Where the skills are: an `npx skills add …` command, a skills.sh link, a GitHub link or owner/repo",
+      ),
+  }),
+  add_skills: z.object({
+    source: z.string().min(1).max(2000).describe("The same source given to find_skills"),
+    names: z
+      .array(z.string().min(1).max(200))
+      .min(1)
+      .max(50)
+      .describe("The skills to add, by the names find_skills returned"),
+  }),
+  create_skill: z.object({
+    name: z.string().min(1).max(64).describe("Lowercase words joined by hyphens"),
+    description: z.string().max(2000).describe("When an agent should use this skill"),
+    body: z.string().max(100_000).describe("The instructions, in Markdown"),
+  }),
   create_bot: z.object({
     name: z.string().min(1).max(80).describe('Short and clear, such as "Vault Summarizer"'),
     title: z.string().max(200).describe("Its role in a few words"),
@@ -76,7 +98,7 @@ export const botToolSchemas = {
       .enum(["none", "read", "write"])
       .optional()
       .describe("Calendar access (default read)"),
-    skills: z.boolean().optional().describe("May read skills (default true)"),
+    skills: z.enum(["none", "read", "write"]).optional().describe("Skills access (default read)"),
   }),
   ask_bot: z.object({
     bot: z.string().describe("The other bot's name, exactly as listed"),
@@ -106,6 +128,12 @@ export const botToolDescriptions: Record<BotToolName, string> = {
     "Create a note. The user is asked to approve it first; until the result comes back, it has not been made.",
   append_to_note: "Add text to the end of an existing note. The user is asked to approve it first.",
   add_calendar_event: "Add an event to the user's calendar. The user is asked to approve it first.",
+  find_skills:
+    "List the skills in a GitHub repository (what `npx skills add` from skills.sh would install): each one's name, description and path. Use it before add_skills.",
+  add_skills:
+    "Add skills from GitHub to the user's skills, by name. The user is asked to approve it first; until the result comes back, nothing was added.",
+  create_skill:
+    "Write a new skill (a SKILL.md: name, description and instructions) into the user's skills. The user is asked to approve it first.",
   create_bot:
     "Make a new bot for the user, with a persona, a face and what it may access. The user is asked to approve it first. Use it when the user asks for a bot, or a bot for a recurring job; do not make a bot for a one-off answer.",
   ask_bot:
@@ -118,6 +146,8 @@ export const botWriteTools = new Set<BotToolName>([
   "append_to_note",
   "add_calendar_event",
   "create_bot",
+  "add_skills",
+  "create_skill",
 ]);
 
 export const botToolNames = Object.keys(botToolSchemas) as BotToolName[];

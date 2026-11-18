@@ -146,7 +146,8 @@ export interface BotAccess {
   notebooks: boolean;
   notes: "none" | "read" | "write";
   calendar: "none" | "read" | "write";
-  skills: boolean;
+  /** Saved as a boolean before skills could be written: `true` reads as "write". */
+  skills: "none" | "read" | "write";
   /** Only this vault's notebooks, notes and skills; every vault when missing. */
   vault?: string;
 }
