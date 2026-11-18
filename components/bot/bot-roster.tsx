@@ -1,7 +1,8 @@
-import { Add01Icon, Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
+import { Input } from "@/components/panelui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Bot } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
@@ -10,9 +11,6 @@ import { useBotActivity, type BotActivity } from "./bot-runtime";
 
 const moodOf = (state: BotActivity): BotMood =>
   state === "thinking" ? "thinking" : state === "done" ? "happy" : "idle";
-
-const iconButton =
-  "flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring";
 
 /** Every bot: pinned ones as large tiles, the rest as rows with their last message. */
 export function BotRoster({
@@ -27,7 +25,6 @@ export function BotRoster({
   onCreate: () => void;
 }) {
   const { t } = useTranslation("bot");
-  const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   const shown = words.length
@@ -41,52 +38,36 @@ export function BotRoster({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* A window bar on macOS: it moves the window and leaves room for its buttons. */}
-      <div data-window-bar className="flex min-h-14 shrink-0 items-center gap-1 ps-4 pe-2">
-        {searching ? (
-          <input
-            autoFocus
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setQuery("");
-                setSearching(false);
-              }
-            }}
-            placeholder={t("roster.searchPlaceholder")}
-            aria-label={t("roster.search")}
-            className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-        ) : (
-          <h2 className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">
-            {t("roster.label")}
-          </h2>
-        )}
-        <button
-          type="button"
-          aria-label={searching ? t("roster.clearSearch") : t("roster.search")}
-          title={searching ? t("roster.clearSearch") : t("roster.search")}
-          onClick={() => {
-            setQuery("");
-            setSearching(!searching);
-          }}
-          className={iconButton}
-        >
-          <Icon icon={searching ? Cancel01Icon : Search01Icon} size={17} />
-        </button>
+      <div data-window-bar className="flex min-h-14 shrink-0 items-center gap-1 border-b ps-4 pe-3">
+        <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{t("roster.label")}</h2>
         <button
           type="button"
           aria-label={t("roster.newBot")}
           title={t("roster.newBot")}
           onClick={onCreate}
-          className={iconButton}
+          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-foreground text-background outline-none hover:bg-foreground/85 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
-          <Icon icon={Add01Icon} size={18} />
+          <Icon icon={Add01Icon} size={17} />
         </button>
+      </div>
+      <div className="border-b p-3">
+        <Input.Group size="sm">
+          <Input.Addon>
+            <Icon icon={Search01Icon} size={14} />
+          </Input.Addon>
+          <Input
+            size="sm"
+            type="search"
+            aria-label={t("roster.search")}
+            placeholder={t("roster.searchPlaceholder")}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </Input.Group>
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <nav aria-label={t("roster.label")} className="flex flex-col gap-1 px-2 pb-3">
+        <nav aria-label={t("roster.label")} className="flex flex-col gap-1 px-2 py-3">
           {pinned.length > 0 ? (
             <div className="grid grid-cols-3 gap-1 pb-2">
               {pinned.map((bot) => (

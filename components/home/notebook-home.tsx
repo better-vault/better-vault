@@ -446,15 +446,13 @@ export function NotebookHome() {
                 </div>
               }
             >
-              {/* Notes and skills draw their own panels; the calendar sits on one card. */}
+              {/* Notes, skills and bots draw their own panels; the calendar sits on one card. */}
               {section === "notes" ? (
                 <NotesWorkspace />
               ) : section === "skills" ? (
                 <SkillsWorkspace />
               ) : section === "bot" ? (
-                <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
-                  <BotView />
-                </div>
+                <BotView />
               ) : (
                 <div className="h-full overflow-hidden rounded-3xl bg-card ring-1 ring-border">
                   <CalendarView />

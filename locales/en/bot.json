@@ -1,10 +1,9 @@
 {
   "title": "Bot",
   "roster": {
-    "label": "Your bots",
+    "label": "Bots",
     "search": "Search bots",
     "searchPlaceholder": "Search bots…",
-    "clearSearch": "Clear search",
     "newBot": "New bot",
     "noMatch": "No bot matches",
     "empty": "No bots yet.",

@@ -78,10 +78,11 @@ export default function BotView() {
   if (!bots) return null;
 
   return (
-    <div className="flex h-full min-h-0">
+    // Two cards, like the Skills page: the roster, and the open bot's thread.
+    <div className="flex h-full min-h-0 gap-2">
       <aside
         className={cn(
-          "min-h-0 w-full shrink-0 border-e border-border md:block md:w-72",
+          "min-h-0 w-full shrink-0 overflow-hidden rounded-3xl bg-card ring-1 ring-border md:block md:w-72",
           selected ? "hidden" : "block",
         )}
       >
@@ -92,7 +93,12 @@ export default function BotView() {
           onCreate={() => setEditing({ mode: "create" })}
         />
       </aside>
-      <section className={cn("min-h-0 min-w-0 flex-1 md:block", selected ? "block" : "hidden")}>
+      <section
+        className={cn(
+          "min-h-0 min-w-0 flex-1 overflow-hidden rounded-3xl bg-card ring-1 ring-border md:block",
+          selected ? "block" : "hidden",
+        )}
+      >
         {shown ? (
           <BotThread
             key={`${shown.id}:${resets}`}
