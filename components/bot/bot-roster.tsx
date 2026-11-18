@@ -169,7 +169,7 @@ function BotRow({
         selected && "bg-foreground/10 hover:bg-foreground/10",
       )}
     >
-      <BotAvatar avatar={bot.avatar} size={44} mood={moodOf(state)} />
+      <BotAvatar avatar={bot.avatar} size={44} fit="head" mood={moodOf(state)} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{bot.name}</span>
         <span

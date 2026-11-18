@@ -31,6 +31,8 @@ export interface CharacterOptions {
   followPointer?: boolean;
   /** One drawing of the resting pose, never animated (tiles, thumbnails). */
   still?: boolean;
+  /** "figure" leaves room for what it wears; "head" fills the box with the head (small spots). */
+  fit?: "figure" | "head";
   /** Varies blinks and wander between characters. */
   seed?: string;
   /** Accessible name; empty marks it decorative. */
@@ -52,8 +54,10 @@ const el = <K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string,
 };
 
 /** Where the head sits in the 100×100 drawing: smaller and lower when it wears a hat. */
-function projectionFor(look: Look): Projection {
+function projectionFor(look: Look, fit: "figure" | "head" = "figure"): Projection {
   const hat = look.head !== "none";
+  // Small spots (list rows, the chat header): the head fills the box, and a hat's top is cropped.
+  if (fit === "head") return { cx: 50, cy: hat ? 55 : 50, scale: hat ? 37 : 41 };
   const neck = look.neck !== "none";
   return {
     cx: 50,
@@ -105,7 +109,7 @@ interface PlacedPart {
 export function mountCharacter(host: HTMLElement, initial: CharacterOptions): MountedCharacter {
   const id = `bvc${++instances}`;
   let options: CharacterOptions = { mood: "idle", ...initial };
-  let projection = projectionFor(options.look);
+  let projection = projectionFor(options.look, options.fit);
   let samples: V3[] = [];
 
   const svg = el("svg", { viewBox: "0 0 100 100", width: "100%", height: "100%" });
@@ -167,11 +171,13 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
   };
 
   function build() {
-    projection = projectionFor(options.look);
+    projection = projectionFor(options.look, options.fit);
     const width = host.clientWidth || 64;
-    detail = width >= 44 ? "full" : width >= 26 ? "mid" : "low";
+    // Detail follows the size of the head on screen, not of the box.
+    const headSize = (width * projection.scale) / 31;
+    detail = headSize >= 44 ? "full" : headSize >= 24 ? "mid" : "low";
     // Hatching keeps the same spacing on screen at every size, so small eyes still show it.
-    const grain = Math.min(2.8, Math.max(1, 72 / width));
+    const grain = Math.min(2.8, Math.max(1, 72 / headSize));
     hatch.setAttribute("width", (2.6 * grain).toFixed(2));
     hatch.setAttribute("height", (2.6 * grain).toFixed(2));
     hatchLine.setAttribute("d", `M0 0 V${(2.6 * grain).toFixed(2)}`);
@@ -373,7 +379,8 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
         (change.body !== undefined && change.body !== options.body) ||
         (change.eyes !== undefined && change.eyes !== options.eyes) ||
         (change.label !== undefined && change.label !== options.label) ||
-        (change.still !== undefined && change.still !== options.still);
+        (change.still !== undefined && change.still !== options.still) ||
+        (change.fit !== undefined && change.fit !== options.fit);
       const nextMood = change.mood ?? options.mood ?? "idle";
       options = { ...options, ...change };
       if (nextMood !== mood) {

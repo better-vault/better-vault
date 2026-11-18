@@ -52,7 +52,12 @@ export function ToolEvent({ part, bots }: { part: ToolPart; bots: Bot[] }) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         {target ? (
-          <BotAvatar avatar={target.avatar} size={20} mood={running ? "thinking" : "idle"} />
+          <BotAvatar
+            avatar={target.avatar}
+            size={22}
+            fit="head"
+            mood={running ? "thinking" : "idle"}
+          />
         ) : null}
         <span className={cn(running && "animate-pulse motion-reduce:animate-none")}>
           {waiting
@@ -209,6 +214,7 @@ export function ApprovalCard({
               neck: newBot.neck,
             }}
             size={44}
+            fit="head"
             mood={pending ? "idle" : "happy"}
           />
         ) : null}
