@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Skills: the + button opens a dialog to create a skill or fetch skills from skills.sh. Paste an `npx skills add …` command, a skills.sh link or a GitHub link, pick the skills found and import them.
+- Bots can find skills on GitHub and add them to your skills, after your OK, or write a new one. Skills access in Edit bot is now Off, Read or Read & write.
+
+### Changed
+
+- Bots have a character of their own: a soft, rounded head that turns in 3D toward the pointer, blinks, thinks, nods and hops, and wears a hat, glasses, a mustache or a bow tie of your choosing. It replaces the open-bot-avatar shapes; bots made with a shape get a matching look.
+- The Bot page shows the bot list and the chat as two separate cards, like the Skills page.
+
 ## [0.8.0] - 2026-11-17
 
 ### Added

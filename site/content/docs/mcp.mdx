@@ -11,6 +11,12 @@ A skill is a Markdown file in the `SKILL.md` format: a name, a description that 
 
 To use skills in a chat, open the prompt's **+** menu, choose **Skills** and tick the ones you want. Their instructions go with each question in that chat.
 
+## Get skills from skills.sh
+
+[skills.sh](https://skills.sh) lists skills that people share on GitHub, each with an `npx skills add …` command. To add them to your vault, press **+** on the Skills page and open the **Fetch** tab. Paste the command, a skills.sh link or a GitHub link, and press **Find skills**.
+
+The dialog lists every skill it finds in that repository, the same ones the skills command would install. Tick the ones you want and press **Import**. Only each skill's `SKILL.md` is imported; other files in its folder, such as scripts, are left out.
+
 ## Connect an agent with MCP
 
 The desktop app runs a [Model Context Protocol](https://modelcontextprotocol.io) server on your computer, so agents can read your sources and notes and share skills with you. It is off until you turn it on, it listens only on your computer, and every request needs a token.

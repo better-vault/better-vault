@@ -5,7 +5,21 @@ description: "Bots in better-vault are helpers with animated faces that read you
 
 Bots are helpers with a name, a role and an animated face, and each one keeps a single ongoing chat with you.
 
-Open **Bot** in the sidebar of the notebooks page, under Calendar. The roster on the left lists your bots, with pinned ones as large tiles at the top, and the chat of the bot you choose fills the rest of the page. A bot's face shows what it is doing: it thinks while it works and looks happy when it is done.
+Open **Bot** in the sidebar of the notebooks page, under Calendar. The card on the left lists your bots, with pinned ones as large tiles at the top, and the chat of the bot you choose opens in the card beside it.
+
+## The bot character
+
+Every bot is the same character: a soft, rounded head with two pill eyes, in the bot's colour. It turns toward your pointer as you move it, blinks, and glances around when it is idle. Its face shows what it is doing: it looks up and sways while it thinks, nods while it waits for your OK, and hops when it is done.
+
+Each bot dresses the character its own way, with one item for its head, one for its face and one at its neck.
+
+| Slot     | Items                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------ |
+| Headwear | Wizard hat, top hat, beanie, beret, crown, chef's hat, graduation cap, headphones, antenna |
+| Face     | Round glasses, square glasses, sunglasses, monocle, mustache, blush                        |
+| Neck     | Bow tie, tie, scarf                                                                        |
+
+If your system is set to reduce motion, the character holds still and only its eyes follow the pointer.
 
 ## What bots can do
 
@@ -18,16 +32,20 @@ A bot never changes anything without asking. When it wants to create a note, add
 | Notebooks and sources | List and search them, read a source |                              |
 | Notes                 | List, search and read them          | Create a note, add to a note |
 | Calendar              | See what is planned                 | Add an event                 |
-| Skills                | List and read them                  |                              |
+| Skills                | List and read them, look on GitHub  | Add skills, write a skill    |
 | Other bots            | Hand them a task                    | Make a new bot               |
 
 Local models from Ollama or LM Studio can't use these tools, so with one of them a bot can chat but can't see your vault.
 
 ## Choose what a bot can access
 
-Each bot has its own access, set in the **Access** tab of **Edit bot** (the menu at the top right of its chat). Turn notebooks and skills on or off, and set notes and the calendar to **Off**, **Read** or **Read & write**. Write access still asks for your OK before each change.
+Each bot has its own access, set in the **Access** tab of **Edit bot** (the menu at the top right of its chat). Turn notebooks on or off, and set notes, the calendar and skills to **Off**, **Read** or **Read & write**. Write access still asks for your OK before each change.
 
 **Vault** limits a bot to one vault, so it only sees that vault's notebooks, notes and skills. A bot asked about something it can't access says so, and points you to this tab.
+
+## Add skills with a bot
+
+A bot with skills set to **Read & write** can add skills for you. Give it an `npx skills add …` command from [skills.sh](https://skills.sh), a skills.sh link or a GitHub link, and it looks up the skills there and asks for your OK before adding them to your Skills page. It can also write a new skill from what you describe.
 
 ## Hand tasks to other bots
 
@@ -47,9 +65,9 @@ Press **+** at the top of the roster to make a bot.
 
 Give the bot a name and a short role, such as "Keeps my reading list". The role helps a coordinating bot decide when to ask it.
 
-### Give it a face
+### Give it a look
 
-Choose one of the shapes, such as the raven from the better-vault logo, a cat, an owl or a robot, and a colour. The preview follows your pointer, the way the bot will in its chat.
+Choose a colour and what it wears: a hat, glasses or a mustache, a bow tie. The preview follows your pointer, the way the bot will in its chat.
 
 ### Tell it how to work
 
@@ -65,4 +83,4 @@ The four starter bots, Chief of Staff, Researcher, Note Taker and Planner, can b
 
 ## Where bots are kept
 
-Bots and their chats are stored with the rest of your data, in the browser on the web and in the desktop app's database, and they are included in backups. Avatars are drawn with [open-bot-avatar](https://github.com/DominikScholz/open-bot-avatar).
+Bots and their chats are stored with the rest of your data, in the browser on the web and in the desktop app's database, and they are included in backups.
