@@ -31,8 +31,6 @@ export interface CharacterOptions {
   followPointer?: boolean;
   /** One drawing of the resting pose, never animated (tiles, thumbnails). */
   still?: boolean;
-  /** "figure" leaves room for what it wears; "head" fills the box with the head (small spots). */
-  fit?: "figure" | "head";
   /** Varies blinks and wander between characters. */
   seed?: string;
   /** Accessible name; empty marks it decorative. */
@@ -54,16 +52,40 @@ const el = <K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string,
 };
 
 /** Where the head sits in the 100×100 drawing: smaller and lower when it wears a hat. */
-function projectionFor(look: Look, fit: "figure" | "head" = "figure"): Projection {
-  const hat = look.head !== "none";
-  // Small spots (list rows, the chat header): the head fills the box, and a hat's top is cropped.
-  if (fit === "head") return { cx: 50, cy: hat ? 55 : 50, scale: hat ? 37 : 41 };
-  const neck = look.neck !== "none";
-  return {
-    cx: 50,
-    cy: (hat ? 60 : 52) - (neck ? 3 : 0),
-    scale: hat ? 26 : 31,
-  };
+/** How far each item reaches beyond the head, in head half-widths: above, below and to each side. */
+const reach: Record<string, { up?: number; down?: number; side?: number }> = {
+  "wizard-hat": { up: 1.55 },
+  "top-hat": { up: 1.15 },
+  beanie: { up: 0.62 },
+  beret: { up: 0.62 },
+  crown: { up: 0.75 },
+  "chef-hat": { up: 1.35 },
+  "graduation-cap": { up: 0.62 },
+  headphones: { up: 0.5, side: 0.38 },
+  antenna: { up: 0.95 },
+  tie: { down: 0.4 },
+  scarf: { down: 0.22, side: 0.06 },
+  "bow-tie": { down: 0.05 },
+  monocle: { down: 0.12 },
+};
+
+/**
+ * Where the head sits in the 100×100 drawing: as large as the box allows with
+ * everything it wears inside it, so nothing is cut off at any size. A little
+ * room is kept for turning and hopping.
+ */
+function projectionFor(look: Look): Projection {
+  const items = [look.head, look.face, look.neck].map((item) => reach[item] ?? {});
+  const up = Math.max(0, ...items.map((item) => item.up ?? 0));
+  const down = Math.max(0, ...items.map((item) => item.down ?? 0));
+  const side = Math.max(0, ...items.map((item) => item.side ?? 0));
+  const margin = 7;
+  const height = 2 + up + down;
+  const width = 2 + 2 * side + 0.3;
+  // Capped, so a bot without a hat isn't much larger than one with: they read as one family.
+  const scale = Math.min(33, (100 - 2 * margin) / Math.max(height, width));
+  const top = margin + (100 - 2 * margin - height * scale) / 2;
+  return { cx: 50, cy: top + (up + 1) * scale, scale };
 }
 
 /** The eyes, measured from the design: tall pills on the centre line, a little apart. */
@@ -109,7 +131,7 @@ interface PlacedPart {
 export function mountCharacter(host: HTMLElement, initial: CharacterOptions): MountedCharacter {
   const id = `bvc${++instances}`;
   let options: CharacterOptions = { mood: "idle", ...initial };
-  let projection = projectionFor(options.look, options.fit);
+  let projection = projectionFor(options.look);
   let samples: V3[] = [];
 
   const svg = el("svg", { viewBox: "0 0 100 100", width: "100%", height: "100%" });
@@ -171,7 +193,7 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
   };
 
   function build() {
-    projection = projectionFor(options.look, options.fit);
+    projection = projectionFor(options.look);
     const width = host.clientWidth || 64;
     // Detail follows the size of the head on screen, not of the box.
     const headSize = (width * projection.scale) / 31;
@@ -379,8 +401,7 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
         (change.body !== undefined && change.body !== options.body) ||
         (change.eyes !== undefined && change.eyes !== options.eyes) ||
         (change.label !== undefined && change.label !== options.label) ||
-        (change.still !== undefined && change.still !== options.still) ||
-        (change.fit !== undefined && change.fit !== options.fit);
+        (change.still !== undefined && change.still !== options.still);
       const nextMood = change.mood ?? options.mood ?? "idle";
       options = { ...options, ...change };
       if (nextMood !== mood) {

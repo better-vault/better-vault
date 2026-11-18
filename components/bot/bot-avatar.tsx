@@ -20,7 +20,6 @@ export function BotAvatar({
   mood = "idle",
   followPointer = false,
   still = false,
-  fit = "figure",
   label = "",
   className,
 }: {
@@ -30,8 +29,6 @@ export function BotAvatar({
   followPointer?: boolean;
   /** One drawing at rest, never animated: for rows of small previews. */
   still?: boolean;
-  /** "head" fills the box with the head and crops a hat's top: for small spots like list rows. */
-  fit?: "figure" | "head";
   /** Its accessible name; empty when a name is shown beside it. */
   label?: string;
   className?: string;
@@ -47,7 +44,6 @@ export function BotAvatar({
     mood,
     followPointer,
     still,
-    fit,
     label,
   };
 
@@ -70,7 +66,7 @@ export function BotAvatar({
     <div
       ref={host}
       aria-hidden={label ? undefined : true}
-      className={cn("shrink-0", fit === "head" && "overflow-hidden", className)}
+      className={cn("shrink-0", className)}
       style={{ width: size, height: size }}
     />
   );

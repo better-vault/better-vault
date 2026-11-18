@@ -55,7 +55,7 @@ export function ToolEvent({ part, bots }: { part: ToolPart; bots: Bot[] }) {
           <BotAvatar
             avatar={target.avatar}
             size={22}
-            fit="head"
+
             mood={running ? "thinking" : "idle"}
           />
         ) : null}
@@ -214,7 +214,7 @@ export function ApprovalCard({
               neck: newBot.neck,
             }}
             size={44}
-            fit="head"
+
             mood={pending ? "idle" : "happy"}
           />
         ) : null}

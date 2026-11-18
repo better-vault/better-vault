@@ -88,6 +88,43 @@ function glance(time: number, seed: number): number {
   return (noise(seed, k + 11) > 0.5 ? 1 : -1) * amount;
 }
 
+/** Now and then the head tips to one side, curious, for a couple of seconds. */
+function tilt(time: number, seed: number): number {
+  const period = 9;
+  const k = Math.floor(time / period);
+  if (noise(seed, k + 15485863) < 0.45) return 0;
+  const start = k * period + 2 + noise(seed, k + 17) * 4;
+  const since = time - start;
+  if (since < 0 || since > 2.2) return 0;
+  const amount =
+    since < 0.35 ? smooth(since / 0.35) : since > 1.7 ? smooth((2.2 - since) / 0.5) : 1;
+  return (noise(seed, k + 23) > 0.5 ? 0.16 : -0.16) * amount;
+}
+
+/** The start of this period's hop, if it has one. */
+function hopStart(time: number, seed: number): number | null {
+  const period = 11;
+  const k = Math.floor(time / period);
+  if (noise(seed, k + 32452843) < 0.5) return null;
+  return k * period + 3 + noise(seed, k + 29) * 6;
+}
+
+/** A small hop, 0..1 high, over 0.5 s. */
+function hopAt(time: number, seed: number): number {
+  const start = hopStart(time, seed);
+  if (start === null) return 0;
+  const since = time - start;
+  return since < 0 || since > 0.5 ? 0 : Math.sin((Math.PI * since) / 0.5);
+}
+
+/** The squash as it lands, 0..1, over 0.18 s after the hop. */
+function landing(time: number, seed: number): number {
+  const start = hopStart(time, seed);
+  if (start === null) return 0;
+  const since = time - start - 0.5;
+  return since < 0 || since > 0.18 ? 0 : Math.sin((Math.PI * since) / 0.18);
+}
+
 export interface PoseInput {
   time: number;
   mood: Mood;
@@ -120,19 +157,24 @@ export function pose({ time: t, mood, seed, look, reducedMotion = false }: PoseI
       p.gazeY = -0.6;
     }
   } else {
-    // Breathing, and a slow wander of the eyes and head.
+    // Breathing, and a wander of the eyes and head, so it always looks alive.
     const breath = Math.sin((TAU * t) / 3.4 + phase);
-    p.sy = 1 + 0.016 * breath;
-    p.sx = 1 - 0.008 * breath;
-    p.lift = -0.5 * breath;
+    p.sy = 1 + 0.018 * breath;
+    p.sx = 1 - 0.009 * breath;
+    p.lift = -0.6 * breath;
+    const aside = glance(t, seed);
     p.gazeX =
-      0.3 * Math.sin(t * 0.43 + phase) +
-      0.12 * Math.sin(t * 1.27 + phase * 2) +
-      0.75 * glance(t, seed);
-    p.gazeY = 0.18 * Math.sin(t * 0.37 + phase * 3);
-    p.yaw += 0.06 * Math.sin(t * 0.31 + phase) + 0.18 * glance(t, seed);
-    p.pitch += 0.03 * Math.sin(t * 0.27 + phase);
+      0.35 * Math.sin(t * 0.43 + phase) + 0.14 * Math.sin(t * 1.27 + phase * 2) + 0.75 * aside;
+    p.gazeY = 0.22 * Math.sin(t * 0.37 + phase * 3);
+    p.yaw += 0.14 * Math.sin(t * 0.31 + phase) + 0.38 * aside;
+    p.pitch += 0.07 * Math.sin(t * 0.27 + phase) - 0.05 * Math.abs(aside);
+    p.roll = 0.05 * Math.sin(t * 0.23 + phase * 1.7) + tilt(t, seed);
     p.blink = blinking(t, seed);
+    // Now and then a little hop, as if it has had an idea.
+    const bounce = hopAt(t, seed);
+    p.lift -= 4 * bounce;
+    p.sy += 0.04 * bounce - 0.05 * landing(t, seed);
+    p.sx -= 0.02 * bounce - 0.04 * landing(t, seed);
 
     if (mood === "thinking") {
       // Looks up and aside, sways slowly, eyes narrowed.

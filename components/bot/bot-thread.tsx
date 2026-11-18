@@ -117,7 +117,7 @@ function ThreadHeader({
         </button>
       </div>
       <div className="flex min-w-0 items-center gap-2 rounded-full bg-muted/60 py-1 ps-1.5 pe-3.5">
-        <BotAvatar avatar={bot.avatar} size={26} fit="head" mood={moodOf(state)} />
+        <BotAvatar avatar={bot.avatar} size={28} mood={moodOf(state)} followPointer />
         <span className="truncate text-sm font-medium">{bot.name}</span>
       </div>
       <div className="flex justify-end">
@@ -389,7 +389,7 @@ function UserTurn({ message, bots }: { message: ChatMessage; bots: Bot[] }) {
       <Message.Content>
         {fromId ? (
           <Message.Header>
-            {from ? <BotAvatar avatar={from.avatar} size={18} fit="head" /> : null}
+            {from ? <BotAvatar avatar={from.avatar} size={18} /> : null}
             {from ? t("thread.from", { name: from.name }) : t("thread.fromUnknown")}
           </Message.Header>
         ) : null}
@@ -480,7 +480,7 @@ function TypingIndicator({ bot }: { bot: Bot }) {
   const { t } = useTranslation("bot");
   return (
     <div role="status" className="flex items-end gap-2">
-      <BotAvatar avatar={bot.avatar} size={32} fit="head" mood="thinking" />
+      <BotAvatar avatar={bot.avatar} size={32} mood="thinking" />
       <div
         aria-hidden
         className="flex h-10 items-center gap-1.5 rounded-[1.25rem] rounded-es-md bg-muted px-4"

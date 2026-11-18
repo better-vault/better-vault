@@ -135,7 +135,7 @@ function PinnedTile({
         selected && "bg-foreground/10 hover:bg-foreground/10",
       )}
     >
-      <BotAvatar avatar={bot.avatar} size={72} mood={moodOf(state)} />
+      <BotAvatar avatar={bot.avatar} size={72} mood={moodOf(state)} followPointer />
       <span className="line-clamp-2 w-full text-center text-xs leading-4 font-medium">
         {bot.name}
       </span>
@@ -169,7 +169,7 @@ function BotRow({
         selected && "bg-foreground/10 hover:bg-foreground/10",
       )}
     >
-      <BotAvatar avatar={bot.avatar} size={44} fit="head" mood={moodOf(state)} />
+      <BotAvatar avatar={bot.avatar} size={48} mood={moodOf(state)} followPointer />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{bot.name}</span>
         <span

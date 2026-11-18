@@ -370,15 +370,7 @@ function LookRow<Item extends string>({
               current === item && "bg-muted ring-1 ring-foreground/20",
             )}
           >
-            {/* A close crop on the slot, so small items read. */}
-            <span className="relative size-11 overflow-hidden">
-              <span
-                className="absolute"
-                style={{ left: -10, top: slot === "head" ? -1 : slot === "face" ? -13 : -20 }}
-              >
-                <BotAvatar avatar={{ ...avatar, [slot]: item }} size={64} still />
-              </span>
-            </span>
+            <BotAvatar avatar={{ ...avatar, [slot]: item }} size={44} still />
           </button>
         ))}
       </div>
