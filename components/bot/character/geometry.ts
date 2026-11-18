@@ -9,10 +9,10 @@
 export type V3 = readonly [number, number, number];
 export type V2 = readonly [number, number];
 
-/** How square the head is: 2 is a sphere, higher is boxier. */
-export const EXPONENT = 3.2;
+/** How square the head is: 2 is a sphere, higher is boxier. 4.6 gives the flat-sided squircle of the design. */
+export const EXPONENT = 4.6;
 /** Front-to-back depth of the head, relative to its width. */
-export const DEPTH = 0.86;
+export const DEPTH = 0.9;
 
 export interface View {
   yaw: number;

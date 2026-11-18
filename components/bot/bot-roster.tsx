@@ -44,7 +44,10 @@ export function BotRoster({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* A window bar on macOS: it moves the window and leaves room for its buttons. */}
-      <div data-window-bar className="flex min-h-14 shrink-0 items-center gap-1 border-b ps-4 pe-3">
+      <div
+        data-window-bar
+        className="flex min-h-14 shrink-0 items-center gap-1 border-b py-3 ps-4 pe-3"
+      >
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{t("roster.label")}</h2>
         <button
           type="button"

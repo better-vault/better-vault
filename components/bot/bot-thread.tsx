@@ -103,7 +103,7 @@ function ThreadHeader({
   return (
     <div
       data-window-bar
-      className="grid min-h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3"
+      className="grid min-h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-3"
     >
       <div>
         <button

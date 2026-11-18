@@ -67,10 +67,11 @@ function projectionFor(look: Look): Projection {
   };
 }
 
-const EYE_X = 0.3;
-const EYE_Y = -0.04;
-const EYE_W = 6.4;
-const EYE_H = 14;
+/** The eyes, measured from the design: tall pills on the centre line, a little apart. */
+const EYE_X = 0.29;
+const EYE_Y = -0.03;
+const EYE_W = 7.6;
+const EYE_H = 16.5;
 const DESIGN = 30;
 
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -94,45 +95,30 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
   svg.style.overflow = "visible";
 
   const defs = el("defs");
-  const shine = el("radialGradient", { id: `${id}-shine`, gradientUnits: "userSpaceOnUse" });
-  shine.append(
-    el("stop", { offset: "0", "stop-color": "var(--bot-paper)", "stop-opacity": ".5" }),
-    el("stop", { offset: ".55", "stop-color": "var(--bot-paper)", "stop-opacity": ".08" }),
-    el("stop", { offset: "1", "stop-color": "var(--bot-paper)", "stop-opacity": "0" }),
-  );
-  const shade = el("linearGradient", { id: `${id}-shade`, x1: "0", y1: "0", x2: "0", y2: "1" });
-  shade.append(
-    el("stop", { offset: ".45", "stop-color": "var(--bot-ink)", "stop-opacity": "0" }),
-    el("stop", { offset: "1", "stop-color": "var(--bot-ink)", "stop-opacity": ".32" }),
-  );
+  // The face's edge into the darker sides, softened, so the turn reads as volume.
   const soft = el("filter", {
     id: `${id}-soft`,
-    x: "-20%",
-    y: "-20%",
-    width: "140%",
-    height: "140%",
+    x: "-10%",
+    y: "-10%",
+    width: "120%",
+    height: "120%",
   });
-  soft.append(el("feGaussianBlur", { stdDeviation: "2.2" }));
-  defs.append(shine, shade, soft);
+  soft.append(el("feGaussianBlur", { stdDeviation: "1.1" }));
+  defs.append(soft);
 
-  const ground = el("ellipse", { fill: "var(--bot-ink)", opacity: ".12" });
   const figure = el("g");
   const back = el("g");
   const head = el("g");
   const frontLayer = el("g");
+  // The whole head in the side colour, then its front face in the body colour on top:
+  // head on, the sides show only as a thin bevel; turned, they show as it turns.
   const body = el("path");
-  const plate = el("path", {
-    filter: `url(#${id}-soft)`,
-    fill: "var(--bot-paper)",
-    opacity: ".16",
-  });
-  const gloss = el("path", { fill: `url(#${id}-shine)` });
-  const shadow = el("path", { fill: `url(#${id}-shade)` });
+  const face = el("path", { filter: `url(#${id}-soft)` });
   const rim = el("path", {
     fill: "none",
     stroke: "var(--bot-ink)",
-    "stroke-opacity": ".14",
-    "stroke-width": ".8",
+    "stroke-opacity": ".12",
+    "stroke-width": ".7",
   });
   const eyes = ([-1, 1] as const).map(() => {
     const group = el("g");
@@ -146,9 +132,9 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
     group.append(pill, arc);
     return { group, pill, arc };
   });
-  head.append(body, plate, gloss, shadow, rim, ...eyes.map((eye) => eye.group));
+  head.append(body, face, rim, ...eyes.map((eye) => eye.group));
   figure.append(back, head, frontLayer);
-  svg.append(defs, ground, figure);
+  svg.append(defs, figure);
   host.append(svg);
 
   let parts: PlacedPart[] = [];
@@ -157,7 +143,7 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
     projection = projectionFor(options.look);
     const dense = !options.still && host.clientWidth >= 40;
     samples = surfaceSamples(dense ? 16 : 10, dense ? 32 : 20);
-    front = samples.filter((point) => point[2] > DEPTH * 0.62);
+    front = samples.filter((point) => point[2] > DEPTH * 0.42);
     for (const placed of parts) placed.node.remove();
     const look = options.look;
     parts = [...headParts[look.head], ...faceParts[look.face], ...neckParts[look.neck]].map(
@@ -169,7 +155,10 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
         return { part, node, layer };
       },
     );
-    body.setAttribute("fill", options.body);
+    body.style.fill = `color-mix(in oklab, ${options.body} 74%, var(--bot-ink))`;
+    face.style.fill = options.body;
+    if (!dense) face.removeAttribute("filter");
+    else face.setAttribute("filter", `url(#${id}-soft)`);
     for (const eye of eyes) {
       eye.pill.setAttribute("fill", options.eyes);
       eye.arc.setAttribute("stroke", options.eyes);
@@ -259,26 +248,13 @@ export function mountCharacter(host: HTMLElement, initial: CharacterOptions): Mo
       "transform",
       `translate(0 ${current.lift.toFixed(2)}) translate(${projection.cx} ${base}) scale(${current.sx.toFixed(4)} ${current.sy.toFixed(4)}) translate(${-projection.cx} ${-base})`,
     );
-    const height = clamp(-current.lift / 6, 0, 1);
-    ground.setAttribute("cx", String(projection.cx));
-    ground.setAttribute("cy", (base + 4).toFixed(2));
-    ground.setAttribute("rx", (projection.scale * (0.72 - 0.18 * height)).toFixed(2));
-    ground.setAttribute("ry", (2.6 - 0.8 * height).toFixed(2));
-    ground.setAttribute("opacity", (0.12 - 0.05 * height).toFixed(3));
-
     const outline = silhouette(m, samples, projection);
     body.setAttribute("d", outline);
-    gloss.setAttribute("d", outline);
-    shadow.setAttribute("d", outline);
     rim.setAttribute("d", outline);
-    plate.setAttribute(
+    face.setAttribute(
       "d",
       smoothClosedPath(convexHull(front.map((point) => project(apply(m, point), projection)))),
     );
-    if (host.clientWidth < 40) plate.removeAttribute("filter");
-    shine.setAttribute("cx", (projection.cx - projection.scale * 0.34).toFixed(2));
-    shine.setAttribute("cy", (projection.cy - projection.scale * 0.46).toFixed(2));
-    shine.setAttribute("r", (projection.scale * 1.25).toFixed(2));
 
     // Eyes slide across the face toward where they look, and fold away as it turns.
     eyes.forEach((eye, index) => {

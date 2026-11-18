@@ -161,8 +161,8 @@ export const headParts: Record<HeadItem, Part[]> = {
 
 const lens = (cx: number, shape: "round" | "square") =>
   shape === "round"
-    ? `<circle cx="${cx}" r="7.6" fill="${paper}" fill-opacity=".14" stroke="${ink}" stroke-width="2"/>`
-    : `<rect x="${cx - 7.5}" y="-6.5" width="15" height="13" rx="2.6" fill="${paper}" fill-opacity=".14" stroke="${ink}" stroke-width="2"/>`;
+    ? `<circle cx="${cx}" r="10" fill="${paper}" fill-opacity=".14" stroke="${ink}" stroke-width="2.2"/>`
+    : `<rect x="${cx - 9}" y="-10" width="18" height="20" rx="3.5" fill="${paper}" fill-opacity=".14" stroke="${ink}" stroke-width="2.2"/>`;
 
 export const faceParts: Record<FaceItem, Part[]> = {
   none: [],
@@ -170,43 +170,43 @@ export const faceParts: Record<FaceItem, Part[]> = {
     onFace(
       0,
       -0.04,
-      `${lens(-9, "round")}${lens(9, "round")}<path d="M-2 -1.5 Q0 -3.6 2 -1.5" stroke="${ink}" stroke-width="2" fill="none"/>`,
+      `${lens(-9.5, "round")}${lens(9.5, "round")}<path d="M-0.5 -2 Q0 -3 0.5 -2" stroke="${ink}" stroke-width="2.2" fill="none"/>`,
     ),
   ],
   "square-glasses": [
     onFace(
       0,
       -0.04,
-      `${lens(-9, "square")}${lens(9, "square")}<path d="M-1.5 -2 H1.5" stroke="${ink}" stroke-width="2"/>`,
+      `${lens(-9.5, "square")}${lens(9.5, "square")}<path d="M-0.5 -3 H0.5" stroke="${ink}" stroke-width="2.2"/>`,
     ),
   ],
   sunglasses: [
     onFace(
       0,
       -0.04,
-      `<path d="M-1.5 -5.5 H-16 Q-17 3 -12 6.5 Q-4.5 8 -2.5 2 Z" fill="${ink}"/>` +
-        `<path d="M1.5 -5.5 H16 Q17 3 12 6.5 Q4.5 8 2.5 2 Z" fill="${ink}"/>` +
-        `<path d="M-2.5 -4.5 H2.5" stroke="${ink}" stroke-width="2"/>` +
-        `<path d="M-13 -2.5 L-9 -2.5 M11 -2.5 L13 -2.5" stroke="${paper}" stroke-width="1.4" opacity=".45" stroke-linecap="round"/>`,
+      `<path d="M-1 -9.5 H-19 Q-20.5 6 -13.5 10 Q-4 11.5 -1.5 3 Z" fill="${ink}"/>` +
+        `<path d="M1 -9.5 H19 Q20.5 6 13.5 10 Q4 11.5 1.5 3 Z" fill="${ink}"/>` +
+        `<path d="M-2 -8.5 H2" stroke="${ink}" stroke-width="2.4"/>` +
+        `<path d="M-16 -5.5 L-11 -5.5 M12 -5.5 L15 -5.5" stroke="${paper}" stroke-width="1.6" opacity=".45" stroke-linecap="round"/>`,
     ),
   ],
   monocle: [
     onFace(
-      0.3,
-      -0.04,
-      `<circle r="8.2" fill="${paper}" fill-opacity=".14" stroke="${gold}" stroke-width="2"/>` +
-        `<path d="M5 6.5 C6 14 2 18 -3 24" stroke="${gold}" stroke-width="1" fill="none"/>`,
+      0.29,
+      -0.03,
+      `<circle r="10.5" fill="${paper}" fill-opacity=".14" stroke="${gold}" stroke-width="2.2"/>` +
+        `<path d="M6.5 8.5 C7.5 16 3 20 -2 26" stroke="${gold}" stroke-width="1.1" fill="none"/>`,
     ),
   ],
   mustache: [
     onFace(
       0,
-      -0.42,
+      -0.5,
       `<path d="M0 -1 C-3.5 -4.5 -10 -4.5 -14 -0.5 C-16 1.5 -18 1 -19.5 -1.5 C-18 5 -8.5 6.5 0 2 C8.5 6.5 18 5 19.5 -1.5 C18 1 16 1.5 14 -0.5 C10 -4.5 3.5 -4.5 0 -1 Z" fill="${ink}"/>`,
     ),
   ],
   blush: ([-1, 1] as const).map((side) =>
-    onFace(side * 0.5, -0.3, `<ellipse rx="4.6" ry="2.6" fill="${red}" opacity=".35"/>`),
+    onFace(side * 0.56, -0.32, `<ellipse rx="5" ry="2.8" fill="${red}" opacity=".35"/>`),
   ),
 };
 

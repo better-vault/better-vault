@@ -28,12 +28,12 @@ export interface Pose {
   happy: number;
 }
 
-/** Resting view: turned a little to its left and seen a little from above, so the volume reads. */
-export const REST_YAW = -0.24;
-export const REST_PITCH = 0.16;
-/** How far the head turns toward what it looks at, at full deflection. */
-const LOOK_YAW = 0.5;
-const LOOK_PITCH = 0.3;
+/** Resting view: facing the viewer, as in the design; it turns when it looks at something. */
+export const REST_YAW = 0;
+export const REST_PITCH = 0.04;
+/** How far the head turns toward what it looks at, at full deflection: a lot, as in the design. */
+const LOOK_YAW = 0.62;
+const LOOK_PITCH = 0.42;
 
 export function hashSeed(text: string): number {
   let hash = 2166136261;
@@ -136,7 +136,7 @@ export function pose({ time: t, mood, seed, look, reducedMotion = false }: PoseI
 
     if (mood === "thinking") {
       // Looks up and aside, sways slowly, eyes narrowed.
-      p.yaw = REST_YAW + 0.34 + 0.05 * Math.sin(t * 0.9 + phase);
+      p.yaw = REST_YAW + 0.3 + 0.05 * Math.sin(t * 0.9 + phase);
       p.pitch = -0.12 + 0.03 * Math.sin(t * 1.3);
       p.roll = 0.07 * Math.sin(t * 0.8 + phase);
       p.gazeX = 0.55 + 0.1 * Math.sin(t * 2.1);
