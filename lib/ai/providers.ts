@@ -3,8 +3,10 @@ import { BACKEND_URL, BETTER_VAULT_MODEL } from "@/lib/account/config";
 import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createElevenLabs } from "@ai-sdk/elevenlabs";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createMoonshotAI } from "@ai-sdk/moonshotai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import {
   wrapLanguageModel,
   type ImageModel,
@@ -65,6 +67,16 @@ async function baseLanguageModel(
       return createGoogleGenerativeAI({ apiKey: credentials.apiKey })(ref.modelId);
     case "deepseek":
       return createDeepSeek({ apiKey: credentials.apiKey })(ref.modelId);
+    case "openrouter":
+      return createOpenRouter({
+        apiKey: credentials.apiKey,
+        compatibility: "strict",
+        // Shown on OpenRouter's app rankings; no user data.
+        appName: "better-vault",
+        appUrl: "https://better-vault.dev",
+      })(ref.modelId);
+    case "kimi":
+      return createMoonshotAI({ apiKey: credentials.apiKey })(ref.modelId);
     case "opencode":
       return createOpenCodeModel(ref.modelId, credentials.apiKey ?? "", credentials.baseURL);
     case "ollama":

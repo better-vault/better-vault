@@ -116,6 +116,39 @@ async function listModelIds(
       });
       return body.data.map((model) => model.id).sort(byNewest);
     }
+    case "openrouter": {
+      // The key's own list: only models it may use, with their context windows.
+      const body = await getJson<{
+        data: {
+          id: string;
+          context_length?: number;
+          architecture?: { output_modalities?: string[] };
+        }[];
+      }>("https://openrouter.ai/api/v1/models/user", {
+        authorization: `Bearer ${credentials.apiKey}`,
+      });
+      const chat = body.data.filter(
+        (model) =>
+          !model.id.endsWith(":batch") &&
+          (model.architecture?.output_modalities ?? ["text"]).includes("text") &&
+          !NOT_CHAT.test(model.id),
+      );
+      for (const model of chat)
+        if (model.context_length) contextTokens[model.id] = model.context_length;
+      return chat.map((model) => model.id);
+    }
+    case "kimi": {
+      const body = await getJson<{ data: { id: string; context_length?: number }[] }>(
+        "https://api.moonshot.ai/v1/models",
+        { authorization: `Bearer ${credentials.apiKey}` },
+      );
+      for (const model of body.data)
+        if (model.context_length) contextTokens[model.id] = model.context_length;
+      return body.data
+        .map((model) => model.id)
+        .filter((id) => !NOT_CHAT.test(id))
+        .sort(byNewest);
+    }
     case "opencode":
       return listOpenCodeModels(credentials.baseURL);
     case "bettervault":

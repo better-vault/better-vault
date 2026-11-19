@@ -1,7 +1,8 @@
 /**
  * The AI providers better-vault can talk to. Shared by the browser (settings,
  * model picker) and the server (model factory). To add a provider, add it
- * here and handle it in `lib/ai/providers.ts` and `server/routes/models.ts`.
+ * here and handle it in `lib/ai/providers.ts` and `lib/ai/list-models.ts`,
+ * with its mark in `lib/ai/provider-icons.ts`.
  */
 export const providerIds = [
   "openai",
@@ -11,6 +12,8 @@ export const providerIds = [
   "ollama",
   "lmstudio",
   "deepseek",
+  "openrouter",
+  "kimi",
   "elevenlabs",
   "bettervault",
 ] as const;
@@ -83,6 +86,8 @@ export const chatProviderIds = [
   "ollama",
   "lmstudio",
   "deepseek",
+  "openrouter",
+  "kimi",
   "bettervault",
 ] as const satisfies readonly ProviderId[];
 
@@ -238,6 +243,44 @@ export const providers: Record<ProviderId, ProviderInfo> = {
     imageModels: [],
     // DeepSeek V4 thinks at high or max; the SDK maps the other levels onto those.
     efforts: ["provider-default", "none", "low", "high", "max"],
+  },
+  openrouter: {
+    id: "openrouter",
+    kind: "chat",
+    name: "OpenRouter",
+    local: false,
+    needsKey: true,
+    // OpenRouter's web plugin searches through a third party, so Web mode stays off (decision 3).
+    webSearch: false,
+    keyUrl: "https://openrouter.ai/settings/keys",
+    // From OpenRouter's model list (https://openrouter.ai/api/v1/models).
+    suggestedModels: [
+      "anthropic/claude-sonnet-5.5",
+      "openai/gpt-6.2-sol",
+      "google/gemini-4-neon",
+      "moonshotai/kimi-k3.1-pro",
+      "deepseek/deepseek-v4-pro",
+    ],
+    contextChars: 400_000,
+    contextTokens: 200_000,
+    imageModels: [],
+    efforts: ["provider-default", "none", "minimal", "low", "medium", "high"],
+  },
+  kimi: {
+    id: "kimi",
+    kind: "chat",
+    name: "Kimi",
+    local: false,
+    needsKey: true,
+    // Kimi's $web_search runs on Moonshot's side but isn't an AI SDK tool; Web mode stays off.
+    webSearch: false,
+    keyUrl: "https://platform.kimi.ai/console/api-keys",
+    // From the model id union in the installed @ai-sdk/moonshotai.
+    suggestedModels: ["kimi-k3.1-pro", "kimi-k3", "kimi-k2.7-code", "kimi-k3.1-pro-highspeed"],
+    contextChars: 400_000,
+    contextTokens: 256_000,
+    imageModels: [],
+    efforts: ["provider-default", "none", "low", "medium", "high"],
   },
   elevenlabs: {
     id: "elevenlabs",

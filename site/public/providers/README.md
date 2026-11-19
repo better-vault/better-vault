@@ -7,3 +7,6 @@ better-vault works with that provider; it implies no endorsement.
 
 `lmstudio-light.svg` and `lmstudio-dark.svg` are the same file with its
 `currentColor` fill set to black and white.
+
+`openrouter-light.svg` and `openrouter-dark.svg` are theSVG's light and dark
+variants of the OpenRouter mark; `kimi.svg` is its full-colour Kimi mark.
