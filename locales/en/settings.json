@@ -513,9 +513,7 @@
     "syncedAt": "Synced {{when}}. Signing in on another device brings them back.",
     "syncNever": "Not synced yet. It starts in a moment.",
     "syncOff": "Off: they stay on this device only.",
-    "syncError": "Couldn't sync: {{error}}",
-    "previewNote": "Preview: this is what a subscriber sees, with sample numbers. Nothing here is real or saved.",
-    "previewAction": "Preview only: nothing was changed."
+    "syncError": "Couldn't sync: {{error}}"
   },
   "plugins": {
     "title": "Plugins",

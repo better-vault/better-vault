@@ -7,8 +7,6 @@ import { Icon, type IconSvgElement } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { markWelcomed, refreshAccount, useAccount } from "@/lib/account/account";
-import { previewAccount, subscriptionPreview } from "@/lib/account/preview";
-import { toast } from "sonner";
 import { updateSettings } from "@/lib/db/settings";
 
 /**
@@ -19,10 +17,7 @@ import { updateSettings } from "@/lib/db/settings";
 export function AccountWatcher() {
   const { t, i18n } = useTranslation("settings");
   const { t: tCommon } = useTranslation();
-  const real = useAccount();
-  // Development only: ?preview=subscribed shows the dialog a new subscriber gets.
-  const preview = subscriptionPreview();
-  const account = preview && real !== undefined ? previewAccount(real) : real;
+  const account = useAccount();
   const [params, setParams] = useSearchParams();
   // Shown while the plan hasn't been thanked for; closing it marks it thanked.
   const [dismissed, setDismissed] = useState(false);
@@ -51,7 +46,7 @@ export function AccountWatcher() {
 
   const close = () => {
     setDismissed(true);
-    if (!preview) void markWelcomed();
+    void markWelcomed();
   };
   if (!account || !plan) return null;
 
@@ -91,11 +86,6 @@ export function AccountWatcher() {
           </Button>
           <Button
             onClick={() => {
-              if (preview) {
-                toast(t("subscription.previewAction"));
-                close();
-                return;
-              }
               void updateSettings(
                 (saved) =>
                   void (saved.model = { provider: "bettervault", modelId: "better-vault" }),
