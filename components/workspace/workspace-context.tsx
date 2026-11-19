@@ -25,6 +25,11 @@ interface WorkspaceState {
   openOutputId: string | null;
   openOutput: (id: string) => void;
   closeOutput: () => void;
+  /** The plugin panel shown in the Studio tab, instead of an output. */
+  openPanel: { pluginId: string; panelId: string } | null;
+  /** Closes the Studio sheet and shows a plugin's panel in the Studio tab. */
+  openPluginPanel: (pluginId: string, panelId: string) => void;
+  closePluginPanel: () => void;
   studioOpen: boolean;
   setStudioOpen: (open: boolean) => void;
   settingsOpen: boolean;
@@ -68,6 +73,7 @@ export function WorkspaceProvider({
 }) {
   const [tab, setTab] = useState<WorkspaceTab>("chat");
   const [openOutputId, setOpenOutputId] = useState<string | null>(null);
+  const [openPanel, setOpenPanel] = useState<WorkspaceState["openPanel"]>(null);
   const [studioOpen, setStudioOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
@@ -84,11 +90,20 @@ export function WorkspaceProvider({
       setTab,
       openOutputId,
       openOutput: (id) => {
+        setOpenPanel(null);
         setOpenOutputId(id);
         setStudioOpen(false);
         setTab("studio");
       },
       closeOutput: () => setOpenOutputId(null),
+      openPanel,
+      openPluginPanel: (pluginId, panelId) => {
+        setOpenOutputId(null);
+        setOpenPanel({ pluginId, panelId });
+        setStudioOpen(false);
+        setTab("studio");
+      },
+      closePluginPanel: () => setOpenPanel(null),
       studioOpen,
       setStudioOpen,
       settingsOpen,
@@ -123,6 +138,7 @@ export function WorkspaceProvider({
       notebook,
       tab,
       openOutputId,
+      openPanel,
       studioOpen,
       settingsOpen,
       addSourceOpen,

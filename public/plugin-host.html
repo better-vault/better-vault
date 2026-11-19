@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plugin</title>
+  </head>
+  <body>
+    <script>
+      // better-vault's plugin host. The app frames this page sandboxed (no
+      // allow-same-origin, so no access to its storage) and sends the
+      // plugin's page in one message; this page then becomes it. Its policy
+      // (above, and in the header) lets the plugin run its own inline code
+      // but load nothing and reach no server. See lib/plugins/bridge.ts.
+      window.addEventListener("message", function load(event) {
+        if (event.source !== window.parent) return;
+        var data = event.data;
+        if (!data || data.type !== "bv:load" || typeof data.html !== "string") return;
+        window.removeEventListener("message", load);
+        document.open();
+        document.write(data.html);
+        document.close();
+      });
+      window.parent.postMessage({ type: "bv:host-ready" }, "*");
+    </script>
+  </body>
+</html>

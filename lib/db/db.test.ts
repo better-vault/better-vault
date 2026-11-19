@@ -28,6 +28,8 @@ import {
 } from "./settings";
 import { createNote, renameNote, saveNoteBody } from "./notes";
 import { createSkill, deleteSkill, saveSkill } from "./skills";
+import { installPlugin, listPlugins, removePlugin, setPluginEnabled } from "./plugins";
+import { parsePluginBundle } from "@/lib/plugins/manifest";
 import {
   createBot,
   deleteBot,
@@ -375,6 +377,62 @@ describe.each(backends)("%s store", (name, create) => {
     });
   });
 
+  describe("plugins", () => {
+    const bundle = (permissions: string[]) => {
+      const parsed = parsePluginBundle({
+        manifest: {
+          manifestVersion: 1,
+          id: "notebook-stats",
+          name: "Notebook stats",
+          version: "1.0.0",
+          permissions,
+          contributes: { panels: [{ id: "stats", title: "Stats", slot: "studio" }] },
+        },
+        files: { "index.html": "<p>Hi</p>" },
+      });
+      if (!parsed.ok) throw new Error(parsed.error);
+      return parsed.bundle;
+    };
+
+    it("installs turned off, keeps grants on updates, and comes back off from a backup", async () => {
+      const installed = await installPlugin(bundle(["read:notebooks"]), "Claude Code");
+      expect([installed.enabled, installed.updatedBy]).toEqual([false, "Claude Code"]);
+
+      await setPluginEnabled("notebook-stats", true, ["read:notebooks", "write:notes"]);
+      let [plugin] = await listPlugins();
+      // Only what the manifest asks for can be granted.
+      expect([plugin.enabled, plugin.granted]).toEqual([true, ["read:notebooks"]]);
+
+      // The same permissions: it stays on.
+      await installPlugin(bundle(["read:notebooks"]));
+      [plugin] = await listPlugins();
+      expect(plugin.enabled).toBe(true);
+
+      // Asking for more turns it off until the user allows it.
+      await installPlugin(bundle(["read:notebooks", "read:notes"]));
+      [plugin] = await listPlugins();
+      expect([plugin.enabled, plugin.granted]).toEqual([false, ["read:notebooks"]]);
+
+      await setPluginEnabled("notebook-stats", true, ["read:notebooks", "read:notes"]);
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      await deleteAllData();
+      expect(await listPlugins()).toEqual([]);
+      await importBackup(backup);
+      [plugin] = await listPlugins();
+      expect([plugin.id, plugin.enabled, plugin.granted]).toEqual(["notebook-stats", false, []]);
+
+      await removePlugin("notebook-stats");
+      expect(await listPlugins()).toEqual([]);
+    });
+
+    it("drops plugins from a backup that don't pass the checks", async () => {
+      const backup = JSON.parse(JSON.stringify(await exportBackup()));
+      backup.plugins = [{ id: "bad", manifest: { id: "Bad Id" }, files: {} }];
+      await importBackup(backup);
+      expect(await listPlugins()).toEqual([]);
+    });
+  });
+
   describe("search", () => {
     it("lists the sources and outputs of every notebook", async () => {
       const a = await createNotebook("A");
@@ -508,7 +566,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(7);
+      expect(backup.format).toBe(8);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");

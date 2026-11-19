@@ -28,7 +28,11 @@
     "mcpOff": "Let AI agents use your notebooks, notes and more",
     "subscription": "Subscription",
     "subscriptionNone": "Better Vault AI and Cloud",
-    "subscriptionPlan": "{{plan}} plan"
+    "subscriptionPlan": "{{plan}} plan",
+    "plugins": "Plugins",
+    "pluginsNone": "Panels and themes made by you or an agent",
+    "pluginsHint_one": "{{count}} turned on",
+    "pluginsHint_other": "{{count}} turned on"
   },
   "providers": {
     "title": "AI providers",
@@ -505,5 +509,39 @@
     "soonHint": "Pro and Max open soon. You can sign in now, and subscribe here once they do.",
     "choose": "Choose a plan",
     "planName": "{{plan}} plan"
+  },
+  "plugins": {
+    "title": "Plugins",
+    "description": "Panels and themes that run inside better-vault. Build one with an AI agent through MCP, or install a .bvplugin.json file.",
+    "install": "Install",
+    "installHint": "Install a plugin from a .bvplugin.json file. It arrives turned off.",
+    "installed": "Installed {{name}}. Turn it on to use it.",
+    "notJson": "{{name}} is not a plugin file.",
+    "invalid": "{{name}} can't be installed: {{error}}",
+    "emptyTitle": "No plugins yet",
+    "emptyBody": "Ask an agent such as Claude Code to build one: allow Plugins in Settings → MCP, then describe the panel you want and where it should go.",
+    "safety": "Plugins run in a sandbox with no network and can't see your keys or settings. A plugin you turn on can read and change only what you allow here, so install plugins you trust.",
+    "meta": "{{version}} · by {{by}}",
+    "byYou": "you",
+    "panels_one": "{{count}} panel",
+    "panels_other": "{{count}} panels",
+    "theme": "Theme",
+    "toggle": "Turn {{name}} on or off",
+    "asks": "Asks to",
+    "granted": "Allowed to",
+    "noPermissions": "Nothing: it only shows its own content.",
+    "removeAsk": "Remove {{name}}?",
+    "keep": "Keep",
+    "remove": "Remove",
+    "leftPage": "{{name}} tried to leave its sandbox, so it was stopped.",
+    "permissions": {
+      "read_notebooks": "Read your notebooks",
+      "read_sources": "Read notebooks' sources",
+      "read_notes": "Read your notes",
+      "read_skills": "Read your skills",
+      "read_calendar": "Read your calendar",
+      "write_notes": "Create notes",
+      "write_calendar": "Add calendar events"
+    }
   }
 }

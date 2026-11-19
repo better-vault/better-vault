@@ -1,0 +1,22 @@
+{
+  "manifest": {
+    "manifestVersion": 1,
+    "id": "notebook-stats",
+    "name": "Notebook stats",
+    "version": "1.0.0",
+    "description": "How much each source in the notebook holds, as bars, with its format.",
+    "author": "better-vault",
+    "icon": "chart",
+    "permissions": ["read:sources"],
+    "contributes": {
+      "panels": [
+        { "id": "stats", "title": "Notebook stats", "slot": "studio", "entry": "index.html" }
+      ]
+    }
+  },
+  "files": {
+    "index.html": "<!doctype html><html><head><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"style.css\"></head><body><main><h1 id=\"title\">Notebook stats</h1><p id=\"summary\" class=\"muted\">Loading…</p><ol id=\"bars\"></ol></main><script src=\"app.js\"></script></body></html>",
+    "style.css": "main{padding:24px;max-width:720px;margin:0 auto}h1{font-size:18px;margin:0 0 4px}.muted{color:var(--muted-foreground);font-size:13px;margin:0 0 20px}ol{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}li{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}.bar{grid-column:1/-1;height:8px;border-radius:999px;background:var(--muted);overflow:hidden}.bar span{display:block;height:100%;border-radius:999px;background:var(--chart-2)}.format{color:var(--muted-foreground)}",
+    "app.js": "const bars = document.getElementById('bars');\nconst summary = document.getElementById('summary');\nasync function render(context) {\n  document.getElementById('title').textContent = context.notebook ? context.notebook.title : 'Notebook stats';\n  try {\n    const sources = await betterVault.call('sources.list');\n    const total = sources.reduce((sum, s) => sum + s.characters, 0);\n    const most = Math.max(1, ...sources.map((s) => s.characters));\n    summary.textContent = sources.length + ' sources · ' + total.toLocaleString(context.language) + ' characters';\n    bars.replaceChildren(...sources.sort((a, b) => b.characters - a.characters).map((s) => {\n      const li = document.createElement('li');\n      const name = document.createElement('span');\n      name.textContent = s.title;\n      const meta = document.createElement('span');\n      meta.className = 'format';\n      meta.textContent = s.format.toUpperCase() + ' · ' + s.characters.toLocaleString(context.language);\n      const bar = document.createElement('div');\n      bar.className = 'bar';\n      const fill = document.createElement('span');\n      fill.style.width = (100 * s.characters / most).toFixed(1) + '%';\n      bar.append(fill);\n      li.append(name, meta, bar);\n      return li;\n    }));\n  } catch (error) {\n    summary.textContent = error.message;\n  }\n}\nbetterVault.onContext(render);\n"
+  }
+}

@@ -10,6 +10,8 @@ import type { McpArea, ToolContext } from "./context";
 import { registerDescribeTool } from "./describe";
 import { registerNoteTools } from "./notes";
 import { registerNotebookTools } from "./notebooks";
+import { pluginGuide, registerPluginTools } from "./plugins";
+import { readFileSync } from "node:fs";
 
 let store: SyncBackend;
 let allowed: Set<McpArea>;
@@ -26,11 +28,12 @@ async function connect() {
     changed: (tables) => changes.push(...tables),
     log: () => undefined,
   };
-  registerDescribeTool(ctx);
+  registerDescribeTool(ctx, pluginGuide);
   registerNotebookTools(ctx);
   registerNoteTools(ctx);
   registerCalendarTools(ctx);
   registerActivityTools(ctx);
+  registerPluginTools(ctx);
   const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
   await mcp.connect(serverSide);
   const client = new Client({ name: "tester", version: "1" });
@@ -74,13 +77,13 @@ describe("MCP tools", () => {
     );
     expect(areas.calendar.mayChange).toBe(false);
     expect(areas.notes.mayChange).toBe(true);
-    // Every tool named in the guide exists (plugins come with their own group).
+    // Every tool named in the guide exists.
     const client = await connect();
     const names = new Set((await client.listTools()).tools.map((tool) => tool.name));
-    for (const [area, guide] of Object.entries(areas))
-      if (area !== "plugins")
-        for (const tool of [...guide.reads, ...(guide as unknown as { writes: string[] }).writes])
-          expect(names, tool).toContain(tool);
+    for (const guide of Object.values(areas))
+      for (const tool of [...guide.reads, ...(guide as unknown as { writes: string[] }).writes])
+        expect(names, tool).toContain(tool);
+    expect(Object.keys((value.plugins as { bridge: object }).bridge)).toContain("sources.list");
   });
 
   it("creates a notebook, adds and reads a source, and searches it", async () => {
@@ -147,6 +150,42 @@ describe("MCP tools", () => {
     });
     await call("delete_event", { id });
     expect(store.listCalendar()).toHaveLength(0);
+  });
+
+  it("installs plugins turned off, only when allowed, and checks them", async () => {
+    const example = JSON.parse(
+      readFileSync(
+        new URL("../../../plugins/examples/notebook-stats.bvplugin.json", import.meta.url),
+        "utf8",
+      ),
+    );
+    expect((await call("install_plugin", example)).raw).toContain("turned off");
+    allowed.add("plugins");
+    const installed = await call("install_plugin", example);
+    expect(installed.error).toBe(false);
+    expect(store.getPlugin("notebook-stats")).toMatchObject({
+      enabled: false,
+      updatedBy: "tester",
+    });
+
+    // The user turns it on; an agent's update turns it off again.
+    store.putPlugin({
+      ...store.getPlugin("notebook-stats")!,
+      enabled: true,
+      granted: ["read:sources"],
+    });
+    await call("update_plugin", example);
+    expect(store.getPlugin("notebook-stats")).toMatchObject({
+      enabled: false,
+      granted: ["read:sources"],
+    });
+
+    const bad = await call("install_plugin", {
+      ...example,
+      manifest: { ...example.manifest, id: "x y" },
+    });
+    expect(bad.error).toBe(true);
+    expect((await call("list_plugins")).value).toHaveLength(1);
   });
 
   it("reads chats and Studio outputs", async () => {

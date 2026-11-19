@@ -2,6 +2,7 @@
 
 import type { ModelRef } from "@/lib/ai/catalog";
 import type { ChatMessage } from "@/lib/chat/types";
+import type { PluginManifest, PluginPermission } from "@/lib/plugins/manifest";
 import type { SourceFormat, SourceKind } from "@/lib/sources/formats";
 
 export interface Notebook {
@@ -89,6 +90,26 @@ export interface Skill {
   /** The instructions, without the frontmatter. */
   body: string;
   /** Who changed it last: "you", or the name of the MCP client. */
+  updatedBy: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * An installed plugin (lib/plugins/manifest.ts): its manifest, its files and
+ * whether the user turned it on. Its panels may use only the permissions
+ * granted when it was turned on.
+ */
+export interface Plugin {
+  /** The manifest's id. */
+  id: string;
+  manifest: PluginManifest;
+  /** Its files by path, as text. */
+  files: Record<string, string>;
+  enabled: boolean;
+  /** What the user allowed when turning it on: some or all of the manifest's permissions. */
+  granted: PluginPermission[];
+  /** Who installed or last updated it: "you", or the name of the MCP client. */
   updatedBy: string;
   createdAt: number;
   updatedAt: number;

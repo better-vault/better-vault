@@ -14,6 +14,7 @@ import type { McpArea, ToolContext } from "./context";
 import { registerDescribeTool } from "./describe";
 import { registerNoteTools } from "./notes";
 import { registerNotebookTools } from "./notebooks";
+import { pluginGuide, registerPluginTools } from "./plugins";
 
 /**
  * A Model Context Protocol server in the desktop app, so AI agents (Claude
@@ -143,11 +144,12 @@ export function startMcp(
         broadcast();
       },
     };
-    registerDescribeTool(ctx, () => describeExtras());
+    registerDescribeTool(ctx, () => ({ ...pluginGuide(), ...describeExtras() }));
     registerNotebookTools(ctx);
     registerNoteTools(ctx);
     registerCalendarTools(ctx);
     registerActivityTools(ctx);
+    registerPluginTools(ctx);
     for (const group of groups) group(ctx);
     return mcp;
   }

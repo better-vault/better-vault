@@ -4,7 +4,12 @@ import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { inlineScriptHashes, securityHeaders } from "@/lib/security/csp";
+import {
+  inlineScriptHashes,
+  PLUGIN_HOST_PATH,
+  pluginHostHeaders,
+  securityHeaders,
+} from "@/lib/security/csp";
 import { createApi } from "./app";
 
 /**
@@ -18,11 +23,13 @@ const hostname = process.env.HOSTNAME || "localhost";
 
 const index = await readFile(path.join(client, "index.html"), "utf8");
 const headers = securityHeaders(inlineScriptHashes(index));
+const pluginHeaders = pluginHostHeaders();
 const app = new Hono();
-// The Content-Security-Policy and friends, on every answer.
+// The Content-Security-Policy and friends, on every answer; the plugin host has its own.
 app.use("*", async (c, next) => {
   await next();
-  for (const [name, value] of Object.entries(headers)) c.res.headers.set(name, value);
+  const own = c.req.path === PLUGIN_HOST_PATH ? pluginHeaders : headers;
+  for (const [name, value] of Object.entries(own)) c.res.headers.set(name, value);
 });
 app.route("/", createApi());
 app.use("/*", serveStatic({ root: path.relative(process.cwd(), client) }));

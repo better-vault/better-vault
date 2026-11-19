@@ -4,6 +4,7 @@ import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { OutputList } from "@/components/studio/output-list";
 import { OutputViewer } from "@/components/studio/output-viewer";
+import { PluginPanelView } from "@/components/plugins/plugin-panel-view";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useOutputs } from "@/lib/db/outputs";
 import { useWorkspace } from "./workspace-context";
@@ -11,9 +12,10 @@ import { useWorkspace } from "./workspace-context";
 /** The Studio tab: the open output, or every output when none is open. */
 export function StudioView() {
   const { t } = useTranslation("studio");
-  const { notebook, openOutput, openOutputId, setStudioOpen } = useWorkspace();
+  const { notebook, openOutput, openOutputId, openPanel, setStudioOpen } = useWorkspace();
   const outputs = useOutputs(notebook.id);
 
+  if (openPanel) return <PluginPanelView {...openPanel} />;
   if (openOutputId) return <OutputViewer id={openOutputId} />;
 
   if (outputs && outputs.length === 0) {

@@ -17,6 +17,7 @@ import type {
   Skill,
   Bot,
   BotMessage,
+  Plugin,
 } from "./types";
 
 export type * from "./types";
@@ -38,6 +39,7 @@ export class BetterVaultDatabase extends Dexie {
   calendar!: EntityTable<CalendarEntry, "id">;
   notes!: EntityTable<Note, "id">;
   skills!: EntityTable<Skill, "id">;
+  plugins!: EntityTable<Plugin, "id">;
   bots!: EntityTable<Bot, "id">;
   botMessages!: EntityTable<BotMessage, "id">;
   blobs!: EntityTable<StoredBlob, "id">;
@@ -145,6 +147,10 @@ export class BetterVaultDatabase extends Dexie {
     this.version(9).stores({
       bots: "id, order",
       botMessages: "id, botId, [botId+createdAt]",
+    });
+    // Version 10: plugins.
+    this.version(10).stores({
+      plugins: "id",
     });
   }
 }

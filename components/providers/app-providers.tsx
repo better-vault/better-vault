@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AccountWatcher } from "@/components/account/welcome-dialog";
 import { CommandPalette } from "@/components/command/command-palette";
 import { OnboardingGate } from "@/components/onboarding/onboarding";
+import { PluginThemes } from "@/components/plugins/plugin-themes";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +22,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <Toaster />
           <UpdatesHost />
           <AccountWatcher />
+          <PluginThemes />
           <OnboardingGate />
         </TooltipProvider>
       </I18nProvider>

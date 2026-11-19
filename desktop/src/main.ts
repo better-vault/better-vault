@@ -122,6 +122,17 @@ function createWindow() {
     if (!url.startsWith(pageOrigin)) openExternal(url);
     return { action: "deny" };
   });
+  // A plugin panel (lib/plugins) may not leave its sandboxed host page:
+  // navigating elsewhere could carry what it was allowed to read off the device.
+  window.webContents.on("will-frame-navigate", (event) => {
+    if (event.isMainFrame) return;
+    const from = event.frame?.url ?? "";
+    if (
+      from.includes("/plugin-host.html") &&
+      !event.url.startsWith(`${pageOrigin}/plugin-host.html`)
+    )
+      event.preventDefault();
+  });
   window.webContents.on("will-navigate", (event, url) => {
     if (url.startsWith(pageOrigin)) return;
     event.preventDefault();

@@ -3,7 +3,12 @@ import { statSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { readFileSync } from "node:fs";
-import { inlineScriptHashes, securityHeaders } from "@/lib/security/csp";
+import {
+  inlineScriptHashes,
+  PLUGIN_HOST_PATH,
+  pluginHostHeaders,
+  securityHeaders,
+} from "@/lib/security/csp";
 import { createApi } from "@/server/app";
 
 /**
@@ -61,9 +66,10 @@ export function handleScheme(renderer: string) {
     let file = path.join(renderer, relative);
     if (!file.startsWith(renderer) || !isFile(file)) file = path.join(renderer, "index.html");
     const response = await net.fetch(pathToFileURL(file).toString());
-    // The pages get the same Content-Security-Policy as the web app's.
+    // The pages get the same Content-Security-Policy as the web app's; the plugin host its own.
     const answer = new Headers(response.headers);
-    for (const [name, value] of Object.entries(pageHeaders ?? {})) answer.set(name, value);
+    const own = url.pathname === PLUGIN_HOST_PATH ? pluginHostHeaders() : pageHeaders;
+    for (const [name, value] of Object.entries(own ?? {})) answer.set(name, value);
     return new Response(response.body, { status: response.status, headers: answer });
   });
 }

@@ -8,6 +8,9 @@ import { availableImageModels, useSettings } from "@/lib/db/settings";
 import { useStudioSettings } from "@/lib/studio/settings";
 import { toolDefinitions } from "@/studio/definitions";
 import { studioToolIds, studioTools, type StudioToolId } from "@/studio/tools";
+import { Icon } from "@/components/icon";
+import { pluginIconSet } from "@/components/plugins/plugin-icons";
+import { usePlugins } from "@/lib/db/plugins";
 import { OutputList } from "./output-list";
 import { useStudioRunner } from "./studio-runner";
 import { ToolTile } from "./tool-tile";
@@ -26,7 +29,14 @@ interface StudioSheetProps {
 export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
   const { t } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
-  const { notebook, openOutput, openTool } = useWorkspace();
+  const { notebook, openOutput, openTool, openPluginPanel } = useWorkspace();
+  const panels = (usePlugins() ?? [])
+    .filter((plugin) => plugin.enabled)
+    .flatMap((plugin) =>
+      plugin.manifest.contributes.panels
+        .filter((panel) => panel.slot === "studio")
+        .map((panel) => ({ plugin, panel })),
+    );
   const runner = useStudioRunner();
   const navigate = useNavigate();
   const settings = useSettings();
@@ -88,6 +98,36 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
               />
             ))}
           </div>
+          {panels.length > 0 ? (
+            <section className="mt-6">
+              <h3 className="mb-2 px-1 text-xs font-medium text-muted-foreground">
+                {t("plugins.title")}
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {panels.map(({ plugin, panel }) => (
+                  <button
+                    key={`${plugin.id}:${panel.id}`}
+                    type="button"
+                    onClick={() => openPluginPanel(plugin.id, panel.id)}
+                    title={plugin.manifest.description || plugin.manifest.name}
+                    className="flex h-14 cursor-pointer items-center gap-2.5 rounded-2xl bg-muted/70 px-3 text-start transition-[background-color,scale] duration-150 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+                  >
+                    <Icon
+                      icon={pluginIconSet[plugin.manifest.icon]}
+                      size={20}
+                      className="shrink-0"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">{panel.title}</span>
+                      <span className="block truncate text-[0.6875rem] text-muted-foreground">
+                        {plugin.manifest.name}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
           <section className="mt-6 pb-4">
             <h3 className="mb-1 px-1 text-xs font-medium text-muted-foreground">{t("created")}</h3>
             <OutputList notebookId={notebook.id} onOpen={(output) => openOutput(output.id)} />

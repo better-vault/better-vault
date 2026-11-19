@@ -11,6 +11,7 @@ import type {
   Vault,
   Note,
   Skill,
+  Plugin,
   CalendarEntry,
   Bot,
   BotMessage,
@@ -53,6 +54,7 @@ const columns: Record<DocTable, Record<string, string>> = {
   vaults: { updated_at: "updatedAt" },
   notes: { vault_id: "vaultId", updated_at: "updatedAt" },
   skills: { vault_id: "vaultId", name: "name" },
+  plugins: {},
   bots: { sort: "order" },
   botMessages: { bot_id: "botId", created_at: "createdAt" },
   folders: { parent_id: "parentId", updated_at: "updatedAt" },
@@ -134,6 +136,10 @@ const migrations: string[] = [
   CREATE TABLE botMessages (id TEXT PRIMARY KEY, bot_id TEXT NOT NULL, created_at REAL NOT NULL, doc TEXT NOT NULL);
   CREATE INDEX bot_messages_bot ON botMessages (bot_id, created_at);
   `,
+  // 8: plugins.
+  `
+  CREATE TABLE plugins (id TEXT PRIMARY KEY, doc TEXT NOT NULL);
+  `,
 ];
 
 /** The schema version a database has once migrated. */
@@ -177,8 +183,9 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     const names = Object.keys(columns[table]);
     const record = row as unknown as Record<string, unknown>;
     const values = names.map((name) => record[columns[table][name]] as SqlValue);
+    const fields = ["id", ...names, "doc"];
     db.prepare(
-      `${mode} INTO ${table} (id, ${names.join(", ")}, doc) VALUES (?, ${names.map(() => "?").join(", ")}, ?)`,
+      `${mode} INTO ${table} (${fields.join(", ")}) VALUES (${fields.map(() => "?").join(", ")})`,
     ).run(row.id, ...values, JSON.stringify(row));
   }
   const add = <T extends { id: string }>(table: DocTable, row: T) => write(table, row, "INSERT");
@@ -214,6 +221,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     "vaults",
     "notes",
     "skills",
+    "plugins",
     "bots",
     "botMessages",
     "folders",
@@ -307,6 +315,14 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     getSkill: (id) => get<Skill>("skills", id),
     putSkill: (skill) => {
       put("skills", skill);
+    },
+    listPlugins: () => docs<Plugin>(db.prepare("SELECT doc FROM plugins").all()),
+    getPlugin: (id) => get<Plugin>("plugins", id),
+    putPlugin: (plugin) => {
+      put("plugins", plugin);
+    },
+    deletePlugin: (id) => {
+      deleteWhere("plugins", "id", id);
     },
     deleteSkill: (id) => {
       deleteWhere("skills", "id", id);
@@ -507,6 +523,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       vaults: docs(db.prepare("SELECT doc FROM vaults").all()),
       notes: docs(db.prepare("SELECT doc FROM notes").all()),
       skills: docs(db.prepare("SELECT doc FROM skills").all()),
+      plugins: docs(db.prepare("SELECT doc FROM plugins").all()),
       bots: docs(db.prepare("SELECT doc FROM bots").all()),
       botMessages: docs(db.prepare("SELECT doc FROM botMessages").all()),
       folders: docs(db.prepare("SELECT doc FROM folders").all()),
@@ -523,6 +540,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         for (const row of data.vaults) put("vaults", row);
         for (const row of data.notes) put("notes", row);
         for (const row of data.skills) put("skills", row);
+        for (const row of data.plugins) put("plugins", row);
         for (const row of data.bots) put("bots", row);
         for (const row of data.botMessages) put("botMessages", row);
         for (const row of data.folders) put("folders", row);

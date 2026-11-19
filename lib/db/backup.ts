@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { chunkText } from "@/lib/grounding/chunk";
 import { conversationTitle } from "@/lib/chat/title";
+import { parsePluginBundle } from "@/lib/plugins/manifest";
 import { store } from "./store";
 import type {
   Chunk,
@@ -17,6 +18,7 @@ import type {
   Skill,
   Bot,
   BotMessage,
+  Plugin,
 } from "./types";
 
 /** A stored file in a backup: its bytes as base64, since backups are JSON. */
@@ -30,17 +32,19 @@ export type BackupBlob = Omit<StoredBlob, "data"> & { data: string };
 export interface Backup {
   app: "better-vault";
   /**
-   * 7 adds bots and their threads; 6 added notes and skills; 5 added calendar entries; 4 added vaults; 3 added folders and files; 2
+   * 8 adds plugins; 7 added bots and their threads; 6 added notes and skills; 5 added calendar entries; 4 added vaults; 3 added folders and files; 2
    * added conversations. Older backups still import: format 1 (one chat per
    * notebook), format 2 (no folders), format 3 (no vaults: everything is in
-   * the default vault), format 4 (no calendar), format 5 (no notes or skills) and format 6 (no bots).
+   * the default vault), format 4 (no calendar), format 5 (no notes or skills), format 6 (no bots)
+   * and format 7 (no plugins). Plugins in a backup are checked again and come back turned off.
    */
-  format: 7;
+  format: 8;
   exportedAt: number;
   calendar: CalendarEntry[];
   vaults: Vault[];
   notes: Note[];
   skills: Skill[];
+  plugins: Plugin[];
   bots: Bot[];
   botMessages: BotMessage[];
   folders: Folder[];
@@ -62,7 +66,9 @@ const backupSchema = z.object({
     z.literal(5),
     z.literal(6),
     z.literal(7),
+    z.literal(8),
   ]),
+  plugins: z.array(z.object({ id: z.string() }).loose()).optional(),
   bots: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
   botMessages: z
     .array(z.object({ id: z.string(), botId: z.string(), createdAt: z.number() }).loose())
@@ -99,7 +105,7 @@ export async function exportBackup(): Promise<Backup> {
   const { blobs, ...content } = await store().exportAll();
   return {
     app: "better-vault",
-    format: 7,
+    format: 8,
     exportedAt: Date.now(),
     ...content,
     blobs: blobs.map((blob) => ({ ...blob, data: toBase64(blob.data) })),
@@ -126,6 +132,7 @@ export async function importBackup(raw: unknown): Promise<number> {
       vaults: backup.vaults,
       notes: backup.notes,
       skills: backup.skills,
+      plugins: backup.plugins,
       bots: backup.bots,
       botMessages: backup.botMessages,
       folders: backup.folders,
@@ -151,10 +158,12 @@ type OldBackup = Omit<
   | "calendar"
   | "notes"
   | "skills"
+  | "plugins"
   | "bots"
   | "botMessages"
 > & {
-  format: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  format: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  plugins?: unknown[];
   bots?: Bot[];
   botMessages?: BotMessage[];
   notes?: Note[];
@@ -195,8 +204,9 @@ function upgradeBackup(backup: OldBackup): Backup {
   }
   return {
     ...backup,
-    format: 7,
+    format: 8,
     calendar: backup.calendar ?? [],
+    plugins: (backup.plugins ?? []).flatMap(restorePlugin),
     bots: backup.bots ?? [],
     botMessages: backup.botMessages ?? [],
     notes: backup.notes ?? [],
@@ -209,7 +219,30 @@ function upgradeBackup(backup: OldBackup): Backup {
   };
 }
 
-/** Deletes every notebook, note, skill, bot, source, chat and output. Settings and keys are kept. */
+/**
+ * A plugin from a backup, checked like any plugin from outside and turned
+ * off, since a backup file may come from someone else.
+ */
+function restorePlugin(raw: unknown): Plugin[] {
+  const row = raw as Partial<Plugin>;
+  const parsed = parsePluginBundle({ manifest: row.manifest, files: row.files });
+  if (!parsed.ok) return [];
+  const now = Date.now();
+  return [
+    {
+      id: parsed.bundle.manifest.id,
+      manifest: parsed.bundle.manifest,
+      files: parsed.bundle.files,
+      enabled: false,
+      granted: [],
+      updatedBy: typeof row.updatedBy === "string" ? row.updatedBy : "you",
+      createdAt: typeof row.createdAt === "number" ? row.createdAt : now,
+      updatedAt: typeof row.updatedAt === "number" ? row.updatedAt : now,
+    },
+  ];
+}
+
+/** Deletes every notebook, note, skill, plugin, bot, source, chat and output. Settings and keys are kept. */
 export async function deleteAllData() {
   await store().clearAll();
 }

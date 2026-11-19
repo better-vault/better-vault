@@ -9,6 +9,7 @@ import {
   Settings01Icon,
   SparklesIcon,
   PlugSocketIcon,
+  PuzzleIcon,
 } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router";
 import { useEffect, useRef, useState, type ReactElement } from "react";
@@ -32,6 +33,8 @@ import { AccountPanel } from "./account-panel";
 import { StoragePanel } from "./storage-panel";
 import { StudioPanel } from "./studio-panel";
 import { McpPanel, useMcpRunning } from "./mcp-panel";
+import { PluginsPanel } from "./plugins-panel";
+import { usePlugins } from "@/lib/db/plugins";
 import { SubscriptionPanel } from "./subscription-panel";
 import { useAccount } from "@/lib/account/account";
 import { Logo } from "@/components/brand/logo";
@@ -65,6 +68,7 @@ export const settingsPages = [
   "appearance",
   "studio",
   "mcp",
+  "plugins",
   "calendar",
   "language",
   "data",
@@ -114,6 +118,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
   const storage = useStorageSettings();
   const studio = useStudioSettings();
   const mcpRunning = useMcpRunning();
+  const pluginsOn = usePlugins()?.filter((plugin) => plugin.enabled).length ?? 0;
   const account = useAccount();
   const hiddenTools = studio?.hidden.length ?? 0;
   const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)).length : 0;
@@ -217,6 +222,16 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 hint={mcpRunning ? t("rows.mcpOn") : t("rows.mcpOff")}
               />
               <SettingsRow
+                to="plugins"
+                icon={PuzzleIcon}
+                label={t("rows.plugins")}
+                hint={
+                  pluginsOn > 0
+                    ? t("rows.pluginsHint", { count: pluginsOn })
+                    : t("rows.pluginsNone")
+                }
+              />
+              <SettingsRow
                 to="calendar"
                 icon={Calendar03Icon}
                 label={t("rows.calendar")}
@@ -272,6 +287,9 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
           </Sheet.Next>
           <Sheet.Next name="mcp" closeLabel={tCommon("actions.close")}>
             <McpPanel />
+          </Sheet.Next>
+          <Sheet.Next name="plugins" closeLabel={tCommon("actions.close")}>
+            <PluginsPanel />
           </Sheet.Next>
           <Sheet.Next name="calendar" closeLabel={tCommon("actions.close")}>
             <CalendarPanel

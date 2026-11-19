@@ -11,6 +11,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     db.vaults,
     db.notes,
     db.skills,
+    db.plugins,
     db.bots,
     db.botMessages,
     db.folders,
@@ -74,6 +75,12 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       await db.skills.put(skill);
     },
     deleteSkill: (id) => db.skills.delete(id),
+    listPlugins: () => db.plugins.toArray(),
+    getPlugin: (id) => db.plugins.get(id),
+    putPlugin: async (plugin) => {
+      await db.plugins.put(plugin);
+    },
+    deletePlugin: (id) => db.plugins.delete(id),
 
     listBots: () => db.bots.orderBy("order").toArray(),
     getBot: (id) => db.bots.get(id),
@@ -233,6 +240,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         vaults,
         notes,
         skills,
+        plugins,
         bots,
         botMessages,
         folders,
@@ -247,6 +255,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         db.vaults.toArray(),
         db.notes.toArray(),
         db.skills.toArray(),
+        db.plugins.toArray(),
         db.bots.toArray(),
         db.botMessages.toArray(),
         db.folders.toArray(),
@@ -262,6 +271,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         vaults,
         notes,
         skills,
+        plugins,
         bots,
         botMessages,
         folders,
@@ -279,6 +289,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.vaults.bulkPut(data.vaults);
         await db.notes.bulkPut(data.notes);
         await db.skills.bulkPut(data.skills);
+        await db.plugins.bulkPut(data.plugins);
         await db.bots.bulkPut(data.bots);
         await db.botMessages.bulkPut(data.botMessages);
         await db.folders.bulkPut(data.folders);

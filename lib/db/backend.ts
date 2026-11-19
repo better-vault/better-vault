@@ -13,6 +13,7 @@ import type {
   Skill,
   Bot,
   BotMessage,
+  Plugin,
 } from "./types";
 
 /**
@@ -59,6 +60,13 @@ export interface Backend {
   /** Adds a skill or replaces it. */
   putSkill(skill: Skill): Promise<void>;
   deleteSkill(id: string): Promise<void>;
+
+  /** Every installed plugin. */
+  listPlugins(): Promise<Plugin[]>;
+  getPlugin(id: string): Promise<Plugin | undefined>;
+  /** Installs a plugin or replaces it. */
+  putPlugin(plugin: Plugin): Promise<void>;
+  deletePlugin(id: string): Promise<void>;
 
   /** Every bot, in roster order. */
   listBots(): Promise<Bot[]>;
@@ -130,11 +138,11 @@ export interface Backend {
   putSetting(key: string, value: unknown): Promise<void>;
   clearSettings(): Promise<void>;
 
-  /** Every vault, note, skill, bot, folder, notebook, source, conversation, message, output and file. */
+  /** Every vault, note, skill, plugin, bot, folder, notebook, source, conversation, message, output and file. */
   exportAll(): Promise<StoreContent>;
   /** Adds content, replacing rows with the same id and the passages of its sources. */
   importAll(content: StoreContent, chunks: Chunk[]): Promise<void>;
-  /** Deletes every vault, note, skill, bot, folder and notebook and everything in them. Settings are kept. */
+  /** Deletes every vault, note, skill, plugin, bot, folder and notebook and everything in them. Settings are kept. */
   clearAll(): Promise<void>;
   /** The number of rows in a table. Used by tests. */
   count(table: TableName): Promise<number>;
@@ -145,6 +153,7 @@ export interface StoreContent {
   vaults: Vault[];
   notes: Note[];
   skills: Skill[];
+  plugins: Plugin[];
   bots: Bot[];
   botMessages: BotMessage[];
   folders: Folder[];
@@ -161,6 +170,7 @@ export const tableNames = [
   "vaults",
   "notes",
   "skills",
+  "plugins",
   "bots",
   "botMessages",
   "folders",
@@ -202,6 +212,8 @@ export const writes = {
   deleteNote: ["notes"],
   putSkill: ["skills"],
   deleteSkill: ["skills"],
+  putPlugin: ["plugins"],
+  deletePlugin: ["plugins"],
   putBot: ["bots"],
   deleteBot: ["bots", "botMessages"],
   saveBotThread: ["bots", "botMessages"],
@@ -228,6 +240,7 @@ export const writes = {
     "vaults",
     "notes",
     "skills",
+    "plugins",
     "bots",
     "botMessages",
     "folders",
@@ -244,6 +257,7 @@ export const writes = {
     "vaults",
     "notes",
     "skills",
+    "plugins",
     "bots",
     "botMessages",
     "folders",
@@ -279,6 +293,10 @@ export const backendMethods = [
   "getSkill",
   "putSkill",
   "deleteSkill",
+  "listPlugins",
+  "getPlugin",
+  "putPlugin",
+  "deletePlugin",
   "listBots",
   "getBot",
   "putBot",

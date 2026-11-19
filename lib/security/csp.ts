@@ -55,7 +55,8 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
       new URL(BACKEND_URL).origin,
     ],
     // YouTube sources play in YouTube's privacy-enhanced player.
-    "frame-src": [...google.frame, "https://www.youtube-nocookie.com"],
+    // Plugin panels run in a sandboxed frame of the app's own plugin host page.
+    "frame-src": ["'self'", ...google.frame, "https://www.youtube-nocookie.com"],
     "worker-src": ["'self'", "blob:"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
@@ -65,6 +66,42 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
   return Object.entries(directives)
     .map(([name, values]) => `${name} ${values.join(" ")}`)
     .join("; ");
+}
+
+/** Where plugin panels run (public/plugin-host.html). */
+export const PLUGIN_HOST_PATH = "/plugin-host.html";
+
+/**
+ * The plugin host's own policy: a plugin's inline scripts and styles may
+ * run, but it may load nothing and reach no server, so the user's data it
+ * is given can't leave the device. The frame is also sandboxed without
+ * `allow-same-origin`, so it can't read the app's storage. The page carries
+ * the same policy in a meta tag, for the dev server.
+ */
+export function pluginHostPolicy(): string {
+  return [
+    "default-src 'none'",
+    "script-src 'unsafe-inline'",
+    "style-src 'unsafe-inline'",
+    "img-src data: blob:",
+    "media-src data: blob:",
+    "font-src data:",
+    "connect-src 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+    "frame-ancestors 'self'",
+  ].join("; ");
+}
+
+/** The headers the plugin host page is sent with. */
+export function pluginHostHeaders(): Record<string, string> {
+  return {
+    "content-security-policy": pluginHostPolicy(),
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "no-referrer",
+    "permissions-policy":
+      "camera=(), geolocation=(), microphone=(), payment=(), usb=(), clipboard-read=(), display-capture=()",
+  };
 }
 
 /** Every header the app's pages are sent with. */
