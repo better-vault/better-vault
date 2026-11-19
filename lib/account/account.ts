@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useStoreQuery } from "@/lib/db/live";
 import { getSettings, updateProvider } from "@/lib/db/settings";
 import { store } from "@/lib/db/store";
@@ -44,9 +45,33 @@ export interface AccountState {
 
 type Me = { user: AccountUser; account: AccountPlan; subscriptions?: "open" | "soon" };
 
-/** Whether plans can be bought yet. Without an account, or from an older backend, they can't. */
+/** Whether plans can be bought yet, as the signed-in account last heard. */
 export function subscriptionsOpen(state: AccountState | null | undefined): boolean {
   return state?.subscriptions === "open";
+}
+
+let publicStatus: Promise<boolean> | null = null;
+
+/** Whether plans can be bought: from the account when signed in, else asked once (GET /v1/status). */
+export function useSubscriptionsOpen(state: AccountState | null | undefined): boolean {
+  const [open, setOpen] = useState(false);
+  const known = state?.subscriptions;
+  useEffect(() => {
+    if (known || state === undefined) return;
+    let live = true;
+    publicStatus ??= fetch(`${BACKEND_URL}/v1/status`)
+      .then((response) => response.json() as Promise<{ subscriptions?: string }>)
+      .then((body) => body.subscriptions === "open")
+      .catch(() => {
+        publicStatus = null;
+        return false;
+      });
+    void publicStatus.then((value) => live && setOpen(value));
+    return () => {
+      live = false;
+    };
+  }, [known, state]);
+  return known ? known === "open" : open;
 }
 
 const KEY = "account";
@@ -187,9 +212,11 @@ export async function signOut(): Promise<void> {
   if (saved)
     await api("/api/auth/sign-out", saved.token, { method: "POST", body: "{}" }).catch(() => {});
   await forget();
+  // What was synced belongs to that account; another one starts clean.
+  await (await import("./cloud-sync")).resetCloudSync();
 }
 
-/** Opens Polar's checkout for a plan, in the browser. */
+/** Opens Dodo Payments' checkout for a plan, in the browser. */
 export async function startCheckout(plan: "pro" | "max"): Promise<void> {
   const saved = await getAccount();
   if (!saved) throw new Error("Sign in first.");
@@ -203,13 +230,14 @@ export async function startCheckout(plan: "pro" | "max"): Promise<void> {
   window.open(url, "_blank", "noopener");
 }
 
-/** Polar's customer portal: change plan, invoices, cancel. */
+/** Dodo Payments' customer portal: change plan, invoices, cancel. */
 export async function openPortal(): Promise<void> {
   const saved = await getAccount();
   if (!saved) throw new Error("Sign in first.");
+  const returnUrl = desktopBridge() ? "https://better-vault.dev" : window.location.origin;
   const { url } = await api<{ url: string }>("/v1/billing/portal", saved.token, {
     method: "POST",
-    body: "{}",
+    body: JSON.stringify({ returnUrl }),
   });
   window.open(url, "_blank", "noopener");
 }

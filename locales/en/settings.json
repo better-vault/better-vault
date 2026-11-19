@@ -474,7 +474,7 @@
     "cap": "Up to ${{amount}} a month",
     "capLabel": "Extra usage limit",
     "manage": "Manage or cancel",
-    "manageHint": "Change plan, see invoices or cancel in Polar's customer portal.",
+    "manageHint": "Change plan, see invoices or cancel in the billing portal (Dodo Payments).",
     "refresh": "Refresh",
     "welcome": {
       "title": "Welcome to {{plan}}",
@@ -501,14 +501,20 @@
       "credits_other": "{{formatted}} AI credits every month",
       "storage": "{{size}} GB of Better Vault Cloud",
       "haiku": "Better Vault AI, no API key needed",
-      "keys": "Your own API keys keep working"
+      "keys": "Your own API keys keep working",
+      "sync": "Your skills and plugins on every device"
     },
     "heroTitle": "Better Vault AI and Cloud",
     "heroBody": "Ask questions without an API key, and keep backups in the cloud.",
     "soon": "Coming soon",
     "soonHint": "Pro and Max open soon. You can sign in now, and subscribe here once they do.",
     "choose": "Choose a plan",
-    "planName": "{{plan}} plan"
+    "planName": "{{plan}} plan",
+    "sync": "Sync skills and plugins",
+    "syncedAt": "Synced {{when}}. Signing in on another device brings them back.",
+    "syncNever": "Not synced yet. It starts in a moment.",
+    "syncOff": "Off: they stay on this device only.",
+    "syncError": "Couldn't sync: {{error}}"
   },
   "plugins": {
     "title": "Plugins",

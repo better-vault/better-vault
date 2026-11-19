@@ -32,8 +32,9 @@ export function AccountWatcher() {
     if (params.get("subscribed") !== "1") return;
     void refreshAccount().catch(() => {});
     const next = new URLSearchParams(params);
-    next.delete("subscribed");
-    next.delete("checkout_id");
+    // Dodo adds the subscription and its status to the address it sends back to.
+    for (const key of ["subscribed", "subscription_id", "status", "email", "checkout_id"])
+      next.delete(key);
     setParams(next, { replace: true });
   }, [params, setParams]);
 

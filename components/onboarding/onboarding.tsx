@@ -30,8 +30,8 @@ import {
   setUsername,
   signIn,
   startCheckout,
-  subscriptionsOpen,
   useAccount,
+  useSubscriptionsOpen,
   usernameAvailable,
 } from "@/lib/account/account";
 import { useStoreQuery } from "@/lib/db/live";
@@ -71,7 +71,7 @@ function Onboarding() {
   const [username, setUsernameDraft] = useState("");
   const [plan, setPlan] = useState<Plan>("free");
   // Paid plans can't be chosen until the backend opens them.
-  const open = subscriptionsOpen(account);
+  const open = useSubscriptionsOpen(account);
   const [busy, setBusy] = useState(false);
   const shownName = name ?? profile?.name ?? "";
 

@@ -1,4 +1,10 @@
-import { CloudIcon, FlashIcon, Key01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
+import {
+  CloudIcon,
+  FlashIcon,
+  Key01Icon,
+  RefreshIcon,
+  SparklesIcon,
+} from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -14,9 +20,11 @@ import {
   setOverage,
   signIn,
   startCheckout,
-  subscriptionsOpen,
   useAccount,
+  useSubscriptionsOpen,
 } from "@/lib/account/account";
+import { setCloudSyncEnabled, syncNow, useCloudSync } from "@/lib/account/cloud-sync";
+import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type Plan = "pro" | "max";
@@ -30,15 +38,16 @@ const included: Record<Plan, { credits: number; storage: number }> = {
 /**
  * Settings → Subscription: with a plan, what has been used this month, extra
  * usage and where to manage it; without one, the two plans side by side and
- * what the chosen one includes. Until the backend opens subscriptions, the
- * plans say "Coming soon". Signing out lives in Settings → Account.
+ * what the chosen one includes. Plans are bought through Dodo Payments; if
+ * the backend closes them, they say "Coming soon". Signing out lives in
+ * Settings → Account.
  */
 export function SubscriptionPanel() {
   const { t, i18n } = useTranslation("settings");
   const account = useAccount();
   const [busy, setBusy] = useState<string | null>(null);
   const [chosen, setChosen] = useState<Plan>("pro");
-  const open = subscriptionsOpen(account);
+  const open = useSubscriptionsOpen(account);
 
   const run = async (what: string, action: () => Promise<unknown>) => {
     setBusy(what);
@@ -127,6 +136,7 @@ export function SubscriptionPanel() {
                     icon={CloudIcon}
                     text={t("subscription.features.storage", { size: included[chosen].storage })}
                   />
+                  <Feature icon={RefreshIcon} text={t("subscription.features.sync")} />
                   <Feature icon={Key01Icon} text={t("subscription.features.keys")} />
                 </ul>
                 {!open ? (
@@ -244,6 +254,8 @@ function CurrentPlan({
         />
       </div>
 
+      <SyncRow />
+
       <section className="flex flex-col gap-2">
         <label className="flex cursor-pointer items-center gap-3">
           <span className="min-w-0 flex-1">
@@ -304,6 +316,39 @@ function CurrentPlan({
       </div>
       <p className="text-xs text-muted-foreground">{t("subscription.manageHint")}</p>
     </>
+  );
+}
+
+/** Skills and plugins in the cloud: on by default, with when they last synced. */
+function SyncRow() {
+  const { t, i18n } = useTranslation("settings");
+  const sync = useCloudSync();
+  if (!sync) return null;
+  const status = sync.error
+    ? t("subscription.syncError", { error: sync.error })
+    : sync.syncedAt
+      ? t("subscription.syncedAt", { when: formatRelativeTime(sync.syncedAt, i18n.language) })
+      : t("subscription.syncNever");
+  return (
+    <label className="flex cursor-pointer items-center gap-3 rounded-2xl bg-muted/50 p-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background ring-1 ring-foreground/[0.06]">
+        <Icon icon={RefreshIcon} size={16} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{t("subscription.sync")}</span>
+        <span
+          className={cn("block text-xs", sync.error ? "text-destructive" : "text-muted-foreground")}
+        >
+          {sync.enabled ? status : t("subscription.syncOff")}
+        </span>
+      </span>
+      <Switch
+        checked={sync.enabled}
+        onCheckedChange={(enabled) =>
+          void setCloudSyncEnabled(enabled).then(() => (enabled ? syncNow() : undefined))
+        }
+      />
+    </label>
   );
 }
 

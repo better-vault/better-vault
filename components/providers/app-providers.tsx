@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AccountWatcher } from "@/components/account/welcome-dialog";
+import { CloudSyncRunner } from "@/components/account/cloud-sync-runner";
 import { CommandPalette } from "@/components/command/command-palette";
 import { OnboardingGate } from "@/components/onboarding/onboarding";
 import { PluginThemes } from "@/components/plugins/plugin-themes";
@@ -22,6 +23,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <Toaster />
           <UpdatesHost />
           <AccountWatcher />
+          <CloudSyncRunner />
           <PluginThemes />
           <OnboardingGate />
         </TooltipProvider>
