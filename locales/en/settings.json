@@ -397,7 +397,7 @@
     "enable": "Allow agents to connect",
     "status": {
       "off": "Off. Nothing can connect.",
-      "running": "Running on {{address}}, for this computer only",
+      "running": "Running on {{address}}",
       "error": "Could not start: {{error}}"
     },
     "permissions": "What agents may change",

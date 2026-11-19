@@ -600,54 +600,65 @@ function OpenCodeCheck() {
             ? t("providers.opencodeChecking")
             : t("providers.opencodeIdle");
 
+  const checkButton = (
+    <Button
+      size="sm"
+      variant="secondary"
+      className="shrink-0"
+      disabled={checking}
+      aria-busy={checking}
+      onClick={() => void check()}
+    >
+      {checking ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
+      {state.status === "idle" || checking
+        ? t("providers.opencodeCheck")
+        : t("providers.opencodeCheckAgain")}
+    </Button>
+  );
+
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-muted/60 py-3 ps-3 pe-3">
-      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-background ring-1 ring-foreground/[0.06]">
-        <ProviderIcon provider="opencode" size={18} />
-        {state.status === "found" || state.status === "missing" ? (
-          <span
-            aria-hidden
+    <div className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-3">
+      <div className="flex items-center gap-3">
+        <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-background ring-1 ring-foreground/[0.06]">
+          <ProviderIcon provider="opencode" size={18} />
+          {state.status === "found" || state.status === "missing" ? (
+            <span
+              aria-hidden
+              className={cn(
+                "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-background",
+                state.status === "found" ? "bg-success" : "bg-warning",
+              )}
+            />
+          ) : null}
+        </span>
+        <div className="min-w-0 flex-1" aria-live="polite">
+          <p className="truncate text-sm font-medium">{t("providers.opencodeTitle")}</p>
+          <p
             className={cn(
-              "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-background",
-              state.status === "found" ? "bg-success" : "bg-warning",
+              "text-xs text-pretty break-words",
+              state.status === "failed" ? "text-destructive" : "text-muted-foreground",
             )}
-          />
-        ) : null}
-      </span>
-      <div className="min-w-0 flex-1" aria-live="polite">
-        <p className="text-sm font-medium">{t("providers.opencodeTitle")}</p>
-        <p
-          className={cn(
-            "truncate text-xs",
-            state.status === "failed" ? "text-destructive" : "text-muted-foreground",
-          )}
-          title={state.status === "found" ? state.path : undefined}
-        >
-          {status}
-        </p>
+            title={state.status === "found" ? state.path : undefined}
+          >
+            {status}
+          </p>
+        </div>
+        {/* One action fits beside the text; when OpenCode is missing, both go on their own row. */}
+        {state.status === "missing" ? null : checkButton}
       </div>
       {state.status === "missing" ? (
-        <a
-          href="https://opencode.ai/download"
-          target="_blank"
-          rel="noreferrer"
-          className={buttonVariants({ size: "sm" })}
-        >
-          {t("providers.opencodeDownload")}
-        </a>
+        <div className="flex gap-2 ps-13">
+          <a
+            href="https://opencode.ai/download"
+            target="_blank"
+            rel="noreferrer"
+            className={buttonVariants({ size: "sm" })}
+          >
+            {t("providers.opencodeDownload")}
+          </a>
+          {checkButton}
+        </div>
       ) : null}
-      <Button
-        size="sm"
-        variant="secondary"
-        disabled={checking}
-        aria-busy={checking}
-        onClick={() => void check()}
-      >
-        {checking ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
-        {state.status === "idle" || checking
-          ? t("providers.opencodeCheck")
-          : t("providers.opencodeCheckAgain")}
-      </Button>
     </div>
   );
 }

@@ -239,7 +239,7 @@ export function McpPanel() {
                   {t("mcp.token")}
                 </span>
                 <code className="min-w-0 flex-1 truncate font-mono text-xs" dir="ltr">
-                  {shown ? state.token : "•".repeat(24)}
+                  {shown ? state.token : "•".repeat(16)}
                 </code>
                 <IconButton
                   label={shown ? t("mcp.hideToken") : t("mcp.showToken")}
