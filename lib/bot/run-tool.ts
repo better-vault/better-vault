@@ -1,16 +1,18 @@
-import { generateId } from "ai";
 import { createBot } from "@/lib/db/bots";
 import { calendarStore } from "@/lib/db/calendar";
 import { createNote, saveNoteBody } from "@/lib/db/notes";
 import { createSkill } from "@/lib/db/skills";
 import { store } from "@/lib/db/store";
-import type { CalendarEntry, Note, Source, Vault } from "@/lib/db/types";
+import type { Note, Source, Vault } from "@/lib/db/types";
 import { DEFAULT_VAULT } from "@/lib/db/vaults";
 import { selectPassages } from "@/lib/grounding/passages";
 import { sameName } from "@/lib/notes/syntax";
 import { fetchRemoteSkills } from "@/lib/skills/fetch";
 import { skillSlug } from "@/lib/skills/format";
+import { calendarEntry, DAY, toTime } from "@/lib/calendar/entries";
 import { botToolSchemas, type BotToolInput, type BotToolName } from "./tools";
+
+export { calendarEntry, localInstant } from "@/lib/calendar/entries";
 
 /** What a tool call needs from the page around it. */
 export interface ToolContext {
@@ -296,59 +298,4 @@ async function run<Name extends BotToolName>(
       return context.askBot(bot, task);
     }
   }
-}
-
-const DAY = 24 * 60 * 60 * 1000;
-const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
-const LOCAL = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/;
-
-/** A day (local midnight) or an instant, as milliseconds. */
-function toTime(value: string): number {
-  const day = DATE.exec(value);
-  if (day) return new Date(+day[1], +day[2] - 1, +day[3]).getTime();
-  return Date.parse(value);
-}
-
-const pad = (n: number) => String(Math.abs(n)).padStart(2, "0");
-
-/** A local date and time as an offset-qualified instant, as the calendar stores them. */
-export function localInstant(date: Date): string {
-  const offset = -date.getTimezoneOffset();
-  const sign = offset >= 0 ? "+" : "-";
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`;
-}
-
-const dateOnly = (date: Date) =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-/** The calendar entry for an `add_calendar_event` call: timed, or all-day with an exclusive end. */
-export function calendarEntry(
-  input: BotToolInput<"add_calendar_event">,
-  timeZone: string,
-): CalendarEntry {
-  const base = {
-    id: generateId(),
-    title: input.title.trim(),
-    ...(input.description ? { description: input.description } : {}),
-    ...(input.location ? { location: input.location } : {}),
-  };
-  const day = DATE.exec(input.start);
-  if (day) {
-    const first = new Date(+day[1], +day[2] - 1, +day[3]);
-    const lastMatch = input.end ? DATE.exec(input.end) : null;
-    const last = lastMatch ? new Date(+lastMatch[1], +lastMatch[2] - 1, +lastMatch[3]) : first;
-    const end = new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1);
-    if (end <= first) throw new Error("The event ends before it starts.");
-    return { ...base, allDay: true, start: dateOnly(first), end: dateOnly(end) };
-  }
-  const start = parseLocal(input.start);
-  const end = input.end ? parseLocal(input.end) : new Date(start.getTime() + 60 * 60 * 1000);
-  if (end <= start) throw new Error("The event ends before it starts.");
-  return { ...base, start: localInstant(start), end: localInstant(end), timeZone };
-}
-
-function parseLocal(value: string): Date {
-  const match = LOCAL.exec(value);
-  if (!match) throw new Error("Use times as YYYY-MM-DDTHH:mm.");
-  return new Date(+match[1], +match[2] - 1, +match[3], +match[4], +match[5]);
 }

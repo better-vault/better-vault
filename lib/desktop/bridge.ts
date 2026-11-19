@@ -20,16 +20,24 @@ export interface McpActivity {
   at: number;
 }
 
-/** The desktop app's MCP server (desktop/src/mcp.ts), as Settings → MCP shows it. */
-export interface McpState {
+/** What agents may change through MCP, one switch each in Settings → MCP. */
+export type McpPermission =
+  | "allowNotebooks"
+  | "allowSources"
+  | "allowNotes"
+  | "allowSkills"
+  | "allowCalendar"
+  | "allowPlugins";
+
+/** The desktop app's MCP server (desktop/src/mcp/), as Settings → MCP shows it. */
+export interface McpState extends Record<McpPermission, boolean> {
   enabled: boolean;
   running: boolean;
   port: number;
   url: string;
   token: string;
+  /** Agents may only read: every permission is off. */
   readOnly: boolean;
-  allowNotes: boolean;
-  allowSkills: boolean;
   /** Why it could not start, such as the port being taken. */
   error: string | null;
   activity: McpActivity[];
@@ -70,9 +78,7 @@ export interface DesktopBridge {
     state(): Promise<McpState>;
     onState(listener: (state: McpState) => void): () => void;
     update(
-      patch: Partial<
-        Pick<McpState, "enabled" | "port" | "readOnly" | "allowNotes" | "allowSkills">
-      >,
+      patch: Partial<Pick<McpState, "enabled" | "port" | "readOnly" | McpPermission>>,
     ): Promise<McpState>;
     regenerateToken(): Promise<McpState>;
   };

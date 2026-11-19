@@ -25,7 +25,7 @@
     "studioHintAll": "All tools on",
     "mcp": "MCP",
     "mcpOn": "Agents can connect",
-    "mcpOff": "Let AI agents use your notes and skills",
+    "mcpOff": "Let AI agents use your notebooks, notes and more",
     "subscription": "Subscription",
     "subscriptionNone": "Better Vault AI and Cloud",
     "subscriptionPlan": "{{plan}} plan"
@@ -390,23 +390,19 @@
   },
   "mcp": {
     "title": "MCP",
-    "description": "Let AI agents on this computer, such as Claude Code, Cursor and Codex, read your notebooks and notes and share skills with you, through the Model Context Protocol.",
+    "description": "Let AI agents on this computer, such as Claude Code, Cursor and Codex, use everything in better-vault: notebooks and sources, notes, skills, the calendar, chats, Studio outputs, bots and plugins. It works through the Model Context Protocol.",
     "desktopOnly": "MCP needs the desktop app",
     "desktopOnlyBody": "Agents connect to a server on your own computer, which a browser tab can't run. The desktop app runs it, and your data stays on your device.",
     "download": "Download the desktop app",
     "enable": "Allow agents to connect",
     "status": {
       "off": "Off. Nothing can connect.",
-      "running": "Listening on {{url}}, for this computer only",
+      "running": "Running on {{address}}, for this computer only",
       "error": "Could not start: {{error}}"
     },
-    "permissions": "What agents may do",
+    "permissions": "What agents may change",
     "readOnly": "Read only",
-    "readOnlyHint": "Agents can read but never change anything",
-    "allowNotes": "Write notes",
-    "allowNotesHint": "Create notes and replace their text",
-    "allowSkills": "Write skills",
-    "allowSkillsHint": "Create, edit and delete skills",
+    "readOnlyHint": "Turns every change off",
     "connection": "Connection",
     "address": "Address",
     "token": "Token",
@@ -423,7 +419,34 @@
       "claude-desktop": "Add this to claude_desktop_config.json; mcp-remote bridges Claude Desktop to the local server."
     },
     "activity": "Recent activity",
-    "noActivity": "No agent has connected yet."
+    "noActivity": "No agent has connected yet.",
+    "permissionsHint": "Agents can always read. Each switch lets them change one part.",
+    "areas": {
+      "allowNotebooks": {
+        "label": "Notebooks",
+        "hint": "Create and rename notebooks"
+      },
+      "allowSources": {
+        "label": "Sources",
+        "hint": "Add links, videos and text; select or delete sources"
+      },
+      "allowNotes": {
+        "label": "Notes",
+        "hint": "Write and delete notes"
+      },
+      "allowSkills": {
+        "label": "Skills",
+        "hint": "Create, edit and delete skills"
+      },
+      "allowCalendar": {
+        "label": "Calendar",
+        "hint": "Add, change and delete events"
+      },
+      "allowPlugins": {
+        "label": "Plugins",
+        "hint": "Install plugins, turned off until you enable them"
+      }
+    }
   },
   "subscription": {
     "title": "Subscription",

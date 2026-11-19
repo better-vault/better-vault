@@ -31,7 +31,7 @@ import { AboutPanel } from "./about-panel";
 import { AccountPanel } from "./account-panel";
 import { StoragePanel } from "./storage-panel";
 import { StudioPanel } from "./studio-panel";
-import { McpPanel } from "./mcp-panel";
+import { McpPanel, useMcpRunning } from "./mcp-panel";
 import { SubscriptionPanel } from "./subscription-panel";
 import { useAccount } from "@/lib/account/account";
 import { Logo } from "@/components/brand/logo";
@@ -113,6 +113,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
   const profile = useProfile();
   const storage = useStorageSettings();
   const studio = useStudioSettings();
+  const mcpRunning = useMcpRunning();
   const account = useAccount();
   const hiddenTools = studio?.hidden.length ?? 0;
   const connected = storage ? storageIds.filter((id) => isStorageReady(storage, id)).length : 0;
@@ -213,7 +214,7 @@ export function SettingsSheet({ open: openProp, onOpenChange, trigger, page }: S
                 to="mcp"
                 icon={PlugSocketIcon}
                 label={t("rows.mcp")}
-                hint={t("rows.mcpOff")}
+                hint={mcpRunning ? t("rows.mcpOn") : t("rows.mcpOff")}
               />
               <SettingsRow
                 to="calendar"

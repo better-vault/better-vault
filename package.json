@@ -35,7 +35,8 @@
     "desktop:start": "npm start --prefix desktop",
     "desktop:pack": "npm run pack --prefix desktop",
     "desktop:dist": "npm run dist --prefix desktop",
-    "desktop:check": "npm run typecheck --prefix desktop && npm run desktop:pack"
+    "desktop:test": "vitest run --config desktop/vitest.config.mjs",
+    "desktop:check": "npm run typecheck --prefix desktop && npm run desktop:test && npm run desktop:pack"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.106",

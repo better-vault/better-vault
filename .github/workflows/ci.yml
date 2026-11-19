@@ -67,5 +67,6 @@ jobs:
         working-directory: desktop
       - run: npm run typecheck
         working-directory: desktop
+      - run: npm run desktop:test
       - run: npm run pack -- --linux
         working-directory: desktop
