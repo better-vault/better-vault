@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-19
+
 ### Added
 
 - YouTube videos as sources: paste a link in the Add sources dialog's Link tab (renamed from Web page) and the video's transcript is added from its captions, as NotebookLM does. Each paragraph starts with its time, and the reader plays the video in YouTube's privacy-enhanced player, starting at the time you press.
@@ -225,7 +227,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/better-vault/better-vault/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/better-vault/better-vault/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/better-vault/better-vault/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/better-vault/better-vault/compare/v0.6.0...v0.7.0
