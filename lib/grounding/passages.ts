@@ -1,13 +1,15 @@
 import MiniSearch from "minisearch";
 import type { PassageRef } from "@/lib/chat/types";
 import type { Chunk, Source } from "@/lib/db/database";
+import { sourceFormatOf } from "@/lib/sources/formats";
 
 /** A numbered passage given to the model. */
 export interface Passage extends Omit<PassageRef, "snippet"> {
   text: string;
 }
 
-type SourceInfo = Pick<Source, "id" | "title" | "kind">;
+type SourceInfo = Pick<Source, "id" | "title" | "kind"> &
+  Partial<Pick<Source, "format" | "fileName">>;
 
 interface SelectOptions {
   sources: SourceInfo[];
@@ -106,6 +108,7 @@ export function selectPassages({ sources, chunks, budget, query }: SelectOptions
       sourceId: chunk.sourceId,
       title: source.title,
       kind: source.kind,
+      format: sourceFormatOf(source),
       text: chunk.text,
     };
   });

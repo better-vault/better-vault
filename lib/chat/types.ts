@@ -1,6 +1,6 @@
 import type { UIMessage } from "ai";
 import type { ModelRef } from "@/lib/ai/catalog";
-import type { SourceKind } from "@/lib/db/database";
+import type { SourceFormat, SourceKind } from "@/lib/db/database";
 
 /**
  * `sources`: answer only from the notebook's selected sources.
@@ -16,6 +16,8 @@ export interface PassageRef {
   sourceId: string;
   title: string;
   kind: SourceKind;
+  /** What the source was (CSV, YouTube video…), for its icon and label. */
+  format?: SourceFormat;
   /** The start of the passage, shown when a citation is hovered. */
   snippet: string;
 }

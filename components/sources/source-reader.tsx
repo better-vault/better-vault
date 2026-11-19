@@ -9,6 +9,8 @@ import { loadBlob } from "@/lib/db/blobs";
 import { useSourceWithChunks } from "@/lib/db/sources";
 import type { Chunk, Source, SourceImage } from "@/lib/db/types";
 import { countWords } from "@/lib/format";
+import { sourceFormatOf } from "@/lib/sources/formats";
+import { secondsOf, youTubeId } from "@/lib/sources/youtube";
 import { reflow } from "@/lib/sources/reflow";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +40,8 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
   const source = read?.source;
   const chunks = read?.chunks;
   const highlighted = useRef<HTMLDivElement>(null);
+  // Where the video player starts: null until a time in the transcript is pressed.
+  const [start, setStart] = useState<number | null>(null);
   const placed = useMemo(
     () => (source && chunks ? imagesByChunk(source, chunks) : new Map<string, PlacedImage[]>()),
     [source, chunks],
@@ -50,12 +54,13 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
 
   if (!source) return null;
   const words = countWords(source.text);
+  const video = source.kind === "youtube" && source.url ? youTubeId(source.url) : null;
 
   return (
     <>
       <Sheet.Header
         title={source.title}
-        description={`${t(`kinds.${source.kind}`)} · ${t("words", { count: words, formattedCount: words.toLocaleString(i18n.language) })}`}
+        description={`${t(`formats.${sourceFormatOf(source)}`)} · ${t("words", { count: words, formattedCount: words.toLocaleString(i18n.language) })}`}
       >
         {source.url ? (
           <a
@@ -64,12 +69,13 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
             rel="noreferrer"
             className="mt-1 inline-flex w-fit items-center gap-1 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            {t("openPage")}
+            {source.kind === "youtube" ? t("openVideo") : t("openPage")}
             <Icon icon={ArrowUpRight01Icon} size={14} className="rtl:-scale-x-100" />
           </a>
         ) : null}
       </Sheet.Header>
       <Sheet.Body>
+        {video ? <YouTubePlayer id={video} start={start} title={source.title} /> : null}
         <div className="flex flex-col gap-3 pb-6 text-[0.9375rem] leading-7">
           {chunks?.map((chunk) => {
             const active = chunk.id === passage;
@@ -84,6 +90,8 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
                 >
                   {source.kind === "markdown" ? (
                     <Markdown text={chunk.text} bare />
+                  ) : video ? (
+                    <TranscriptText text={chunk.text} onSeek={setStart} />
                   ) : (
                     <ChunkWithPictures
                       text={chunk.text}
@@ -106,6 +114,58 @@ function ReaderBody({ sourceId, passage }: { sourceId: string; passage?: string 
       </Sheet.Body>
     </>
   );
+}
+
+/**
+ * A YouTube video, from YouTube's privacy-enhanced address (no cookies until
+ * it plays). Pressing a time in the transcript starts it there.
+ */
+function YouTubePlayer({ id, start, title }: { id: string; start: number | null; title: string }) {
+  const params = new URLSearchParams({ rel: "0", modestbranding: "1" });
+  if (start !== null) {
+    params.set("start", String(start));
+    params.set("autoplay", "1");
+  }
+  return (
+    <div className="sticky top-0 z-10 -mx-1 mb-4 bg-background px-1 pb-3">
+      <iframe
+        key={start ?? "start"}
+        src={`https://www.youtube-nocookie.com/embed/${id}?${params}`}
+        title={title}
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+        className="aspect-video w-full rounded-2xl bg-muted"
+      />
+    </div>
+  );
+}
+
+/** A transcript passage: one paragraph per time mark, each mark a button that starts the video there. */
+function TranscriptText({ text, onSeek }: { text: string; onSeek: (seconds: number) => void }) {
+  const { t } = useTranslation("sources");
+  return text
+    .split(/\n{2,}/)
+    .filter((paragraph) => paragraph.trim())
+    .map((paragraph, index) => {
+      const match = /^\[((?:\d+:)?\d{1,2}:\d{2})\]\s*/.exec(paragraph);
+      const seconds = match ? secondsOf(match[1]) : null;
+      return (
+        <p key={index}>
+          {match && seconds !== null ? (
+            <button
+              type="button"
+              onClick={() => onSeek(seconds)}
+              aria-label={t("playFrom", { time: match[1] })}
+              className="me-2 inline-flex h-6 cursor-pointer items-center rounded-md bg-muted px-1.5 align-[0.1em] font-mono text-xs text-muted-foreground tabular-nums outline-none hover:bg-info hover:text-info-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {match[1]}
+            </button>
+          ) : null}
+          {match ? paragraph.slice(match[0].length) : paragraph}
+        </p>
+      );
+    });
 }
 
 /** A passage as paragraphs, with the lines a PDF broke joined again. */

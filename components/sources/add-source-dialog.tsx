@@ -2,8 +2,10 @@ import {
   CloudServerIcon,
   CloudUploadIcon,
   Globe02Icon,
+  Link01Icon,
   Loading03Icon,
   TextIcon,
+  YoutubeIcon,
 } from "@hugeicons/core-free-icons";
 import { useId, useRef, useState, useSyncExternalStore, type DragEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +17,8 @@ import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { Input } from "@/components/panelui/input";
 import { Textarea } from "@/components/panelui/textarea";
+import { SOURCE_EXTENSIONS } from "@/lib/sources/formats";
+import { youTubeId } from "@/lib/sources/youtube";
 import {
   ACCEPTED_FILES,
   IngestError,
@@ -31,16 +35,13 @@ import { cn } from "@/lib/utils";
 
 type Mode = "file" | "cloud" | "url" | "text";
 
-/** The file types a source can be, as extensions, for the cloud browser. */
-const SOURCE_EXTENSIONS = ["pdf", "md", "markdown", "mdx", "txt", "text", "csv"] as const;
-
 interface AddSourceDialogProps {
   notebookId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-/** Adds sources from files, a web page or pasted text. */
+/** Adds sources from files, storage, a link (a web page or a YouTube video) or pasted text. */
 export function AddSourceDialog({ notebookId, open, onOpenChange }: AddSourceDialogProps) {
   const { t } = useTranslation("sources");
   const { t: tCommon } = useTranslation();
@@ -130,6 +131,8 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
     addFiles(event.dataTransfer.files);
   };
 
+  const video = mode === "url" ? youTubeId(url) : null;
+
   const canSubmit =
     !busy && (mode === "url" ? url.trim() !== "" : mode === "text" ? text.trim() !== "" : false);
 
@@ -162,7 +165,7 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
             {
               value: "url",
               label: t("addDialog.tabs.url"),
-              icon: <Icon icon={Globe02Icon} size={16} />,
+              icon: <Icon icon={Link01Icon} size={16} />,
             },
             {
               value: "text",
@@ -242,16 +245,36 @@ function AddSourceForm({ notebookId, onDone }: { notebookId: string; onDone: () 
             }}
           >
             {mode === "url" ? (
-              <Field label={t("addDialog.urlLabel")} htmlFor={urlId} hint={t("addDialog.urlHint")}>
-                <Input
-                  id={urlId}
-                  type="url"
-                  inputMode="url"
-                  autoFocus
-                  placeholder={t("addDialog.urlPlaceholder")}
-                  value={url}
-                  onChange={(event) => setUrl(event.target.value)}
-                />
+              <Field
+                label={t("addDialog.urlLabel")}
+                htmlFor={urlId}
+                hint={video ? t("addDialog.youtubeHint") : t("addDialog.urlHint")}
+              >
+                <Input.Group>
+                  <Input.Addon>
+                    <Icon
+                      icon={video ? YoutubeIcon : Globe02Icon}
+                      size={16}
+                      className={video ? "text-foreground" : undefined}
+                    />
+                  </Input.Addon>
+                  <Input
+                    id={urlId}
+                    type="url"
+                    inputMode="url"
+                    autoFocus
+                    placeholder={t("addDialog.urlPlaceholder")}
+                    value={url}
+                    onChange={(event) => setUrl(event.target.value)}
+                  />
+                  {video ? (
+                    <Input.Addon align="end">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+                        {t("formats.youtube")}
+                      </span>
+                    </Input.Addon>
+                  ) : null}
+                </Input.Group>
               </Field>
             ) : (
               <>

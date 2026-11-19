@@ -2,6 +2,7 @@
 
 import type { ModelRef } from "@/lib/ai/catalog";
 import type { ChatMessage } from "@/lib/chat/types";
+import type { SourceFormat, SourceKind } from "@/lib/sources/formats";
 
 export interface Notebook {
   id: string;
@@ -198,7 +199,7 @@ export interface StoredBlob {
   createdAt: number;
 }
 
-export type SourceKind = "text" | "markdown" | "pdf" | "url";
+export type { SourceFormat, SourceKind };
 
 export interface Source {
   id: string;
@@ -209,6 +210,8 @@ export interface Source {
   url?: string;
   /** The name of an uploaded file. */
   fileName?: string;
+  /** What the file or page was (CSV, Word document, YouTube video…), for its icon and label. */
+  format?: SourceFormat;
   /** The source as plain text. */
   text: string;
   /**

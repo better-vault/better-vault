@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sourceFormats, sourceKinds } from "@/lib/sources/formats";
 import { describeError } from "@/lib/ai/errors";
 import { createImageModel, createLanguageModel, createSpeechModel } from "@/lib/ai/providers";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
@@ -12,7 +13,8 @@ const passageSchema = z.object({
   chunkId: z.string(),
   sourceId: z.string(),
   title: z.string(),
-  kind: z.enum(["text", "markdown", "pdf", "url"]),
+  kind: z.enum(sourceKinds),
+  format: z.enum(sourceFormats).optional(),
   text: z.string(),
 });
 

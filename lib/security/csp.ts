@@ -54,7 +54,8 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
       // better-vault's own backend: account, subscription and Better Vault Cloud.
       new URL(BACKEND_URL).origin,
     ],
-    "frame-src": google.frame,
+    // YouTube sources play in YouTube's privacy-enhanced player.
+    "frame-src": [...google.frame, "https://www.youtube-nocookie.com"],
     "worker-src": ["'self'", "blob:"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],

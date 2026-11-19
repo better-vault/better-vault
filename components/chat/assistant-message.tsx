@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Message } from "@/components/panelui/message";
-import { sourceKindIcons } from "@/components/sources/source-kind";
+import { sourceFormatIcons } from "@/components/sources/source-format";
+import { sourceFormatOf } from "@/lib/sources/formats";
 import type { ChatMessage, PassageRef } from "@/lib/chat/types";
 import { cleanText } from "@/lib/grounding/clean";
 import { citedNumbers, stripCitations } from "@/lib/grounding/passages";
@@ -117,10 +118,10 @@ export function AssistantMessage({
       key: first.sourceId,
       numbers: numbers.sort((a, b) => a - b),
       title: first.title,
-      place: tSources(`kinds.${first.kind}`),
+      place: tSources(`formats.${sourceFormatOf(first)}`),
       // Snippets saved with older answers may hold characters no font can draw.
       snippet: cleanText(first.snippet),
-      icon: sourceKindIcons[first.kind],
+      icon: sourceFormatIcons[sourceFormatOf(first)],
       onOpen: () => onOpenPassage(first),
     }));
     return { references, read: read.size };

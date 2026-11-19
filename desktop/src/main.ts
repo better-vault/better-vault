@@ -1,4 +1,12 @@
-import { app, BrowserWindow, dialog, nativeTheme, shell, type WebFrameMain } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  nativeTheme,
+  session,
+  shell,
+  type WebFrameMain,
+} from "electron";
 import path from "node:path";
 import { openDatabase } from "./database";
 import { startMcp } from "./mcp";
@@ -124,6 +132,21 @@ function createWindow() {
   return window;
 }
 
+/**
+ * YouTube's player refuses to play without a Referer (error 153), and pages
+ * on app:// send none. Its requests get the website's address instead.
+ */
+function allowYouTubePlayer() {
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ["https://www.youtube-nocookie.com/*"] },
+    (details, callback) => {
+      if (!details.requestHeaders.Referer)
+        details.requestHeaders.Referer = "https://better-vault.dev/";
+      callback({ requestHeaders: details.requestHeaders });
+    },
+  );
+}
+
 app.whenReady().then(() => {
   if (!firstInstance) return;
   try {
@@ -133,6 +156,7 @@ app.whenReady().then(() => {
     closeDatabase = database.close;
     startMcp(database.store, isTrusted, app.getVersion());
     startAccount(isTrusted);
+    allowYouTubePlayer();
     handleScheme(devServer ?? path.join(__dirname, "..", "renderer"));
   } catch (error) {
     dialog.showErrorBox(

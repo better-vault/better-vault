@@ -7,6 +7,7 @@ import {
   type LanguageModelUsage,
 } from "ai";
 import { z } from "zod";
+import { sourceFormats, sourceKinds } from "@/lib/sources/formats";
 import { providers } from "@/lib/ai/catalog";
 import { describeError } from "@/lib/ai/errors";
 import { chatSystemPrompt } from "@/lib/ai/prompts";
@@ -21,7 +22,8 @@ const passageSchema = z.object({
   chunkId: z.string(),
   sourceId: z.string(),
   title: z.string(),
-  kind: z.enum(["text", "markdown", "pdf", "url"]),
+  kind: z.enum(sourceKinds),
+  format: z.enum(sourceFormats).optional(),
   text: z.string(),
 });
 
@@ -64,7 +66,10 @@ function withoutOldCitations(messages: ChatMessage[]): ChatMessage[] {
 }
 
 function textLength(message: ChatMessage): number {
-  return message.parts.reduce((sum, part) => sum + (part.type === "text" ? part.text.length : 0), 0);
+  return message.parts.reduce(
+    (sum, part) => sum + (part.type === "text" ? part.text.length : 0),
+    0,
+  );
 }
 
 /** The provider's count, without the parts that are unknown. */

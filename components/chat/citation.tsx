@@ -2,7 +2,8 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
-import { sourceKindIcons } from "@/components/sources/source-kind";
+import { sourceFormatIcons } from "@/components/sources/source-format";
+import { sourceFormatOf } from "@/lib/sources/formats";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import type { PassageRef } from "@/lib/chat/types";
 import { cleanText } from "@/lib/grounding/clean";
@@ -52,12 +53,12 @@ export function Citation({ passage, numbers, onOpen, className }: CitationProps)
       <HoverCardContent side="top" sideOffset={6} className="w-72 rounded-2xl p-3">
         <div className="flex items-start gap-2.5">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-            <Icon icon={sourceKindIcons[passage.kind]} size={16} />
+            <Icon icon={sourceFormatIcons[sourceFormatOf(passage)]} size={16} />
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{passage.title}</p>
             <p className="text-xs text-muted-foreground">
-              {tSources(`kinds.${passage.kind}`)} ·{" "}
+              {tSources(`formats.${sourceFormatOf(passage)}`)} ·{" "}
               {t("citation.passage", { numbers: numbers.join(", ") })}
             </p>
           </div>

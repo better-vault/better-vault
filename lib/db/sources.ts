@@ -3,7 +3,7 @@ import { chunkText, normaliseText } from "@/lib/grounding/chunk";
 import { saveBlob } from "./blobs";
 import { useStoreQuery } from "./live";
 import { store } from "./store";
-import type { Chunk, Source, SourceImage, SourceKind } from "./types";
+import type { Chunk, Source, SourceFormat, SourceImage, SourceKind } from "./types";
 
 export interface NewSource {
   notebookId: string;
@@ -12,6 +12,7 @@ export interface NewSource {
   text: string;
   url?: string;
   fileName?: string;
+  format?: SourceFormat;
 }
 
 /** Adds a source and splits it into passages. Throws if it has no text. */
@@ -25,6 +26,7 @@ export async function addSource(input: NewSource): Promise<Source> {
     kind: input.kind,
     url: input.url,
     fileName: input.fileName,
+    ...(input.format ? { format: input.format } : {}),
     text,
     charCount: text.length,
     selected: true,

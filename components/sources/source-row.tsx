@@ -15,7 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { Source } from "@/lib/db/database";
 import { deleteSource, renameSource, setSourceSelected } from "@/lib/db/sources";
 import { countWords } from "@/lib/format";
-import { sourceKindIcons } from "./source-kind";
+import { sourceFormatOf } from "@/lib/sources/formats";
+import { sourceFormatIcons } from "./source-format";
 
 /** One source: whether it is used, its kind and size, and what can be done with it. */
 export function SourceRow({ source, onRead }: { source: Source; onRead: () => void }) {
@@ -24,6 +25,7 @@ export function SourceRow({ source, onRead }: { source: Source; onRead: () => vo
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const words = countWords(source.text);
+  const format = sourceFormatOf(source);
 
   return (
     <div className="flex items-center gap-1 rounded-2xl ps-3 pe-1 transition-colors hover:bg-muted">
@@ -38,12 +40,12 @@ export function SourceRow({ source, onRead }: { source: Source; onRead: () => vo
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-2xl px-2 py-2.5 text-start outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted">
-          <Icon icon={sourceKindIcons[source.kind]} />
+          <Icon icon={sourceFormatIcons[format]} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{source.title}</span>
           <span className="block truncate text-xs text-muted-foreground">
-            {t(`kinds.${source.kind}`)} ·{" "}
+            {t(`formats.${format}`)} ·{" "}
             {t("words", { count: words, formattedCount: words.toLocaleString(i18n.language) })}
           </span>
         </span>
