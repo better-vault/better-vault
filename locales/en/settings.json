@@ -479,12 +479,13 @@
     "welcome": {
       "title": "Welcome to {{plan}}",
       "body": "Thank you for supporting better-vault, {{name}}.",
-      "credits_one": "{{count}} AI credit every month with Better Vault AI",
-      "credits_other": "{{count}} AI credits every month with Better Vault AI",
-      "storage": "{{size}} GB of Better Vault Cloud for backups",
-      "keys": "Your own API keys keep working and stay on this device",
+      "credits_one": "{{formatted}} AI credit a month",
+      "credits_other": "{{formatted}} AI credits a month",
+      "storage": "{{size}} GB of Better Vault Cloud",
+      "keys": "Your own keys keep working",
       "use": "Use Better Vault AI",
-      "later": "Not now"
+      "later": "Not now",
+      "sync": "Skills and plugins on every device"
     },
     "choosePlan": "Get {{plan}}",
     "perMonth": "/month",
@@ -512,7 +513,9 @@
     "syncedAt": "Synced {{when}}. Signing in on another device brings them back.",
     "syncNever": "Not synced yet. It starts in a moment.",
     "syncOff": "Off: they stay on this device only.",
-    "syncError": "Couldn't sync: {{error}}"
+    "syncError": "Couldn't sync: {{error}}",
+    "previewNote": "Preview: this is what a subscriber sees, with sample numbers. Nothing here is real or saved.",
+    "previewAction": "Preview only: nothing was changed."
   },
   "plugins": {
     "title": "Plugins",

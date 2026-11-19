@@ -1,10 +1,14 @@
+import { CloudIcon, FlashIcon, Key01Icon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { Logo } from "@/components/brand/logo";
+import { Icon, type IconSvgElement } from "@/components/icon";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { markWelcomed, refreshAccount, useAccount } from "@/lib/account/account";
+import { previewAccount, subscriptionPreview } from "@/lib/account/preview";
+import { toast } from "sonner";
 import { updateSettings } from "@/lib/db/settings";
 
 /**
@@ -13,9 +17,12 @@ import { updateSettings } from "@/lib/db/settings";
  * plan, offering to switch to Better Vault AI.
  */
 export function AccountWatcher() {
-  const { t } = useTranslation("settings");
+  const { t, i18n } = useTranslation("settings");
   const { t: tCommon } = useTranslation();
-  const account = useAccount();
+  const real = useAccount();
+  // Development only: ?preview=subscribed shows the dialog a new subscriber gets.
+  const preview = subscriptionPreview();
+  const account = preview && real !== undefined ? previewAccount(real) : real;
   const [params, setParams] = useSearchParams();
   // Shown while the plan hasn't been thanked for; closing it marks it thanked.
   const [dismissed, setDismissed] = useState(false);
@@ -44,7 +51,7 @@ export function AccountWatcher() {
 
   const close = () => {
     setDismissed(true);
-    void markWelcomed();
+    if (!preview) void markWelcomed();
   };
   if (!account || !plan) return null;
 
@@ -60,16 +67,22 @@ export function AccountWatcher() {
           <p className="text-sm text-muted-foreground">
             {t("subscription.welcome.body", { name: account.user.name || account.user.email })}
           </p>
-          <ul className="flex w-full flex-col gap-1.5 rounded-2xl bg-muted/50 p-4 text-start text-sm">
-            <li>
-              {t("subscription.welcome.credits", { count: account.account.credits.included })}
-            </li>
-            <li>
-              {t("subscription.welcome.storage", {
+          <ul className="flex w-full flex-col gap-3 rounded-2xl bg-muted/50 p-4 text-start">
+            <Perk
+              icon={FlashIcon}
+              text={t("subscription.welcome.credits", {
+                count: account.account.credits.included,
+                formatted: account.account.credits.included.toLocaleString(i18n.language),
+              })}
+            />
+            <Perk
+              icon={CloudIcon}
+              text={t("subscription.welcome.storage", {
                 size: Math.round(account.account.storage.included / 1024 ** 3),
               })}
-            </li>
-            <li>{t("subscription.welcome.keys")}</li>
+            />
+            <Perk icon={RefreshIcon} text={t("subscription.welcome.sync")} />
+            <Perk icon={Key01Icon} text={t("subscription.welcome.keys")} />
           </ul>
         </div>
         <Dialog.Footer>
@@ -78,6 +91,11 @@ export function AccountWatcher() {
           </Button>
           <Button
             onClick={() => {
+              if (preview) {
+                toast(t("subscription.previewAction"));
+                close();
+                return;
+              }
               void updateSettings(
                 (saved) =>
                   void (saved.model = { provider: "bettervault", modelId: "better-vault" }),
@@ -90,5 +108,17 @@ export function AccountWatcher() {
         </Dialog.Footer>
       </Dialog.Content>
     </Dialog>
+  );
+}
+
+/** One thing the plan includes, with its icon, as in Settings → Subscription. */
+function Perk({ icon, text }: { icon: IconSvgElement; text: string }) {
+  return (
+    <li className="flex items-center gap-3 text-sm">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-background text-foreground">
+        <Icon icon={icon} size={15} />
+      </span>
+      {text}
+    </li>
   );
 }

@@ -24,6 +24,8 @@ import {
 } from "@/lib/account/account";
 import { setCloudSyncEnabled, syncNow, useCloudSync } from "@/lib/account/cloud-sync";
 import { formatRelativeTime } from "@/lib/format";
+import { previewAccount, previewSync, subscriptionPreview } from "@/lib/account/preview";
+import type { AccountState } from "@/lib/account/account";
 import { cn } from "@/lib/utils";
 
 type Plan = "pro" | "max";
@@ -43,11 +45,18 @@ const included: Record<Plan, { credits: number; storage: number }> = {
  */
 export function SubscriptionPanel() {
   const { t, i18n } = useTranslation("settings");
-  const account = useAccount();
+  const real = useAccount();
+  // Development only: ?preview=subscribed shows what a subscriber sees.
+  const preview = subscriptionPreview();
+  const account = preview && real !== undefined ? previewAccount(real) : real;
   const [busy, setBusy] = useState<string | null>(null);
   const [chosen, setChosen] = useState<Plan>("pro");
 
   const run = async (what: string, action: () => Promise<unknown>) => {
+    if (preview) {
+      toast(t("subscription.previewAction"));
+      return;
+    }
     setBusy(what);
     try {
       await action();
@@ -68,8 +77,13 @@ export function SubscriptionPanel() {
       <Sheet.Header title={t("subscription.title")} description={t("subscription.description")} />
       <Sheet.Body>
         <div className="flex flex-col gap-5 pb-4">
+          {preview ? (
+            <p className="rounded-2xl border border-dashed border-info/40 bg-info/5 px-3 py-2 text-xs text-info">
+              {t("subscription.previewNote")}
+            </p>
+          ) : null}
           {plan && account ? (
-            <CurrentPlan plan={plan} busy={busy} run={run} />
+            <CurrentPlan account={account} plan={plan} busy={busy} run={run} preview={preview} />
           ) : (
             <>
               <div className="flex items-center gap-3">
@@ -181,17 +195,19 @@ export function SubscriptionPanel() {
 
 /** The active plan: when it renews, what is used and left, extra usage, and managing it. */
 function CurrentPlan({
+  account,
   plan,
   busy,
   run,
+  preview,
 }: {
+  account: AccountState;
   plan: Plan;
   busy: string | null;
   run: (what: string, action: () => Promise<unknown>) => Promise<void>;
+  preview: boolean;
 }) {
   const { t, i18n } = useTranslation("settings");
-  const account = useAccount();
-  if (!account) return null;
   const { credits, storage, periodEnd, cancelAtPeriodEnd, overage } = account.account;
   const date = (iso: string | null) =>
     iso ? new Date(iso).toLocaleDateString(i18n.language, { day: "numeric", month: "long" }) : "";
@@ -243,7 +259,7 @@ function CurrentPlan({
         />
       </div>
 
-      <SyncRow />
+      <SyncRow preview={preview} />
 
       <section className="flex flex-col gap-2">
         <label className="flex cursor-pointer items-center gap-3">
@@ -309,9 +325,10 @@ function CurrentPlan({
 }
 
 /** Skills and plugins in the cloud: on by default, with when they last synced. */
-function SyncRow() {
+function SyncRow({ preview }: { preview: boolean }) {
   const { t, i18n } = useTranslation("settings");
-  const sync = useCloudSync();
+  const real = useCloudSync();
+  const sync = preview ? previewSync() : real;
   if (!sync) return null;
   const status = sync.error
     ? t("subscription.syncError", { error: sync.error })
@@ -334,7 +351,9 @@ function SyncRow() {
       <Switch
         checked={sync.enabled}
         onCheckedChange={(enabled) =>
-          void setCloudSyncEnabled(enabled).then(() => (enabled ? syncNow() : undefined))
+          preview
+            ? toast(t("subscription.previewAction"))
+            : void setCloudSyncEnabled(enabled).then(() => (enabled ? syncNow() : undefined))
         }
       />
     </label>
