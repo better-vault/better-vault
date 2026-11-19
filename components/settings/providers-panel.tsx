@@ -13,7 +13,6 @@ import { Field } from "@/components/common/field";
 import { Icon } from "@/components/icon";
 import { ProviderIcon } from "@/components/provider-icon";
 import { Button, buttonVariants } from "@/components/panelui/button";
-import { Alert } from "@/components/panelui/alert";
 import { Input } from "@/components/panelui/input";
 import { Label } from "@/components/panelui/label";
 import { Sheet } from "@/components/panelui/sheet";
@@ -555,14 +554,16 @@ function ChatGPTCard({
 }
 
 /**
- * Desktop app: checks whether OpenCode is installed on this computer, with a
- * spinner while it looks, and says what to do when it isn't.
+ * Desktop app: one row that says whether OpenCode is installed on this
+ * computer, in the style of the other providers' switch row. "Check" looks
+ * for it; when it's missing, the row offers the download. A Zen or Go key
+ * works either way.
  */
 function OpenCodeCheck() {
   const { t } = useTranslation("settings");
   const [state, setState] = useState<
     | { status: "idle" | "checking" }
-    | { status: "found"; version: string }
+    | { status: "found"; version: string; path: string }
     | { status: "missing" }
     | { status: "failed"; error: string }
   >({ status: "idle" });
@@ -573,57 +574,85 @@ function OpenCodeCheck() {
     try {
       const response = await fetch("/api/opencode/detect", { method: "POST" });
       const body = (await response.json()) as {
-        install?: { version: string } | null;
+        install?: { version: string; path: string } | null;
         error?: string;
       };
       if (!response.ok) throw new Error(body.error ?? response.statusText);
       setState(
-        body.install ? { status: "found", version: body.install.version } : { status: "missing" },
+        body.install
+          ? { status: "found", version: body.install.version, path: body.install.path }
+          : { status: "missing" },
       );
     } catch (error) {
       setState({ status: "failed", error: error instanceof Error ? error.message : String(error) });
     }
   }
 
+  const checking = state.status === "checking";
+  const status =
+    state.status === "found"
+      ? t("providers.opencodeFound", { version: state.version, path: shortPath(state.path) })
+      : state.status === "missing"
+        ? t("providers.opencodeMissing")
+        : state.status === "failed"
+          ? state.error
+          : checking
+            ? t("providers.opencodeChecking")
+            : t("providers.opencodeIdle");
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-muted/60 py-3 ps-3 pe-3">
+      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-background ring-1 ring-foreground/[0.06]">
+        <ProviderIcon provider="opencode" size={18} />
+        {state.status === "found" || state.status === "missing" ? (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute -end-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-background",
+              state.status === "found" ? "bg-success" : "bg-warning",
+            )}
+          />
+        ) : null}
+      </span>
+      <div className="min-w-0 flex-1" aria-live="polite">
+        <p className="text-sm font-medium">{t("providers.opencodeTitle")}</p>
+        <p
+          className={cn(
+            "truncate text-xs",
+            state.status === "failed" ? "text-destructive" : "text-muted-foreground",
+          )}
+          title={state.status === "found" ? state.path : undefined}
+        >
+          {status}
+        </p>
+      </div>
+      {state.status === "missing" ? (
+        <a
+          href="https://opencode.ai/download"
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({ size: "sm" })}
+        >
+          {t("providers.opencodeDownload")}
+        </a>
+      ) : null}
       <Button
+        size="sm"
         variant="secondary"
-        className="self-start"
-        disabled={state.status === "checking"}
-        aria-busy={state.status === "checking"}
+        disabled={checking}
+        aria-busy={checking}
         onClick={() => void check()}
       >
-        {state.status === "checking" ? (
-          <Icon icon={Loading03Icon} size={16} className="animate-spin" />
-        ) : null}
-        {state.status === "checking"
-          ? t("providers.opencodeChecking")
-          : t("providers.opencodeCheck")}
+        {checking ? <Icon icon={Loading03Icon} size={14} className="animate-spin" /> : null}
+        {state.status === "idle" || checking
+          ? t("providers.opencodeCheck")
+          : t("providers.opencodeCheckAgain")}
       </Button>
-      {state.status === "found" ? (
-        <Alert tone="success" variant="plain">
-          <Alert.Title>{t("providers.opencodeFound", { version: state.version })}</Alert.Title>
-          <Alert.Description>{t("providers.opencodeFoundBody")}</Alert.Description>
-        </Alert>
-      ) : state.status === "missing" ? (
-        <Alert tone="warning" variant="plain">
-          <Alert.Title>{t("providers.opencodeMissing")}</Alert.Title>
-          <Alert.Description>{t("providers.opencodeMissingBody")}</Alert.Description>
-          <Alert.Actions>
-            <a
-              href="https://opencode.ai/download"
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ size: "sm" })}
-            >
-              {t("providers.opencodeDownload")}
-            </a>
-          </Alert.Actions>
-        </Alert>
-      ) : state.status === "failed" ? (
-        <p className="text-sm text-destructive">{state.error}</p>
-      ) : null}
     </div>
   );
+}
+
+/** "/Users/ada/.opencode/bin/opencode" → "~/.opencode/bin/opencode". */
+function shortPath(path: string): string {
+  return path.replace(/^(\/Users\/[^/]+|\/home\/[^/]+|[A-Za-z]:\\Users\\[^\\]+)/, "~");
 }

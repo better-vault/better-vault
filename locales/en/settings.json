@@ -66,13 +66,14 @@
       "go": "Go: a monthly OpenCode plan with open coding models. Use the key from your Go subscription."
     },
     "audioOnly": "{{name}} only makes speech. Audio Overviews in Studio use it to read the conversation aloud; it can't chat or write.",
-    "opencodeCheck": "Check for OpenCode on this computer",
+    "opencodeCheck": "Check",
     "opencodeChecking": "Looking for OpenCode…",
-    "opencodeFound": "OpenCode {{version}} is installed",
-    "opencodeFoundBody": "better-vault uses OpenCode's models with your Zen or Go key below.",
-    "opencodeMissing": "OpenCode isn't installed",
-    "opencodeMissingBody": "better-vault couldn't find OpenCode on this computer. Install it, then check again. A Zen or Go key works without it.",
-    "opencodeDownload": "Download OpenCode"
+    "opencodeFound": "Version {{version}} · {{path}}",
+    "opencodeMissing": "Not installed. A Zen or Go key works without it.",
+    "opencodeDownload": "Download",
+    "opencodeTitle": "OpenCode on this computer",
+    "opencodeIdle": "Not checked yet. A Zen or Go key works without it.",
+    "opencodeCheckAgain": "Check again"
   },
   "appearance": {
     "title": "Appearance",
