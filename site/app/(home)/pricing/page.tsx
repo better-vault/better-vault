@@ -96,7 +96,7 @@ export default function PricingPage() {
           ))}
         </div>
         <p className="mx-auto mt-6 max-w-5xl text-center text-sm text-muted-foreground">
-          Prices in US dollars, billed monthly through Polar. Subscribe from the app in Settings →
+          Prices in US dollars, billed monthly through Dodo Payments. Subscribe from the app in Settings →
           Subscription.
         </p>
       </section>

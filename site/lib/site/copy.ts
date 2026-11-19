@@ -107,7 +107,7 @@ export const faq: { question: string; answer: string }[] = [
   {
     question: "Where is my data stored?",
     answer:
-      "On your device: in your browser's IndexedDB on the web, or in a SQLite file on your computer in the desktop app. There is no account and no server database. Requests are forwarded to the provider you pick, and keys and content are never stored or logged.",
+      "On your device: in your browser's IndexedDB on the web, or in a SQLite file on your computer in the desktop app. No account is needed, and no server database holds your notebooks. Requests are forwarded to the provider you pick, and keys and content are never stored or logged.",
   },
   {
     question: "Can I self-host it?",

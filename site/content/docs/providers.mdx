@@ -1,20 +1,25 @@
 ---
 title: "Providers and models"
-description: "Use better-vault with OpenAI, Anthropic, Gemini, OpenCode, Ollama or LM Studio, and ElevenLabs for speech, with your own key, ChatGPT plan or local model."
+description: "Use better-vault with OpenAI, Anthropic, Gemini, OpenRouter, Kimi, OpenCode, DeepSeek, Ollama or LM Studio, and ElevenLabs for speech, with your own key."
 ---
 
-better-vault works with six providers that write and one that speaks: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
+better-vault works with nine providers that write and one that speaks: you bring the key or the local server, and you pick the provider and model for each question in the prompt bar.
 
 | Provider            | Needs                                     | Web mode | Pictures (Infographic)    |
 | ------------------- | ----------------------------------------- | -------- | ------------------------- |
 | **OpenAI**          | API key, or ChatGPT sign-in (desktop app) | Yes      | Yes (GPT Image models)    |
 | **Anthropic**       | API key                                   | Yes      | No                        |
 | **Google (Gemini)** | API key                                   | Yes      | Yes (Gemini image models) |
+| **OpenRouter**      | OpenRouter API key                        | No       | No                        |
+| **Kimi**            | Kimi (Moonshot AI) API key                | No       | No                        |
+| **DeepSeek**        | API key                                   | No       | No                        |
 | **OpenCode**        | OpenCode Zen or Go API key                | No       | No                        |
 | **Ollama**          | Ollama running on your machine            | No       | No                        |
 | **LM Studio**       | LM Studio's local server                  | No       | No                        |
 
 **ElevenLabs** only makes speech. It needs an API key and reads Audio Overviews aloud; it doesn't appear in the model picker.
+
+**OpenRouter** serves hundreds of models from many makers behind one key; better-vault lists the ones your key may use. **Kimi** is Moonshot AI's own platform for its Kimi models.
 
 **OpenCode** serves many makers' models behind one key. Choose **Zen** to pay as you go with console credits, or **Go** for its monthly plan, in **Settings → AI providers → OpenCode**.
 
@@ -25,7 +30,7 @@ better-vault works with six providers that write and one that speaks: you bring 
 
 ### Get a key
 
-Create one in the provider's console: [OpenAI](https://platform.openai.com/api-keys), [Anthropic](https://console.anthropic.com/settings/keys) or [Google AI Studio](https://aistudio.google.com/apikey).
+Create one in the provider's console: [OpenAI](https://platform.openai.com/api-keys), [Anthropic](https://console.anthropic.com/settings/keys) or [Google AI Studio](https://aistudio.google.com/apikey), [OpenRouter](https://openrouter.ai/settings/keys) or [Kimi](https://platform.kimi.ai/console/api-keys).
 
 </Step>
 <Step>

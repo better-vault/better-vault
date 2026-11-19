@@ -5,6 +5,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- YouTube videos as sources: paste a link in the Add sources dialog's Link tab (renamed from Web page) and the video's transcript is added from its captions, as NotebookLM does. Each paragraph starts with its time, and the reader plays the video in YouTube's privacy-enhanced player, starting at the time you press.
+- Word, Excel, PowerPoint and EPUB files as sources, and text formats such as CSV, TSV, JSON, XML, YAML, HTML, logs and source code. Each source shows its real format and icon (CSV, Word document, YouTube video…) in the list, the reader and citations.
+- OpenRouter and Kimi as AI providers.
+- MCP gives agents everything in the app: notebooks and folders, sources (add text, links, PDFs and YouTube videos), notes with backlinks, skills, the calendar, chats, Studio outputs and bots. `describe_app` tells an agent what each part holds and what it may change; Settings → MCP has a switch for each part.
+- Plugins: panels and themes that run in a sandbox with no network, installed from a `.bvplugin.json` file in Settings → Plugins. Each plugin lists what it asks to read or change, and gets only what you allow. Panels open from the Studio sheet.
+- Creator mode through MCP: agents such as Claude Code build and update plugins with `install_plugin` and `update_plugin`; they arrive turned off for you to review.
+- Pro and Max plans can be bought, through Dodo Payments. Subscribers' skills and plugins sync across their devices, on by default with a switch in Settings → Subscription.
+
+### Changed
+
+- Settings → MCP is redesigned, with Panel tabs for each agent's setup and a card of switches.
+- The OpenCode check in Settings → AI providers is one status row with the version and where OpenCode is installed.
+- Backups are format 8, with plugins; plugins in a backup come back turned off. Older backups still import.
+- Payments and the billing portal move from Polar to Dodo Payments.
+
 ## [0.9.0] - 2026-11-18
 
 ### Added

@@ -505,9 +505,7 @@
       "sync": "Your skills and plugins on every device"
     },
     "heroTitle": "Better Vault AI and Cloud",
-    "heroBody": "Ask questions without an API key, and keep backups in the cloud.",
-    "soon": "Coming soon",
-    "soonHint": "Pro and Max open soon. You can sign in now, and subscribe here once they do.",
+    "heroBody": "Ask without an API key, keep backups in the cloud, and have your skills and plugins on every device.",
     "choose": "Choose a plan",
     "planName": "{{plan}} plan",
     "sync": "Sync skills and plugins",

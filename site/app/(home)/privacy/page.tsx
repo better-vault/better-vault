@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: absoluteUrl("/privacy") },
 };
 
-const UPDATED = "November 3, 2026";
+const UPDATED = "November 19, 2026";
 
 export default function PrivacyPage() {
   return (
@@ -36,10 +36,25 @@ export default function PrivacyPage() {
 
       <LegalSection title="What we collect">
         <p>
-          <strong>Nothing.</strong> better-vault has no accounts and no server database. We do not
-          collect, store, sell or share your notebooks, sources, chats, files, API keys, Google
-          account information or usage data. The app contains no analytics or tracking, and neither
-          does this website.
+          <strong>Without an account, nothing.</strong> We do not collect, store, sell or share
+          your notebooks, sources, chats, notes, files, API keys, Google account information or
+          usage data. The app contains no analytics or tracking, and neither does this website.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="The optional account and plans">
+        <p>
+          An account is only needed for a Pro or Max plan. If you create one, we keep your email
+          address, name and username, your plan, and how many AI credits you used. Payments are
+          handled by Dodo Payments, which receives your payment details under its own privacy
+          policy; we never see your card.
+        </p>
+        <p>
+          With a plan, we also receive the questions you send to Better Vault AI (to answer them,
+          through Anthropic), the files you choose to put in Better Vault Cloud, and, while sync is
+          on, your skills and plugins, so another device can get them back. Your notebooks, notes
+          and API keys never reach us. You can turn sync off in{" "}
+          <strong>Settings → Subscription</strong>.
         </p>
       </LegalSection>
 
@@ -59,8 +74,8 @@ export default function PrivacyPage() {
         </p>
         <ul className="flex list-disc flex-col gap-2 ps-5">
           <li>
-            <strong>AI providers</strong> (such as OpenAI, Anthropic, Google, OpenCode, ElevenLabs,
-            or Ollama and LM Studio on your own machine) receive your question, the relevant
+            <strong>AI providers</strong> (such as OpenAI, Anthropic, Google, OpenRouter, Kimi,
+            OpenCode, ElevenLabs, or Ollama and LM Studio on your own machine) receive your question, the relevant
             passages of your sources and your key, and return the answer. Their own privacy policies
             apply.
           </li>
@@ -70,7 +85,9 @@ export default function PrivacyPage() {
             choose to open.
           </li>
           <li>
-            <strong>Web pages</strong> you add as sources are fetched to read their text.
+            <strong>Web pages and YouTube videos</strong> you add as sources are fetched to read
+            their text or the video&apos;s captions. A YouTube source plays in YouTube&apos;s
+            privacy-enhanced player, which sets no cookies until you play it.
           </li>
         </ul>
         <p>

@@ -1,20 +1,29 @@
 ---
 title: "Sources"
-description: "Add PDFs, Markdown and text files, web pages or pasted text to a notebook in better-vault, then choose which of those sources the chat and the Studio use."
+description: "Add documents, spreadsheets, slides, PDFs, EPUBs, web pages, YouTube videos or pasted text to a notebook, then choose which sources the chat and Studio use."
 ---
 
 A source is a document you add to a notebook. better-vault stores it as plain text and splits it into passages, which it uses to answer questions and to create Studio outputs.
 
 ## Supported sources
 
-| Kind         | How to add it                                                                 |
-| ------------ | ----------------------------------------------------------------------------- |
-| **PDF**      | Upload a file of up to 20 MB. Text-based PDFs work best.                      |
-| **Markdown** | Upload a `.md` file.                                                          |
-| **Text**     | Upload a `.txt` file, or choose **Paste text**.                               |
-| **Web page** | Open the **Web page** tab and enter the full address. Its main text is saved. |
+| Kind                                    | How to add it                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **PDF**                                 | Upload a file of up to 20 MB. Text-based PDFs work best.                                        |
+| **Word, Excel and PowerPoint**          | Upload a `.docx`, `.xlsx` or `.pptx` file. Each sheet becomes rows; each slide keeps its notes. |
+| **EPUB books**                          | Upload a `.epub` file. Its chapters are read in order.                                          |
+| **Markdown and text**                   | Upload a `.md` or `.txt` file, or choose **Paste text**.                                        |
+| **CSV, JSON, HTML, XML, YAML and code** | Upload the file. better-vault reads it as text and shows its format.                            |
+| **Web page**                            | Open the **Link** tab and enter the full address. Its main text is saved.                       |
+| **YouTube video**                       | Open the **Link** tab and paste the video's address. Its transcript is saved.                   |
 
-DOCX, EPUB, YouTube transcripts, images and audio are on the [roadmap](/docs/roadmap).
+Each source shows its format, such as CSV, Word document or YouTube video, with its own icon in the list, the reader and citations. Images and audio are on the [roadmap](/docs/roadmap).
+
+## YouTube videos
+
+better-vault adds a YouTube video the way NotebookLM does: it imports the video's transcript, from captions the uploader wrote or YouTube made automatically. The video needs to be public and have captions; a private video, or one without captions, can't be added, and the dialog says why.
+
+The transcript keeps a time, such as `[4:05]`, at the start of each paragraph, so citations point at a moment in the video. In the reader, the video plays above the transcript in YouTube's privacy-enhanced player, and pressing a time starts it there.
 
 ## Add sources
 
@@ -26,4 +35,4 @@ The chat and the Studio use only the sources that are selected. Tick or untick a
 
 ## Read, rename or delete
 
-Each source has a menu. **Read** shows the text better-vault saved, and for a web page you can open the original. You can also rename or delete the source. Deleting it keeps the chats and outputs that were made from it.
+Each source has a menu. **Read** shows the text better-vault saved, and for a web page or video you can open the original. You can also rename or delete the source. Deleting it keeps the chats and outputs that were made from it.

@@ -2,7 +2,7 @@
  * The pricing page's plans and comparison. The app itself is free and open
  * source; the plans add Better Vault AI (answers without an API key) and
  * Better Vault Cloud. Keep these in step with better-vault-backend's
- * src/credits.ts and the Polar products.
+ * src/credits.ts and the Dodo Payments products.
  */
 export interface Plan {
   id: "free" | "pro" | "max";
@@ -25,7 +25,7 @@ export const plans: Plan[] = [
     features: [
       "Notebooks, chat with citations and every Studio tool",
       "Notes with links, graph and canvas",
-      "Bring your own key: OpenAI, Anthropic, Google, DeepSeek and more",
+      "Bring your own key: OpenAI, Anthropic, Google, OpenRouter, Kimi and more",
       "Local models with Ollama and LM Studio",
       "Your data stays on your device",
     ],
@@ -41,6 +41,7 @@ export const plans: Plan[] = [
       "Everything in Free",
       "Better Vault AI with 1,250 AI credits a month",
       "20 GB of Better Vault Cloud for backups and exports",
+      "Your skills and plugins on every device",
       "Extra usage when you want it, capped by you",
     ],
     cta: { label: "Get Pro", href: "/download" },
@@ -88,6 +89,7 @@ export const comparisonGroups: {
       { label: "Notebooks on your device", free: true, pro: true, max: true },
       { label: "Google Drive, OneDrive, S3 and R2", free: true, pro: true, max: true },
       { label: "Better Vault Cloud", free: false, pro: "20 GB", max: "50 GB" },
+      { label: "Skills and plugins synced across devices", free: false, pro: true, max: true },
     ],
   },
   {
@@ -141,11 +143,11 @@ export const pricingFaq: { question: string; answer: string }[] = [
   {
     question: "Are my API keys or notebooks sent to Better Vault?",
     answer:
-      "No. Your notebooks, notes and API keys stay on your device. Only the questions you ask Better Vault AI, and the files you choose to put in Better Vault Cloud, go to our servers.",
+      "No. Your notebooks, notes and API keys stay on your device. Only the questions you ask Better Vault AI, the files you choose to put in Better Vault Cloud and, with sync on, your skills and plugins go to our servers.",
   },
   {
     question: "Can I cancel any time?",
     answer:
-      "Yes. Cancel in Settings → Subscription → Manage, and your plan stays until the end of the month you paid for. Payments and invoices are handled by Polar.",
+      "Yes. Cancel in Settings → Subscription → Manage, and your plan stays until the end of the month you paid for. Payments and invoices are handled by Dodo Payments.",
   },
 ];

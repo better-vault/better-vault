@@ -1,9 +1,9 @@
 ---
 title: "Skills and MCP for AI agents"
-description: "Keep shared SKILL.md instructions in a better-vault vault and let AI agents like Claude Code, Cursor and Codex read your notebooks and notes through MCP."
+description: "Keep shared SKILL.md skills in a vault and let agents like Claude Code, Cursor and Codex use your notebooks, notes, calendar and much more through MCP."
 ---
 
-Skills are instructions for AI agents that you keep in a vault, and MCP lets agents on your computer use them, along with your notebooks and notes.
+Skills are instructions for AI agents that you keep in a vault, and MCP lets agents on your computer use them, along with everything else in better-vault.
 
 ## Skills
 
@@ -19,13 +19,13 @@ The dialog lists every skill it finds in that repository, the same ones the skil
 
 ## Connect an agent with MCP
 
-The desktop app runs a [Model Context Protocol](https://modelcontextprotocol.io) server on your computer, so agents can read your sources and notes and share skills with you. It is off until you turn it on, it listens only on your computer, and every request needs a token.
+The desktop app runs a [Model Context Protocol](https://modelcontextprotocol.io) server on your computer, so agents can use your notebooks, sources, notes, skills, calendar, chats, Studio outputs, bots and plugins. It is off until you turn it on, it listens only on your computer, and every request needs a token. Your settings and API keys are never shared.
 
 <Steps>
 
 ### Turn it on
 
-Open **Settings → MCP** in the desktop app and turn on **Allow agents to connect**. Choose whether agents may only read, or also write notes and skills.
+Open **Settings → MCP** in the desktop app and turn on **Allow agents to connect**. Agents can always read; under **What agents may change**, each part has its own switch, and **Read only** turns every change off. Plugins stay off until you allow them.
 
 ### Set up your agent
 
@@ -33,8 +33,22 @@ Pick your agent, Claude Code, Cursor, Codex or Claude Desktop, and copy the setu
 
 ### Use it
 
-Ask your agent about your notebooks. It can list vaults and notebooks, search and read sources, read and write notes, and read, write and delete skills. Changes show up in the app at once.
+Ask your agent about your notebooks. It starts with `describe_app`, which tells it what each part holds and what it may change, then uses the tools below. Changes show up in the app at once.
 
 </Steps>
+
+## What agents can do
+
+| Part          | Read                                                                                     | Change (when allowed)                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Notebooks** | `list_vaults`, `list_folders`, `list_notebooks`                                          | `create_notebook`, `rename_notebook`                                                   |
+| **Sources**   | `search_sources`, `read_source`                                                          | `add_source` (text, a link or a YouTube video), `set_source_selected`, `delete_source` |
+| **Notes**     | `list_notes`, `search_notes`, `read_note`, `list_backlinks`                              | `write_note`, `delete_note`                                                            |
+| **Skills**    | `list_skills`, `read_skill`, and each skill as a prompt                                  | `write_skill`, `delete_skill`                                                          |
+| **Calendar**  | `list_events`                                                                            | `create_event`, `update_event`, `delete_event`                                         |
+| **Activity**  | `list_chats`, `read_chat`, `list_outputs`, `read_output`, `list_bots`, `read_bot_thread` | —                                                                                      |
+| **Plugins**   | `list_plugins`, `read_plugin`                                                            | `install_plugin`, `update_plugin`, `remove_plugin`                                     |
+
+Notes, sources and skills are also resources, at `note://`, `source://` and `skill://` addresses. [Creator mode](/docs/creator-mode) explains how an agent builds plugins.
 
 The web app can't run an MCP server, so Settings → MCP there links to the desktop app. **New token** in the same page stops every agent set up with the old one.

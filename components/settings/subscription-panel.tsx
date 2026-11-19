@@ -21,7 +21,6 @@ import {
   signIn,
   startCheckout,
   useAccount,
-  useSubscriptionsOpen,
 } from "@/lib/account/account";
 import { setCloudSyncEnabled, syncNow, useCloudSync } from "@/lib/account/cloud-sync";
 import { formatRelativeTime } from "@/lib/format";
@@ -38,16 +37,15 @@ const included: Record<Plan, { credits: number; storage: number }> = {
 /**
  * Settings → Subscription: with a plan, what has been used this month, extra
  * usage and where to manage it; without one, the two plans side by side and
- * what the chosen one includes. Plans are bought through Dodo Payments; if
- * the backend closes them, they say "Coming soon". Signing out lives in
- * Settings → Account.
+ * what the chosen one includes, bought through Dodo Payments. Without an
+ * account, the button signs in first and then opens the checkout. Signing out
+ * lives in Settings → Account.
  */
 export function SubscriptionPanel() {
   const { t, i18n } = useTranslation("settings");
   const account = useAccount();
   const [busy, setBusy] = useState<string | null>(null);
   const [chosen, setChosen] = useState<Plan>("pro");
-  const open = useSubscriptionsOpen(account);
 
   const run = async (what: string, action: () => Promise<unknown>) => {
     setBusy(what);
@@ -80,11 +78,6 @@ export function SubscriptionPanel() {
                   <p className="text-sm font-semibold">{t("subscription.heroTitle")}</p>
                   <p className="text-xs text-muted-foreground">{t("subscription.heroBody")}</p>
                 </div>
-                {!open ? (
-                  <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[0.6875rem] font-medium text-muted-foreground">
-                    {t("subscription.soon")}
-                  </span>
-                ) : null}
               </div>
 
               <div
@@ -139,32 +132,28 @@ export function SubscriptionPanel() {
                   <Feature icon={RefreshIcon} text={t("subscription.features.sync")} />
                   <Feature icon={Key01Icon} text={t("subscription.features.keys")} />
                 </ul>
-                {!open ? (
-                  <Button size="lg" className="w-full" disabled>
-                    {t("subscription.soon")}
-                  </Button>
-                ) : account ? (
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    disabled={busy !== null}
-                    aria-busy={busy === chosen}
-                    onClick={() => void run(chosen, () => startCheckout(chosen))}
-                  >
-                    {t("subscription.choosePlan", { plan: t(`subscription.plans.${chosen}`) })}
-                  </Button>
-                ) : null}
+                <Button
+                  size="lg"
+                  className="w-full"
+                  disabled={busy !== null}
+                  aria-busy={busy === chosen}
+                  onClick={() =>
+                    void run(chosen, async () => {
+                      // Without an account, sign in first; the checkout follows.
+                      if (!account) await signIn("signin");
+                      await startCheckout(chosen);
+                    })
+                  }
+                >
+                  {t("subscription.choosePlan", { plan: t(`subscription.plans.${chosen}`) })}
+                </Button>
               </div>
-
-              {!open ? (
-                <p className="text-xs text-muted-foreground">{t("subscription.soonHint")}</p>
-              ) : null}
 
               {!account ? (
                 <div className="flex gap-2">
                   <Button
                     className="flex-1"
-                    variant={open ? "default" : "outline"}
+                    variant="outline"
                     disabled={busy !== null}
                     onClick={() => void run("signin", () => signIn("signin"))}
                   >

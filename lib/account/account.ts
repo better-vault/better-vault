@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useStoreQuery } from "@/lib/db/live";
 import { getSettings, updateProvider } from "@/lib/db/settings";
 import { store } from "@/lib/db/store";
@@ -39,40 +38,11 @@ export interface AccountState {
   checkedAt: number;
   /** The plan the welcome dialog last thanked the user for. */
   welcomed: string | null;
-  /** "soon" while plans can't be bought yet (the backend says which). */
+  /** What the backend says about buying plans; kept for older backends, not shown. */
   subscriptions?: "open" | "soon";
 }
 
 type Me = { user: AccountUser; account: AccountPlan; subscriptions?: "open" | "soon" };
-
-/** Whether plans can be bought yet, as the signed-in account last heard. */
-export function subscriptionsOpen(state: AccountState | null | undefined): boolean {
-  return state?.subscriptions === "open";
-}
-
-let publicStatus: Promise<boolean> | null = null;
-
-/** Whether plans can be bought: from the account when signed in, else asked once (GET /v1/status). */
-export function useSubscriptionsOpen(state: AccountState | null | undefined): boolean {
-  const [open, setOpen] = useState(false);
-  const known = state?.subscriptions;
-  useEffect(() => {
-    if (known || state === undefined) return;
-    let live = true;
-    publicStatus ??= fetch(`${BACKEND_URL}/v1/status`)
-      .then((response) => response.json() as Promise<{ subscriptions?: string }>)
-      .then((body) => body.subscriptions === "open")
-      .catch(() => {
-        publicStatus = null;
-        return false;
-      });
-    void publicStatus.then((value) => live && setOpen(value));
-    return () => {
-      live = false;
-    };
-  }, [known, state]);
-  return known ? known === "open" : open;
-}
 
 const KEY = "account";
 
