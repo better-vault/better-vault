@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { botLook } from "@/lib/bot/look";
+import { botLook, faceItems, headItems, neckItems } from "@/lib/bot/look";
+import { faceParts, headParts, neckParts } from "./accessories";
 import {
   apply,
   convexHull,
@@ -103,5 +104,19 @@ describe("bot looks", () => {
       face: "mustache",
       neck: "none",
     });
+  });
+
+  it("has a drawing for every item", () => {
+    for (const [items, parts] of [
+      [headItems, headParts],
+      [faceItems, faceParts],
+      [neckItems, neckParts],
+    ] as const) {
+      for (const item of items) {
+        const drawn = (parts as Record<string, unknown[]>)[item];
+        expect(drawn, item).toBeDefined();
+        if (item !== "none") expect(drawn.length, item).toBeGreaterThan(0);
+      }
+    }
   });
 });

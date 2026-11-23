@@ -16,6 +16,12 @@ export const headItems = [
   "graduation-cap",
   "headphones",
   "antenna",
+  "cowboy-hat",
+  "party-hat",
+  "halo",
+  "viking-helmet",
+  "flower-crown",
+  "bandana",
 ] as const;
 
 export const faceItems = [
@@ -26,9 +32,24 @@ export const faceItems = [
   "monocle",
   "mustache",
   "blush",
+  "star-glasses",
+  "heart-glasses",
+  "goggles",
+  "eyepatch",
+  "freckles",
 ] as const;
 
-export const neckItems = ["none", "bow-tie", "tie", "scarf"] as const;
+export const neckItems = [
+  "none",
+  "bow-tie",
+  "tie",
+  "scarf",
+  "necklace",
+  "medal",
+  "lanyard",
+  "collar",
+  "neckerchief",
+] as const;
 
 export type HeadItem = (typeof headItems)[number];
 export type FaceItem = (typeof faceItems)[number];

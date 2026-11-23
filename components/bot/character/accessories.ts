@@ -147,12 +147,81 @@ export const headParts: Record<HeadItem, Part[]> = {
       { lag: 1 },
     ),
   ],
+  "cowboy-hat": [
+    brim(-0.04, `<ellipse rx="34" ry="30"/>`, 0.45),
+    upright(
+      `<path d="M-15 1 C-16 -12 -15 -22 -10 -25 C-5 -27 -2 -21 0 -21 C2 -21 5 -27 10 -25 C15 -22 16 -12 15 1 Z"/>` +
+        `<path d="M-15 -6 C-5 -3 5 -3 15 -6 L15 -1 C5 2 -5 2 -15 -1 Z" fill="${HATCH}"/>`,
+      { lag: 0.5 },
+    ),
+  ],
+  "party-hat": [
+    upright(
+      `<path d="M-14 2 L0 -36 L14 2 Z"/>` +
+        `<path d="M-10.5 -8 L8 -1 M-6.5 -19 L5 -14 M-3 -28 L2.5 -26" ${open}/>` +
+        `<circle cy="-38" r="4.5" fill="${HATCH}"/>`,
+      { lag: 0.75 },
+    ),
+  ],
+  halo: [
+    upright(
+      `<ellipse cy="-14" rx="19" ry="5.5" ${open} stroke-width="2.6"/>` +
+        `<ellipse cy="-14" rx="14" ry="3" ${open} stroke-dasharray="2 3"/>`,
+      { lift: 0.05, lag: 0.85 },
+    ),
+  ],
+  "viking-helmet": [
+    upright(
+      `<path d="M-27 4 C-27 -24 27 -24 27 4 Z"/>` +
+        `<rect x="-28.5" y="-1" width="57" height="7" rx="3" fill="${HATCH}"/>` +
+        `<path d="M-2 -18 V-1 M2 -18 V-1" ${open}/>` +
+        `<path d="M-25 -6 C-36 -8 -40 -20 -36 -32 C-33 -24 -28 -19 -20 -16 Z"/>` +
+        `<path d="M25 -6 C36 -8 40 -20 36 -32 C33 -24 28 -19 20 -16 Z"/>`,
+      { lift: -0.16, lag: 0.3 },
+    ),
+  ],
+  "flower-crown": [
+    upright(
+      `<path d="M-26 1 C-14 -4 14 -4 26 1" ${open}/>` +
+        [-21, -10.5, 0, 10.5, 21]
+          .map(
+            (x, at) =>
+              `<g transform="translate(${x} ${at % 2 ? -3.5 : -2})">` +
+              `<circle cx="0" cy="-4" r="3.2"/><circle cx="3.8" cy="-1.2" r="3.2"/><circle cx="2.4" cy="3.2" r="3.2"/>` +
+              `<circle cx="-2.4" cy="3.2" r="3.2"/><circle cx="-3.8" cy="-1.2" r="3.2"/><circle r="1.8" fill="${HATCH}"/></g>`,
+          )
+          .join(""),
+      { lift: -0.1, lag: 0.35 },
+    ),
+  ],
+  bandana: [
+    upright(
+      `<path d="M-28 5 C-29 -20 29 -20 28 5 C14 0 -14 0 -28 5 Z" fill="${HATCH}"/>` +
+        `<circle cx="-12" cy="-8" r="1.6"/><circle cx="2" cy="-12" r="1.6"/><circle cx="14" cy="-6" r="1.6"/>` +
+        `<path d="M26 2 C32 4 36 10 34 16 L29 9 Z M26 2 C33 1 38 4 40 9 L32 7 Z"/>`,
+      { lift: -0.2, lag: 0.3 },
+    ),
+  ],
 };
 
 const lens = (cx: number, shape: "round" | "square") =>
   shape === "round"
     ? `<circle cx="${cx}" r="10" ${open}/>`
     : `<rect x="${cx - 9}" y="-10" width="18" height="20" rx="3.5" ${open}/>`;
+
+/** A five-pointed lens, centred at `cx`. */
+const star = (cx: number) => {
+  const points = Array.from({ length: 10 }, (_, at) => {
+    const angle = (Math.PI / 5) * at - Math.PI / 2;
+    const r = at % 2 ? 5 : 11.5;
+    return `${(cx + Math.cos(angle) * r).toFixed(2)} ${(Math.sin(angle) * r).toFixed(2)}`;
+  });
+  return `<path d="M${points.join(" L")} Z" ${open}/>`;
+};
+
+/** A heart-shaped lens, centred at `cx`. */
+const heart = (cx: number) =>
+  `<path transform="translate(${cx} 0)" d="M0 9 C-6 4 -11 0 -11 -4.5 C-11 -9 -5.5 -11 0 -5.5 C5.5 -11 11 -9 11 -4.5 C11 0 6 4 0 9 Z" ${open}/>`;
 
 export const faceParts: Record<FaceItem, Part[]> = {
   none: [],
@@ -196,6 +265,33 @@ export const faceParts: Record<FaceItem, Part[]> = {
   blush: ([-1, 1] as const).map((side) =>
     onFace(side * 0.56, -0.32, `<path d="M-4 2 L-2 -2 M-0.5 2 L1.5 -2 M3 2 L5 -2" ${open}/>`),
   ),
+  "star-glasses": [onFace(0, -0.04, `${star(-10)}${star(10)}<path d="M-1.5 -2 H1.5" ${open}/>`)],
+  "heart-glasses": [onFace(0, -0.04, `${heart(-10)}${heart(10)}<path d="M-1.5 -3 H1.5" ${open}/>`)],
+  goggles: [
+    onFace(
+      0,
+      -0.02,
+      `<path d="M-30 -2 H-21 M21 -2 H30" ${open} stroke-width="3"/>` +
+        `<circle cx="-10.5" cy="-1" r="11" fill="${HATCH}"/><circle cx="10.5" cy="-1" r="11" fill="${HATCH}"/>` +
+        `<circle cx="-10.5" cy="-1" r="7.5"/><circle cx="10.5" cy="-1" r="7.5"/>` +
+        `<path d="M-14 -4.5 Q-12 -6.5 -9.5 -6 M7 -4.5 Q9 -6.5 11.5 -6" ${open}/>`,
+    ),
+  ],
+  eyepatch: [
+    onFace(
+      0,
+      0,
+      `<path d="M-30 -14 L30 8" ${open}/>` +
+        `<path d="M-19 -9 C-19 -1 -15 6 -9.5 6 C-4 6 -1 -1 -1.5 -8 C-7 -11 -13 -11 -19 -9 Z" fill="${HATCH}"/>`,
+    ),
+  ],
+  freckles: ([-1, 1] as const).map((side) =>
+    onFace(
+      side * 0.55,
+      -0.3,
+      `<circle cx="-4" cy="-1" r="1.3" fill="${HATCH}"/><circle cx="0" cy="2" r="1.3" fill="${HATCH}"/><circle cx="4" cy="-1" r="1.3" fill="${HATCH}"/><circle cx="0.5" cy="-3.5" r="1.3" fill="${HATCH}"/>`,
+    ),
+  ),
 };
 
 export const neckParts: Record<NeckItem, Part[]> = {
@@ -236,5 +332,52 @@ export const neckParts: Record<NeckItem, Part[]> = {
       facing: true,
       lag: 0.6,
     },
+  ],
+  necklace: [
+    onFace(
+      0,
+      -0.82,
+      `<path d="M-15 -4 Q0 8 15 -4" ${open}/>` +
+        [-12, -8, -4, 0, 4, 8, 12]
+          .map(
+            (x) =>
+              `<circle cx="${x}" cy="${(-4 + 12 * (1 - (x / 15) ** 2) * 0.5).toFixed(2)}" r="1.6"/>`,
+          )
+          .join("") +
+        `<path d="M0 4 L3.5 8.5 L0 13 L-3.5 8.5 Z" fill="${HATCH}"/>`,
+    ),
+  ],
+  medal: [
+    onFace(
+      0,
+      -0.8,
+      `<path d="M-8 -4 L-2 7 H2 L8 -4 H3 L0 2 L-3 -4 Z" fill="${HATCH}"/>` +
+        `<circle cy="13" r="6.5"/><path d="M0 9.5 l1 2.2 2.4.2 -1.8 1.6.6 2.4 -2.2-1.3 -2.2 1.3.6-2.4 -1.8-1.6 2.4-.2z"/>`,
+    ),
+  ],
+  lanyard: [
+    onFace(
+      0,
+      -0.8,
+      `<path d="M-14 -5 L-3 8 M14 -5 L3 8" ${open} stroke-width="2.4"/>` +
+        `<rect x="-7" y="7" width="14" height="18" rx="2"/>` +
+        `<rect x="-4" y="10.5" width="8" height="6" rx="1" fill="${HATCH}"/><path d="M-4 20 H4 M-4 22.5 H2" ${open}/>`,
+    ),
+  ],
+  collar: [
+    onFace(
+      0,
+      -0.78,
+      `<path d="M-1 -3 L-13 -5 L-9 7 Z"/><path d="M1 -3 L13 -5 L9 7 Z"/>` +
+        `<circle cy="3" r="1.4" fill="${HATCH}"/><circle cy="9" r="1.4" fill="${HATCH}"/>`,
+    ),
+  ],
+  neckerchief: [
+    onFace(
+      0,
+      -0.8,
+      `<path d="M-15 -4 C-5 -1 5 -1 15 -4 L0 15 Z" fill="${HATCH}"/>` +
+        `<rect x="-3.5" y="-3" width="7" height="5" rx="2"/>`,
+    ),
   ],
 };

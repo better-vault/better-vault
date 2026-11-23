@@ -11,6 +11,7 @@ import { Input } from "@/components/panelui/input";
 import { Select } from "@/components/panelui/select";
 import { Switch } from "@/components/panelui/switch";
 import { Tabs } from "@/components/panelui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/panelui/textarea";
 import { botAccess } from "@/lib/bot/access";
 import { botLook, faceItems, headItems, neckItems } from "@/lib/bot/look";
@@ -188,30 +189,32 @@ function BotForm({
                 onChoose={(neck) => set({ avatar: { ...details.avatar, neck } })}
               />
 
-              <fieldset className="flex flex-col gap-2">
+              <fieldset className="flex min-w-0 flex-col gap-2">
                 <legend className="mb-2 text-sm font-medium">{t("editor.color")}</legend>
-                <div
-                  className="flex flex-wrap gap-2"
-                  role="radiogroup"
-                  aria-label={t("editor.color")}
-                >
-                  {botColorKeys.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      role="radio"
-                      aria-checked={details.avatar.color === color}
-                      aria-label={t(`colors.${color}`)}
-                      title={t(`colors.${color}`)}
-                      onClick={() => set({ avatar: { ...details.avatar, color } })}
-                      className={cn(
-                        "size-7 cursor-pointer rounded-full ring-offset-2 ring-offset-popover outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        botColor(color).swatch,
-                        details.avatar.color === color && "ring-2 ring-foreground",
-                      )}
-                    />
-                  ))}
-                </div>
+                <ScrollArea horizontal className="-mx-1">
+                  <div
+                    className="flex gap-2 px-2 pt-1 pb-3.5"
+                    role="radiogroup"
+                    aria-label={t("editor.color")}
+                  >
+                    {botColorKeys.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        role="radio"
+                        aria-checked={details.avatar.color === color}
+                        aria-label={t(`colors.${color}`)}
+                        title={t(`colors.${color}`)}
+                        onClick={() => set({ avatar: { ...details.avatar, color } })}
+                        style={{ background: botColor(color).body }}
+                        className={cn(
+                          "size-7 shrink-0 cursor-pointer rounded-full ring-offset-2 ring-offset-popover outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          details.avatar.color === color && "ring-2 ring-foreground",
+                        )}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
               </fieldset>
 
               <Field label={t("editor.instructions")} htmlFor={instructionsId}>
@@ -346,34 +349,34 @@ function LookRow<Item extends string>({
   const { t } = useTranslation("bot");
   const current = botLook(avatar)[slot];
   return (
-    <fieldset className="flex flex-col gap-2">
+    <fieldset className="flex min-w-0 flex-col gap-2">
       <legend className="mb-2 text-sm font-medium">{t(`look.${slot}`)}</legend>
-      <div
-        className="grid grid-cols-5 gap-1 sm:grid-cols-10"
-        role="radiogroup"
-        aria-label={t(`look.${slot}`)}
-      >
-        {items.map((item) => (
-          <button
-            key={item}
-            type="button"
-            role="radio"
-            aria-checked={current === item}
-            aria-label={t(`look.items.${item}` as "look.items.none")}
-            title={t(`look.items.${item}` as "look.items.none")}
-            onClick={() => onChoose(item)}
-            style={
-              current === item ? ({ "--bot-surface": "var(--muted)" } as CSSProperties) : undefined
-            }
-            className={cn(
-              "flex aspect-square cursor-pointer items-center justify-center rounded-xl transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
-              current === item && "bg-muted ring-1 ring-foreground/20",
-            )}
-          >
-            <BotAvatar avatar={{ ...avatar, [slot]: item }} size={44} still />
-          </button>
-        ))}
-      </div>
+      <ScrollArea horizontal className="-mx-1">
+        <div className="flex gap-1 px-1 pb-2.5" role="radiogroup" aria-label={t(`look.${slot}`)}>
+          {items.map((item) => (
+            <button
+              key={item}
+              type="button"
+              role="radio"
+              aria-checked={current === item}
+              aria-label={t(`look.items.${item}` as "look.items.none")}
+              title={t(`look.items.${item}` as "look.items.none")}
+              onClick={() => onChoose(item)}
+              style={
+                current === item
+                  ? ({ "--bot-surface": "var(--muted)" } as CSSProperties)
+                  : undefined
+              }
+              className={cn(
+                "flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-xl transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                current === item && "bg-muted ring-1 ring-foreground/20",
+              )}
+            >
+              <BotAvatar avatar={{ ...avatar, [slot]: item }} size={44} still />
+            </button>
+          ))}
+        </div>
+      </ScrollArea>
     </fieldset>
   );
 }

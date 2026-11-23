@@ -97,7 +97,13 @@
     "chart-5": "Violet",
     "chart-4": "Amber",
     "destructive": "Red",
-    "chart-1": "Graphite"
+    "chart-1": "Graphite",
+    "teal": "Teal",
+    "indigo": "Indigo",
+    "rose": "Rose",
+    "orange": "Orange",
+    "lime": "Lime",
+    "slate": "Slate"
   },
   "starters": {
     "chief": {
@@ -167,7 +173,23 @@
       "blush": "Blush",
       "bow-tie": "Bow tie",
       "tie": "Tie",
-      "scarf": "Scarf"
+      "scarf": "Scarf",
+      "cowboy-hat": "Cowboy hat",
+      "party-hat": "Party hat",
+      "halo": "Halo",
+      "viking-helmet": "Viking helmet",
+      "flower-crown": "Flower crown",
+      "bandana": "Bandana",
+      "star-glasses": "Star glasses",
+      "heart-glasses": "Heart glasses",
+      "goggles": "Goggles",
+      "eyepatch": "Eye patch",
+      "freckles": "Freckles",
+      "necklace": "Necklace",
+      "medal": "Medal",
+      "lanyard": "Lanyard",
+      "collar": "Collar",
+      "neckerchief": "Neckerchief"
     }
   }
 }
