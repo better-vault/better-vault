@@ -7,6 +7,7 @@ import { useChatSession } from "@/components/chat/chat-provider";
 import { Icon } from "@/components/icon";
 import { Message } from "@/components/panelui/message";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSettings } from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
 import { useWorkspace } from "./workspace-context";
 
@@ -16,6 +17,7 @@ const SUGGESTIONS = ["summary", "questions", "terms", "plan"] as const;
 export function ChatView() {
   const { t } = useTranslation("chat");
   const chat = useChatSession();
+  const settings = useSettings();
   const { readSource } = useWorkspace();
   const scroller = useRef<HTMLDivElement>(null);
   const last = chat.messages.at(-1);
@@ -57,6 +59,7 @@ export function ChatView() {
           ) : (
             <AssistantMessage
               key={message.id}
+              avatar={settings?.answerAvatar ?? null}
               message={message}
               streaming={chat.status === "streaming" && at === chat.messages.length - 1}
               isLast={at === chat.messages.length - 1}

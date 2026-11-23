@@ -17,6 +17,8 @@ const hostOf = (url: string) => {
     return url;
   }
 };
+import { AnswerAvatar } from "@/components/bot/answer-avatar";
+import type { BotAvatar as BotLook } from "@/lib/db/types";
 import { AnswerReferences, SearchStatus, type Reference } from "./answer-references";
 import { Markdown } from "./markdown";
 import { isVisualPart, VisualPart } from "./visual/visual-part";
@@ -24,6 +26,8 @@ import { isVisualPart, VisualPart } from "./visual/visual-part";
 const SEARCH_TOOLS = new Set(["web_search", "google_search"]);
 
 interface AssistantMessageProps {
+  /** The character shown once the answer is finished; none when `null`. */
+  avatar?: BotLook | null;
   message: ChatMessage;
   streaming: boolean;
   isLast: boolean;
@@ -33,6 +37,7 @@ interface AssistantMessageProps {
 
 /** An answer: the sources it read or searched, the text with citations, and actions. */
 export function AssistantMessage({
+  avatar,
   message,
   streaming,
   isLast,
@@ -136,7 +141,7 @@ export function AssistantMessage({
     .filter(Boolean)
     .join(" · ");
 
-  return (
+  const answer = (
     <Message from="assistant" streaming={streaming && text !== ""}>
       <Message.Content className="gap-3">
         {message.metadata?.mode === "web" && web.searching ? (
@@ -192,5 +197,20 @@ export function AssistantMessage({
         ) : null}
       </Message.Content>
     </Message>
+  );
+  if (avatar === undefined || avatar === null) return answer;
+  // The character sits beside the answer, at its foot; its column stays while
+  // the answer streams, so the text does not move when it appears.
+  return (
+    <div className="flex items-end gap-3">
+      <div className="mb-1 flex w-[30px] shrink-0 justify-center self-stretch">
+        {!streaming && (text || hasVisual) ? (
+          <div className="mt-auto">
+            <AnswerAvatar avatar={avatar} fresh={isLast} />
+          </div>
+        ) : null}
+      </div>
+      <div className="min-w-0 flex-1">{answer}</div>
+    </div>
   );
 }

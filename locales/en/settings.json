@@ -87,6 +87,8 @@
     "dark": "Dark",
     "accent": "Primary colour",
     "accentHint": "Used for buttons, selections and highlights.",
+    "answerAvatar": "Answer avatar",
+    "answerAvatarHint": "A character beside the chat's finished answers. Bots show their own face.",
     "accents": {
       "default": "Neutral",
       "blue": "Blue",

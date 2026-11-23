@@ -8,6 +8,7 @@ import {
   type ProviderId,
 } from "@/lib/ai/catalog";
 import { useStoreQuery } from "./live";
+import type { BotAvatar } from "./types";
 import { store } from "./store";
 
 export interface ProviderSettings {
@@ -40,7 +41,17 @@ export interface AppSettings {
   model: ModelRef | null;
   /** Models starred in the model picker, as `provider:modelId`. */
   favoriteModels: string[];
+  /** The character shown beside the notebook chat's finished answers; `null` hides it. */
+  answerAvatar: BotAvatar | null;
 }
+
+/** The character the notebook chat starts with. */
+export const defaultAnswerAvatar: BotAvatar = {
+  color: "chart-2",
+  head: "none",
+  face: "round-glasses",
+  neck: "none",
+};
 
 const SETTINGS_KEY = "app";
 
@@ -62,6 +73,7 @@ export function defaultSettings(): AppSettings {
     providers: Object.fromEntries(entries) as Record<ProviderId, ProviderSettings>,
     model: null,
     favoriteModels: [],
+    answerAvatar: { ...defaultAnswerAvatar },
   };
 }
 
@@ -74,6 +86,7 @@ function withDefaults(saved: Partial<AppSettings> | undefined): AppSettings {
   }
   base.model = saved.model ?? null;
   base.favoriteModels = saved.favoriteModels ?? [];
+  if (saved.answerAvatar !== undefined) base.answerAvatar = saved.answerAvatar;
   return base;
 }
 

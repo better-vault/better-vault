@@ -3,8 +3,13 @@ import { useTranslation } from "react-i18next";
 import { Field } from "@/components/common/field";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
+import { BotAvatar } from "@/components/bot/bot-avatar";
+import { LookPicker } from "@/components/bot/look-picker";
 import { Sheet } from "@/components/panelui/sheet";
+import { Switch } from "@/components/panelui/switch";
 import { useTheme, type Theme } from "@/components/providers/theme-provider";
+import { defaultAnswerAvatar, updateSettings, useSettings } from "@/lib/db/settings";
+import type { BotAvatar as BotLook } from "@/lib/db/types";
 import { accents } from "@/lib/theme/script";
 import { cn } from "@/lib/utils";
 
@@ -80,8 +85,39 @@ export function AppearancePanel() {
               })}
             </div>
           </Field>
+          <AnswerAvatarField />
         </div>
       </Sheet.Body>
     </>
+  );
+}
+
+/** The character beside the notebook chat's finished answers, or none. */
+function AnswerAvatarField() {
+  const { t } = useTranslation("settings");
+  const settings = useSettings();
+  if (!settings) return null;
+  const avatar = settings.answerAvatar;
+  const save = (next: BotLook | null) =>
+    void updateSettings((saved) => void (saved.answerAvatar = next));
+
+  return (
+    <div className="flex flex-col gap-4 border-t pt-5">
+      <div className="flex items-center gap-3">
+        <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-muted">
+          {avatar ? <BotAvatar avatar={avatar} size={48} followPointer /> : null}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="text-sm font-medium">{t("appearance.answerAvatar")}</span>
+          <span className="text-xs text-muted-foreground">{t("appearance.answerAvatarHint")}</span>
+        </div>
+        <Switch
+          checked={avatar !== null}
+          label={t("appearance.answerAvatar")}
+          onCheckedChange={(on) => save(on ? { ...defaultAnswerAvatar } : null)}
+        />
+      </div>
+      {avatar ? <LookPicker avatar={avatar} onChange={save} /> : null}
+    </div>
   );
 }

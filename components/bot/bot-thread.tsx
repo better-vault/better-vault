@@ -31,6 +31,7 @@ import { updateBot } from "@/lib/db/bots";
 import { activeModel, availableModels, useSettings } from "@/lib/db/settings";
 import type { Bot } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
+import { AnswerAvatar } from "./answer-avatar";
 import { BotAvatar } from "./bot-avatar";
 import { ApprovalCard, isToolPart, ToolEvent } from "./bot-parts";
 import { moodOf } from "./bot-roster";
@@ -268,6 +269,13 @@ function ThreadBody({
                 <BotTurn
                   message={message}
                   bots={bots}
+                  avatar={
+                    (!busy || at < messages.length - 1) &&
+                    (at === messages.length - 1 || messages[at + 1]?.role === "user")
+                      ? bot.avatar
+                      : null
+                  }
+                  fresh={at === messages.length - 1}
                   onAnswer={async (toolCallId, approved) => {
                     try {
                       await answerApproval(bot.id, toolCallId, approved);
@@ -408,10 +416,15 @@ type Block =
 function BotTurn({
   message,
   bots,
+  avatar,
+  fresh,
   onAnswer,
 }: {
   message: ChatMessage;
   bots: Bot[];
+  /** The bot's face, shown under a finished turn. */
+  avatar: Bot["avatar"] | null;
+  fresh: boolean;
   onAnswer: (toolCallId: string, approved: boolean) => Promise<void>;
 }) {
   const blocks = useMemo(() => {
@@ -429,45 +442,51 @@ function BotTurn({
     return out;
   }, [message.parts]);
 
+  const finished = avatar !== null && blocks.some((block) => block.kind === "text");
   return (
-    <div className="flex flex-col items-start gap-2">
-      {blocks.map((block, at) => {
-        if (block.kind === "text")
-          return (
-            <div
-              key={at}
-              className="max-w-[min(85%,40rem)] rounded-[1.25rem] rounded-ss-md bg-muted px-4 py-2.5"
-            >
-              <Message from="assistant">
-                <Message.Content>
-                  <Message.Bubble>
-                    <Message.BubbleContent className="leading-6 [&_p]:my-2">
-                      <Markdown text={block.text} bare />
-                    </Message.BubbleContent>
-                  </Message.Bubble>
-                </Message.Content>
-              </Message>
-            </div>
-          );
-        const part = block.part;
-        if (isVisualPart(part))
-          return (
-            <div key={part.toolCallId} className="w-full">
-              <VisualPart part={part} />
-            </div>
-          );
-        const name = getToolName(part);
-        if (!isBotTool(name)) return null;
-        if (botWriteTools.has(name))
-          return (
-            <ApprovalCard
-              key={part.toolCallId}
-              part={part}
-              onAnswer={(approved) => onAnswer(part.toolCallId, approved)}
-            />
-          );
-        return <ToolEvent key={part.toolCallId} part={part} bots={bots} />;
-      })}
+    <div className="flex items-end gap-2">
+      <div className="flex w-8 shrink-0 justify-center">
+        {finished ? <AnswerAvatar avatar={avatar} fresh={fresh} /> : null}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+        {blocks.map((block, at) => {
+          if (block.kind === "text")
+            return (
+              <div
+                key={at}
+                className="max-w-[min(85%,40rem)] rounded-[1.25rem] rounded-es-md bg-muted px-4 py-2.5"
+              >
+                <Message from="assistant">
+                  <Message.Content>
+                    <Message.Bubble>
+                      <Message.BubbleContent className="leading-6 [&_p]:my-2">
+                        <Markdown text={block.text} bare />
+                      </Message.BubbleContent>
+                    </Message.Bubble>
+                  </Message.Content>
+                </Message>
+              </div>
+            );
+          const part = block.part;
+          if (isVisualPart(part))
+            return (
+              <div key={part.toolCallId} className="w-full">
+                <VisualPart part={part} />
+              </div>
+            );
+          const name = getToolName(part);
+          if (!isBotTool(name)) return null;
+          if (botWriteTools.has(name))
+            return (
+              <ApprovalCard
+                key={part.toolCallId}
+                part={part}
+                onAnswer={(approved) => onAnswer(part.toolCallId, approved)}
+              />
+            );
+          return <ToolEvent key={part.toolCallId} part={part} bots={bots} />;
+        })}
+      </div>
     </div>
   );
 }
