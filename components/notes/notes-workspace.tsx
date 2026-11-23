@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import type { CompletionWorld } from "./editor/completion";
 import { NoteEditor, type NoteEditorHandle } from "./editor/note-editor";
 import { GraphView } from "./graph-view";
+import { NoteTabs } from "./note-tabs";
 import { NoteDetails } from "./note-details";
 import { NoteList } from "./note-list";
 import { NoteReader } from "./note-reader";
@@ -382,7 +383,7 @@ export default function NotesWorkspace() {
 
       {/* Tabs, then the open note or the graph. */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border">
-        <div className="flex h-14 shrink-0 items-center gap-1 border-b px-3">
+        <div className="note-tabs-bar flex h-14 shrink-0 items-center gap-1 px-3">
           <button
             type="button"
             onClick={() => go("back")}
@@ -401,53 +402,14 @@ export default function NotesWorkspace() {
           >
             <Icon icon={ArrowRight01Icon} size={16} className="rtl:rotate-180" />
           </button>
-          <div
-            role="tablist"
-            aria-label={t("title")}
-            className="flex min-w-0 flex-1 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
-          >
-            {visibleTabs.map((id) => {
-              const tabNote = id === GRAPH_TAB ? null : byId.get(id);
-              const label = id === GRAPH_TAB ? t("tabs.graph") : (tabNote?.title ?? "");
-              const active = id === activeTab;
-              return (
-                <div
-                  key={id}
-                  role="tab"
-                  aria-selected={active}
-                  className={cn(
-                    "group flex h-8 max-w-48 shrink-0 items-center gap-1.5 rounded-lg ps-2.5 pe-1 text-sm",
-                    active
-                      ? "bg-foreground/10 font-medium"
-                      : "text-muted-foreground hover:bg-accent/60",
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => (id === GRAPH_TAB ? show({ graph: true }) : show({ note: id }))}
-                    onAuxClick={(event) => event.button === 1 && closeTab(id)}
-                    className="flex min-w-0 cursor-pointer items-center gap-1.5 outline-none focus-visible:underline"
-                  >
-                    <Icon
-                      icon={id === GRAPH_TAB ? HierarchyCircle01Icon : Note01Icon}
-                      size={14}
-                      className="shrink-0"
-                    />
-                    <span className="truncate">{label}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => closeTab(id)}
-                    aria-label={t("tabs.close")}
-                    className="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-0 outline-none group-hover:opacity-100 hover:bg-background focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring aria-[current]:opacity-100"
-                    aria-current={active ? "true" : undefined}
-                  >
-                    <Icon icon={Cancel01Icon} size={12} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          <NoteTabs
+            tabs={visibleTabs}
+            active={activeTab}
+            graphTab={GRAPH_TAB}
+            labelOf={(id) => (id === GRAPH_TAB ? t("tabs.graph") : (byId.get(id)?.title ?? ""))}
+            onShow={(id) => (id === GRAPH_TAB ? show({ graph: true }) : show({ note: id }))}
+            onClose={closeTab}
+          />
           {note && !graphOpen ? (
             <button
               type="button"
