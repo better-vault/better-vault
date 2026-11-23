@@ -11,6 +11,7 @@ const samples: Record<(typeof boardItemKinds)[number], BoardItem> = {
   formula: { kind: "formula", text: "6CO2 + 6H2O → C6H12O6 + 6O2" },
   note: { kind: "note", text: "Remember: xylem up, phloem both ways." },
   flow: { kind: "flow", items: ["Roots", "Stem", "Leaves"] },
+  sources: { kind: "sources", items: ["Britannica – Plant tissue"] },
   icons: {
     kind: "icons",
     icons: [{ label: "Cell", shapes: [{ type: "circle", points: [50, 50], r: 30 }] }],
@@ -46,5 +47,9 @@ describe("whiteboard answer layout", () => {
   it("puts an answer beside what is on the board, or at the view's corner", () => {
     expect(answerOrigin([], [5, 6])).toEqual([5, 6]);
     expect(answerOrigin([{ x: 0, y: 10, width: 100, height: 20 }], [5, 6])).toEqual([260, 10]);
+    // Beside the selection is taken, so the answer goes below it.
+    const selected = { x: 0, y: 0, width: 100, height: 100 };
+    const neighbour = { x: 300, y: 0, width: 400, height: 100 };
+    expect(answerOrigin([selected, neighbour], [0, 0], [selected])).toEqual([0, 220]);
   });
 });

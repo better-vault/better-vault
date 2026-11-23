@@ -22,8 +22,9 @@ import {
 import { BoardCanvas } from "./board-canvas";
 import type { OutputChrome } from "@/studio/shared/form";
 import { OutputInfo } from "@/studio/shared/output-info";
+import { BoardContextMenu } from "./board-menu";
 import { BoardMenu, ViewControls } from "./controls";
-import type { Point } from "./geometry";
+import { elementAt, type Point } from "./geometry";
 import { placedSize, prepareImage } from "./images";
 import { PropertiesPanel } from "./properties-panel";
 import { newId, newSeed } from "./scene";
@@ -68,6 +69,8 @@ export function Board({
   const [announcement, setAnnouncement] = useState("");
   const size = useCallback(() => sizeRef.current, []);
   const [asking, setAsking] = useState(false);
+  // What the Ask AI field asks about: a selection, or the whole board.
+  const [about, setAbout] = useState<BoardElement[] | null>(null);
   const ai = useAskAi(board, size);
   useEffect(() => {
     if (ai.error) toast.error(t("whiteboard.ai.error", { error: ai.error }));
@@ -357,6 +360,30 @@ export function Board({
         const box = root.current!.getBoundingClientRect();
         pointer.current = [event.clientX - box.left, event.clientY - box.top];
       }}
+      onContextMenuCapture={(event) => {
+        // A right-click on something not selected selects it (with its group) first.
+        const box = root.current!.getBoundingClientRect();
+        const at = toWorld(
+          [event.clientX - box.left, event.clientY - box.top],
+          board.view ?? { x: 0, y: 0, zoom: 1 },
+        );
+        const hit = elementAt(board.elements, at, board.view?.zoom ?? 1);
+        if (!hit) {
+          if (board.selected.size) board.setSelected(new Set());
+          return;
+        }
+        if (board.selected.has(hit.id)) return;
+        const group = hit.groupIds.at(-1);
+        board.setSelected(
+          new Set(
+            group
+              ? board.elements
+                  .filter((each) => each.groupIds.includes(group))
+                  .map((each) => each.id)
+              : [hit.id],
+          ),
+        );
+      }}
       onDragOver={(event) => {
         if ([...event.dataTransfer.items].some((item) => item.kind === "file"))
           event.preventDefault();
@@ -377,17 +404,31 @@ export function Board({
         );
       }}
     >
-      <BoardCanvas
+      <BoardContextMenu
         board={board}
-        panning={panning}
-        onPlaceImage={(at) => {
-          placeAt.current = at;
-          fileInput.current?.click();
+        size={size}
+        onAsk={(selection) => {
+          setAbout(selection);
+          setAsking(true);
         }}
-        onCreated={() => {
-          if (!board.toolLocked) board.setTool("selection");
+        onAskAbout={(question, selection) => {
+          setAbout(selection);
+          setAsking(true);
+          void ai.ask(question, selection);
         }}
-      />
+      >
+        <BoardCanvas
+          board={board}
+          panning={panning}
+          onPlaceImage={(at) => {
+            placeAt.current = at;
+            fileInput.current?.click();
+          }}
+          onCreated={() => {
+            if (!board.toolLocked) board.setTool("selection");
+          }}
+        />
+      </BoardContextMenu>
 
       {editing?.type === "text" ? (
         <TextEditor
@@ -441,11 +482,14 @@ export function Board({
             status={ai.status}
             ready={ai.ready}
             voice={voiceProvider(ai.settings)}
-            onAsk={(question) => void ai.ask(question)}
+            about={about?.length ?? 0}
+            onClearAbout={() => setAbout(null)}
+            onAsk={(question) => void ai.ask(question, about ?? undefined)}
             onStop={ai.stop}
             onClose={() => {
               ai.stop();
               setAsking(false);
+              setAbout(null);
               root.current?.focus({ preventScroll: true });
             }}
           />

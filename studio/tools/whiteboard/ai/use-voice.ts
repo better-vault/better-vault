@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Records the microphone for voice input and turns it into text through the
- * app's /api/transcribe, with the user's OpenAI or ElevenLabs key. `level`
+ * app's /api/transcribe, with the user's OpenAI, ElevenLabs or Google key. `level`
  * follows the loudness, for the recorder's wave.
  */
 export function useVoice(
-  credentials: { provider: "openai" | "elevenlabs"; apiKey: string } | null,
+  credentials: { provider: "openai" | "elevenlabs" | "google"; apiKey: string } | null,
   onText: (text: string) => void,
   onError: (message: string) => void,
 ) {
@@ -73,7 +73,7 @@ export function useVoice(
         const response = await fetch("/api/transcribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...credentials, audio: btoa(binary) }),
+          body: JSON.stringify({ ...credentials, audio: btoa(binary), mediaType: blob.type }),
         });
         const body = (await response.json()) as { text?: string; error?: string };
         if (!response.ok || !body.text) throw new Error(body.error ?? response.statusText);

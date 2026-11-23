@@ -15,6 +15,8 @@ export function AskAiBar({
   status,
   ready,
   voice,
+  about = 0,
+  onClearAbout,
   onAsk,
   onStop,
   onClose,
@@ -22,7 +24,10 @@ export function AskAiBar({
 }: {
   status: AskStatus;
   ready: boolean;
-  voice: { provider: "openai" | "elevenlabs"; apiKey: string } | null;
+  voice: { provider: "openai" | "elevenlabs" | "google"; apiKey: string } | null;
+  /** How many selected items the question is about; 0 for the whole board. */
+  about?: number;
+  onClearAbout?: () => void;
   onAsk: (question: string) => void;
   onStop: () => void;
   onClose: () => void;
@@ -57,6 +62,22 @@ export function AskAiBar({
       >
         <Icon icon={Cancel01Icon} size={12} />
       </button>
+      {about > 0 ? (
+        <div className="mb-1.5 flex justify-center">
+          <span className="flex items-center gap-1.5 rounded-full bg-chart-5/15 py-1 ps-3 pe-1 text-xs font-medium text-chart-5 shadow-sm backdrop-blur">
+            {t("whiteboard.ai.about", { count: about })}
+            <button
+              type="button"
+              onClick={onClearAbout}
+              aria-label={t("whiteboard.ai.clearAbout")}
+              title={t("whiteboard.ai.clearAbout")}
+              className="flex size-5 cursor-pointer items-center justify-center rounded-full hover:bg-chart-5/20"
+            >
+              <Icon icon={Cancel01Icon} size={11} />
+            </button>
+          </span>
+        </div>
+      ) : null}
       <Prompt
         value={draft}
         onValueChange={setDraft}
@@ -100,7 +121,9 @@ export function AskAiBar({
                     ? t("whiteboard.ai.thinking")
                     : status === "writing"
                       ? t("whiteboard.ai.writing")
-                      : t("whiteboard.ai.placeholder")
+                      : about > 0
+                        ? t("whiteboard.ai.placeholderAbout")
+                        : t("whiteboard.ai.placeholder")
                 }
                 aria-label={t("whiteboard.ai.placeholder")}
               />

@@ -559,7 +559,9 @@
       "zoom": "Zoom",
       "download": "Download",
       "rename": "Rename",
-      "deleteBoard": "Delete whiteboard"
+      "deleteBoard": "Delete whiteboard",
+      "toFront": "Bring to front",
+      "toBack": "Send to back"
     },
     "background": "Background",
     "backgrounds": {
@@ -645,7 +647,31 @@
       "voiceError": "Couldn't hear that: {{error}}",
       "error": "Couldn't answer: {{error}}",
       "setUp": "Set up a chat model to ask the board.",
-      "setUpAction": "Set up"
+      "setUpAction": "Set up",
+      "askAbout": "Ask AI about this…",
+      "quick": "Quick questions",
+      "about_one": "About the selected item",
+      "about_other": "About {{count}} selected items",
+      "clearAbout": "Ask about the whole board instead",
+      "presets": {
+        "explain": {
+          "label": "Explain this",
+          "question": "Explain what I selected, step by step."
+        },
+        "table": {
+          "label": "Turn into a table",
+          "question": "Organise what I selected into a clear table."
+        },
+        "quiz": {
+          "label": "Quiz me on this",
+          "question": "Write a short quiz (3–4 questions with answers) about what I selected."
+        },
+        "sources": {
+          "label": "Check it on the web",
+          "question": "Check what I selected against reliable sources on the web, correct anything wrong, and list the sources."
+        }
+      },
+      "placeholderAbout": "Ask about what you selected"
     }
   },
   "audio-overview": {

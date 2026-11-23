@@ -18,6 +18,7 @@ export const boardItemKinds = [
   "note",
   "flow",
   "icons",
+  "sources",
 ] as const;
 export type BoardItemKind = (typeof boardItemKinds)[number];
 
@@ -38,7 +39,9 @@ export const boardItem = z.object({
     .array(z.string().max(200))
     .max(12)
     .optional()
-    .describe("list and steps: the lines; flow: the boxes, in order"),
+    .describe(
+      "list and steps: the lines; flow: the boxes, in order; sources: where facts came from",
+    ),
   columns: z.array(z.string().max(60)).max(5).optional().describe("table: the header"),
   rows: z
     .array(z.array(z.string().max(120)).max(5))
@@ -73,10 +76,15 @@ Items:
 - formula: an equation or formula in plain text, e.g. "6CO2 + 6H2O → C6H12O6 + 6O2".
 - note: one key idea to remember, boxed.
 - flow: 2–5 short boxes joined by arrows, for a chain of causes or stages.
+- sources: last, when you looked things up: 1–4 short "Site – page title" lines.
 - icons: 2–4 small drawings with a label each, to make ideas visual. Draw each with 2–8 simple shapes in a 100 × 100 box (circles, lines, rects, dots), in colour.
 
 Rules:
 - 4 to 9 items. Mix kinds: a board with only text is a bad board.
 - Write in the language of the question. Keep every line short; it is a board, not an essay.
 - Colours: ink for most writing, and blue, green, red, amber or violet to highlight.
-- Use what you know; be correct.`;
+- Use what you know; be correct.
+- When the user selected something, answer about that: explain it, extend it, or do what they ask with it.`;
+
+/** Added when the model has its provider's web search. */
+export const webRules = `You can search the web. Search when the question needs facts you aren't sure of, recent information, or numbers; then end the board with a sources item naming where they came from. Don't search for simple, well-known things.`;

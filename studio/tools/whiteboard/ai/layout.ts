@@ -348,6 +348,18 @@ export class BoardLayout {
         this.y += GAP - 10;
         break;
       }
+      case "sources": {
+        const size = 16;
+        for (const line of (item.items ?? []).slice(0, 4)) {
+          for (const part of wrap(`↗ ${line}`, COLUMN, size)) {
+            const width = measureText(part, "hand", size).width;
+            ops.push(text(part, [start(width), this.y], size, "grey"));
+            this.y += size * LINE_HEIGHT;
+          }
+        }
+        this.y += GAP;
+        break;
+      }
       case "icons": {
         const icons = item.icons ?? [];
         const cell = Math.min(170, COLUMN / Math.max(icons.length, 1));
@@ -403,15 +415,41 @@ function iconShape(shape: IconShape, left: number, top: number, scale: number): 
   }
 }
 
-/** Where the answer goes: right of what is on the board, level with its top, or at the view's corner. */
+type Rect = { x: number; y: number; width: number; height: number };
+
+/** The room an answer is expected to need: its column, and a generous height. */
+const ROOM = { width: 760 + 40, height: 640 };
+
+const overlaps = (a: Rect, b: Rect) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+/**
+ * Where an answer goes, in empty space: beside what it is about (a selection,
+ * or else everything on the board), else below it, else past the board's right
+ * edge. An empty board answers at the view's corner.
+ */
 export function answerOrigin(
-  elements: readonly { x: number; y: number; width: number; height: number }[],
+  elements: readonly Rect[],
   viewCorner: Point,
+  about: readonly Rect[] = elements,
 ): Point {
   if (elements.length === 0) return viewCorner;
-  const right = Math.max(...elements.map((element) => element.x + element.width));
-  const top = Math.min(...elements.map((element) => element.y));
-  return [right + 160, top];
+  const box = (items: readonly Rect[]) => ({
+    minX: Math.min(...items.map((each) => each.x)),
+    minY: Math.min(...items.map((each) => each.y)),
+    maxX: Math.max(...items.map((each) => each.x + each.width)),
+    maxY: Math.max(...items.map((each) => each.y + each.height)),
+  });
+  const near = box(about.length ? about : elements);
+  const all = box(elements);
+  const free = ([x, y]: Point) =>
+    !elements.some((each) => overlaps({ x, y, ...ROOM }, each));
+  const candidates: Point[] = [
+    [near.maxX + 160, near.minY],
+    [near.minX, near.maxY + 120],
+    [all.maxX + 160, near.minY],
+  ];
+  return candidates.find(free) ?? [all.minX, all.maxY + 160];
 }
 
 export const ANSWER_WIDTH = COLUMN;

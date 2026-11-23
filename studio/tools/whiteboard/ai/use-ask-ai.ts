@@ -10,7 +10,10 @@ import {
 import type { Size } from "../actions";
 import type { Point } from "../geometry";
 import { newId } from "../scene";
-import type { BoardElement } from "../schema";
+import { emptyBoard, type BoardElement, type BoardFile } from "../schema";
+import { boardSvg } from "../export";
+import { exportFonts, resolveBoardPalette } from "../export-browser";
+import { svgToPng } from "@/studio/exports/image";
 import type { BoardModel } from "../use-board";
 import { toScreen, toWorld } from "../viewport";
 import { createAnimator, type Animator } from "./animator";
@@ -18,6 +21,28 @@ import { answerOrigin, BoardLayout } from "./layout";
 import { boardItem } from "./schema";
 
 export type AskStatus = "idle" | "thinking" | "writing";
+
+/** The selection as a PNG, so the model sees drawings as well as words. */
+async function selectionPicture(
+  elements: readonly BoardElement[],
+  files: Record<string, BoardFile>,
+): Promise<string | undefined> {
+  try {
+    const data = { ...emptyBoard(), elements: [...elements], files };
+    const palette = resolveBoardPalette();
+    const { svg, width, height } = boardSvg(data, palette, await exportFonts(data));
+    const scale = Math.min(2, 1600 / Math.max(width, height, 1));
+    const blob = await svgToPng(svg, width, height, scale, palette.background);
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return undefined;
+  }
+}
 
 /** What is written on the board already, for the model to build on. */
 function boardText(elements: readonly BoardElement[]) {
@@ -66,10 +91,11 @@ export function useAskAi(board: BoardModel, size: () => Size) {
   useEffect(() => stop, [stop]);
 
   const ask = useCallback(
-    async (question: string) => {
+    async (question: string, selection?: readonly BoardElement[]) => {
       stop();
       setError(null);
       const current = boardRef.current;
+      const about = selection?.length ? selection : null;
       const saved = await getSettings();
       const chosen = activeModel(saved);
       if (!chosen) return;
@@ -78,7 +104,12 @@ export function useAskAi(board: BoardModel, size: () => Size) {
       const view = current.view ?? { x: 0, y: 0, zoom: 1 };
       const zoom = Math.min(1.1, Math.max(0.75, view.zoom));
       const corner = toWorld([80, 160], { ...view, zoom });
-      const [ox, oy] = answerOrigin(current.latestRef.current.elements, corner);
+      // About a selection: beside it. Otherwise beside everything on the board.
+      const [ox, oy] = answerOrigin(
+        current.latestRef.current.elements,
+        corner,
+        about ?? current.latestRef.current.elements,
+      );
       current.setView({ zoom, x: 80 - ox * zoom, y: 160 - oy * zoom });
 
       const before = current.latestRef.current;
@@ -111,6 +142,14 @@ export function useAskAi(board: BoardModel, size: () => Size) {
           body: JSON.stringify({
             question,
             board: boardText(before.elements),
+            ...(about
+              ? {
+                  selection: {
+                    text: boardText(about),
+                    image: await selectionPicture(about, before.files),
+                  },
+                }
+              : {}),
             model: chosen,
             credentials: credentialsFor(saved, chosen.provider),
             effort: effortFor(saved, chosen.provider),
@@ -161,7 +200,7 @@ export function useAskAi(board: BoardModel, size: () => Size) {
 /** Which provider can turn speech into text with the user's keys, if any. */
 export function voiceProvider(settings: ReturnType<typeof useSettings>) {
   if (!settings) return null;
-  for (const id of ["openai", "elevenlabs"] as const) {
+  for (const id of ["openai", "elevenlabs", "google"] as const) {
     if (isProviderReady(settings, id) && settings.providers[id].apiKey)
       return { provider: id, apiKey: settings.providers[id].apiKey };
   }
