@@ -14,6 +14,7 @@ import type {
   Bot,
   BotMessage,
   Plugin,
+  VaultFile,
 } from "./types";
 
 /**
@@ -62,6 +63,12 @@ export interface Backend {
   deleteSkill(id: string): Promise<void>;
 
   /** Every installed plugin. */
+  /** Every loose file in every vault. */
+  listFiles(): Promise<VaultFile[]>;
+  getFile(id: string): Promise<VaultFile | undefined>;
+  putFile(file: VaultFile): Promise<void>;
+  /** Deletes a file and its bytes. */
+  deleteFile(id: string): Promise<void>;
   listPlugins(): Promise<Plugin[]>;
   getPlugin(id: string): Promise<Plugin | undefined>;
   /** Installs a plugin or replaces it. */
@@ -154,6 +161,7 @@ export interface StoreContent {
   notes: Note[];
   skills: Skill[];
   plugins: Plugin[];
+  files: VaultFile[];
   bots: Bot[];
   botMessages: BotMessage[];
   folders: Folder[];
@@ -171,6 +179,7 @@ export const tableNames = [
   "notes",
   "skills",
   "plugins",
+  "files",
   "bots",
   "botMessages",
   "folders",
@@ -212,6 +221,8 @@ export const writes = {
   deleteNote: ["notes"],
   putSkill: ["skills"],
   deleteSkill: ["skills"],
+  putFile: ["files"],
+  deleteFile: ["files", "blobs"],
   putPlugin: ["plugins"],
   deletePlugin: ["plugins"],
   putBot: ["bots"],
@@ -219,7 +230,7 @@ export const writes = {
   saveBotThread: ["bots", "botMessages"],
   addFolder: ["folders"],
   patchFolder: ["folders"],
-  deleteFolder: ["folders", "notebooks"],
+  deleteFolder: ["folders", "notebooks", "files"],
   addSource: ["sources", "chunks", "notebooks"],
   patchSource: ["sources"],
   patchNotebookSources: ["sources"],
@@ -241,6 +252,7 @@ export const writes = {
     "notes",
     "skills",
     "plugins",
+    "files",
     "bots",
     "botMessages",
     "folders",
@@ -258,6 +270,7 @@ export const writes = {
     "notes",
     "skills",
     "plugins",
+    "files",
     "bots",
     "botMessages",
     "folders",
@@ -293,6 +306,10 @@ export const backendMethods = [
   "getSkill",
   "putSkill",
   "deleteSkill",
+  "listFiles",
+  "getFile",
+  "putFile",
+  "deleteFile",
   "listPlugins",
   "getPlugin",
   "putPlugin",

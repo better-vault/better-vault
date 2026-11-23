@@ -14,8 +14,8 @@ export const areaGuide: Record<
 > = {
   notebooks: {
     about:
-      "Notebooks, kept in vaults and folders. Each has its own sources, chats and Studio outputs.",
-    reads: ["list_vaults", "list_folders", "list_notebooks"],
+      "Notebooks, kept in vaults and folders. Each has its own sources, chats and Studio outputs. Vaults also hold loose files (list_files, read_file).",
+    reads: ["list_vaults", "list_folders", "list_notebooks", "list_files", "read_file"],
     writes: ["create_notebook", "rename_notebook"],
     record: "{ id, title, vault, folderId, pinned, updatedAt, sources[] }",
   },

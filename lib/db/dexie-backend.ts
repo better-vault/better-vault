@@ -12,6 +12,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
     db.notes,
     db.skills,
     db.plugins,
+    db.files,
     db.bots,
     db.botMessages,
     db.folders,
@@ -75,6 +76,18 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       await db.skills.put(skill);
     },
     deleteSkill: (id) => db.skills.delete(id),
+    listFiles: () => db.files.toArray(),
+    getFile: (id) => db.files.get(id),
+    putFile: async (file) => {
+      await db.files.put(file);
+    },
+    deleteFile: (id) =>
+      db.transaction("rw", [db.files, db.blobs], async () => {
+        const file = await db.files.get(id);
+        if (!file) return;
+        await db.blobs.delete(file.blobId);
+        await db.files.delete(id);
+      }),
     listPlugins: () => db.plugins.toArray(),
     getPlugin: (id) => db.plugins.get(id),
     putPlugin: async (plugin) => {
@@ -120,9 +133,15 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
       await db.folders.update(id, patch);
     },
     deleteFolder: (id) =>
-      db.transaction("rw", [db.folders, db.notebooks], async () => {
+      db.transaction("rw", [db.folders, db.notebooks, db.files], async () => {
         const folder = await db.folders.get(id);
         if (!folder) return;
+        await db.files
+          .filter((file) => file.folderId === id)
+          .modify((file) => {
+            if (folder.parentId) file.folderId = folder.parentId;
+            else delete file.folderId;
+          });
         await db.folders.where("parentId").equals(id).modify({ parentId: folder.parentId });
         await db.notebooks
           .filter((notebook) => notebook.folderId === id)
@@ -241,6 +260,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         notes,
         skills,
         plugins,
+        files,
         bots,
         botMessages,
         folders,
@@ -256,6 +276,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         db.notes.toArray(),
         db.skills.toArray(),
         db.plugins.toArray(),
+        db.files.toArray(),
         db.bots.toArray(),
         db.botMessages.toArray(),
         db.folders.toArray(),
@@ -272,6 +293,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         notes,
         skills,
         plugins,
+        files,
         bots,
         botMessages,
         folders,
@@ -290,6 +312,7 @@ export function createDexieBackend(db = new BetterVaultDatabase()): Backend & {
         await db.notes.bulkPut(data.notes);
         await db.skills.bulkPut(data.skills);
         await db.plugins.bulkPut(data.plugins);
+        await db.files.bulkPut(data.files);
         await db.bots.bulkPut(data.bots);
         await db.botMessages.bulkPut(data.botMessages);
         await db.folders.bulkPut(data.folders);

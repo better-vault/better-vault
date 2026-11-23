@@ -12,6 +12,7 @@ import type {
   Note,
   Skill,
   Plugin,
+  VaultFile,
   CalendarEntry,
   Bot,
   BotMessage,
@@ -55,6 +56,7 @@ const columns: Record<DocTable, Record<string, string>> = {
   notes: { vault_id: "vaultId", updated_at: "updatedAt" },
   skills: { vault_id: "vaultId", name: "name" },
   plugins: {},
+  files: { vault_id: "vaultId" },
   bots: { sort: "order" },
   botMessages: { bot_id: "botId", created_at: "createdAt" },
   folders: { parent_id: "parentId", updated_at: "updatedAt" },
@@ -140,6 +142,11 @@ const migrations: string[] = [
   `
   CREATE TABLE plugins (id TEXT PRIMARY KEY, doc TEXT NOT NULL);
   `,
+  // 9: loose files in a vault; their bytes are blobs.
+  `
+  CREATE TABLE files (id TEXT PRIMARY KEY, vault_id TEXT NOT NULL, doc TEXT NOT NULL);
+  CREATE INDEX files_vault ON files (vault_id);
+  `,
 ];
 
 /** The schema version a database has once migrated. */
@@ -222,6 +229,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     "notes",
     "skills",
     "plugins",
+    "files",
     "bots",
     "botMessages",
     "folders",
@@ -316,6 +324,18 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
     putSkill: (skill) => {
       put("skills", skill);
     },
+    listFiles: () => docs<VaultFile>(db.prepare("SELECT doc FROM files").all()),
+    getFile: (id) => get<VaultFile>("files", id),
+    putFile: (file) => {
+      put("files", file);
+    },
+    deleteFile: (id) =>
+      transaction(db, () => {
+        const file = get<VaultFile>("files", id);
+        if (!file) return;
+        db.prepare("DELETE FROM blobs WHERE id = ?").run(file.blobId);
+        deleteWhere("files", "id", id);
+      }),
     listPlugins: () => docs<Plugin>(db.prepare("SELECT doc FROM plugins").all()),
     getPlugin: (id) => get<Plugin>("plugins", id),
     putPlugin: (plugin) => {
@@ -368,6 +388,11 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       transaction(db, () => {
         const folder = get<Folder>("folders", id);
         if (!folder) return;
+        for (const file of docs<VaultFile>(db.prepare("SELECT doc FROM files").all())) {
+          if (file.folderId !== id) continue;
+          const { folderId: _moved, ...rest } = file;
+          put("files", folder.parentId ? { ...rest, folderId: folder.parentId } : rest);
+        }
         const children = db.prepare("SELECT id FROM folders WHERE parent_id = ?").all(id);
         for (const { id: child } of children as { id: string }[])
           patch<Folder>("folders", child, { parentId: folder.parentId });
@@ -524,6 +549,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
       notes: docs(db.prepare("SELECT doc FROM notes").all()),
       skills: docs(db.prepare("SELECT doc FROM skills").all()),
       plugins: docs(db.prepare("SELECT doc FROM plugins").all()),
+      files: docs(db.prepare("SELECT doc FROM files").all()),
       bots: docs(db.prepare("SELECT doc FROM bots").all()),
       botMessages: docs(db.prepare("SELECT doc FROM botMessages").all()),
       folders: docs(db.prepare("SELECT doc FROM folders").all()),
@@ -541,6 +567,7 @@ export function createSqliteStore(db: SqliteDatabase): SyncBackend {
         for (const row of data.notes) put("notes", row);
         for (const row of data.skills) put("skills", row);
         for (const row of data.plugins) put("plugins", row);
+        for (const row of data.files) put("files", row);
         for (const row of data.bots) put("bots", row);
         for (const row of data.botMessages) put("botMessages", row);
         for (const row of data.folders) put("folders", row);

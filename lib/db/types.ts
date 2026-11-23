@@ -96,6 +96,27 @@ export interface Skill {
 }
 
 /**
+ * A file kept loose in a vault (a PDF the AI made, say), shown on the Vault
+ * page beside folders and notebooks. Its bytes live in the blobs table, under
+ * `blobId`; the row holds what the page lists.
+ */
+export interface VaultFile {
+  id: string;
+  vaultId: string;
+  /** The folder it is in; none for the vault's top level. */
+  folderId?: string;
+  /** The file's name, with its extension. */
+  name: string;
+  mime: string;
+  size: number;
+  blobId: string;
+  /** Who made it: "you", "ai" (the notebook chat), or a bot's id. */
+  createdBy: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
  * An installed plugin (lib/plugins/manifest.ts): its manifest, its files and
  * whether the user turned it on. Its panels may use only the permissions
  * granted when it was turned on.

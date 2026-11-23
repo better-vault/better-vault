@@ -73,6 +73,8 @@ export async function deleteVault(id: string) {
     await store().deleteNote(note.id);
   for (const skill of (await store().listSkills()).filter((item) => item.vaultId === id))
     await store().deleteSkill(skill.id);
+  for (const file of (await store().listFiles()).filter((item) => item.vaultId === id))
+    await store().deleteFile(file.id);
   await store().deleteVault(id);
   if (currentVaultId() === id) setCurrentVault(DEFAULT_VAULT);
 }

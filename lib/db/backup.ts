@@ -19,6 +19,7 @@ import type {
   Bot,
   BotMessage,
   Plugin,
+  VaultFile,
 } from "./types";
 
 /** A stored file in a backup: its bytes as base64, since backups are JSON. */
@@ -38,13 +39,14 @@ export interface Backup {
    * the default vault), format 4 (no calendar), format 5 (no notes or skills), format 6 (no bots)
    * and format 7 (no plugins). Plugins in a backup are checked again and come back turned off.
    */
-  format: 8;
+  format: 9;
   exportedAt: number;
   calendar: CalendarEntry[];
   vaults: Vault[];
   notes: Note[];
   skills: Skill[];
   plugins: Plugin[];
+  files: VaultFile[];
   bots: Bot[];
   botMessages: BotMessage[];
   folders: Folder[];
@@ -67,8 +69,21 @@ const backupSchema = z.object({
     z.literal(6),
     z.literal(7),
     z.literal(8),
+    z.literal(9),
   ]),
   plugins: z.array(z.object({ id: z.string() }).loose()).optional(),
+  files: z
+    .array(
+      z
+        .object({
+          id: z.string(),
+          vaultId: z.string(),
+          name: z.string(),
+          blobId: z.string(),
+        })
+        .loose(),
+    )
+    .optional(),
   bots: z.array(z.object({ id: z.string(), name: z.string() }).loose()).optional(),
   botMessages: z
     .array(z.object({ id: z.string(), botId: z.string(), createdAt: z.number() }).loose())
@@ -105,7 +120,7 @@ export async function exportBackup(): Promise<Backup> {
   const { blobs, ...content } = await store().exportAll();
   return {
     app: "better-vault",
-    format: 8,
+    format: 9,
     exportedAt: Date.now(),
     ...content,
     blobs: blobs.map((blob) => ({ ...blob, data: toBase64(blob.data) })),
@@ -133,6 +148,7 @@ export async function importBackup(raw: unknown): Promise<number> {
       notes: backup.notes,
       skills: backup.skills,
       plugins: backup.plugins,
+      files: backup.files,
       bots: backup.bots,
       botMessages: backup.botMessages,
       folders: backup.folders,
@@ -159,11 +175,13 @@ type OldBackup = Omit<
   | "notes"
   | "skills"
   | "plugins"
+  | "files"
   | "bots"
   | "botMessages"
 > & {
-  format: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  format: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   plugins?: unknown[];
+  files?: VaultFile[];
   bots?: Bot[];
   botMessages?: BotMessage[];
   notes?: Note[];
@@ -204,8 +222,9 @@ function upgradeBackup(backup: OldBackup): Backup {
   }
   return {
     ...backup,
-    format: 8,
+    format: 9,
     calendar: backup.calendar ?? [],
+    files: backup.files ?? [],
     plugins: (backup.plugins ?? []).flatMap(restorePlugin),
     bots: backup.bots ?? [],
     botMessages: backup.botMessages ?? [],

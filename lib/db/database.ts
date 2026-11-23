@@ -18,6 +18,7 @@ import type {
   Bot,
   BotMessage,
   Plugin,
+  VaultFile,
 } from "./types";
 
 export type * from "./types";
@@ -40,6 +41,7 @@ export class BetterVaultDatabase extends Dexie {
   notes!: EntityTable<Note, "id">;
   skills!: EntityTable<Skill, "id">;
   plugins!: EntityTable<Plugin, "id">;
+  files!: EntityTable<VaultFile, "id">;
   bots!: EntityTable<Bot, "id">;
   botMessages!: EntityTable<BotMessage, "id">;
   blobs!: EntityTable<StoredBlob, "id">;
@@ -151,6 +153,10 @@ export class BetterVaultDatabase extends Dexie {
     // Version 10: plugins.
     this.version(10).stores({
       plugins: "id",
+    });
+    // Version 11: loose files in a vault (their bytes are blobs).
+    this.version(11).stores({
+      files: "id, vaultId",
     });
   }
 }

@@ -91,6 +91,61 @@ export function registerNotebookTools(ctx: ToolContext) {
   );
 
   mcp.registerTool(
+    "list_files",
+    {
+      description:
+        "List the loose files kept in vaults (PDFs, Word documents, spreadsheets and more, often made by the AI).",
+      inputSchema: { vault: z.string().optional().describe("Vault name or id") },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ vault }) =>
+      guarded(() => {
+        log("list_files");
+        const vaultId = vault ? findVault(store, vault) : null;
+        return text(
+          store
+            .listFiles()
+            .filter((file) => !vaultId || file.vaultId === vaultId)
+            .map((file) => ({
+              id: file.id,
+              name: file.name,
+              type: file.mime,
+              size: file.size,
+              folderId: file.folderId ?? null,
+              vault: vaultName(store, file.vaultId),
+              createdBy: file.createdBy,
+            })),
+        );
+      }),
+  );
+
+  mcp.registerTool(
+    "read_file",
+    {
+      description:
+        "Read a vault file's text. Text formats (Markdown, CSV, JSON, HTML, plain text) come back as they are; other formats only report their name and size.",
+      inputSchema: { id: z.string().describe("The file's id, from list_files") },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ id }) =>
+      guarded(() => {
+        log("read_file");
+        const file = store.getFile(id);
+        if (!file) return failure("No file has that id.");
+        const blob = store.getBlob(file.blobId);
+        const textual = /^text\/|json|xml|csv|markdown/.test(file.mime);
+        return text({
+          name: file.name,
+          type: file.mime,
+          size: file.size,
+          ...(textual && blob
+            ? { text: new TextDecoder().decode(blob.data).slice(0, 200_000) }
+            : {}),
+        });
+      }),
+  );
+
+  mcp.registerTool(
     "list_notebooks",
     {
       description: "List notebooks with their sources. Optionally only one vault's.",

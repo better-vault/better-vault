@@ -27,6 +27,7 @@ import {
   updateProvider,
 } from "./settings";
 import { createNote, renameNote, saveNoteBody } from "./notes";
+import { deleteVaultFile, listFiles, loadVaultFile, saveVaultFile } from "./files";
 import { createSkill, deleteSkill, saveSkill } from "./skills";
 import { installPlugin, listPlugins, removePlugin, setPluginEnabled } from "./plugins";
 import { parsePluginBundle } from "@/lib/plugins/manifest";
@@ -178,6 +179,39 @@ describe.each(backends)("%s store", (name, create) => {
       expect(await loadBlob(loose)).not.toBeNull();
       await deleteNotebook(notebookId);
       expect(await store().count("blobs")).toBe(0);
+    });
+  });
+
+  describe("vault files", () => {
+    it("keeps loose files, moves them out of a deleted folder and round-trips backups", async () => {
+      const vaultId = await createVault({ name: "Work", color: "chart-2" });
+      const folderId = await createFolder("Reports", null, undefined, vaultId);
+      const file = await saveVaultFile(new Blob(["hello"], { type: "text/plain" }), {
+        name: "hello.txt",
+        vaultId,
+        folderId,
+        createdBy: "ai",
+      });
+      expect(file.size).toBe(5);
+      const bytes = await loadVaultFile(file);
+      expect(await bytes!.text()).toBe("hello");
+
+      await deleteFolder(folderId);
+      const [moved] = await listFiles();
+      expect(moved.folderId).toBeUndefined();
+
+      const backup = await exportBackup();
+      await deleteVaultFile(file.id);
+      expect(await store().count("files")).toBe(0);
+      expect(await store().count("blobs")).toBe(0);
+
+      await importBackup(JSON.parse(JSON.stringify(backup)));
+      const [restored] = await listFiles();
+      expect(restored.name).toBe("hello.txt");
+      expect(await (await loadVaultFile(restored))!.text()).toBe("hello");
+
+      await deleteVault(vaultId);
+      expect(await store().count("files")).toBe(0);
     });
   });
 
@@ -566,7 +600,7 @@ describe.each(backends)("%s store", (name, create) => {
       const notebookId = await createNotebook("Kept");
       await saveChat({ id: id("backup-c"), notebookId }, [userMessage("a", "Hello there")]);
       const backup = await exportBackup();
-      expect(backup.format).toBe(8);
+      expect(backup.format).toBe(9);
       await deleteAllData();
       await importBackup(JSON.parse(JSON.stringify(backup)));
       expect((await store().getConversation(id("backup-c")))?.title).toBe("Hello there");
