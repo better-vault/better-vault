@@ -1,5 +1,7 @@
 import {
+  Add01Icon,
   ArrowLeft01Icon,
+  Shield01Icon,
   Delete02Icon,
   Eraser01Icon,
   MoreHorizontalIcon,
@@ -11,20 +13,22 @@ import { getToolName } from "ai";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { ComposerModelPicker } from "@/components/chat/composer-model-picker";
+import { EffortMenu } from "@/components/chat/effort-menu";
 import { Markdown } from "@/components/chat/markdown";
+import { UsageRing } from "@/components/chat/usage-ring";
 import { isVisualPart, VisualPart } from "@/components/chat/visual/visual-part";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
 import { Message } from "@/components/panelui/message";
-import { ModelPicker } from "@/components/panelui/model-picker";
 import { Prompt, type PromptState } from "@/components/panelui/prompt";
-import { ProviderIcon } from "@/components/provider-icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { chatProviderIds, modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
+import { providers } from "@/lib/ai/catalog";
+import { accessSummary, botAccess } from "@/lib/bot/access";
 import { botWriteTools, isBotTool } from "@/lib/bot/tools";
 import type { ChatMessage } from "@/lib/chat/types";
 import { updateBot } from "@/lib/db/bots";
-import { activeModel, availableModels, updateSettings, useSettings } from "@/lib/db/settings";
+import { activeModel, availableModels, useSettings } from "@/lib/db/settings";
 import type { Bot } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
 import { BotAvatar } from "./bot-avatar";
@@ -76,6 +80,8 @@ export function BotThread({
           bot={bot}
           bots={bots}
           chat={chat.chat}
+          onEdit={onEdit}
+          onClear={onClear}
           onOpenSettings={onOpenSettings}
         />
       ) : (
@@ -168,11 +174,15 @@ function ThreadBody({
   bot,
   bots,
   chat: instance,
+  onEdit,
+  onClear,
   onOpenSettings,
 }: {
   bot: Bot;
   bots: Bot[];
   chat: Chat<ChatMessage>;
+  onEdit: () => void;
+  onClear: () => void;
   onOpenSettings: () => void;
 }) {
   const { t, i18n } = useTranslation("bot");
@@ -223,24 +233,6 @@ function ThreadBody({
         : null,
     );
   }, [messages, i18n.language]);
-
-  const modelItems = models.map((ref) => ({
-    value: modelKey(ref),
-    label: ref.modelId,
-    provider: ref.provider,
-    contextWindow: settings?.providers[ref.provider].contextTokens[ref.modelId],
-    tags: [
-      ...(providers[ref.provider].webSearch ? [tChat("modelTags.web")] : []),
-      ...(providers[ref.provider].local ? [tChat("modelTags.local")] : []),
-    ],
-  }));
-  const pickerProviders = chatProviderIds
-    .filter((id) => models.some((ref) => ref.provider === id))
-    .map((id) => ({
-      value: id,
-      label: providers[id].name,
-      icon: <ProviderIcon provider={id} size={20} />,
-    }));
 
   const errorText =
     error && !(error instanceof NoModelError) && error.message !== "no-model"
@@ -336,38 +328,43 @@ function ThreadBody({
               />
               <Prompt.Footer>
                 <Prompt.Tools>
-                  {modelItems.length > 0 && model && settings ? (
-                    <ModelPicker
-                      variant="rail"
-                      items={modelItems}
-                      providers={pickerProviders}
-                      value={modelKey(model)}
-                      label={tChat("model")}
-                      favorites={settings.favoriteModels}
-                      onFavoritesChange={(favorites) =>
-                        void updateSettings((saved) => void (saved.favoriteModels = favorites))
-                      }
-                      onValueChange={(key) => {
-                        const next = parseModelKey(key);
-                        if (next) void updateBot(bot.id, { model: next });
-                      }}
-                    >
-                      <ModelPicker.Trigger
-                        appearance="ghost"
-                        className="max-w-48"
-                        placeholder={tChat("chooseModel")}
-                      />
-                      <ModelPicker.Content
-                        side="top"
-                        placeholder={tChat("searchModels")}
-                        emptyText={tChat("noModels")}
-                      />
-                    </ModelPicker>
+                  <Prompt.Menu label={tChat("menu")} icon={<Icon icon={Add01Icon} />}>
+                    <Menu.Item onClick={onEdit}>
+                      <Icon icon={PencilEdit02Icon} />
+                      {t("menu.edit")}
+                    </Menu.Item>
+                    <Menu.Item disabled={messages.length === 0} onClick={onClear}>
+                      <Icon icon={Eraser01Icon} />
+                      {t("menu.clear")}
+                    </Menu.Item>
+                  </Prompt.Menu>
+                  {model && settings ? (
+                    <ComposerModelPicker
+                      settings={settings}
+                      model={model}
+                      onChange={(next) => void updateBot(bot.id, { model: next })}
+                    />
                   ) : null}
                 </Prompt.Tools>
                 <Prompt.Submit sendLabel={tChat("send")} stopLabel={tChat("stop")} />
               </Prompt.Footer>
             </Prompt.Field>
+            <Prompt.Context open={model !== null}>
+              <Prompt.ContextItem onSelect={onEdit}>
+                <Icon icon={Shield01Icon} size={14} />
+                <span className="max-w-64 truncate">
+                  {accessSummary(botAccess(bot))
+                    .map((key) => t(`access.summary.${key}` as "access.summary.notes"))
+                    .join(", ") || t("access.summary.nothing")}
+                </span>
+              </Prompt.ContextItem>
+              {model && settings ? (
+                <span className="ms-auto flex items-center gap-3">
+                  <EffortMenu settings={settings} provider={model.provider} />
+                  <UsageRing messages={messages} settings={settings} model={model} busy={busy} />
+                </span>
+              ) : null}
+            </Prompt.Context>
           </Prompt>
         </div>
       </div>

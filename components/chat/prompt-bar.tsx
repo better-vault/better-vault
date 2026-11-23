@@ -12,24 +12,17 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
-import { ProviderIcon } from "@/components/provider-icon";
 import { Menu } from "@/components/panelui/menu";
-import { ModelPicker } from "@/components/panelui/model-picker";
 import { Prompt, type PromptState } from "@/components/panelui/prompt";
 import { useWorkspace } from "@/components/workspace/workspace-context";
-import { chatProviderIds, modelKey, parseModelKey, providers } from "@/lib/ai/catalog";
+import { providers } from "@/lib/ai/catalog";
 import type { ChatMode } from "@/lib/chat/types";
-import {
-  activeModel,
-  availableModels,
-  updateSettings,
-  usesChatGPT,
-  useSettings,
-} from "@/lib/db/settings";
+import { activeModel, updateSettings, useSettings } from "@/lib/db/settings";
 import { useSources } from "@/lib/db/sources";
 import { useSkills } from "@/lib/db/skills";
 import { useNavigate } from "react-router";
 import { useChatSession } from "./chat-provider";
+import { ComposerModelPicker } from "./composer-model-picker";
 import { EffortMenu } from "./effort-menu";
 import { UsageRing } from "./usage-ring";
 
@@ -37,7 +30,6 @@ import { UsageRing } from "./usage-ring";
 export function PromptBar() {
   const { t } = useTranslation("chat");
   const { t: tCommon } = useTranslation();
-  const { t: tSettings } = useTranslation("settings");
   const { notebook, setTab, setSettingsOpen, setAddSourceOpen } = useWorkspace();
   const chat = useChatSession();
   const navigate = useNavigate();
@@ -54,39 +46,12 @@ export function PromptBar() {
   // Set while a send is refused, so the prompt does not clear what was written.
   const keepDraft = useRef(false);
 
-  const models = settings ? availableModels(settings) : [];
   const model = settings ? activeModel(settings) : null;
   const webAvailable = model ? providers[model.provider].webSearch : false;
   const mode: ChatMode = chat.mode === "web" && webAvailable ? "web" : "sources";
   const selected = sources?.filter((source) => source.selected).length ?? 0;
   const needsSource = mode === "sources" && selected === 0;
   const status: PromptState = chat.status === "ready" ? "idle" : chat.status;
-
-  const modelItems = models.map((ref) => {
-    const info = providers[ref.provider];
-    const listed = settings?.providers[ref.provider].contextTokens[ref.modelId];
-    return {
-      value: modelKey(ref),
-      label: ref.modelId,
-      provider: ref.provider,
-      note:
-        settings && usesChatGPT(settings, ref.provider)
-          ? tSettings("chatgpt.planLabel")
-          : undefined,
-      contextWindow: listed,
-      tags: [
-        ...(info.webSearch ? [t("modelTags.web")] : []),
-        ...(info.local ? [t("modelTags.local")] : []),
-      ],
-    };
-  });
-  const pickerProviders = chatProviderIds
-    .filter((id) => models.some((ref) => ref.provider === id))
-    .map((id) => ({
-      value: id,
-      label: providers[id].name,
-      icon: <ProviderIcon provider={id} size={20} />,
-    }));
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/80 to-transparent px-3 pt-8 pb-3 sm:px-4 sm:pb-4">
@@ -207,33 +172,12 @@ export function PromptBar() {
                     },
                   ]}
                 />
-                {modelItems.length > 0 && model && settings ? (
-                  <ModelPicker
-                    variant="rail"
-                    items={modelItems}
-                    providers={pickerProviders}
-                    value={modelKey(model)}
-                    label={t("model")}
-                    favorites={settings.favoriteModels}
-                    onFavoritesChange={(favorites) =>
-                      void updateSettings((saved) => void (saved.favoriteModels = favorites))
-                    }
-                    onValueChange={(key) => {
-                      const next = parseModelKey(key);
-                      if (next) void updateSettings((saved) => void (saved.model = next));
-                    }}
-                  >
-                    <ModelPicker.Trigger
-                      appearance="ghost"
-                      className="max-w-48"
-                      placeholder={t("chooseModel")}
-                    />
-                    <ModelPicker.Content
-                      side="top"
-                      placeholder={t("searchModels")}
-                      emptyText={t("noModels")}
-                    />
-                  </ModelPicker>
+                {model && settings ? (
+                  <ComposerModelPicker
+                    settings={settings}
+                    model={model}
+                    onChange={(next) => void updateSettings((saved) => void (saved.model = next))}
+                  />
                 ) : null}
               </Prompt.Tools>
               <Prompt.Submit sendLabel={t("send")} stopLabel={t("stop")} />
