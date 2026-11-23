@@ -5,6 +5,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Whiteboard **Ask AI**: from the board's menu, ask in one line or by voice, and the answer is written and drawn on the board by hand behind a pen: headings, text, lists, steps, tables, formulas, notes, flows and small drawings, in the hand font (Aref Ruqaa for Arabic). It ends as one group and one undo step.
+- Chat and bots can make files (PDF, Word, Excel, PowerPoint, CSV, Markdown, HTML, text and JSON) after your OK, and keep them in the vault.
+- Vaults hold loose files beside folders and notebooks, shown as a sheet of paper you can download, rename, move and delete. MCP gains `list_files` and `read_file`.
+- Notes: a Notion-style block handle. Hover a block for + (a block menu with a filter and previews) and ⋮⋮ (duplicate, copy, move, delete, turn into, and drag to move); `/` on an empty line opens the same menu.
+- Plugins can add Studio tools of their own, mods (CSS that reshapes the whole app), use your AI model (`use:ai`) and keep their own data. Settings → Plugins has Installed and Browse tabs with search, and a dialog for each plugin with a third-party warning; installing always confirms first, and uninstalling puts the app back as it was.
+- The plugin directory, [better-vault-plugins](https://github.com/better-vault/better-vault-plugins), with Piano coach, Terminal, Paper and Notebook stats. The app and better-vault.dev/plugins list a reviewed plugin as soon as it is merged.
+- Vault script (beta) in Settings → MCP: agents run one sandboxed script instead of many tool calls, which saves tokens.
+- Appearance: upload a font for the whole app, and remove it again; choose the character shown beside the chat's finished answers.
+- Bots: sixteen new accessories and six colours, in rows that scroll.
+- An accessibility statement (ACCESSIBILITY.md) and an issue template for barriers.
+
+### Changed
+
+- The Bot page's prompt has the chat's menu, model picker and context band.
+- Finished answers in the chat and in bot threads show a character beside them.
+- Notes tabs are folder-style, raised into the page.
+- The Vault page shows folders and notebooks as frosted folders with sheets that rise on hover and badges for the kinds of file inside.
+- Backups are format 9, with vault files. Older backups still import.
+
 ## [0.10.0] - 2026-11-19
 
 ### Added
