@@ -351,8 +351,17 @@ function LookRow<Item extends string>({
   return (
     <fieldset className="flex min-w-0 flex-col gap-2">
       <legend className="mb-2 text-sm font-medium">{t(`look.${slot}`)}</legend>
-      <ScrollArea horizontal className="-mx-1">
-        <div className="flex gap-1 px-1 pb-2.5" role="radiogroup" aria-label={t(`look.${slot}`)}>
+      <div
+        className="-mx-1 -my-3 [scrollbar-width:none] overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden"
+        style={{
+          maskImage: "linear-gradient(to right, black calc(100% - 2rem), transparent)",
+        }}
+      >
+        <div
+          className="flex w-max gap-1 px-1 py-3"
+          role="radiogroup"
+          aria-label={t(`look.${slot}`)}
+        >
           {items.map((item) => (
             <button
               key={item}
@@ -376,7 +385,7 @@ function LookRow<Item extends string>({
             </button>
           ))}
         </div>
-      </ScrollArea>
+      </div>
     </fieldset>
   );
 }
