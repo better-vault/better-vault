@@ -201,11 +201,13 @@ export function FolderArt({
         className="absolute inset-0"
         style={{
           ...pocketMask,
-          // The folder's own colour, as chosen when it was made: full strength at the top,
-          // a little deeper at the foot, with the same soft light as the grey folder.
+          // The folder's own colour, as chosen when it was made, as frosted glass: the
+          // sheets behind show through, blurred. Lighter at the top, deeper at the foot.
           background: tint
-            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, var(--${tint}) 88%, var(--vault-sheet)), color-mix(in oklch, var(--${tint}) 80%, var(--vault-shade)) 80%)`
+            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, color-mix(in oklch, var(--${tint}) 88%, var(--vault-sheet)) 74%, transparent), color-mix(in oklch, color-mix(in oklch, var(--${tint}) 80%, var(--vault-shade)) 84%, transparent) 80%)`
             : "radial-gradient(120% 85% at 45% 22%, var(--vault-front-from), var(--vault-front-to) 78%)",
+          backdropFilter: "blur(9px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(9px) saturate(1.5)",
         }}
       />
       {/* A thin light edge along the pocket's top, like the reference's sheen. */}
