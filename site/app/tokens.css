@@ -61,6 +61,12 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
+  /* Vault tiles (components/home/vault-tiles.tsx): paper, and a frosted folder. */
+  --vault-sheet: oklch(1 0 0);
+  --vault-sheet-ink: oklch(0.82 0 0);
+  --vault-back: oklch(0.145 0 0 / 0.05);
+  --vault-front-from: oklch(0.8 0 0 / 0.97);
+  --vault-front-to: oklch(0.62 0 0 / 0.98);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
@@ -92,6 +98,11 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
+  --vault-sheet: oklch(0.97 0 0);
+  --vault-sheet-ink: oklch(0.8 0 0);
+  --vault-back: oklch(1 0 0 / 0.06);
+  --vault-front-from: oklch(0.56 0 0 / 0.97);
+  --vault-front-to: oklch(0.29 0 0 / 0.985);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);

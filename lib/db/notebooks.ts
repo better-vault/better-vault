@@ -1,3 +1,4 @@
+import { sourceFormatOf, type SourceFormat } from "@/lib/sources/formats";
 import { generateId } from "ai";
 import { useStoreQuery } from "./live";
 import { store } from "./store";
@@ -54,6 +55,24 @@ export function useNotebookCounts(): Map<string, { sources: number }> | undefine
     async () => {
       const counts = await store().countSources();
       return new Map(Object.entries(counts).map(([id, sources]) => [id, { sources }]));
+    },
+    [],
+    ["sources"],
+  );
+}
+
+/** The format of each notebook's sources, for the badges on its tile. */
+export function useNotebookFormats(): Map<string, SourceFormat[]> | undefined {
+  return useStoreQuery(
+    async () => {
+      const formats = new Map<string, SourceFormat[]>();
+      for (const source of await store().listAllSources()) {
+        formats.set(source.notebookId, [
+          ...(formats.get(source.notebookId) ?? []),
+          sourceFormatOf(source),
+        ]);
+      }
+      return formats;
     },
     [],
     ["sources"],

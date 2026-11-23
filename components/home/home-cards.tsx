@@ -12,16 +12,23 @@ import { itemColor } from "@/lib/notebooks/colors";
 import { notebookIcon } from "@/lib/notebooks/icons";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { useFolderActions, useNotebookActions } from "./item-actions";
+import { fileKindOf, type FileKind } from "@/lib/files/kinds";
+import { downloadVaultFile } from "@/lib/db/files";
+import type { VaultFile } from "@/lib/db/types";
+import { sourceFormatIcons } from "@/components/sources/source-format";
+import { useFileActions, useFolderActions, useNotebookActions } from "./item-actions";
+import { FileArt, FolderArt, KindBadge, TileName } from "./vault-tiles";
 
 /** Drag types for moving notebooks and folders; files use the browser's own "Files". */
 export const NOTEBOOK_DRAG = "application/x-better-vault-notebook";
 export const FOLDER_DRAG = "application/x-better-vault-folder";
+export const FILE_DRAG = "application/x-better-vault-file";
 
 export const isFileDrag = (event: DragEvent) => event.dataTransfer.types.includes("Files");
 export const isCardDrag = (event: DragEvent) =>
   event.dataTransfer.types.includes(NOTEBOOK_DRAG) ||
-  event.dataTransfer.types.includes(FOLDER_DRAG);
+  event.dataTransfer.types.includes(FOLDER_DRAG) ||
+  event.dataTransfer.types.includes(FILE_DRAG);
 
 export type HomeView = "grid" | "list";
 
@@ -71,7 +78,7 @@ function ItemMark({
 }
 
 const tileClass =
-  "group relative flex flex-col items-center gap-2 rounded-2xl px-2 pt-4 pb-3 text-center outline-none transition-colors hover:bg-accent/60 focus-within:bg-accent/60";
+  "group relative flex flex-col items-center gap-2.5 rounded-2xl px-2 pt-4 pb-3 text-center outline-none";
 const rowClass =
   "group relative grid grid-cols-[minmax(0,1fr)_8rem_9rem_2rem] items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition-colors hover:bg-accent/60 focus-within:bg-accent/60";
 
@@ -79,6 +86,7 @@ export function FolderItem({
   folder,
   folders,
   size,
+  kinds,
   view,
   onOpen,
   onDropCards,
@@ -86,6 +94,8 @@ export function FolderItem({
   folder: Folder;
   folders: Folder[];
   size: number;
+  /** The kinds of file inside it, most common first. */
+  kinds: FileKind[];
   view: HomeView;
   onOpen: () => void;
   onDropCards: (event: DragEvent) => void;
@@ -135,12 +145,12 @@ export function FolderItem({
     <WithContextMenu actions={actions} dialogs={dialogs}>
       <div {...common} className={cn(tileClass, drop.over && "bg-accent ring-1 ring-primary")}>
         {open}
-        <span className="pointer-events-none">
-          <ItemMark icon={Folder01Icon} color={folder.color} size="lg" />
+        <span className="pointer-events-none w-full">
+          <FolderArt kinds={kinds} count={size} tint={folder.color} />
         </span>
         <span className="pointer-events-none w-full min-w-0">
-          <span className="block truncate text-sm font-medium">{folder.name}</span>
-          <span className="block truncate text-xs text-muted-foreground">{meta}</span>
+          <TileName name={folder.name} />
+          <span className="block truncate text-sm text-muted-foreground">{meta}</span>
         </span>
         <span className="absolute end-1.5 top-1.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 has-[[data-popup-open]]:opacity-100">
           {menu}
@@ -155,6 +165,7 @@ export function NotebookItem({
   folders,
   vaults,
   sources,
+  kinds,
   view,
 }: {
   notebook: Notebook;
@@ -162,6 +173,8 @@ export function NotebookItem({
   /** The vaults it can be moved to. */
   vaults: Vault[];
   sources: number;
+  /** The kinds of its sources, most common first. */
+  kinds: FileKind[];
   view: HomeView;
 }) {
   const { t, i18n } = useTranslation("home");
@@ -218,16 +231,21 @@ export function NotebookItem({
     <WithContextMenu actions={actions} dialogs={dialogs}>
       <div {...common} className={tileClass}>
         {open}
-        <span className="pointer-events-none">
-          <ItemMark icon={notebookIcon(notebook.icon)} color={notebook.color} size="lg" />
+        <span className="pointer-events-none w-full">
+          <FolderArt
+            kinds={kinds}
+            count={sources}
+            tint={notebook.color}
+            mark={notebookIcon(notebook.icon)}
+          />
         </span>
         <span className="pointer-events-none w-full min-w-0">
-          <span className="block truncate text-sm font-medium">
+          <span className="flex items-center justify-center">
             {pin}
-            {notebook.title}
+            <TileName name={notebook.title} />
           </span>
           <span
-            className="block truncate text-xs text-muted-foreground"
+            className="block truncate text-sm text-muted-foreground"
             title={t("updated", { time: formatRelativeTime(notebook.updatedAt, i18n.language) })}
           >
             {meta}
@@ -239,6 +257,97 @@ export function NotebookItem({
       </div>
     </WithContextMenu>
   );
+}
+
+/** A loose file in the vault: a sheet of paper; opening it downloads it. */
+export function FileItem({
+  file,
+  folders,
+  view,
+}: {
+  file: VaultFile;
+  folders: Folder[];
+  view: HomeView;
+}) {
+  const { t, i18n } = useTranslation("home");
+  const { t: tSources } = useTranslation("sources");
+  const kind = fileKindOf(file.name, file.mime);
+  const kindLabel =
+    kind in sourceFormatIcons
+      ? tSources(`formats.${kind}` as "formats.pdf")
+      : t(`files.kinds.${kind}` as "files.kinds.other");
+  const meta = t("files.size", { kind: kindLabel, size: formatBytes(file.size, i18n.language) });
+  const { actions, dialogs, onKeyDown } = useFileActions(file, folders);
+  const menu = <CardMenu label={t("files.menu")} actions={actions} />;
+  const common = {
+    onKeyDown,
+    draggable: true,
+    onDragStart: (event: DragEvent) => {
+      event.dataTransfer.setData(FILE_DRAG, file.id);
+      event.dataTransfer.effectAllowed = "move";
+    },
+  };
+  const open = (
+    <button
+      type="button"
+      onClick={() => void downloadVaultFile(file)}
+      aria-label={file.name}
+      className="absolute inset-0 cursor-pointer rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    />
+  );
+  const title = file.name.replace(/\.[^.]+$/, "");
+
+  if (view === "list")
+    return (
+      <WithContextMenu actions={actions} dialogs={dialogs}>
+        <div {...common} className={rowClass}>
+          {open}
+          <span className="pointer-events-none flex min-w-0 items-center gap-3">
+            <KindBadge kind={kind} className="size-7" />
+            <span className="truncate font-medium">{file.name}</span>
+          </span>
+          <span className="pointer-events-none truncate text-muted-foreground">{meta}</span>
+          <span className="pointer-events-none truncate text-muted-foreground">
+            {formatRelativeTime(file.updatedAt, i18n.language)}
+          </span>
+          {menu}
+        </div>
+      </WithContextMenu>
+    );
+
+  return (
+    <WithContextMenu actions={actions} dialogs={dialogs}>
+      <div {...common} className={tileClass}>
+        {open}
+        <span className="pointer-events-none w-full">
+          <FileArt kind={kind} />
+        </span>
+        <span className="pointer-events-none w-full min-w-0">
+          <TileName name={title} />
+          <span className="block truncate text-sm text-muted-foreground">{meta}</span>
+        </span>
+        <span className="absolute end-1.5 top-1.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 has-[[data-popup-open]]:opacity-100">
+          {menu}
+        </span>
+      </div>
+    </WithContextMenu>
+  );
+}
+
+function formatBytes(bytes: number, language: string) {
+  const units = ["byte", "kilobyte", "megabyte", "gigabyte"] as const;
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1000 && unit < units.length - 1) {
+    value /= 1000;
+    unit += 1;
+  }
+  return new Intl.NumberFormat(language, {
+    style: "unit",
+    unit: units[unit],
+    unitDisplay: "short",
+    maximumFractionDigits: value < 10 && unit > 0 ? 1 : 0,
+  }).format(value);
 }
 
 function MenuButton({ label }: { label: string }) {

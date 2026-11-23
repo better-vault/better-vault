@@ -52,6 +52,24 @@
     "deleteConfirm": "Delete folder",
     "newHint": "to group notebooks"
   },
+  "files": {
+    "menu": "File options",
+    "download": "Download",
+    "rename": "Rename",
+    "renameTitle": "Rename file",
+    "name": "Name",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteBody": "The file is removed from this vault. This can't be undone.",
+    "deleteConfirm": "Delete file",
+    "size": "{{kind}} · {{size}}",
+    "kinds": {
+      "image": "Picture",
+      "audio": "Sound",
+      "video": "Video",
+      "archive": "Archive",
+      "other": "File"
+    }
+  },
   "move": {
     "action": "Move to…",
     "title": "Move “{{name}}”",

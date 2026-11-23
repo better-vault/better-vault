@@ -1,4 +1,5 @@
 import {
+  Download01Icon,
   ArrowDataTransferHorizontalIcon,
   Delete02Icon,
   FolderOpenIcon,
@@ -16,7 +17,9 @@ import type { MenuAction } from "@/components/common/action-menu";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { RenameDialog } from "@/components/common/rename-dialog";
 import type { Folder, Notebook, Vault } from "@/lib/db/database";
+import { deleteVaultFile, downloadVaultFile, moveVaultFile, renameVaultFile } from "@/lib/db/files";
 import { deleteFolder, moveFolder, updateFolder } from "@/lib/db/folders";
+import type { VaultFile } from "@/lib/db/types";
 import { deleteNotebook, pinNotebook, renameNotebook, updateNotebook } from "@/lib/db/notebooks";
 import { vaultOf } from "@/lib/db/vaults";
 import { desktopBridge } from "@/lib/desktop/bridge";
@@ -287,6 +290,89 @@ export function useFolderActions(
     dialogs,
     onKeyDown: keyHandler(
       () => setEditing(true),
+      () => setDeleting(true),
+    ),
+  };
+}
+
+/** The actions of a loose file in a vault: download, rename, move and delete. */
+export function useFileActions(file: VaultFile, folders: Folder[]) {
+  const { t } = useTranslation("home");
+  const { t: tCommon } = useTranslation();
+  const [renaming, setRenaming] = useState(false);
+  const [moving, setMoving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const actions: MenuAction[] = [
+    {
+      kind: "item",
+      id: "download",
+      label: t("files.download"),
+      icon: Download01Icon,
+      onSelect: () => void downloadVaultFile(file),
+    },
+    { kind: "separator", id: "s1" },
+    {
+      kind: "item",
+      id: "rename",
+      label: t("files.rename"),
+      icon: PencilEdit01Icon,
+      shortcut: renameKeys,
+      onSelect: () => setRenaming(true),
+    },
+    {
+      kind: "item",
+      id: "move",
+      label: t("move.action"),
+      icon: FolderTransferIcon,
+      onSelect: () => setMoving(true),
+    },
+    { kind: "separator", id: "s2" },
+    {
+      kind: "item",
+      id: "delete",
+      label: tCommon("actions.delete"),
+      icon: Delete02Icon,
+      shortcut: deleteKeys(),
+      destructive: true,
+      onSelect: () => setDeleting(true),
+    },
+  ];
+
+  const dialogs = (
+    <>
+      <RenameDialog
+        open={renaming}
+        onOpenChange={setRenaming}
+        title={t("files.renameTitle")}
+        label={t("files.name")}
+        value={file.name}
+        onSave={(name) => renameVaultFile(file.id, name)}
+      />
+      <MoveDialog
+        open={moving}
+        onOpenChange={setMoving}
+        name={file.name}
+        folders={folders}
+        current={file.folderId ?? null}
+        onMove={(target) => moveVaultFile(file.id, target ?? undefined)}
+      />
+      <ConfirmDialog
+        open={deleting}
+        onOpenChange={setDeleting}
+        title={t("files.deleteTitle", { name: file.name })}
+        body={t("files.deleteBody")}
+        confirmLabel={t("files.deleteConfirm")}
+        onConfirm={() => deleteVaultFile(file.id)}
+      />
+    </>
+  );
+
+  return {
+    actions,
+    dialogs,
+    onKeyDown: keyHandler(
+      () => setRenaming(true),
       () => setDeleting(true),
     ),
   };

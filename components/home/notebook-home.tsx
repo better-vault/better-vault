@@ -38,8 +38,11 @@ import {
   createNotebook,
   updateNotebook,
   useNotebookCounts,
+  useNotebookFormats,
   useNotebooks,
 } from "@/lib/db/notebooks";
+import { moveVaultFile, useFiles } from "@/lib/db/files";
+import { fileKindOf, topKinds, type FileKind } from "@/lib/files/kinds";
 import {
   DEFAULT_VAULT,
   setCurrentVault,
@@ -55,7 +58,9 @@ import { ACCEPTED_FILES, IngestError, ingestFile } from "@/lib/sources/ingest";
 import { cn } from "@/lib/utils";
 import { FolderDialog } from "./folder-dialogs";
 import {
+  FILE_DRAG,
   FOLDER_DRAG,
+  FileItem,
   FolderItem,
   ListHeader,
   NOTEBOOK_DRAG,
@@ -105,6 +110,8 @@ export function NotebookHome() {
   const allNotebooks = useNotebooks();
   const everyFolder = useFolders();
   const counts = useNotebookCounts();
+  const formats = useNotebookFormats();
+  const allFiles = useFiles();
   const vaults = useVaults();
   const vaultId = useCurrentVault(vaults);
   const vault = vaults?.find((each) => each.id === vaultId);
@@ -248,20 +255,56 @@ export function NotebookHome() {
           (notebook) => notebook.title,
         )
     : undefined;
+  const files = useMemo(
+    () => (allFiles ?? []).filter((file) => file.vaultId === vaultId),
+    [allFiles, vaultId],
+  );
+  const shownFiles =
+    section === "recents" ? [] : files.filter((file) => (file.folderId ?? null) === current);
   const empty =
-    shownNotebooks !== undefined && shownNotebooks.length === 0 && shownFolders.length === 0;
+    shownNotebooks !== undefined &&
+    shownNotebooks.length === 0 &&
+    shownFolders.length === 0 &&
+    shownFiles.length === 0;
   const pinned = (notebooks ?? []).filter((notebook) => notebook.pinned);
 
   /** What a folder holds, for its tile. */
   const sizeOf = (id: string) =>
     folders.filter((folder) => folder.parentId === id).length +
-    (notebooks ?? []).filter((notebook) => notebook.folderId === id).length;
+    (notebooks ?? []).filter((notebook) => notebook.folderId === id).length +
+    files.filter((file) => file.folderId === id).length;
+
+  /** The kinds of file a notebook holds, most common first. */
+  const notebookKinds = (id: string): FileKind[] => topKinds(formats?.get(id) ?? []);
+
+  /** The kinds of file anywhere inside a folder: its notebooks' sources and its files. */
+  const folderKinds = (id: string): FileKind[] => {
+    const inside = new Set([id]);
+    for (let grew = true; grew;) {
+      grew = false;
+      for (const folder of folders)
+        if (folder.parentId && inside.has(folder.parentId) && !inside.has(folder.id)) {
+          inside.add(folder.id);
+          grew = true;
+        }
+    }
+    return topKinds([
+      ...(notebooks ?? [])
+        .filter((notebook) => notebook.folderId && inside.has(notebook.folderId))
+        .flatMap((notebook) => formats?.get(notebook.id) ?? []),
+      ...files
+        .filter((file) => file.folderId && inside.has(file.folderId))
+        .map((file) => fileKindOf(file.name, file.mime)),
+    ]);
+  };
 
   async function dropCards(event: DragEvent, target: string | null) {
     const notebookId = event.dataTransfer.getData(NOTEBOOK_DRAG);
     const folderId = event.dataTransfer.getData(FOLDER_DRAG);
     if (notebookId) await updateNotebook(notebookId, { folderId: target });
     if (folderId && folderId !== target) await moveFolder(folderId, target, folders);
+    const fileId = event.dataTransfer.getData(FILE_DRAG);
+    if (fileId) await moveVaultFile(fileId, target ?? undefined);
   }
 
   function describe(error: unknown): string {
@@ -503,13 +546,14 @@ export function NotebookHome() {
                       </div>
                     </div>
                   ) : view === "grid" ? (
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-x-2 gap-y-1">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-x-4 gap-y-3">
                       {shownFolders.map((folder) => (
                         <FolderItem
                           key={folder.id}
                           folder={folder}
                           folders={folders}
                           size={sizeOf(folder.id)}
+                          kinds={folderKinds(folder.id)}
                           view="grid"
                           onOpen={() => openFolder(folder.id)}
                           onDropCards={(event) => void dropCards(event, folder.id)}
@@ -522,8 +566,12 @@ export function NotebookHome() {
                           folders={folders}
                           vaults={vaults ?? []}
                           sources={counts?.get(notebook.id)?.sources ?? 0}
+                          kinds={notebookKinds(notebook.id)}
                           view="grid"
                         />
+                      ))}
+                      {shownFiles.map((file) => (
+                        <FileItem key={file.id} file={file} folders={folders} view="grid" />
                       ))}
                     </div>
                   ) : (
@@ -540,6 +588,7 @@ export function NotebookHome() {
                           folder={folder}
                           folders={folders}
                           size={sizeOf(folder.id)}
+                          kinds={folderKinds(folder.id)}
                           view="list"
                           onOpen={() => openFolder(folder.id)}
                           onDropCards={(event) => void dropCards(event, folder.id)}
@@ -552,8 +601,12 @@ export function NotebookHome() {
                           folders={folders}
                           vaults={vaults ?? []}
                           sources={counts?.get(notebook.id)?.sources ?? 0}
+                          kinds={notebookKinds(notebook.id)}
                           view="list"
                         />
+                      ))}
+                      {shownFiles.map((file) => (
+                        <FileItem key={file.id} file={file} folders={folders} view="list" />
                       ))}
                     </div>
                   )}
