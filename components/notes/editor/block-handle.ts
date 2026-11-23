@@ -78,6 +78,8 @@ class BlockHandle {
   indicator: HTMLElement;
   block: Block | null = null;
   dragging = false;
+  /** Where the pointer last was, to put the handle back after the page re-lays out. */
+  last: { x: number; y: number } | null = null;
 
   constructor(
     readonly view: EditorView,
@@ -114,17 +116,26 @@ class BlockHandle {
   onMove = (event: MouseEvent) => {
     if (this.dragging) return;
     if (this.dom.contains(event.target as Node)) return;
+    this.last = { x: event.clientX, y: event.clientY };
+    this.place();
+  };
+
+  /** Shows the handle for the block under the last pointer position. */
+  place() {
+    if (!this.last) return;
     const content = this.view.contentDOM.getBoundingClientRect();
-    const pos = this.view.posAtCoords({
-      x: Math.min(Math.max(event.clientX, content.left + 60), content.right - 10),
-      y: event.clientY,
-    });
+    // Over a widget (a table, a callout), posAtCoords may find nothing: try the line's start.
+    const at = (x: number) =>
+      this.view.posAtCoords({ x, y: this.last!.y }) ??
+      this.view.posAtCoords({ x: content.left + 2, y: this.last!.y });
+    const pos = at(Math.min(Math.max(this.last.x, content.left + 60), content.right - 10));
     if (pos === null) return this.hide();
     this.show(blockAt(this.view.state, pos));
-  };
+  }
 
   onLeave = (event: MouseEvent) => {
     if (this.dragging || this.dom.contains(event.relatedTarget as Node)) return;
+    this.last = null;
     this.hide();
   };
 
@@ -134,7 +145,8 @@ class BlockHandle {
     const line = this.view.lineBlockAt(block.from);
     const firstLine = Math.min(line.height, this.lineHeight(block.from));
     // Beside the text in the margin; on a narrow pane, as far out as it fits.
-    const left = Math.max(2, this.contentStart() - HANDLE_WIDTH - 6);
+    const width = this.dom.offsetWidth || HANDLE_WIDTH;
+    const left = Math.max(2, this.contentStart() - width - 6);
     this.dom.style.transform = `translate(${left}px, ${top + Math.max(0, (firstLine - 24) / 2)}px)`;
     this.dom.dataset.visible = "";
   }
@@ -219,7 +231,14 @@ class BlockHandle {
   }
 
   update(update: ViewUpdate) {
-    if (update.docChanged || update.geometryChanged) this.hide();
+    if (this.dragging) return;
+    if (update.docChanged) {
+      this.hide();
+      return;
+    }
+    // The page re-laid out (live preview drew a line differently): put the handle back.
+    if (update.geometryChanged || update.viewportChanged)
+      this.view.requestMeasure({ read: () => null, write: () => this.place() });
   }
 
   destroy() {
@@ -240,6 +259,7 @@ export function blockHandle(options: BlockHandleOptions): Extension {
       ".cm-scroller": { position: "relative" },
       ".cm-block-handle": {
         position: "absolute",
+        width: "max-content",
         top: "0",
         left: "0",
         zIndex: "5",
@@ -252,6 +272,14 @@ export function blockHandle(options: BlockHandleOptions): Extension {
       },
       ".cm-block-handle[data-visible]": { opacity: "1", pointerEvents: "auto" },
       ".cm-block-handle button": {
+        // Reset the browser's own button box (macOS adds padding and a border).
+        appearance: "none",
+        boxSizing: "border-box",
+        padding: "0",
+        margin: "0",
+        flex: "none",
+        font: "inherit",
+        lineHeight: "0",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

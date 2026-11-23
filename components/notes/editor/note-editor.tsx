@@ -39,6 +39,7 @@ import { BlockMenu, type MenuEntry } from "./block-menu";
 import { blockPreview } from "./block-previews";
 import { notesKeymap } from "./keymap";
 import { livePreview } from "./live-preview";
+import { richBlocks } from "./rich-blocks";
 import { notesHighlight, notesTheme } from "./theme";
 
 export interface NoteEditorHandle {
@@ -110,6 +111,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(function
           icons: false,
         }),
         livePreview({ resolves: (link) => latest.current.resolves(link), open }),
+        richBlocks(),
         blockHandle({
           labels: { add: t("blocks.add"), drag: t("blocks.drag") },
           onAdd: (editor, block) => {
