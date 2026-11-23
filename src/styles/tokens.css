@@ -8,7 +8,8 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   /* The whiteboard's hand-drawn font; other scripts fall back to the sans font. */
-  --font-hand: "Excalifont", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-hand:
+    "Excalifont", "Aref Ruqaa", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-sans);
 
   --color-background: var(--background);

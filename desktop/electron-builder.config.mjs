@@ -37,6 +37,10 @@ const config = {
     ],
     hardenedRuntime: true,
     gatekeeperAssess: false,
+    // macOS asks before the microphone is used, with this reason.
+    extendInfo: {
+      NSMicrophoneUsageDescription: "better-vault listens when you ask the whiteboard by voice.",
+    },
     entitlements: "build/entitlements.mac.plist",
     entitlementsInherit: "build/entitlements.mac.plist",
     notarize,

@@ -630,6 +630,22 @@
       "navigate": "Move around",
       "shapes": "Shapes",
       "draw": "Draw and write"
+    },
+    "ai": {
+      "menu": "Ask AI",
+      "placeholder": "Ask anything, and watch it explained on the board",
+      "thinking": "Thinking…",
+      "writing": "Writing on the board…",
+      "send": "Ask",
+      "stop": "Stop",
+      "close": "Close Ask AI",
+      "listening": "Listening…",
+      "cancelRecording": "Cancel recording",
+      "finishRecording": "Use recording",
+      "voiceError": "Couldn't hear that: {{error}}",
+      "error": "Couldn't answer: {{error}}",
+      "setUp": "Set up a chat model to ask the board.",
+      "setUpAction": "Set up"
     }
   },
   "audio-overview": {

@@ -1,4 +1,5 @@
 import {
+  SparklesIcon,
   Delete02Icon,
   Download04Icon,
   EraserIcon,
@@ -97,7 +98,16 @@ export function ViewControls({ board, size }: { board: BoardModel; size: () => S
  * The board menu, bottom end: downloads, background, rename, unlock, the
  * shortcuts, clearing and deleting the board.
  */
-export function BoardMenu({ board, chrome }: { board: BoardModel; chrome?: OutputChrome }) {
+export function BoardMenu({
+  board,
+  chrome,
+  onAskAi,
+}: {
+  board: BoardModel;
+  chrome?: OutputChrome;
+  /** Opens the "Ask AI" field at the board's foot. */
+  onAskAi?: () => void;
+}) {
   const { t } = useTranslation("studio");
   const [shortcuts, setShortcuts] = useState(false);
   const locked = board.elements.some((element) => element.locked);
@@ -122,6 +132,15 @@ export function BoardMenu({ board, chrome }: { board: BoardModel; chrome?: Outpu
           />
         </Menu.Trigger>
         <Menu.Content side="top" align="end" className="min-w-52">
+          {onAskAi ? (
+            <>
+              <Menu.Item onClick={onAskAi}>
+                <Icon icon={SparklesIcon} />
+                {t("whiteboard.ai.menu")}
+              </Menu.Item>
+              <Menu.Separator />
+            </>
+          ) : null}
           {chrome && chrome.downloads.length > 0 ? (
             <Menu.Sub>
               <Menu.SubTrigger disabled={chrome.busy}>

@@ -284,6 +284,15 @@ html[data-window-controls]
   }
 }
 
+/* Aref Ruqaa (SIL Open Font License 1.1, see public/fonts/aref-ruqaa/OFL.txt): the hand font for
+   Arabic script, which Excalifont doesn't draw, so the whiteboard writes Arabic by hand too. */
+@font-face {
+  font-family: "Aref Ruqaa";
+  src: url("/fonts/aref-ruqaa/aref-ruqaa-arabic.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
 /* Excalifont (SIL Open Font License 1.1, see public/fonts/excalifont/OFL.txt): the whiteboard's hand-drawn font. */
 @font-face {
   font-family: "Excalifont";

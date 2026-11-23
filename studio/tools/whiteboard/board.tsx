@@ -32,7 +32,9 @@ import { TextEditor } from "./text-editor";
 import { Toolbar } from "./toolbar";
 import { toolForKey, type BoardTool } from "./tools-meta";
 import { useBoard } from "./use-board";
-import { toWorld } from "./viewport";
+import { toScreen, toWorld } from "./viewport";
+import { AskAiBar, PenCursor } from "./ai/ask-ai-bar";
+import { useAskAi, voiceProvider } from "./ai/use-ask-ai";
 
 const SAVE_DELAY = 800;
 
@@ -65,6 +67,12 @@ export function Board({
   const [panning, setPanning] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const size = useCallback(() => sizeRef.current, []);
+  const [asking, setAsking] = useState(false);
+  const ai = useAskAi(board, size);
+  useEffect(() => {
+    if (ai.error) toast.error(t("whiteboard.ai.error", { error: ai.error }));
+  }, [ai.error, t]);
+  const pen = ai.pen && board.view ? toScreen(ai.pen, board.view) : null;
 
   // ---- Size, and a first view that shows everything.
   const { setView } = board;
@@ -423,8 +431,26 @@ export function Board({
         <ViewControls board={board} size={size} />
       </div>
       <div className="pointer-events-none absolute end-3 bottom-3">
-        <BoardMenu board={board} chrome={chrome} />
+        <BoardMenu board={board} chrome={chrome} onAskAi={() => setAsking(true)} />
       </div>
+
+      <PenCursor at={pen} />
+      {asking ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center max-sm:bottom-16">
+          <AskAiBar
+            status={ai.status}
+            ready={ai.ready}
+            voice={voiceProvider(ai.settings)}
+            onAsk={(question) => void ai.ask(question)}
+            onStop={ai.stop}
+            onClose={() => {
+              ai.stop();
+              setAsking(false);
+              root.current?.focus({ preventScroll: true });
+            }}
+          />
+        </div>
+      ) : null}
 
       <input
         ref={fileInput}
