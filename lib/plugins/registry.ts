@@ -12,6 +12,13 @@ export const REGISTRY_RAW = `https://raw.githubusercontent.com/${REGISTRY_REPO}/
 export const REGISTRY_URL = `${REGISTRY_RAW}registry.json`;
 export const REGISTRY_WEB = `https://github.com/${REGISTRY_REPO}`;
 
+/** A picture in the directory repo: a plugin's cover or one of its screenshots. */
+export const PICTURE_PATH =
+  /^plugins\/[a-z0-9-]+\/(?:cover|screenshots\/[\w.-]+)\.(?:png|jpe?g|webp)$/;
+
+/** A directory picture as the app loads it: through its own API, so the page's CSP is unchanged. */
+export const pictureUrl = (path: string) => `/api/plugins/picture?path=${encodeURIComponent(path)}`;
+
 export const registryEntrySchema = z.object({
   id: z.string().regex(PLUGIN_ID),
   name: z.string().max(60),
@@ -34,8 +41,10 @@ export const registryEntrySchema = z.object({
   bundle: z.string().regex(/^dist\/[a-z0-9-]+-[\w.-]+\.bvplugin\.json$/),
   sha256: z.string().regex(/^[0-9a-f]{64}$/),
   size: z.number().int().nonnegative(),
-  /** Pictures in the repo (paths), shown in the details. */
-  screenshots: z.array(z.string().max(200)).max(6).default([]),
+  /** The card's header picture, a path in the repo. */
+  cover: z.string().regex(PICTURE_PATH).optional(),
+  /** Pictures of the plugin at work (paths in the repo), shown in its dialog. */
+  screenshots: z.array(z.string().regex(PICTURE_PATH)).max(6).default([]),
   updatedAt: z.string().max(40).default(""),
 });
 export type RegistryEntry = z.infer<typeof registryEntrySchema>;

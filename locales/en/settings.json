@@ -602,7 +602,8 @@
       "on": "On",
       "off": "Off",
       "uninstallTitle": "Uninstall {{name}}?",
-      "uninstallBody": "Its tools, panels, mods and theme are removed with everything it saved, and the app goes back to how it was."
+      "uninstallBody": "Its tools, panels, mods and theme are removed with everything it saved, and the app goes back to how it was.",
+      "pictures": "What it looks like"
     },
     "tabs": {
       "installed": "Installed",
@@ -618,6 +619,13 @@
     "retry": "Try again",
     "installedTag": "Installed",
     "updateTag": "Update",
-    "request": "Missing something? Request a plugin on GitHub."
+    "request": "Missing something? Request a plugin on GitHub.",
+    "card": {
+      "by": "by {{author}}",
+      "tool": "Studio tool",
+      "panel": "Panel",
+      "mod": "Mod",
+      "theme": "Theme"
+    }
   }
 }

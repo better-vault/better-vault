@@ -17,10 +17,11 @@ import { Switch } from "@/components/panelui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { removePlugin, setPluginEnabled, usePlugins } from "@/lib/db/plugins";
 import type { Plugin } from "@/lib/db/types";
-import { fetchBundle, installConfirmed } from "@/lib/plugins/directory";
+import { fetchBundle, installConfirmed, useRegistry } from "@/lib/plugins/directory";
 import type { PluginBundle, PluginManifest, PluginPermission } from "@/lib/plugins/manifest";
-import { REGISTRY_WEB, type RegistryEntry } from "@/lib/plugins/registry";
+import { pictureUrl, REGISTRY_WEB, type RegistryEntry } from "@/lib/plugins/registry";
 import { cn } from "@/lib/utils";
+import { PluginCover } from "./plugin-card";
 import { pluginIconSet } from "./plugin-icons";
 
 /**
@@ -84,6 +85,9 @@ function PluginDialogContent({ target }: { target: Target }) {
         ? target.id
         : target.bundle.manifest.id;
   const installed = plugins?.find((plugin) => plugin.id === id);
+  const { registry } = useRegistry();
+  const listed =
+    target.kind === "registry" ? target.entry : registry?.plugins.find((entry) => entry.id === id);
   const [bundle, setBundle] = useState<PluginBundle | null>(
     target.kind === "file" ? target.bundle : null,
   );
@@ -140,24 +144,26 @@ function PluginDialogContent({ target }: { target: Target }) {
     <Dialog.Content size="md" closeLabel={tCommon("actions.close")}>
       <Dialog.Header
         title={
-          <span className="flex items-center gap-3">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-muted">
-              <Icon icon={pluginIconSet[manifest.icon]} size={20} />
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate">{manifest.name}</span>
-              <span className="block truncate text-xs font-normal text-muted-foreground">
-                {t("plugins.dialog.meta", {
-                  version: manifest.version,
-                  author: manifest.author || t("plugins.dialog.unknownAuthor"),
-                })}
-              </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate">{manifest.name}</span>
+            <span className="truncate text-xs font-normal text-muted-foreground">
+              {t("plugins.dialog.meta", {
+                version: manifest.version,
+                author: manifest.author || t("plugins.dialog.unknownAuthor"),
+              })}
             </span>
           </span>
         }
       />
       <Dialog.Body>
         <div className="flex flex-col gap-4">
+          <div className="relative">
+            <PluginCover cover={listed?.cover} icon={manifest.icon} className="rounded-2xl" />
+            <span className="absolute start-4 -bottom-5 flex size-14 items-center justify-center rounded-full bg-muted ring-4 ring-popover">
+              <Icon icon={pluginIconSet[manifest.icon]} size={24} />
+            </span>
+          </div>
+          <div className="h-2" />
           <Alert tone={target.kind === "file" ? "destructive" : "warning"} variant="plain">
             <Alert.Icon>
               <Icon icon={Alert02Icon} />
@@ -187,6 +193,24 @@ function PluginDialogContent({ target }: { target: Target }) {
                     </span>
                   ))}
                 </div>
+              ) : null}
+              {listed?.screenshots.length ? (
+                <section>
+                  <h3 className="mb-1.5 text-xs font-medium text-muted-foreground">
+                    {t("plugins.dialog.pictures")}
+                  </h3>
+                  <div className="-mx-1 flex snap-x [scrollbar-width:thin] gap-2 overflow-x-auto px-1 pb-1">
+                    {listed.screenshots.map((path) => (
+                      <img
+                        key={path}
+                        src={pictureUrl(path)}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-[16/10] w-[85%] shrink-0 snap-start rounded-xl object-cover object-top ring-1 ring-border"
+                      />
+                    ))}
+                  </div>
+                </section>
               ) : null}
               {adds.length ? (
                 <section>

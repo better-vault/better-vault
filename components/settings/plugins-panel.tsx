@@ -1,24 +1,18 @@
-import {
-  ArrowRight01Icon,
-  FileImportIcon,
-  Loading03Icon,
-  Search01Icon,
-} from "@hugeicons/core-free-icons";
+import { FileImportIcon, Loading03Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Icon } from "@/components/icon";
 import { openPluginDialog } from "@/components/plugins/plugin-dialog";
-import { pluginIconSet } from "@/components/plugins/plugin-icons";
+import { PluginCard } from "@/components/plugins/plugin-card";
 import { Button } from "@/components/panelui/button";
 import { Input } from "@/components/panelui/input";
 import { Sheet } from "@/components/panelui/sheet";
 import { Tabs } from "@/components/panelui/tabs";
 import { usePlugins } from "@/lib/db/plugins";
 import { useRegistry } from "@/lib/plugins/directory";
-import { parsePluginBundle, type PluginIcon } from "@/lib/plugins/manifest";
-import { matchesSearch, REGISTRY_WEB } from "@/lib/plugins/registry";
-import { cn } from "@/lib/utils";
+import { parsePluginBundle, type PluginManifest } from "@/lib/plugins/manifest";
+import { matchesSearch, REGISTRY_WEB, type RegistryEntry } from "@/lib/plugins/registry";
 
 /**
  * Settings → Plugins: what is installed, and the directory to find more.
@@ -78,54 +72,11 @@ export function PluginsPanel() {
   );
 }
 
-function Row({
-  icon,
-  name,
-  meta,
-  status,
-  onOpen,
-}: {
-  icon: PluginIcon;
-  name: string;
-  meta: string;
-  status?: { label: string; on: boolean };
-  onOpen: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-start outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
-    >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted">
-        <Icon icon={pluginIconSet[icon]} size={18} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium">{name}</span>
-        <span className="block truncate text-xs text-muted-foreground">{meta}</span>
-      </span>
-      {status ? (
-        <span
-          className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-[0.6875rem] font-medium",
-            status.on ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
-          )}
-        >
-          {status.label}
-        </span>
-      ) : null}
-      <Icon
-        icon={ArrowRight01Icon}
-        size={16}
-        className="shrink-0 text-muted-foreground rtl:rotate-180"
-      />
-    </button>
-  );
-}
-
 function Installed({ query }: { query: string }) {
   const { t } = useTranslation("settings");
   const plugins = usePlugins();
+  // The directory's covers, for plugins that came from it.
+  const { registry } = useRegistry();
   const input = useRef<HTMLInputElement>(null);
   const shown = (plugins ?? []).filter((plugin) =>
     matchesSearch({ ...plugin.manifest, author: plugin.manifest.author ?? "" }, query),
@@ -163,25 +114,29 @@ function Installed({ query }: { query: string }) {
       ) : shown.length === 0 ? (
         <p className="px-1 py-4 text-sm text-muted-foreground">{t("plugins.noMatches")}</p>
       ) : (
-        <div className="divide-y overflow-hidden rounded-2xl border">
-          {shown.map((plugin) => (
-            <Row
-              key={plugin.id}
-              icon={plugin.manifest.icon}
-              name={plugin.manifest.name}
-              meta={t("plugins.meta", {
-                version: plugin.manifest.version,
-                by:
+        <div className="flex flex-col gap-3">
+          {shown.map((plugin) => {
+            const listed = registry?.plugins.find((entry) => entry.id === plugin.id);
+            return (
+              <PluginCard
+                key={plugin.id}
+                name={plugin.manifest.name}
+                author={
                   plugin.manifest.author ??
-                  (plugin.updatedBy === "you" ? t("plugins.byYou") : plugin.updatedBy),
-              })}
-              status={{
-                label: plugin.enabled ? t("plugins.dialog.on") : t("plugins.dialog.off"),
-                on: plugin.enabled,
-              }}
-              onOpen={() => openPluginDialog({ kind: "installed", id: plugin.id })}
-            />
-          ))}
+                  (plugin.updatedBy === "you" ? t("plugins.byYou") : plugin.updatedBy)
+                }
+                summary={plugin.manifest.description}
+                icon={plugin.manifest.icon}
+                cover={listed?.cover}
+                tags={addsOf(plugin.manifest, t)}
+                status={{
+                  label: plugin.enabled ? t("plugins.dialog.on") : t("plugins.dialog.off"),
+                  tone: plugin.enabled ? "on" : "off",
+                }}
+                onOpen={() => openPluginDialog({ kind: "installed", id: plugin.id })}
+              />
+            );
+          })}
         </div>
       )}
       <div className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
@@ -238,24 +193,23 @@ function Browse({ query }: { query: string }) {
       {shown.length === 0 ? (
         <p className="px-1 py-4 text-sm text-muted-foreground">{t("plugins.noMatches")}</p>
       ) : (
-        <div className="divide-y overflow-hidden rounded-2xl border">
+        <div className="flex flex-col gap-3">
           {shown.map((entry) => {
             const have = installed?.find((plugin) => plugin.id === entry.id);
             return (
-              <Row
+              <PluginCard
                 key={entry.id}
-                icon={entry.icon}
                 name={entry.name}
-                meta={entry.description || entry.author}
+                author={entry.author}
+                summary={entry.description}
+                icon={entry.icon}
+                cover={entry.cover}
+                tags={countsOf(entry.adds, t)}
                 status={
                   have
-                    ? {
-                        label:
-                          have.manifest.version === entry.version
-                            ? t("plugins.installedTag")
-                            : t("plugins.updateTag"),
-                        on: true,
-                      }
+                    ? have.manifest.version === entry.version
+                      ? { label: t("plugins.installedTag"), tone: "on" }
+                      : { label: t("plugins.updateTag"), tone: "update" }
                     : undefined
                 }
                 onOpen={() => openPluginDialog({ kind: "registry", entry })}
@@ -274,4 +228,26 @@ function Browse({ query }: { query: string }) {
       </a>
     </div>
   );
+}
+
+type Translate = ReturnType<typeof useTranslation<"settings">>["t"];
+
+/** What an installed plugin adds, as short words for its card. */
+function addsOf(manifest: PluginManifest, t: Translate): string[] {
+  const { panels, mods, theme } = manifest.contributes;
+  return [
+    ...(panels.some((panel) => panel.slot === "studio-tool") ? [t("plugins.card.tool")] : []),
+    ...(panels.some((panel) => panel.slot === "studio") ? [t("plugins.card.panel")] : []),
+    ...((mods ?? []).length ? [t("plugins.card.mod")] : []),
+    ...(theme ? [t("plugins.card.theme")] : []),
+  ];
+}
+
+function countsOf(adds: RegistryEntry["adds"], t: Translate): string[] {
+  return [
+    ...(adds.studioTools ? [t("plugins.card.tool")] : []),
+    ...(adds.panels ? [t("plugins.card.panel")] : []),
+    ...(adds.mods ? [t("plugins.card.mod")] : []),
+    ...(adds.theme ? [t("plugins.card.theme")] : []),
+  ];
 }

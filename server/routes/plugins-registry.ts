@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { REGISTRY_RAW, REGISTRY_URL, registrySchema, type Registry } from "@/lib/plugins/registry";
+import {
+  PICTURE_PATH,
+  REGISTRY_RAW,
+  REGISTRY_URL,
+  registrySchema,
+  type Registry,
+} from "@/lib/plugins/registry";
 
 /**
  * The plugin directory, read from GitHub by the app's own API (so the page
@@ -13,7 +19,11 @@ const TTL = 10 * 60 * 1000;
 
 async function registry(fresh = false): Promise<Registry> {
   if (!fresh && cached && Date.now() - cached.at < TTL) return cached.registry;
-  const response = await fetch(REGISTRY_URL, { headers: { Accept: "application/json" } });
+  // GitHub's raw files are cached for a few minutes; a fresh look skips that cache.
+  const response = await fetch(fresh ? `${REGISTRY_URL}?t=${Date.now()}` : REGISTRY_URL, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
   if (!response.ok) throw new Error(`The plugin directory answered ${response.status}.`);
   const parsed = registrySchema.safeParse(await response.json());
   if (!parsed.success) throw new Error("The plugin directory could not be read.");
@@ -58,4 +68,31 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+}
+
+const pictures = new Map<string, { at: number; type: string; bytes: ArrayBuffer }>();
+
+/** A plugin's cover or screenshot from the directory, kept for an hour. */
+export async function picture(request: Request) {
+  const path = new URL(request.url).searchParams.get("path") ?? "";
+  if (!PICTURE_PATH.test(path)) return new Response("Not found.", { status: 404 });
+  const kept = pictures.get(path);
+  if (kept && Date.now() - kept.at < 60 * 60 * 1000)
+    return new Response(kept.bytes, {
+      headers: { "Content-Type": kept.type, "Cache-Control": "public, max-age=3600" },
+    });
+  const response = await fetch(`${REGISTRY_RAW}${path}`);
+  if (!response.ok) return new Response("Not found.", { status: 404 });
+  const bytes = await response.arrayBuffer();
+  if (bytes.byteLength > 4 * 1024 * 1024) return new Response("Too large.", { status: 413 });
+  const type = path.endsWith(".png")
+    ? "image/png"
+    : path.endsWith(".webp")
+      ? "image/webp"
+      : "image/jpeg";
+  if (pictures.size > 100) pictures.clear();
+  pictures.set(path, { at: Date.now(), type, bytes });
+  return new Response(bytes, {
+    headers: { "Content-Type": type, "Cache-Control": "public, max-age=3600" },
+  });
 }
