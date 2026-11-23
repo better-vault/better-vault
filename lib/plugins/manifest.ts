@@ -108,6 +108,44 @@ export const colourSchema = z
 
 const palette = z.partialRecord(z.enum(themeTokens), colourSchema);
 
+/**
+ * How the Notes graph view looks (lib/notes/graph-style.ts): its layout, and
+ * how nodes, links and labels are drawn. Colours are theme token names (such
+ * as "chart-4") or plain colours.
+ */
+const graphColour = z.union([z.string().regex(/^[a-z][a-z0-9-]{0,40}$/), colourSchema]);
+export const graphStyleSchema = z.object({
+  layout: z.enum(["force", "radial"]).default("force"),
+  /** Behind the graph; the page's own background when left out. */
+  background: graphColour.optional(),
+  node: z
+    .object({
+      /** One colour for every node, or "vault" for each vault's colour. */
+      color: z.union([z.literal("vault"), graphColour]).default("vault"),
+      size: z.number().min(0.4).max(3).default(1),
+      /** A soft ring around the hub (the open note, or the most linked one). */
+      hubRing: z.boolean().default(false),
+    })
+    .default({ color: "vault", size: 1, hubRing: false }),
+  link: z
+    .object({
+      color: graphColour.default("border"),
+      width: z.number().min(0.25).max(4).default(1),
+      opacity: z.number().min(0.05).max(1).default(1),
+      curved: z.boolean().default(false),
+    })
+    .default({ color: "border", width: 1, opacity: 1, curved: false }),
+  label: z
+    .object({
+      font: z.enum(["sans", "mono", "serif"]).default("sans"),
+      color: graphColour.default("foreground"),
+      uppercase: z.boolean().default(false),
+      size: z.number().min(8).max(18).default(12),
+    })
+    .default({ font: "sans", color: "foreground", uppercase: false, size: 12 }),
+});
+export type GraphStyle = z.infer<typeof graphStyleSchema>;
+
 /** Plugin ids: lowercase words joined by hyphens, as in `notebook-stats`. */
 export const PLUGIN_ID = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 
@@ -149,10 +187,22 @@ export const manifestSchema = z.object({
       panels: z.array(panelSchema).max(10).default([]),
       theme: z.object({ light: palette.optional(), dark: palette.optional() }).optional(),
       mods: z.array(modSchema).max(10).default([]),
+      /** Looks for the Notes graph view, offered beside the built-in ones. */
+      graph: z
+        .array(
+          z.object({
+            id: z.string().regex(PLUGIN_ID),
+            title: z.string().min(1).max(60),
+            style: graphStyleSchema,
+          }),
+        )
+        .max(5)
+        .default([]),
     })
     .refine(
-      (value) => value.panels.length > 0 || value.theme || value.mods.length > 0,
-      "Add a panel, a theme or a mod.",
+      (value) =>
+        value.panels.length > 0 || value.theme || value.mods.length > 0 || value.graph.length > 0,
+      "Add a panel, a theme, a mod or a graph style.",
     ),
   /** Words to find it by in the plugin directory. */
   tags: z.array(z.string().max(30)).max(8).default([]),

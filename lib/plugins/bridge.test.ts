@@ -13,7 +13,7 @@ const plugin = (overrides: Partial<Plugin>): Plugin => ({
     description: "",
     icon: "puzzle",
     permissions: ["read:notes", "write:notes"],
-    contributes: { panels: [], mods: [] },
+    contributes: { panels: [], mods: [], graph: [] },
     tags: [],
   },
   files: {},

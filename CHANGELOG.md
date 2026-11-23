@@ -17,6 +17,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Appearance: upload a font for the whole app, and remove it again; choose the character shown beside the chat's finished answers.
 - Bots: sixteen new accessories and six colours, in rows that scroll.
 - An accessibility statement (ACCESSIBILITY.md) and an issue template for barriers.
+- Whiteboard: right-click a selection to ask the AI about it (in your words, or explain, make a table, quiz me, check it on the web), or to copy, duplicate, group, order, lock or delete it. The AI sees the selection's words and a picture of it, can search the web with its provider's own search, and lists its sources. Voice input also works with a Google key.
+- Notes: tables, horizontal rules, pictures and `$$` formulas are drawn in place while the file stays Markdown; click one to edit its source.
+- The Notes graph has looks: Classic, and Constellation (a radial tree with curved branches and a ringed hub), chosen in Settings → Appearance or the graph's toolbar. Plugins can add their own (`contributes.graph`).
+- Plugins are shown as cards with a cover picture, and their dialog shows pictures of the plugin at work.
 
 ### Changed
 
@@ -25,6 +29,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Notes tabs are folder-style, raised into the page.
 - The Vault page shows folders and notebooks as frosted folders with sheets that rise on hover and badges for the kinds of file inside.
 - Backups are format 9, with vault files. Older backups still import.
+- Vault folders and notebooks take their own colour in full, and the badges for the kinds of file inside are larger, without a disc.
+- The character sits at the top of an answer, not at its bottom.
+- Plugin Studio tools fill their area without a frame.
+
+### Fixed
+
+- Piano coach counts a key in any octave, and its chips show the octave.
+- The Notes block handle no longer overlaps text on macOS, and appears again after the page scrolls or a block changes size.
+- The plugin dialog asks before uninstalling in a dialog of its own, instead of squeezing the question into its footer.
 
 ## [0.10.0] - 2026-11-19
 

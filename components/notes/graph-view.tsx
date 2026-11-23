@@ -5,7 +5,9 @@ import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { Input } from "@/components/panelui/input";
 import { Switch } from "@/components/panelui/switch";
+import { Select } from "@/components/panelui/select";
 import { buildGraph, type GraphNode } from "@/lib/notes/graph";
+import { useGraphStyle } from "@/lib/notes/use-graph-style";
 import type { LinkWorld } from "@/lib/notes/resolve";
 import { itemColor } from "@/lib/notebooks/colors";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,7 @@ export function GraphView({
   const [highlight, setHighlight] = useState("");
   const [fitKey, setFitKey] = useState(0);
   const local = scope === "local" && focusId !== null;
+  const look = useGraphStyle();
 
   const graph = useMemo(
     () =>
@@ -87,6 +90,22 @@ export function GraphView({
           onChange={(event) => setHighlight(event.target.value)}
           className="w-40"
         />
+        <Select
+          items={look.options.map((option) => ({ value: option.id, label: option.title }))}
+          value={look.current.id}
+          onValueChange={(next) => typeof next === "string" && look.choose(next)}
+        >
+          <Select.Trigger size="sm" aria-label={t("graph.style")} className="w-36">
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Content>
+            {look.options.map((option) => (
+              <Select.Item key={option.id} value={option.id}>
+                {option.title}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
         <div className="ms-auto flex items-center gap-3 rounded-full bg-card/90 px-3 py-1 text-xs ring-1 ring-border backdrop-blur">
           <label className="flex cursor-pointer items-center gap-1.5">
             <Switch size="xs" checked={showTags} onCheckedChange={setShowTags} />
@@ -128,6 +147,7 @@ export function GraphView({
           onOpen={onOpen}
           fitKey={fitKey}
           label={t("graph.title")}
+          look={look.current.style}
         />
       )}
 

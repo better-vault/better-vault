@@ -31,6 +31,7 @@ export function registerPluginTools(ctx: ToolContext) {
     granted: plugin.granted,
     panels: plugin.manifest.contributes.panels,
     theme: Boolean(plugin.manifest.contributes.theme),
+    graphStyles: plugin.manifest.contributes.graph?.map((style) => style.title) ?? [],
     updatedBy: plugin.updatedBy,
   });
 
@@ -137,7 +138,7 @@ export function pluginGuide() {
   return {
     plugins: {
       about:
-        "Plugins add Studio tools and panels (sandboxed HTML pages), mods (CSS for the whole app) and themes to better-vault. Describe where a panel goes, what it shows, exact numbers and defaults, and what to leave out; use the user's real data through the bridge, never placeholders. A Studio tool can ask the user's AI model with ai.generate (permission use:ai) and keep its own data with storage.get/set.",
+        "Plugins add Studio tools and panels (sandboxed HTML pages), mods (CSS for the whole app), themes and Notes graph styles to better-vault. Describe where a panel goes, what it shows, exact numbers and defaults, and what to leave out; use the user's real data through the bridge, never placeholders. A Studio tool can ask the user's AI model with ai.generate (permission use:ai) and keep its own data with storage.get/set.",
       manifest: {
         manifestVersion: 2,
         id: "lowercase-words-joined-by-hyphens",
@@ -157,6 +158,14 @@ export function pluginGuide() {
             },
           ],
           mods: [{ id: "mod-id", title: "What it changes", file: "mod.css" }],
+          graph: [
+            {
+              id: "style-id",
+              title: "Shown in the graph-look picker",
+              style:
+                "{ layout: 'force'|'radial', background?, node: { color: 'vault'|colour, size, hubRing }, link: { color, width, opacity, curved }, label: { font: 'sans'|'mono'|'serif', color, uppercase, size } }; colours are token names (chart-4) or plain colours",
+            },
+          ],
           theme: {
             light:
               "{ token: colour } with tokens from `themeTokens`; colours as #hex, rgb(), hsl() or oklch()",

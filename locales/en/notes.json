@@ -93,7 +93,12 @@
     "search": "Highlight…",
     "fit": "Fit to screen",
     "empty": "Link notes with [[ ]] to see them connect here.",
-    "legend": "Vaults"
+    "legend": "Vaults",
+    "styles": {
+      "classic": "Classic",
+      "constellation": "Constellation"
+    },
+    "style": "Graph look"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",

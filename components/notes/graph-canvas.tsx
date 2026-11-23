@@ -4,12 +4,20 @@ import {
   forceLink,
   forceManyBody,
   forceSimulation,
+  forceX,
+  forceY,
   type Simulation,
   type SimulationLinkDatum,
   type SimulationNodeDatum,
 } from "d3-force";
 import { useEffect, useRef } from "react";
 import type { GraphEdge, GraphNode } from "@/lib/notes/graph";
+import {
+  builtInGraphStyles,
+  radialLayout,
+  resolveColour,
+  type GraphStyle,
+} from "@/lib/notes/graph-style";
 
 type SimNode = GraphNode & SimulationNodeDatum;
 type SimLink = SimulationLinkDatum<SimNode>;
@@ -27,14 +35,31 @@ interface GraphCanvasProps {
   /** Changes whenever the view should be fitted again. */
   fitKey?: number;
   label: string;
+  /** How the graph is laid out and drawn (Settings → Appearance, or a plugin's). */
+  look?: GraphStyle;
 }
 
 /** Reads a colour token once per draw, so the graph follows light and dark mode. */
 const token = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim() || "currentColor";
 
-const radius = (node: GraphNode) =>
+const baseRadius = (node: GraphNode) =>
   (node.kind === "tag" ? 3 : 4) + Math.min(10, Math.sqrt(node.degree) * 2.2);
+
+const FONTS = {
+  sans: "ui-sans-serif, system-ui, sans-serif",
+  mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  serif: "ui-serif, Georgia, serif",
+} as const;
+
+/** The node a radial graph grows from: the open note, else the most linked one. */
+function radialHub(nodes: readonly GraphNode[], focusId: string | null | undefined) {
+  const focus = focusId ? nodes.find((node) => node.id === `note:${focusId}`) : undefined;
+  if (focus) return focus.id;
+  let best: GraphNode | undefined;
+  for (const node of nodes) if (!best || node.degree > best.degree) best = node;
+  return best?.id;
+}
 
 /**
  * The graph drawn on a canvas with a force layout (d3-force), like
@@ -50,7 +75,9 @@ export function GraphCanvas({
   onOpen,
   fitKey = 0,
   label,
+  look = builtInGraphStyles.classic,
 }: GraphCanvasProps) {
+  const radius = (node: GraphNode) => baseRadius(node) * look.node.size;
   const canvas = useRef<HTMLCanvasElement>(null);
   const state = useRef({
     view: { x: 0, y: 0, k: 1 },
@@ -62,8 +89,9 @@ export function GraphCanvas({
     nodes: [] as SimNode[],
     links: [] as SimLink[],
     neighbours: new Map<string, Set<string>>(),
+    hubId: null as string | null,
   });
-  const props = useRef({ vaultColors, focusId, highlight, onOpen });
+  const props = useRef({ vaultColors, focusId, highlight, onOpen, look });
 
   // Draws one frame, reading the latest state and props through refs.
   const draw = useRef(() => {});
@@ -72,8 +100,8 @@ export function GraphCanvas({
     if (!element) return;
     const context = element.getContext("2d");
     if (!context) return;
-    const { view, hover, nodes: simNodes, links, neighbours } = state.current;
-    const { vaultColors: colors, focusId: focus, highlight: query } = props.current;
+    const { view, hover, nodes: simNodes, links, neighbours, hubId } = state.current;
+    const { vaultColors: colors, focusId: focus, highlight: query, look: style } = props.current;
     const ratio = window.devicePixelRatio || 1;
     const width = element.clientWidth;
     const height = element.clientHeight;
@@ -83,6 +111,10 @@ export function GraphCanvas({
     }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, width, height);
+    if (style.background) {
+      context.fillStyle = resolveColour(style.background, token);
+      context.fillRect(0, 0, width, height);
+    }
     context.translate(view.x, view.y);
     context.scale(view.k, view.k);
 
@@ -90,20 +122,41 @@ export function GraphCanvas({
     const search = query.trim().toLowerCase();
     const matches = (node: SimNode) => !search || node.label.toLowerCase().includes(search);
     const border = token("border");
+    const linkColour = resolveColour(style.link.color, token);
+    const labelColour = resolveColour(style.label.color, token);
     const muted = token("muted-foreground");
     const primary = token("primary");
     const foreground = token("foreground");
 
-    context.lineWidth = 1 / view.k;
+    context.lineWidth = style.link.width / view.k;
     for (const link of links) {
       const a = link.source as SimNode;
       const b = link.target as SimNode;
       const on = lit && lit.has(a.id) && lit.has(b.id);
-      context.strokeStyle = on ? primary : border;
-      context.globalAlpha = lit && !on ? 0.25 : search ? 0.4 : 1;
+      context.strokeStyle = on ? primary : linkColour;
+      context.globalAlpha = on ? 1 : (lit ? 0.25 : search ? 0.4 : 1) * style.link.opacity;
+      const [ax, ay, bx, by] = [a.x ?? 0, a.y ?? 0, b.x ?? 0, b.y ?? 0];
       context.beginPath();
-      context.moveTo(a.x ?? 0, a.y ?? 0);
-      context.lineTo(b.x ?? 0, b.y ?? 0);
+      context.moveTo(ax, ay);
+      if (style.link.curved) {
+        // A branch that leaves its parent outward and bends into the child.
+        const hub = simNodes.find((node) => node.id === hubId);
+        const [cx, cy] = [hub?.x ?? 0, hub?.y ?? 0];
+        const rb = Math.hypot(bx - cx, by - cy);
+        const ra = Math.hypot(ax - cx, ay - cy);
+        const angle = Math.atan2(by - cy, bx - cx);
+        const mid = (ra + rb) / 2;
+        context.bezierCurveTo(
+          ra < 1 ? cx + Math.cos(angle) * mid * 0.5 : ax + ((ax - cx) / ra) * (mid - ra),
+          ra < 1 ? cy + Math.sin(angle) * mid * 0.5 : ay + ((ay - cy) / ra) * (mid - ra),
+          cx + Math.cos(angle) * mid,
+          cy + Math.sin(angle) * mid,
+          bx,
+          by,
+        );
+      } else {
+        context.lineTo(bx, by);
+      }
       context.stroke();
     }
 
@@ -115,7 +168,9 @@ export function GraphCanvas({
           ? muted
           : node.kind === "missing"
             ? border
-            : token(colors[node.vaultId ?? ""] ?? "chart-2");
+            : style.node.color === "vault"
+              ? token(colors[node.vaultId ?? ""] ?? "chart-2")
+              : resolveColour(style.node.color, token);
       context.fillStyle = colour;
       context.beginPath();
       const r = radius(node);
@@ -131,6 +186,20 @@ export function GraphCanvas({
         context.stroke();
         context.setLineDash([]);
       }
+      if (style.node.hubRing && node.id === hubId) {
+        // A soft halo and a thin ring around the hub.
+        context.globalAlpha = faded ? 0.1 : 0.18;
+        context.beginPath();
+        context.arc(node.x ?? 0, node.y ?? 0, r * 2.6, 0, Math.PI * 2);
+        context.fill();
+        context.globalAlpha = faded ? 0.2 : 0.7;
+        context.strokeStyle = colour;
+        context.lineWidth = 1 / view.k;
+        context.beginPath();
+        context.arc(node.x ?? 0, node.y ?? 0, r * 3.6, 0, Math.PI * 2);
+        context.stroke();
+        context.globalAlpha = faded ? 0.2 : 1;
+      }
       if (node.id === `note:${focus}` || node === hover) {
         context.strokeStyle = primary;
         context.lineWidth = 2 / view.k;
@@ -142,17 +211,33 @@ export function GraphCanvas({
     }
 
     // Labels: always near the pointer and the open note, the rest once zoomed in.
-    context.textAlign = "center";
-    context.textBaseline = "top";
-    context.font = `${12 / view.k}px ui-sans-serif, system-ui, sans-serif`;
+    const hub = simNodes.find((node) => node.id === hubId);
+    const radial = style.layout === "radial";
+    context.font = `${style.label.size / view.k}px ${FONTS[style.label.font]}`;
     for (const node of simNodes) {
       const near =
         (lit && lit.has(node.id)) || node.id === `note:${focus}` || (search && matches(node));
       if (!near && view.k < 0.9) continue;
       if (lit && !lit.has(node.id)) continue;
       context.globalAlpha = near ? 1 : Math.min(1, (view.k - 0.9) * 3 + 0.3);
-      context.fillStyle = node.kind === "tag" || node.kind === "missing" ? muted : foreground;
-      context.fillText(node.label, node.x ?? 0, (node.y ?? 0) + radius(node) + 4 / view.k);
+      context.fillStyle =
+        node.kind === "tag" || node.kind === "missing" ? muted : near ? foreground : labelColour;
+      const text = style.label.uppercase ? node.label.toUpperCase() : node.label;
+      const [x, y] = [node.x ?? 0, node.y ?? 0];
+      if (radial && hub && node !== hub) {
+        // Beside the node, pointing away from the hub.
+        const angle = Math.atan2(y - (hub.y ?? 0), x - (hub.x ?? 0));
+        const right = Math.cos(angle) >= 0;
+        const gap = radius(node) + 5 / view.k;
+        context.textAlign = right ? "left" : "right";
+        context.textBaseline = "middle";
+        context.fillText(text, x + Math.cos(angle) * gap, y + Math.sin(angle) * gap);
+      } else {
+        context.textAlign = "center";
+        context.textBaseline = "top";
+        const ring = style.node.hubRing && node.id === hubId ? 3.6 : 1;
+        context.fillText(text, x, y + radius(node) * ring + 4 / view.k);
+      }
     }
     context.globalAlpha = 1;
   };
@@ -189,7 +274,7 @@ export function GraphCanvas({
 
   // The latest props and drawing functions, for the handlers and the simulation.
   useEffect(() => {
-    props.current = { vaultColors, focusId, highlight, onOpen };
+    props.current = { vaultColors, focusId, highlight, onOpen, look };
     draw.current = drawFrame;
     fit.current = fitView;
     draw.current();
@@ -212,34 +297,69 @@ export function GraphCanvas({
       neighbours.set(edge.target, new Set([...(neighbours.get(edge.target) ?? []), edge.source]));
     }
     state.current.sim?.stop();
-    const fresh = simNodes.some((node) => node.x === undefined);
-    const sim = forceSimulation(simNodes)
-      .force(
-        "link",
+    const radial = look.layout === "radial";
+    const hubId = radial ? (radialHub(simNodes, focusId) ?? null) : null;
+    let fresh = simNodes.some((node) => node.x === undefined);
+    const sim = forceSimulation(simNodes);
+    if (radial) {
+      // Each node is pulled to its place in the radial tree; dragging still works.
+      const places = radialLayout(simNodes, edges, hubId, 90 * look.node.size + 40);
+      for (const node of simNodes) {
+        const place = places.get(node.id);
+        if (fresh || node.x === undefined) Object.assign(node, { x: place?.x, y: place?.y });
+      }
+      fresh = true;
+      sim
+        .force("x", forceX<SimNode>((node) => places.get(node.id)?.x ?? 0).strength(0.6))
+        .force("y", forceY<SimNode>((node) => places.get(node.id)?.y ?? 0).strength(0.6))
+        .force(
+          "collide",
+          forceCollide<SimNode>().radius((node) => radius(node) + 2),
+        )
+        .alpha(0.6);
+    } else {
+      sim
+        .force(
+          "link",
+          forceLink<SimNode, SimLink>(links)
+            .id((node) => node.id)
+            .distance(60)
+            .strength(0.6),
+        )
+        .force("charge", forceManyBody().strength(-160))
+        .force("center", forceCenter(0, 0).strength(0.05))
+        .force(
+          "collide",
+          forceCollide<SimNode>().radius((node) => radius(node) + 6),
+        )
+        .alpha(fresh ? 1 : 0.3);
+    }
+    if (radial)
+      sim.force(
+        "link-ids",
         forceLink<SimNode, SimLink>(links)
           .id((node) => node.id)
-          .distance(60)
-          .strength(0.6),
-      )
-      .force("charge", forceManyBody().strength(-160))
-      .force("center", forceCenter(0, 0).strength(0.05))
-      .force(
-        "collide",
-        forceCollide<SimNode>().radius((node) => radius(node) + 6),
-      )
-      .alpha(fresh ? 1 : 0.3)
-      .on("tick", () => draw.current());
+          .strength(0),
+      );
+    sim.on("tick", () => draw.current());
     let fitted = false;
     sim.on("end", () => {
       if (!fitted && fresh) fit.current();
       fitted = true;
     });
-    Object.assign(state.current, { sim, nodes: simNodes, links, neighbours });
+    Object.assign(state.current, {
+      sim,
+      nodes: simNodes,
+      links,
+      neighbours,
+      hubId: hubId ?? radialHub(simNodes, focusId),
+    });
     if (fresh) setTimeout(() => fit.current(), 450);
     return () => {
       sim.stop();
     };
-  }, [nodes, edges]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rebuilt on the layout, not every style tweak
+  }, [nodes, edges, look.layout, look.node.size, look.layout === "radial" ? focusId : null]);
 
   useEffect(() => {
     fit.current();

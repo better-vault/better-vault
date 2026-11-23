@@ -6,6 +6,7 @@ import { Field } from "@/components/common/field";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { BotAvatar } from "@/components/bot/bot-avatar";
+import { GraphLookPicker } from "@/components/notes/graph-look-picker";
 import { LookPicker } from "@/components/bot/look-picker";
 import { Button } from "@/components/panelui/button";
 import { Sheet } from "@/components/panelui/sheet";
@@ -90,6 +91,9 @@ export function AppearancePanel() {
             </div>
           </Field>
           <FontField />
+          <Field label={t("appearance.graph")} hint={t("appearance.graphHint")}>
+            <GraphLookPicker />
+          </Field>
           <AnswerAvatarField />
         </div>
       </Sheet.Body>

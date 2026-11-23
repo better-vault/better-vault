@@ -109,7 +109,9 @@
       "amber": "Amber",
       "orange": "Orange",
       "rose": "Rose"
-    }
+    },
+    "graph": "Graph view",
+    "graphHint": "How the Notes graph is laid out and drawn. Plugins can add their own looks."
   },
   "language": {
     "title": "Language",

@@ -1,0 +1,52 @@
+---
+title: "Graph styles"
+description: "Give the Notes graph view a look of your own with a plugin: choose its layout, node and link colours, curved branches, a ringed hub and label type, with no code."
+---
+
+A graph style changes how the Notes graph view is laid out and drawn, much like a graph theme in Obsidian. It runs no code: it is a few settings in the manifest.
+
+## Add one
+
+List your styles under `contributes.graph`. Each has an `id`, a `title` shown in the picker, and a `style`. Every part of the style is optional, so you only write what you change.
+
+```json
+{
+  "contributes": {
+    "graph": [
+      {
+        "id": "ember",
+        "title": "Ember",
+        "style": {
+          "layout": "radial",
+          "background": "oklch(0.16 0.01 40)",
+          "node": { "color": "#ff7a1a", "size": 0.8, "hubRing": true },
+          "link": { "color": "muted-foreground", "width": 0.6, "opacity": 0.5, "curved": true },
+          "label": { "font": "mono", "uppercase": true, "size": 10 }
+        }
+      }
+    ]
+  }
+}
+```
+
+Once the plugin is on, its styles appear beside Classic and Constellation in **Settings → Appearance → Graph view** and in the graph's own toolbar. When the plugin is turned off or removed, the graph goes back to Classic.
+
+## Settings
+
+| Setting           | Values                          | What it does                                                                  |
+| ----------------- | ------------------------------- | ----------------------------------------------------------------------------- |
+| `layout`          | `force` (default), `radial`     | A force layout, or a radial tree that grows from the open or most linked note |
+| `background`      | a colour                        | Behind the graph; the page's own background when left out                     |
+| `node.color`      | `vault` (default) or a colour   | Each vault's colour, or one colour for every node                             |
+| `node.size`       | 0.4 to 3 (default 1)            | Scales every node                                                             |
+| `node.hubRing`    | `true` or `false`               | A soft halo and ring around the hub                                           |
+| `link.color`      | a colour (default `border`)     | The colour of the lines                                                       |
+| `link.width`      | 0.25 to 4 (default 1)           | Line width                                                                    |
+| `link.opacity`    | 0.05 to 1 (default 1)           | Line opacity                                                                  |
+| `link.curved`     | `true` or `false`               | Curved branches instead of straight lines                                     |
+| `label.font`      | `sans`, `mono`, `serif`         | The labels' typeface                                                          |
+| `label.color`     | a colour (default `foreground`) | The labels' colour                                                            |
+| `label.uppercase` | `true` or `false`               | Labels in capitals                                                            |
+| `label.size`      | 8 to 18 (default 12)            | Label size in pixels                                                          |
+
+A colour is either a theme token name, such as `chart-4` or `muted-foreground`, which follows light and dark mode, or a plain colour written as `#hex`, `rgb()`, `hsl()` or `oklch()`.
