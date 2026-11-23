@@ -37,7 +37,8 @@ export function botToolsFor(
   { handedOver = false }: { handedOver?: boolean } = {},
 ): BotToolName[] {
   const access = botAccess(bot);
-  const tools: BotToolName[] = [];
+  // Any bot may offer to make a file; it is kept only once the user approves it.
+  const tools: BotToolName[] = ["create_file"];
   if (access.notebooks) tools.push("list_notebooks", "search_sources", "read_source");
   if (access.notes !== "none") tools.push("list_notes", "search_notes", "read_note");
   if (access.notes === "write") tools.push("create_note", "append_to_note");

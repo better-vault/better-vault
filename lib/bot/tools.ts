@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { faceItems, headItems, neckItems } from "./look";
+import { createFileDescription, createFileInput } from "@/lib/files/tools";
 import { botColorKeys } from "./colors";
 
 /**
@@ -9,6 +10,7 @@ import { botColorKeys } from "./colors";
  * OK in the thread; `ask_bot` hands a task to another bot.
  */
 export const botToolSchemas = {
+  create_file: createFileInput,
   list_notebooks: z.object({
     vault: z.string().optional().describe("Vault name, to list only that vault's notebooks"),
   }),
@@ -131,6 +133,7 @@ export const botToolDescriptions: Record<BotToolName, string> = {
     "List the skills in a GitHub repository (what `npx skills add` from skills.sh would install): each one's name, description and path. Use it before add_skills.",
   add_skills:
     "Add skills from GitHub to the user's skills, by name. The user is asked to approve it first; until the result comes back, nothing was added.",
+  create_file: createFileDescription,
   create_skill:
     "Write a new skill (a SKILL.md: name, description and instructions) into the user's skills. The user is asked to approve it first.",
   create_bot:
@@ -141,6 +144,7 @@ export const botToolDescriptions: Record<BotToolName, string> = {
 
 /** Tools that change the user's data: they wait for the user's OK. */
 export const botWriteTools = new Set<BotToolName>([
+  "create_file",
   "create_note",
   "append_to_note",
   "add_calendar_event",

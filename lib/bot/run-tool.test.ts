@@ -133,6 +133,7 @@ describe("bot access", () => {
       access: { notebooks: false, notes: "read", calendar: "write", skills: "none" } as const,
     };
     expect(botToolsFor(planner)).toEqual([
+      "create_file",
       "list_notes",
       "search_notes",
       "read_note",

@@ -18,6 +18,7 @@ import { EffortMenu } from "@/components/chat/effort-menu";
 import { Markdown } from "@/components/chat/markdown";
 import { UsageRing } from "@/components/chat/usage-ring";
 import { isVisualPart, VisualPart } from "@/components/chat/visual/visual-part";
+import { FileApprovalCard } from "@/components/files/file-approval-card";
 import { Icon } from "@/components/icon";
 import { Menu } from "@/components/panelui/menu";
 import { Message } from "@/components/panelui/message";
@@ -476,6 +477,14 @@ function BotTurn({
             );
           const name = getToolName(part);
           if (!isBotTool(name)) return null;
+          if (name === "create_file")
+            return (
+              <FileApprovalCard
+                key={part.toolCallId}
+                part={part}
+                onAnswer={(approved) => onAnswer(part.toolCallId, approved)}
+              />
+            );
           if (botWriteTools.has(name))
             return (
               <ApprovalCard

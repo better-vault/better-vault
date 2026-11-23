@@ -18,12 +18,15 @@ const hostOf = (url: string) => {
   }
 };
 import { AnswerAvatar } from "@/components/bot/answer-avatar";
+import { FileApprovalCard } from "@/components/files/file-approval-card";
 import type { BotAvatar as BotLook } from "@/lib/db/types";
 import { AnswerReferences, SearchStatus, type Reference } from "./answer-references";
 import { Markdown } from "./markdown";
 import { isVisualPart, VisualPart } from "./visual/visual-part";
 
 const SEARCH_TOOLS = new Set(["web_search", "google_search"]);
+
+type FilePart = Extract<ChatMessage["parts"][number], { toolCallId: string }>;
 
 interface AssistantMessageProps {
   /** The character shown once the answer is finished; none when `null`. */
@@ -33,6 +36,8 @@ interface AssistantMessageProps {
   isLast: boolean;
   onRetry: () => void;
   onOpenPassage: (passage: PassageRef) => void;
+  /** Makes or declines a file the AI asked to make. */
+  onAnswerFile?: (toolCallId: string, approved: boolean) => Promise<void>;
 }
 
 /** An answer: the sources it read or searched, the text with citations, and actions. */
@@ -43,6 +48,7 @@ export function AssistantMessage({
   isLast,
   onRetry,
   onOpenPassage,
+  onAnswerFile,
 }: AssistantMessageProps) {
   const { t } = useTranslation("chat");
   const { t: tSources } = useTranslation("sources");
@@ -53,7 +59,9 @@ export function AssistantMessage({
   // Text and visuals in the order the model wrote them; runs of text join up.
   const blocks = useMemo(() => {
     const out: (
-      { kind: "text"; text: string } | { kind: "visual"; part: ChatMessage["parts"][number] }
+      | { kind: "text"; text: string }
+      | { kind: "visual"; part: ChatMessage["parts"][number] }
+      | { kind: "file"; part: FilePart }
     )[] = [];
     for (const part of message.parts) {
       if (part.type === "text") {
@@ -62,11 +70,14 @@ export function AssistantMessage({
         else out.push({ kind: "text", text: part.text });
       } else if (isToolUIPart(part) && isVisualPart(part)) {
         out.push({ kind: "visual", part });
+      } else if (isToolUIPart(part) && getToolName(part) === "create_file") {
+        out.push({ kind: "file", part });
       }
     }
     return out;
   }, [message.parts]);
   const hasVisual = blocks.some((block) => block.kind === "visual");
+  const files = blocks.flatMap((block) => (block.kind === "file" ? [block.part] : []));
 
   const web = useMemo(() => {
     const references: Reference[] = [];
@@ -155,7 +166,7 @@ export function AssistantMessage({
           <Message.Bubble>
             <Message.BubbleContent className="flex flex-col gap-3">
               {blocks.map((block, at) =>
-                block.kind === "text" ? (
+                block.kind === "file" ? null : block.kind === "text" ? (
                   <Markdown
                     key={at}
                     text={block.text}
@@ -174,6 +185,13 @@ export function AssistantMessage({
             {passages.length > 0 ? t("status.reading") : t("status.thinking")}
           </Message.Status>
         ) : null}
+        {files.map((part) => (
+          <FileApprovalCard
+            key={part.toolCallId}
+            part={part}
+            onAnswer={(approved) => onAnswerFile?.(part.toolCallId, approved) ?? Promise.resolve()}
+          />
+        ))}
         {text && (showNotebook || showWeb) ? (
           <AnswerReferences
             notebook={showNotebook ? notebook.references : []}

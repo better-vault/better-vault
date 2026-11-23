@@ -191,6 +191,7 @@ async function toolContext(botId: string, messages: ChatMessage[]): Promise<Tool
     askBot: (target, task) => askBot(botId, target, task),
     allowed: new Set(bot ? botToolsFor(bot, { handedOver }) : []),
     ...(vault ? { vault } : {}),
+    botId,
   };
 }
 

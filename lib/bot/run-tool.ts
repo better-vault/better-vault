@@ -2,6 +2,7 @@ import { createBot } from "@/lib/db/bots";
 import { calendarStore } from "@/lib/db/calendar";
 import { createNote, saveNoteBody } from "@/lib/db/notes";
 import { createSkill } from "@/lib/db/skills";
+import { createFileFromTool } from "@/lib/files/create";
 import { store } from "@/lib/db/store";
 import type { Note, Source, Vault } from "@/lib/db/types";
 import { DEFAULT_VAULT } from "@/lib/db/vaults";
@@ -28,6 +29,8 @@ export interface ToolContext {
   allowed?: ReadonlySet<BotToolName>;
   /** The one vault this bot may see; every vault when missing. */
   vault?: string;
+  /** The bot making the call, recorded on the files it makes. */
+  botId?: string;
 }
 
 /** Long texts are cut so one read cannot fill the model's context. */
@@ -210,6 +213,13 @@ async function run<Name extends BotToolName>(
       );
       if (!skill) throw new Error("No skill with that name.");
       return { name: skill.name, description: skill.description, body: cut(skill.body) };
+    }
+    case "create_file": {
+      const vaultId = context.vault ?? context.currentVault;
+      return createFileFromTool(input as BotToolInput<"create_file">, {
+        vaultId,
+        createdBy: context.botId ?? "bot",
+      });
     }
     case "create_note": {
       const { title, body, vault } = input as BotToolInput<"create_note">;

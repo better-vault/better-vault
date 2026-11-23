@@ -3,8 +3,10 @@ import {
   createUIMessageStreamResponse,
   stepCountIs,
   streamText,
+  tool,
   toUIMessageStream,
   type LanguageModelUsage,
+  type ToolSet,
 } from "ai";
 import { z } from "zod";
 import { sourceFormats, sourceKinds } from "@/lib/sources/formats";
@@ -16,6 +18,7 @@ import { createVisualTools } from "../visual-tools";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
 import type { ChatMessage, ChatMessageMetadata, TokenUsage } from "@/lib/chat/types";
 import { toPassageRefs, stripCitations, type Passage } from "@/lib/grounding/passages";
+import { createFileDescription, createFileInput } from "@/lib/files/tools";
 
 const passageSchema = z.object({
   n: z.number().int().positive(),
@@ -106,7 +109,13 @@ export async function POST(request: Request) {
   // Local models often can't call tools, so they answer in text only.
   const visuals = parsed.data.visuals && !providers[model.provider].local;
   const searchTools = mode === "web" ? createWebSearchTools(model, credentials) : undefined;
-  const tools = visuals ? { ...searchTools, ...createVisualTools() } : searchTools;
+  // Files are made in the page, after the user's OK: the tool has no `execute` here.
+  const fileTools: ToolSet = providers[model.provider].local
+    ? {}
+    : { create_file: tool({ description: createFileDescription, inputSchema: createFileInput }) };
+  const tools = visuals
+    ? { ...searchTools, ...createVisualTools(), ...fileTools }
+    : { ...searchTools, ...fileTools };
   const options = { skills: parsed.data.skills, visuals };
   const system = chatSystemPrompt(mode, passages, options);
   const instructions = chatSystemPrompt(mode, [], options).length;

@@ -1,5 +1,5 @@
 import { Chat, useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, generateId } from "ai";
+import { DefaultChatTransport, generateId, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import {
   useCallback,
   useContext,
@@ -21,6 +21,10 @@ import {
   getSettings,
 } from "@/lib/db/settings";
 import { getChunks, listSources } from "@/lib/db/sources";
+import { store } from "@/lib/db/store";
+import { DEFAULT_VAULT } from "@/lib/db/vaults";
+import { createFileFromTool } from "@/lib/files/create";
+import { createFileInput, type CreateFileOutput } from "@/lib/files/tools";
 import { selectPassages } from "@/lib/grounding/passages";
 import { listSkills } from "@/lib/db/skills";
 import { getStudioSettings } from "@/lib/studio/settings";
@@ -46,15 +50,26 @@ interface ChatSession {
   startNew: () => void;
   /** Shows a saved conversation. */
   open: (conversationId: string) => Promise<void>;
+  /** Makes (or declines) a file the AI asked to make, then lets the answer carry on. */
+  answerFile: (toolCallId: string, approved: boolean) => Promise<void>;
 }
 
 const ChatContext = stableContext<ChatSession | null>("chat-session", null);
 
+/**
+ * The last request body each conversation sent. When an approved file lets
+ * the answer carry on, the follow-up request reuses it (model, key, passages).
+ */
+const lastBodies = new Map<string, object>();
+
 const transport = new DefaultChatTransport<ChatMessage>({
   api: "/api/chat",
-  prepareSendMessagesRequest: ({ messages, body }) => ({
-    body: { ...body, messages: messages.slice(-HISTORY) },
-  }),
+  prepareSendMessagesRequest: ({ id, messages, body }) => {
+    // A question sends the full body; the automatic carry-on sends none (or an empty one).
+    const full = body && "model" in body ? body : lastBodies.get(id);
+    if (full) lastBodies.set(id, full);
+    return { body: { ...full, messages: messages.slice(-HISTORY) } };
+  },
 });
 
 /**
@@ -66,6 +81,8 @@ function chatFor(notebookId: string, conversationId: string, messages: ChatMessa
     id: conversationId,
     messages,
     transport,
+    // Once the user answers a file the AI asked to make, the answer carries on.
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onFinish: ({ messages: finished }) =>
       void saveChat({ id: conversationId, notebookId }, finished),
   });
@@ -196,7 +213,7 @@ function ChatRunner({
     [notebookId, mode, skills],
   );
 
-  const { sendMessage, regenerate, stop, messages, status, error } = chat;
+  const { sendMessage, regenerate, stop, messages, status, error, addToolOutput } = chat;
 
   const value = useMemo<ChatSession>(
     () => ({
@@ -219,6 +236,29 @@ function ChatRunner({
       stop: () => void stop(),
       startNew,
       open,
+      answerFile: async (toolCallId, approved) => {
+        const part = messages
+          .flatMap((message) => message.parts)
+          .find((each) => "toolCallId" in each && each.toolCallId === toolCallId);
+        if (!part || !("input" in part)) return;
+        const parsed = createFileInput.safeParse(part.input);
+        const output: CreateFileOutput = !approved
+          ? { ok: false, declined: true }
+          : parsed.success
+            ? await createFileFromTool(parsed.data, {
+                vaultId: (await store().getNotebook(notebookId))?.vaultId ?? DEFAULT_VAULT,
+                createdBy: "ai",
+              })
+            : { ok: false, error: parsed.error.message };
+        // After a reload there is no earlier request to reuse; build one for the carry-on.
+        if (!lastBodies.has(instance.id)) {
+          const question = textOf(
+            [...messages].reverse().find((message) => message.role === "user"),
+          );
+          lastBodies.set(instance.id, await requestFor(question));
+        }
+        await addToolOutput({ tool: "create_file", toolCallId, output } as never);
+      },
     }),
     [
       instance.id,
@@ -235,6 +275,8 @@ function ChatRunner({
       stop,
       startNew,
       open,
+      addToolOutput,
+      notebookId,
     ],
   );
 

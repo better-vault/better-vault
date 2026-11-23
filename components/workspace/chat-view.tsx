@@ -65,6 +65,7 @@ export function ChatView() {
               isLast={at === chat.messages.length - 1}
               onRetry={retry}
               onOpenPassage={(passage) => readSource(passage.sourceId, passage.chunkId)}
+              onAnswerFile={chat.answerFile}
             />
           ),
         )}
