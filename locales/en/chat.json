@@ -132,5 +132,33 @@
     "attached_one": "{{count}} skill",
     "attached_other": "{{count}} skills",
     "clear": "Remove skills from this chat"
+  },
+  "files": {
+    "title": "File",
+    "needsOk": "Make this file?",
+    "writing": "Writing…",
+    "make": "Make it",
+    "notNow": "Not now",
+    "saved": "Saved in your vault",
+    "download": "Download",
+    "showInVault": "Show in Vault",
+    "declined": "Not made",
+    "failed": "Couldn't make it: {{error}}",
+    "inFolder": "in {{folder}}",
+    "slides_one": "{{count}} slide",
+    "slides_other": "{{count}} slides",
+    "sheets_one": "{{count}} sheet",
+    "sheets_other": "{{count}} sheets",
+    "formats": {
+      "pdf": "PDF",
+      "docx": "Word document",
+      "xlsx": "Excel spreadsheet",
+      "pptx": "PowerPoint presentation",
+      "csv": "CSV",
+      "md": "Markdown",
+      "html": "Web page",
+      "txt": "Text",
+      "json": "JSON"
+    }
   }
 }
