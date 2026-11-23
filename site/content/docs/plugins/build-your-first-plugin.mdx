@@ -1,0 +1,83 @@
+---
+title: "Build your first plugin"
+description: "Build a better-vault Studio tool from an empty folder: write its manifest and page, try it in the app from a file, then submit it to the plugin directory."
+---
+
+This guide builds a small Studio tool, a word counter for the open notebook, and takes it from an empty folder to the plugin directory.
+
+<Steps>
+
+### Make the folder
+
+A plugin is a manifest and a few text files. Make a folder with a `manifest.json` and a `files` folder beside it.
+
+```text
+word-count/
+  manifest.json
+  files/
+    index.html
+    app.js
+```
+
+### Write the manifest
+
+The manifest says what the plugin is, what it asks for and where it shows. This one adds a Studio tool and asks to read sources.
+
+```json
+{
+  "manifestVersion": 2,
+  "id": "word-count",
+  "name": "Word count",
+  "version": "1.0.0",
+  "description": "How many words each source in the notebook holds.",
+  "author": "You",
+  "icon": "chart",
+  "permissions": ["read:sources"],
+  "tags": ["sources", "stats"],
+  "contributes": {
+    "panels": [
+      { "id": "count", "title": "Word count", "slot": "studio-tool", "entry": "index.html" }
+    ]
+  }
+}
+```
+
+[Manifest](/docs/plugins/manifest) describes every field.
+
+### Write the page
+
+The page is ordinary HTML. better-vault adds `window.betterVault` before your script runs, and puts the app's colours on `:root`, so `var(--foreground)` and friends match the app.
+
+```html
+<!doctype html>
+<html>
+  <body>
+    <h1>Word count</h1>
+    <ul id="list"></ul>
+    <script src="app.js"></script>
+  </body>
+</html>
+```
+
+```js
+const list = document.getElementById("list");
+const sources = await betterVault.call("sources.list", {});
+for (const source of sources) {
+  const { text } = await betterVault.call("sources.read", { sourceId: source.id });
+  const item = document.createElement("li");
+  item.textContent = `${source.title}: ${text.split(/\s+/).length} words`;
+  list.append(item);
+}
+```
+
+[Bridge API](/docs/plugins/bridge-api) lists everything a page can call.
+
+### Try it in the app
+
+Bundle the folder as one file, `word-count.bvplugin.json`, with the manifest and the files' text: `{ "manifest": { … }, "files": { "index.html": "…", "app.js": "…" } }`. In **Settings → Plugins → Installed**, choose **Install** and pick the file, then open the Studio: your tool is in the grid with a **Plugin** tag.
+
+### Submit it
+
+Fork [better-vault-plugins](https://github.com/better-vault/better-vault-plugins), copy your folder to `plugins/word-count/`, run `npm run validate`, and open a pull request. [Publish](/docs/plugins/publish) explains the review.
+
+</Steps>

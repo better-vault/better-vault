@@ -43,6 +43,14 @@ const downloadLink: LinkItemType = {
   active: "url",
 };
 
+/** The plugin directory, read live from the plugins repository. */
+const pluginsLink: LinkItemType = {
+  type: "main",
+  text: "Plugins",
+  url: "/plugins",
+  active: "nested-url",
+};
+
 /** Plans: free with your own keys, Pro and Max with Better Vault AI. */
 const pricingLink: LinkItemType = {
   type: "main",
@@ -101,7 +109,7 @@ const githubMenuLink: LinkItemType = {
 export const baseOptions: BaseLayoutProps = {
   nav: { title: navTitle, url: "/" },
   githubUrl: undefined,
-  links: [docsLink, pricingLink, roadmapLink, downloadLink, githubDocsLink, startLink],
+  links: [docsLink, pricingLink, roadmapLink, downloadLink, pluginsLink, githubDocsLink, startLink],
 };
 
 export const homeOptions: BaseLayoutProps = {
@@ -111,6 +119,7 @@ export const homeOptions: BaseLayoutProps = {
     pricingLink,
     roadmapLink,
     downloadLink,
+    pluginsLink,
     githubHomeLink,
     githubMenuLink,
     startLink,

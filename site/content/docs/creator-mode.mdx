@@ -3,9 +3,9 @@ title: "Creator mode"
 description: "Describe a panel or a theme in plain words and let an AI agent such as Claude Code build it as a better-vault plugin, using the desktop app's MCP server."
 ---
 
-Creator mode lets an AI agent build plugins for better-vault from a description: you say what you want, and the agent writes the panel or theme and installs it.
+Creator mode lets an AI agent build plugins for better-vault from a description: you say what you want, and the agent writes the Studio tool, panel, mod or theme and installs it.
 
-It follows the idea behind DeepSeek Harness's Creator Mode, where everything is a plugin. Before it writes anything, the agent looks at the running app: `describe_app` tells it the plugin format, the methods a panel can call, where panels can go and which colours a theme may set. So it works from the real app rather than guessing.
+It follows the idea behind DeepSeek Harness's Creator Mode, where everything is a plugin. Before it writes anything, the agent looks at the running app: `describe_app` tells it the plugin format, the methods a page can call, where pages can go, the hooks a mod can target and which colours a theme may set. So it works from the real app rather than guessing.
 
 ## Build a plugin with an agent
 
@@ -31,7 +31,7 @@ Clear requests give working plugins in fewer rounds.
 
 | Do this                      | For example                                                    |
 | ---------------------------- | -------------------------------------------------------------- |
-| Say where it goes            | "A Studio panel"                                               |
+| Say where it goes            | "A Studio tool"                                                |
 | Give numbers, not adjectives | "Show the 10 longest sources", "five colour styles"            |
 | Say what to leave out        | "No settings screen; keep the page minimal"                    |
 | Ask for real data            | "Use the notebook's sources, never sample data"                |

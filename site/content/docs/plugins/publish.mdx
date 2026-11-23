@@ -1,0 +1,36 @@
+---
+title: "Publish a plugin"
+description: "Submit a plugin to the better-vault directory with a pull request: how it is checked and reviewed, and how it appears in the app and on the site after merge."
+---
+
+Plugins reach the directory through a pull request to [better-vault-plugins](https://github.com/better-vault/better-vault-plugins), and appear in the app and on this site as soon as it is merged.
+
+<Steps>
+
+### Add your folder
+
+Fork the repository and add your plugin as `plugins/<id>/`, with `manifest.json`, a `files` folder, a `README.md` and, if you like, pictures in `screenshots/`. [CONTRIBUTING.md](https://github.com/better-vault/better-vault-plugins/blob/main/CONTRIBUTING.md) shows the layout.
+
+### Check it
+
+Run `npm install`, then `npm run validate`. It checks your manifest, your mod CSS and the size with the same rules as the app, and refuses pages that try to use the network.
+
+### Open a pull request
+
+Fill in the template: what the plugin does and why it asks for each permission. The same checks run on your pull request.
+
+</Steps>
+
+## Review
+
+A maintainer reads your code and tries the plugin. Reviews look for permissions that match what the plugin does, readable code with nothing minified, mods that keep the app usable in light and dark mode, and content you may share under the MIT licence.
+
+## After merge
+
+A workflow rebuilds `registry.json` and the plugin's bundle, with its SHA-256. The app's **Browse** tab and [better-vault.dev/plugins](/plugins) read that file, so your plugin appears within the hour, with no release of the app. The app checks the SHA-256 before it installs anything.
+
+To update your plugin, raise its `version` and open another pull request. Users see **Update** in the app.
+
+## Request a plugin
+
+If you have an idea but won't build it, [open a plugin request](https://github.com/better-vault/better-vault-plugins/issues/new?template=plugin-request.yml).

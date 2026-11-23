@@ -1,0 +1,13 @@
+{
+  "title": "Plugins",
+  "pages": [
+    "index",
+    "build-your-first-plugin",
+    "manifest",
+    "bridge-api",
+    "studio-tools",
+    "mods",
+    "themes",
+    "publish"
+  ]
+}

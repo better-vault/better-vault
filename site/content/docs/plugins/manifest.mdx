@@ -1,0 +1,49 @@
+---
+title: "Manifest"
+description: "Every field of a better-vault plugin manifest: its id, version, icon, permissions and tags, and the Studio tools, panels, mods and theme it contributes."
+---
+
+A plugin's manifest is a JSON file that says what the plugin is, what it may use and what it adds to the app.
+
+## Fields
+
+| Field             | What it holds                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `manifestVersion` | `2`. Plugins with `1` (panels and themes only) still install.                                           |
+| `id`              | Lowercase words joined by hyphens, such as `piano-coach`. It must match the folder in the directory.    |
+| `name`            | The name people see, 60 characters at most.                                                             |
+| `version`         | A version such as `1.0.0`. Raise it with every update.                                                  |
+| `description`     | One or two sentences, 500 characters at most.                                                           |
+| `author`          | Your name or your team's.                                                                               |
+| `icon`            | One of `puzzle`, `chart`, `table`, `book`, `calendar`, `note`, `palette`, `sparkles`, `code`, `globe`, `image`, `music`, `video`, `brain`, `clock`, `target`. |
+| `permissions`     | What the plugin may read or change; see the table below.                                                |
+| `tags`            | Up to eight words to find it by in the directory.                                                       |
+| `contributes`     | What it adds: `panels`, `mods` and `theme`. It needs at least one of them.                              |
+
+## Permissions
+
+| Permission       | Lets the plugin                                  |
+| ---------------- | ------------------------------------------------ |
+| `read:notebooks` | List the user's notebooks                        |
+| `read:sources`   | List a notebook's sources and read their text    |
+| `read:notes`     | List and read notes                              |
+| `read:skills`    | Read skills                                      |
+| `read:calendar`  | List calendar events                             |
+| `write:notes`    | Create notes                                     |
+| `write:calendar` | Add calendar events                              |
+| `use:ai`         | Ask the user's AI model with `ai.generate`       |
+
+The user can untick any of them when installing, so a plugin should still work, with less, when a permission is missing.
+
+## Contributions
+
+Each entry in `panels` is a page: `id`, `title`, `slot`, `entry` (one of the plugin's files, `index.html` by default) and, for Studio tools, a one-line `description`. The `slot` is where it shows:
+
+| Slot          | Where it shows                                                                  |
+| ------------- | ------------------------------------------------------------------------------- |
+| `studio-tool` | In the Studio's tools grid, beside the built-in tools, and full size when open. |
+| `studio`      | In the Studio sheet's Plugins group, as a smaller panel.                        |
+
+Each entry in `mods` is `id`, `title` and `file`, a CSS file among the plugin's files; [Mods](/docs/plugins/mods) explains them. The `theme` holds colours for `light` and `dark`; [Themes](/docs/plugins/themes) lists the tokens.
+
+A plugin's files together may be 2 MB at most.

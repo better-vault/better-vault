@@ -1,0 +1,31 @@
+---
+title: "Themes"
+description: "Recolour better-vault with a theme plugin: set the app's colour tokens for light and dark mode, using plain colours, with no code and nothing to load."
+---
+
+A theme sets the app's colour tokens, separately for light and dark mode, and runs no code.
+
+## Add one
+
+Put the colours under `contributes.theme`, as `light` and `dark` objects. Leave out any token you don't change.
+
+```json
+"theme": {
+  "light": { "background": "#f4eee2", "foreground": "#2c241b", "primary": "#8a4b23" },
+  "dark": { "background": "#1b1712", "foreground": "#ede3d1", "primary": "#e0a46b" }
+}
+```
+
+## Tokens
+
+| Tokens | What they colour |
+| ------ | ---------------- |
+| `background`, `foreground` | The page and its text |
+| `card`, `card-foreground`, `popover`, `popover-foreground` | Cards, menus and dialogs |
+| `primary`, `primary-foreground`, `secondary`, `secondary-foreground` | Buttons and selections |
+| `muted`, `muted-foreground`, `accent`, `accent-foreground` | Quiet surfaces and hovers |
+| `border`, `input`, `ring` | Lines, fields and focus rings |
+| `destructive`, `info`, `info-foreground`, `success`, `warning` | States |
+| `chart-1` to `chart-5` | Charts, folders and bots |
+
+Each value must be a plain colour: `#hex`, `rgb()`, `hsl()`, `oklch()` or `oklab()`. Pair a theme with a [mod](/docs/plugins/mods) when you also want to change type or shapes, as [Paper](/plugins/paper) does.

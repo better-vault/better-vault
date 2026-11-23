@@ -1,3 +1,4 @@
+import { listPlugins } from "@/lib/site/plugins";
 import { execFileSync } from "node:child_process";
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/site/config";
@@ -33,7 +34,7 @@ function lastModifiedByFile(paths: string[]): Map<string, Date> {
 }
 
 /** The landing page and every docs page. Canonical URLs only; the app is not listed. */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const home = "app/(home)/page.tsx";
   const download = "app/(home)/download/page.tsx";
   const privacy = "app/(home)/privacy/page.tsx";
@@ -48,6 +49,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     entry("/", home),
     entry("/download", download),
+    { url: absoluteUrl("/plugins") },
+    ...(await listPlugins()).map((plugin) => ({
+      url: absoluteUrl(`/plugins/${plugin.id}`),
+      ...(plugin.updatedAt ? { lastModified: new Date(plugin.updatedAt) } : {}),
+    })),
     entry("/pricing", pricing),
     entry("/privacy", privacy),
     entry("/terms", terms),

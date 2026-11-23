@@ -1,0 +1,30 @@
+---
+title: "Studio tools"
+description: "Make a Studio tool with a better-vault plugin: a page that sits in the Studio beside the built-in tools, uses the notebook, the AI model and its own storage."
+---
+
+A Studio tool is a plugin page that sits in the Studio's tools grid beside the built-in tools, and opens full size in the Studio tab with the open notebook as its context.
+
+## Add one
+
+Give a panel the `studio-tool` slot and a one-line `description`. The tool shows in the grid with its name, the plugin's icon and a **Plugin** tag.
+
+```json
+{
+  "id": "piano",
+  "title": "Piano coach",
+  "slot": "studio-tool",
+  "entry": "index.html",
+  "description": "Play, follow lessons and practise."
+}
+```
+
+## Make it useful
+
+A Studio tool can read the open notebook's sources with `sources.list` and `sources.read`, ask the user's model with `ai.generate`, and remember things with `storage.get` and `storage.set`. [Bridge API](/docs/plugins/bridge-api) lists them all.
+
+[Piano coach](/plugins/piano-coach) is a complete example: a keyboard drawn in HTML and played with Web Audio, lessons that light up the next key, best scores kept in storage, and exercises written by the user's model with a JSON Schema. Its source is in the [plugin directory](https://github.com/better-vault/better-vault-plugins/tree/main/plugins/piano-coach).
+
+## Look like the app
+
+The page gets the app's colour tokens as CSS variables on `:root`, and the `dark` class in dark mode, so use `var(--background)`, `var(--foreground)`, `var(--muted)`, `var(--primary)` and `var(--chart-1)` to `var(--chart-5)` rather than fixed colours. Listen to `betterVault.onContext` if you draw on a canvas and need to redraw when the theme changes.

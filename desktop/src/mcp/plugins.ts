@@ -170,7 +170,7 @@ export function pluginGuide() {
         "studio-tool":
           "A tool of its own in the Studio sheet's grid, beside the built-in tools; opens full size in the Studio tab.",
       },
-      mods: "CSS applied to the whole app while the plugin is on. It may not @import or load anything but data: pictures and fonts. Target the stable hooks: [data-bv=sidebar], [data-bv=notebook-topbar], [data-bv=notebook], [data-bv=prompt], [data-bv=chat], [data-bv=studio-tools], [data-bv=vault-toolbar], [data-bv=vault-grid], [data-bv=note-tabs], and the colour tokens (--background, --primary, --font-sans, --radius…).",
+      mods: "CSS applied to the whole app while the plugin is on. It may not @import or load anything but data: pictures and fonts. Target the stable hooks: [data-bv=sidebar], [data-bv=notebook-topbar], [data-bv=notebook], [data-bv=prompt], [data-bv=chat], [data-bv=studio-tools], [data-bv=vault-toolbar], [data-bv=vault-grid], [data-bv=note-tabs], and the tokens (--background, --primary, --radius, and --font-geist-sans for the app's font).",
       themeTokens,
       bridge: bridgeApi,
       sdk: sdkGuide,

@@ -35,7 +35,7 @@ You will also be able to choose the **language of answers and Studio outputs** s
 
 Plugins and Creator mode through MCP are the base for making better-vault your own. Next, **Creator mode in the app** lets you describe a panel, a workbench or a theme in a bot's chat; the bot builds it, shows it in the sandbox and refines it with you, without an outside agent.
 
-Plugins will get **more places to appear**: sidebars, chat commands and Studio tools of their own. **Sharing plugins** will make it easy to pass one on or install one from a link. **Synced customization** will carry your settings, themes and bots to your other devices through the same account sync as skills and plugins.
+Plugins can now add **Studio tools** of their own and **mods** that reshape the app, and the **plugin directory** lists reviewed plugins in the app and on the site. Next, plugins will get **more places to appear**: sidebars and chat commands. **Synced customization** will carry your settings, themes and bots to your other devices through the same account sync as skills and plugins.
 
 ## Edit and share
 

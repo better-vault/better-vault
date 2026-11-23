@@ -1,0 +1,42 @@
+---
+title: "Mods"
+description: "Reshape the whole better-vault app with a mod: CSS that targets its stable data-bv hooks and tokens, and loads nothing, for layouts, type and corners."
+---
+
+A mod is CSS for the whole app, like a [Zen Browser](https://zen-browser.app/mods/) mod: it can change the layout, spacing, corners and type, or hide parts, while its plugin is on.
+
+## Add one
+
+List the CSS file in the manifest's `mods`. A plugin can have up to ten.
+
+```json
+"mods": [{ "id": "terminal-layout", "title": "Monospaced, square, dashed", "file": "terminal.css" }]
+```
+
+## Target the hooks
+
+Class names change between versions, so target the stable `data-bv` hooks and the app's tokens instead.
+
+| Hook                         | What it marks                               |
+| ---------------------------- | ------------------------------------------- |
+| `[data-bv="sidebar"]`        | The vault sidebar                           |
+| `[data-bv="vault-toolbar"]`  | The Vault page's toolbar                    |
+| `[data-bv="vault-grid"]`     | The Vault page's grid of folders and files  |
+| `[data-bv="notebook"]`       | An open notebook, with its tabs             |
+| `[data-bv="notebook-topbar"]`| A notebook's top bar                        |
+| `[data-bv="chat"]`           | The notebook chat                           |
+| `[data-bv="prompt"]`         | The prompt bar                              |
+| `[data-bv="studio-tools"]`   | The Studio's tools grid                     |
+| `[data-bv="note-tabs"]`      | The Notes page's tabs                       |
+
+| Token                | What it sets                       |
+| -------------------- | ---------------------------------- |
+| `--font-geist-sans`  | The app's font                     |
+| `--radius`           | The base corner radius             |
+| `--background` and the other colour tokens | Colours (a theme is the better place for these) |
+
+## What a mod may not do
+
+A mod is checked when it installs and again before it is applied. It may not use `@import`, load anything but `data:` pictures and fonts with `url()`, use escaped characters, or script through CSS, and the app's Content-Security-Policy blocks other hosts as well. Turning the plugin off or uninstalling it removes the CSS at once.
+
+[Terminal](/plugins/terminal) is a complete example.

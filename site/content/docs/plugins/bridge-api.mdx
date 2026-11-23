@@ -1,0 +1,41 @@
+---
+title: "Bridge API"
+description: "What a better-vault plugin page can call through window.betterVault: notebooks, sources, notes, the calendar, the user's AI model and its own storage."
+---
+
+A plugin's page reaches the user's data through one function, `betterVault.call(method, params)`, which better-vault answers only as far as the user allowed.
+
+## Calling a method
+
+Each call returns a promise with the method's result, or rejects with a message that says why not, such as a permission the user didn't give.
+
+```js
+const notes = await betterVault.call("notes.list", {});
+```
+
+## Methods
+
+| Method           | Needs            | Takes                                                    | Returns                                     |
+| ---------------- | ---------------- | -------------------------------------------------------- | ------------------------------------------- |
+| `notebooks.list` | `read:notebooks` | nothing                                                  | Notebooks with their source counts          |
+| `sources.list`   | `read:sources`   | `notebookId` (the open notebook when left out)           | The notebook's sources                      |
+| `sources.read`   | `read:sources`   | `sourceId`                                               | A source's text                             |
+| `notes.list`     | `read:notes`     | nothing                                                  | Notes, without their text                   |
+| `notes.read`     | `read:notes`     | `id`                                                     | A note's Markdown                           |
+| `notes.create`   | `write:notes`    | `title`, `body`                                          | The new note                                |
+| `skills.list`    | `read:skills`    | nothing                                                  | Skills with their instructions              |
+| `calendar.list`  | `read:calendar`  | `from`, `to` (days, inclusive)                           | Events                                      |
+| `calendar.add`   | `write:calendar` | `title`, `start`, and optional `end`, `description`, `location` | The new event                        |
+| `ai.generate`    | `use:ai`         | `prompt`, optional `system` and `schema` (JSON Schema)   | `{ text }`, or `{ object }` with a schema   |
+| `storage.get`    | nothing          | `key`                                                    | What the plugin saved, or `null`            |
+| `storage.set`    | nothing          | `key`, `value` (`null` removes it)                       | `{ ok: true }`                              |
+
+`ai.generate` uses the model the user chose in the app, with their key, which the plugin never sees. Ask for a `schema` when you need data rather than prose. Storage is the plugin's own, kept on the user's device, 1 MB in all, and removed when the plugin is uninstalled.
+
+## Context and messages
+
+`betterVault.context` holds where the page runs: the open notebook, the theme, the app's colour tokens and the language. `betterVault.onContext(listener)` calls back when it changes, such as when the user switches to dark mode. `betterVault.toast(message)` shows a short message in the app.
+
+## The sandbox
+
+Pages can't use the network: `fetch`, pictures and fonts from servers are blocked. Put scripts, styles and pictures (as `data:` URLs) in the plugin's files. `<script src>` and `<link rel=stylesheet>` to your own files are put inline for you.
