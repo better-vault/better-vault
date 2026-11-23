@@ -53,6 +53,23 @@ export const bridgeApi = {
       "{ title: string, start: string, end?: string, description?: string, location?: string }",
     description: "Adds an event. start/end: YYYY-MM-DDTHH:mm (timed) or YYYY-MM-DD (all day).",
   },
+  "ai.generate": {
+    permission: "use:ai",
+    params: "{ prompt: string, system?: string, schema?: JSONSchema }",
+    description:
+      "Asks the user's chosen AI model. Returns { text }, or { object } matching the JSON Schema when one is given. The plugin never sees the model or the key.",
+  },
+  "storage.get": {
+    permission: null,
+    params: "{ key: string }",
+    description:
+      "A value this plugin saved earlier (its own storage, kept on this device), or null.",
+  },
+  "storage.set": {
+    permission: null,
+    params: "{ key: string, value: JSON }",
+    description: "Saves a value in this plugin's own storage (1 MB in all). null removes it.",
+  },
 } as const satisfies Record<
   string,
   { permission: PluginPermission | null; params: string; description: string }

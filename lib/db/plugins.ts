@@ -47,6 +47,8 @@ export async function setPluginEnabled(
   });
 }
 
+/** Removes a plugin and what it saved: its panels, theme and mods go with it at once. */
 export async function removePlugin(id: string): Promise<void> {
   await store().deletePlugin(id);
+  await store().putSetting(`plugin-data:${id}`, null);
 }

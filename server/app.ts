@@ -6,6 +6,8 @@ import { POST as chat } from "./routes/chat";
 import { POST as chatgpt } from "./routes/chatgpt";
 import { POST as models } from "./routes/models";
 import { POST as opencode } from "./routes/opencode";
+import { POST as pluginAi } from "./routes/plugin-ai";
+import { GET as pluginsRegistry, POST as pluginsBundle } from "./routes/plugins-registry";
 import { POST as skillsFetch } from "./routes/skills-fetch";
 import { POST as sourcesParse } from "./routes/sources-parse";
 import { POST as studio } from "./routes/studio";
@@ -31,6 +33,9 @@ export function createApi({ desktop = false }: { desktop?: boolean } = {}) {
   api.post("/chatgpt", (c) => chatgpt(c.req.raw));
   api.post("/models", (c) => models(c.req.raw));
   api.post("/opencode/detect", () => opencode());
+  api.post("/plugins/ai", (c) => pluginAi(c.req.raw));
+  api.get("/plugins/registry", (c) => pluginsRegistry(c.req.raw));
+  api.post("/plugins/bundle", (c) => pluginsBundle(c.req.raw));
   api.post("/skills/fetch", (c) => skillsFetch(c.req.raw));
   api.post("/sources/parse", (c) => sourcesParse(c.req.raw));
   api.post("/studio", (c) => studio(c.req.raw));

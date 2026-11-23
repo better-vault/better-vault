@@ -36,6 +36,7 @@ export function TopBar() {
     // the middle; on a narrow screen it gives way first and is shortened.
     <header
       data-window-bar
+      data-bv="notebook-topbar"
       className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-3 pt-3 pb-2 sm:grid-cols-[1fr_minmax(0,auto)_1fr] sm:gap-3 sm:px-4"
     >
       <div className="flex items-center justify-self-start">

@@ -79,6 +79,7 @@ export function VaultSidebar({
 
   return (
     <aside
+      data-bv="sidebar"
       aria-label={t("vaults.sidebar")}
       className="m-2 me-0 hidden w-60 shrink-0 flex-col rounded-3xl bg-muted/60 ring-1 ring-border/60 md:flex"
     >

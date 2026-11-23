@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { unsafeCss } from "./css";
 
 /**
  * A plugin: panels and themes that run inside better-vault. It follows
@@ -15,7 +16,8 @@ import { z } from "zod";
  * `.bvplugin.json` file. Either way they arrive turned off.
  */
 
-export const MANIFEST_VERSION = 1;
+/** The newest manifest format. Version 1 manifests (panels and themes only) still install. */
+export const MANIFEST_VERSION = 2;
 
 /** What a plugin may ask for. Reads are of the user's data; writes change it. */
 export const pluginPermissions = [
@@ -26,15 +28,17 @@ export const pluginPermissions = [
   "read:calendar",
   "write:notes",
   "write:calendar",
+  "use:ai",
 ] as const;
 export type PluginPermission = (typeof pluginPermissions)[number];
 
 /**
  * Where a plugin's panel shows. `studio`: in the Studio sheet's Plugins
- * group, opened in the Studio tab with the notebook as context. More slots
- * (sidebars, chat commands) are on the roadmap.
+ * group, opened in the Studio tab with the notebook as context.
+ * `studio-tool`: a tool of its own in the Studio sheet's grid, beside the
+ * built-in ones, with its description, opened full size in the Studio tab.
  */
-export const pluginSlots = ["studio"] as const;
+export const pluginSlots = ["studio", "studio-tool"] as const;
 export type PluginSlot = (typeof pluginSlots)[number];
 
 /** The colour tokens a theme may set (src/styles/tokens.css). */
@@ -113,10 +117,26 @@ export const panelSchema = z.object({
   slot: z.enum(pluginSlots),
   /** The file the panel opens: one of the plugin's `files`. */
   entry: z.string().max(200).default("index.html"),
+  /** One line under a Studio tool's name. */
+  description: z.string().max(140).optional(),
+});
+
+/**
+ * A mod: CSS for the whole app (as Zen Browser's mods are), to reshape its
+ * layout, spacing, corners and type, or hide parts. It can load nothing:
+ * `@import` and links to anything but `data:` are refused (lib/plugins/css.ts),
+ * and the app's Content-Security-Policy blocks other hosts as well. It targets
+ * the stable `data-bv` hooks on the app's main surfaces.
+ */
+export const modSchema = z.object({
+  id: z.string().regex(PLUGIN_ID),
+  title: z.string().min(1).max(60),
+  /** A CSS file among the plugin's `files`. */
+  file: z.string().max(200),
 });
 
 export const manifestSchema = z.object({
-  manifestVersion: z.literal(MANIFEST_VERSION),
+  manifestVersion: z.union([z.literal(1), z.literal(MANIFEST_VERSION)]),
   id: z.string().regex(PLUGIN_ID, "Use lowercase words joined by hyphens."),
   name: z.string().min(1).max(60),
   version: z.string().regex(/^\d+\.\d+\.\d+(?:-[\w.]+)?$/, "Use a version like 1.0.0."),
@@ -128,8 +148,14 @@ export const manifestSchema = z.object({
     .object({
       panels: z.array(panelSchema).max(10).default([]),
       theme: z.object({ light: palette.optional(), dark: palette.optional() }).optional(),
+      mods: z.array(modSchema).max(10).default([]),
     })
-    .refine((value) => value.panels.length > 0 || value.theme, "Add a panel or a theme."),
+    .refine(
+      (value) => value.panels.length > 0 || value.theme || value.mods.length > 0,
+      "Add a panel, a theme or a mod.",
+    ),
+  /** Words to find it by in the plugin directory. */
+  tags: z.array(z.string().max(30)).max(8).default([]),
 });
 export type PluginManifest = z.infer<typeof manifestSchema>;
 
@@ -156,6 +182,18 @@ export const pluginBundleSchema = z
           code: "custom",
           message: `Panel "${panel.id}" opens ${panel.entry}, which is not among the files.`,
         });
+    for (const mod of bundle.manifest.contributes.mods) {
+      const css = bundle.files[mod.file];
+      if (css === undefined)
+        ctx.addIssue({
+          code: "custom",
+          message: `Mod "${mod.id}" uses ${mod.file}, which is not among the files.`,
+        });
+      else {
+        const problem = unsafeCss(css);
+        if (problem) ctx.addIssue({ code: "custom", message: `Mod "${mod.id}": ${problem}` });
+      }
+    }
   });
 export type PluginBundle = z.infer<typeof pluginBundleSchema>;
 

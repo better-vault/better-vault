@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Sheet } from "@/components/panelui/sheet";
@@ -30,13 +31,16 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
   const { t } = useTranslation("studio");
   const { t: tCommon } = useTranslation();
   const { notebook, openOutput, openTool, openPluginPanel } = useWorkspace();
-  const panels = (usePlugins() ?? [])
-    .filter((plugin) => plugin.enabled)
-    .flatMap((plugin) =>
+  const enabledPlugins = (usePlugins() ?? []).filter((plugin) => plugin.enabled);
+  const panelsIn = (slot: "studio" | "studio-tool") =>
+    enabledPlugins.flatMap((plugin) =>
       plugin.manifest.contributes.panels
-        .filter((panel) => panel.slot === "studio")
+        .filter((panel) => panel.slot === slot)
         .map((panel) => ({ plugin, panel })),
     );
+  const panels = panelsIn("studio");
+  // Plugin Studio tools sit in the grid beside the built-in ones.
+  const pluginTools = panelsIn("studio-tool");
   const runner = useStudioRunner();
   const navigate = useNavigate();
   const settings = useSettings();
@@ -84,7 +88,7 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
               {t("allHidden")}
             </p>
           ) : null}
-          <div className="grid grid-cols-2 gap-2">
+          <div data-bv="studio-tools" className="grid grid-cols-2 gap-2">
             {shownTools.map((id) => (
               <ToolTile
                 key={id}
@@ -93,9 +97,38 @@ export function StudioSheet({ open, onOpenChange, trigger }: StudioSheetProps) {
                 badge={toolDefinitions[id]?.imageModel && noImageModel ? t("needsKey") : undefined}
                 // An odd one out spans the whole row.
                 className={
-                  shownTools.length % 2 === 1 && id === shownTools.at(-1) ? "col-span-2" : undefined
+                  (shownTools.length + pluginTools.length) % 2 === 1 &&
+                  pluginTools.length === 0 &&
+                  id === shownTools.at(-1)
+                    ? "col-span-2"
+                    : undefined
                 }
               />
+            ))}
+            {pluginTools.map(({ plugin, panel }, at) => (
+              <button
+                key={`${plugin.id}:${panel.id}`}
+                type="button"
+                onClick={() => openPluginPanel(plugin.id, panel.id)}
+                title={panel.description || plugin.manifest.description || panel.title}
+                data-bv="plugin-tool"
+                className={cn(
+                  "group relative flex h-14 cursor-pointer items-center gap-2.5 rounded-2xl bg-muted/70 px-3 text-start transition-[background-color,scale] duration-150 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]",
+                  (shownTools.length + pluginTools.length) % 2 === 1 &&
+                    at === pluginTools.length - 1 &&
+                    "col-span-2",
+                )}
+              >
+                <Icon
+                  icon={pluginIconSet[plugin.manifest.icon]}
+                  size={20}
+                  className="shrink-0 text-chart-5"
+                />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{panel.title}</span>
+                <span className="shrink-0 rounded-full bg-chart-5/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-chart-5">
+                  {t("plugins.tag")}
+                </span>
+              </button>
             ))}
           </div>
           {panels.length > 0 ? (

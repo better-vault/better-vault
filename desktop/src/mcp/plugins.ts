@@ -137,9 +137,9 @@ export function pluginGuide() {
   return {
     plugins: {
       about:
-        "Plugins add panels (sandboxed HTML pages) and themes to better-vault. Describe where a panel goes, what it shows, exact numbers and defaults, and what to leave out; use the user's real data through the bridge, never placeholders.",
+        "Plugins add Studio tools and panels (sandboxed HTML pages), mods (CSS for the whole app) and themes to better-vault. Describe where a panel goes, what it shows, exact numbers and defaults, and what to leave out; use the user's real data through the bridge, never placeholders. A Studio tool can ask the user's AI model with ai.generate (permission use:ai) and keep its own data with storage.get/set.",
       manifest: {
-        manifestVersion: 1,
+        manifestVersion: 2,
         id: "lowercase-words-joined-by-hyphens",
         name: "Shown name (60 characters at most)",
         version: "1.0.0",
@@ -148,8 +148,15 @@ export function pluginGuide() {
         permissions: pluginPermissions,
         contributes: {
           panels: [
-            { id: "panel-id", title: "Panel title", slot: pluginSlots, entry: "index.html" },
+            {
+              id: "panel-id",
+              title: "Panel title",
+              slot: pluginSlots,
+              entry: "index.html",
+              description: "One line under a Studio tool's name (studio-tool slot)",
+            },
           ],
+          mods: [{ id: "mod-id", title: "What it changes", file: "mod.css" }],
           theme: {
             light:
               "{ token: colour } with tokens from `themeTokens`; colours as #hex, rgb(), hsl() or oklch()",
@@ -160,7 +167,10 @@ export function pluginGuide() {
       slots: {
         studio:
           "The Studio sheet's Plugins group; opens in the Studio tab with the open notebook as context.",
+        "studio-tool":
+          "A tool of its own in the Studio sheet's grid, beside the built-in tools; opens full size in the Studio tab.",
       },
+      mods: "CSS applied to the whole app while the plugin is on. It may not @import or load anything but data: pictures and fonts. Target the stable hooks: [data-bv=sidebar], [data-bv=notebook-topbar], [data-bv=notebook], [data-bv=prompt], [data-bv=chat], [data-bv=studio-tools], [data-bv=vault-toolbar], [data-bv=vault-grid], [data-bv=note-tabs], and the colour tokens (--background, --primary, --font-sans, --radius…).",
       themeTokens,
       bridge: bridgeApi,
       sdk: sdkGuide,

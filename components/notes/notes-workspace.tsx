@@ -383,7 +383,10 @@ export default function NotesWorkspace() {
 
       {/* Tabs, then the open note or the graph. */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl bg-card ring-1 ring-border">
-        <div className="note-tabs-bar flex h-14 shrink-0 items-center gap-1 px-3">
+        <div
+          data-bv="note-tabs"
+          className="note-tabs-bar flex h-14 shrink-0 items-center gap-1 px-3"
+        >
           <button
             type="button"
             onClick={() => go("back")}

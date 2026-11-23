@@ -41,7 +41,7 @@ export function ChatView() {
       );
 
   return (
-    <ScrollArea className="h-full" viewportRef={scroller}>
+    <ScrollArea data-bv="chat" className="h-full" viewportRef={scroller}>
       <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 pt-4 pb-56 sm:px-6">
         {chat.messages.map((message, at) =>
           message.role === "user" ? (

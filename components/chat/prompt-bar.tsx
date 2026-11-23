@@ -54,7 +54,10 @@ export function PromptBar() {
   const status: PromptState = chat.status === "ready" ? "idle" : chat.status;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/80 to-transparent px-3 pt-8 pb-3 sm:px-4 sm:pb-4">
+    <div
+      data-bv="prompt"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-background via-background/80 to-transparent px-3 pt-8 pb-3 sm:px-4 sm:pb-4"
+    >
       <div className="pointer-events-auto mx-auto w-full max-w-3xl">
         <Prompt
           value={draft}

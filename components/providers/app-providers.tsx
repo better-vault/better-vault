@@ -3,6 +3,8 @@ import { AccountWatcher } from "@/components/account/welcome-dialog";
 import { CloudSyncRunner } from "@/components/account/cloud-sync-runner";
 import { CommandPalette } from "@/components/command/command-palette";
 import { OnboardingGate } from "@/components/onboarding/onboarding";
+import { PluginDialogs } from "@/components/plugins/plugin-dialog";
+import { PluginMods } from "@/components/plugins/plugin-mods";
 import { PluginThemes } from "@/components/plugins/plugin-themes";
 import { Sheet } from "@/components/panelui/sheet";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,6 +28,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <AccountWatcher />
           <CloudSyncRunner />
           <PluginThemes />
+          <PluginMods />
+          <PluginDialogs />
           <AppFont />
           <OnboardingGate />
         </TooltipProvider>

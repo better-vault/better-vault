@@ -366,6 +366,7 @@ export function NotebookHome() {
         {/* On the calendar, the calendar's own bar replaces this one (phones keep it for the menus). */}
         <header
           data-window-bar
+          data-bv="vault-toolbar"
           className={cn(
             "flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6",
             fullPage && "md:hidden",
@@ -546,7 +547,10 @@ export function NotebookHome() {
                       </div>
                     </div>
                   ) : view === "grid" ? (
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-x-4 gap-y-3">
+                    <div
+                      data-bv="vault-grid"
+                      className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-x-4 gap-y-3"
+                    >
                       {shownFolders.map((folder) => (
                         <FolderItem
                           key={folder.id}

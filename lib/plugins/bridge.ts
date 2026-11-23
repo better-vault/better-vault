@@ -2,6 +2,7 @@ import { calendarEntry, entriesBetween } from "@/lib/calendar/entries";
 import { calendarStore } from "@/lib/db/calendar";
 import { createNote, listNotes } from "@/lib/db/notes";
 import { listSkills } from "@/lib/db/skills";
+import { activeModel, credentialsFor, effortFor, getSettings } from "@/lib/db/settings";
 import { listSources } from "@/lib/db/sources";
 import { store } from "@/lib/db/store";
 import type { Plugin } from "@/lib/db/types";
@@ -47,7 +48,60 @@ const str = (value: unknown, name: string, max = 10_000): string => {
 const optional = (value: unknown, name: string, max = 10_000) =>
   value === undefined ? undefined : str(value, name, max);
 
+/** Where a plugin's own storage is kept: with the settings, under its id. */
+export const pluginStorageKey = (id: string) => `plugin-data:${id}`;
+const MAX_STORAGE = 1024 * 1024;
+
+async function pluginStorage(id: string): Promise<Record<string, unknown>> {
+  const saved = await store().getSetting(pluginStorageKey(id));
+  return saved && typeof saved === "object" ? (saved as Record<string, unknown>) : {};
+}
+
 const bridgeMethods: Record<BridgeMethod, MethodSpec> = {
+  "ai.generate": {
+    run: async (params) => {
+      const settings = await getSettings();
+      const model = activeModel(settings);
+      if (!model) throw new Error("The user has no AI model set up.");
+      const schema = params.schema;
+      if (
+        schema !== undefined &&
+        (typeof schema !== "object" || schema === null || Array.isArray(schema))
+      )
+        throw new Error('"schema" must be a JSON Schema object.');
+      const response = await fetch("/api/plugins/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: str(params.prompt, "prompt", 50_000),
+          system: optional(params.system, "system", 10_000),
+          schema,
+          model,
+          credentials: credentialsFor(settings, model.provider),
+          effort: effortFor(settings, model.provider),
+        }),
+      });
+      const body = (await response.json()) as { text?: string; object?: unknown; error?: string };
+      if (!response.ok) throw new Error(body.error ?? "The model did not answer.");
+      return body;
+    },
+  },
+  "storage.get": {
+    run: async (params, plugin) =>
+      (await pluginStorage(plugin.id))[str(params.key, "key", 200)] ?? null,
+  },
+  "storage.set": {
+    run: async (params, plugin) => {
+      const key = str(params.key, "key", 200);
+      const data = await pluginStorage(plugin.id);
+      if (params.value === null || params.value === undefined) delete data[key];
+      else data[key] = params.value;
+      if (JSON.stringify(data).length > MAX_STORAGE)
+        throw new Error("This plugin's storage is full (1 MB).");
+      await store().putSetting(pluginStorageKey(plugin.id), data);
+      return { ok: true };
+    },
+  },
   "notebooks.list": {
     run: async () => {
       const [notebooks, counts] = await Promise.all([

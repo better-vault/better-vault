@@ -73,6 +73,7 @@ function WorkspaceLayout() {
 
   return (
     <Tabs
+      data-bv="notebook"
       value={tab}
       onValueChange={(value) => setTab(value as WorkspaceTab)}
       className="h-full gap-0"

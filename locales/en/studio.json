@@ -759,6 +759,7 @@
   },
   "plugins": {
     "title": "Plugins",
-    "byline": "{{name}} · {{version}}"
+    "byline": "{{name}} · {{version}}",
+    "tag": "Plugin"
   }
 }
