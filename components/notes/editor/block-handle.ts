@@ -144,9 +144,12 @@ class BlockHandle {
     const top = this.lineTop(block.from);
     const line = this.view.lineBlockAt(block.from);
     const firstLine = Math.min(line.height, this.lineHeight(block.from));
-    // Beside the text in the margin; on a narrow pane, as far out as it fits.
-    const width = this.dom.offsetWidth || HANDLE_WIDTH;
-    const left = Math.max(2, this.contentStart() - width - 6);
+    // Its end sits just before where the block's text really starts (measured from
+    // the text itself, not the editor's padding, which differs between systems).
+    const end = this.textStart(block.from);
+    const width = this.dom.getBoundingClientRect().width || HANDLE_WIDTH;
+    const rtl = getComputedStyle(this.view.contentDOM).direction === "rtl";
+    const left = rtl ? end + 6 : Math.max(2, end - width - 6);
     this.dom.style.transform = `translate(${left}px, ${top + Math.max(0, (firstLine - 24) / 2)}px)`;
     this.dom.dataset.visible = "";
   }
@@ -167,6 +170,17 @@ class BlockHandle {
     const scroller = this.view.scrollDOM.getBoundingClientRect();
     const block = this.view.lineBlockAt(pos);
     return block.top + this.view.documentTop - scroller.top + this.view.scrollDOM.scrollTop;
+  }
+
+  /** Where the text of the line at `pos` starts, in the scroller's own coordinates. */
+  textStart(pos: number) {
+    const scroller = this.view.scrollDOM.getBoundingClientRect();
+    const line = this.view.state.doc.lineAt(pos);
+    const coords = this.view.coordsAtPos(line.from, 1);
+    const rtl = getComputedStyle(this.view.contentDOM).direction === "rtl";
+    if (!coords) return this.contentStart();
+    const edge = rtl ? coords.right : coords.left;
+    return edge - scroller.left + this.view.scrollDOM.scrollLeft;
   }
 
   contentStart() {
