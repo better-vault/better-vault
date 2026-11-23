@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UpdatesHost } from "@/components/updates/updates-host";
 import { I18nProvider } from "./i18n-provider";
+import { AppFont } from "./app-font";
 import { ThemeProvider } from "./theme-provider";
 
 /** Everything the app needs around every page. */
@@ -25,6 +26,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <AccountWatcher />
           <CloudSyncRunner />
           <PluginThemes />
+          <AppFont />
           <OnboardingGate />
         </TooltipProvider>
       </I18nProvider>

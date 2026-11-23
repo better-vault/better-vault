@@ -1,15 +1,19 @@
 import { ComputerIcon, Moon02Icon, Sun03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Field } from "@/components/common/field";
 import { Segmented } from "@/components/common/segmented";
 import { Icon } from "@/components/icon";
 import { BotAvatar } from "@/components/bot/bot-avatar";
 import { LookPicker } from "@/components/bot/look-picker";
+import { Button } from "@/components/panelui/button";
 import { Sheet } from "@/components/panelui/sheet";
 import { Switch } from "@/components/panelui/switch";
 import { useTheme, type Theme } from "@/components/providers/theme-provider";
 import { defaultAnswerAvatar, updateSettings, useSettings } from "@/lib/db/settings";
 import type { BotAvatar as BotLook } from "@/lib/db/types";
+import { FontError, fontAccept, removeAppFont, saveAppFont, useAppFont } from "@/lib/theme/font";
 import { accents } from "@/lib/theme/script";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +89,7 @@ export function AppearancePanel() {
               })}
             </div>
           </Field>
+          <FontField />
           <AnswerAvatarField />
         </div>
       </Sheet.Body>
@@ -119,5 +124,70 @@ function AnswerAvatarField() {
       </div>
       {avatar ? <LookPicker avatar={avatar} onChange={save} /> : null}
     </div>
+  );
+}
+
+/** Upload a font for the whole app, or go back to the app's own. */
+function FontField() {
+  const { t } = useTranslation("settings");
+  const font = useAppFont();
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function upload(file: File) {
+    setBusy(true);
+    try {
+      await saveAppFont(file);
+      toast.success(t("appearance.fontAdded", { name: file.name }));
+    } catch (error) {
+      toast.error(
+        error instanceof FontError && error.reason === "too-big"
+          ? t("appearance.fontTooBig")
+          : t("appearance.fontUnreadable"),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Field label={t("appearance.font")} hint={t("appearance.fontHint")}>
+      <div className="flex flex-col gap-3 rounded-2xl bg-muted/60 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-background text-lg font-semibold">
+            Aa
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate text-sm font-medium">
+              {font ? font.name : t("appearance.fontDefault")}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {font ? t("appearance.fontCustom") : t("appearance.fontBuiltIn")}
+            </span>
+          </div>
+        </div>
+        <input
+          ref={input}
+          type="file"
+          accept={fontAccept}
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void upload(file);
+          }}
+        />
+        <div className="flex gap-2 *:flex-1">
+          <Button size="sm" disabled={busy} onClick={() => input.current?.click()}>
+            {font ? t("appearance.fontReplace") : t("appearance.fontUpload")}
+          </Button>
+          {font ? (
+            <Button size="sm" variant="secondary" onClick={() => void removeAppFont()}>
+              {t("appearance.fontRemove")}
+            </Button>
+          ) : null}
+        </div>
+      </div>
+    </Field>
   );
 }
