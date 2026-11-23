@@ -49,12 +49,41 @@ export function KindBadge({
   kind,
   className,
   style,
+  bare = false,
 }: {
   kind: FileKind;
   className?: string;
   style?: CSSProperties;
+  /** Just the mark, with no disc behind it: for the tiles' corner. */
+  bare?: boolean;
 }) {
   const mark = marks[kind];
+  if (bare)
+    return (
+      <span
+        style={style}
+        className={cn(
+          "flex aspect-square items-center justify-center drop-shadow-[0_1px_2px_oklch(0_0_0/0.45)]",
+          className,
+        )}
+      >
+        {mark ? (
+          <img
+            src={mark}
+            alt=""
+            draggable={false}
+            // The Markdown mark is drawn in black; on dark surfaces it is drawn in white.
+            className={cn("size-full object-contain", kind === "markdown" && "dark:invert")}
+          />
+        ) : (
+          <Icon
+            icon={kindIcon(kind)}
+            strokeWidth={1.6}
+            className="size-full text-(--vault-sheet)"
+          />
+        )}
+      </span>
+    );
   return (
     <span
       style={style}
@@ -172,8 +201,10 @@ export function FolderArt({
         className="absolute inset-0"
         style={{
           ...pocketMask,
+          // The folder's own colour, as chosen when it was made: full strength at the top,
+          // a little deeper at the foot, with the same soft light as the grey folder.
           background: tint
-            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, var(--${tint}) 38%, var(--vault-front-from)), color-mix(in oklch, var(--${tint}) 22%, var(--vault-front-to)) 78%)`
+            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, var(--${tint}) 88%, var(--vault-sheet)), color-mix(in oklch, var(--${tint}) 80%, var(--vault-shade)) 80%)`
             : "radial-gradient(120% 85% at 45% 22%, var(--vault-front-from), var(--vault-front-to) 78%)",
         }}
       />
@@ -235,15 +266,9 @@ function Badges({ kinds }: { kinds: FileKind[] }) {
   const shown = kinds.slice(0, 2);
   if (shown.length === 0) return null;
   return (
-    <span className="absolute start-[5%] bottom-[7%] flex w-[26%]">
-      {shown.map((kind, at) => (
-        <KindBadge
-          key={kind}
-          kind={kind}
-          className={cn("w-[52%] shrink-0", at > 0 && "-ms-[18%]")}
-          // The first badge sits in front, as in the reference.
-          style={{ zIndex: shown.length - at }}
-        />
+    <span className="absolute start-[6%] bottom-[8%] flex w-[34%] gap-[8%]">
+      {shown.map((kind) => (
+        <KindBadge key={kind} kind={kind} bare className="w-[42%] shrink-0" />
       ))}
     </span>
   );
