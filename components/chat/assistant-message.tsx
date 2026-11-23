@@ -217,16 +217,12 @@ export function AssistantMessage({
     </Message>
   );
   if (avatar === undefined || avatar === null) return answer;
-  // The character sits beside the answer, at its foot; its column stays while
-  // the answer streams, so the text does not move when it appears.
+  // The character sits beside the answer, at its top, as in messaging apps;
+  // its column stays while the answer streams, so the text does not move.
   return (
-    <div className="flex items-end gap-3">
-      <div className="mb-1 flex w-[30px] shrink-0 justify-center self-stretch">
-        {!streaming && (text || hasVisual) ? (
-          <div className="mt-auto">
-            <AnswerAvatar avatar={avatar} fresh={isLast} />
-          </div>
-        ) : null}
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex w-[30px] shrink-0 justify-center">
+        {!streaming && (text || hasVisual) ? <AnswerAvatar avatar={avatar} fresh={isLast} /> : null}
       </div>
       <div className="min-w-0 flex-1">{answer}</div>
     </div>

@@ -8,6 +8,7 @@ import {
 import { useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Icon } from "@/components/icon";
 import { Alert } from "@/components/panelui/alert";
 import { Button } from "@/components/panelui/button";
@@ -274,37 +275,25 @@ function PluginDialogContent({ target }: { target: Target }) {
       </Dialog.Body>
       <Dialog.Footer>
         {installed && step === "details" && !updatable ? (
-          removing ? (
-            <>
-              <span className="me-auto text-sm text-muted-foreground">
-                {t("plugins.dialog.uninstallAsk")}
-              </span>
-              <Button variant="ghost" onClick={() => setRemoving(false)}>
-                {t("plugins.keep")}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  void removePlugin(installed.id).then(() => {
-                    toast.success(
-                      t("plugins.dialog.uninstalled", { name: installed.manifest.name }),
-                    );
-                    closePluginDialog();
-                  });
-                }}
-              >
-                {t("plugins.dialog.uninstall")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" className="me-auto" onClick={() => setRemoving(true)}>
-                <Icon icon={Delete02Icon} size={15} />
-                {t("plugins.dialog.uninstall")}
-              </Button>
-              <InstalledSwitch plugin={installed} chosen={chosen} />
-            </>
-          )
+          <>
+            <Button variant="ghost" className="me-auto" onClick={() => setRemoving(true)}>
+              <Icon icon={Delete02Icon} size={15} />
+              {t("plugins.dialog.uninstall")}
+            </Button>
+            <InstalledSwitch plugin={installed} chosen={chosen} />
+            <ConfirmDialog
+              open={removing}
+              onOpenChange={setRemoving}
+              title={t("plugins.dialog.uninstallTitle", { name: installed.manifest.name })}
+              body={t("plugins.dialog.uninstallBody")}
+              confirmLabel={t("plugins.dialog.uninstall")}
+              onConfirm={async () => {
+                await removePlugin(installed.id);
+                toast.success(t("plugins.dialog.uninstalled", { name: installed.manifest.name }));
+                closePluginDialog();
+              }}
+            />
+          </>
         ) : step === "details" ? (
           <>
             <Dialog.Close render={<Button variant="ghost" />}>

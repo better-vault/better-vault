@@ -40,8 +40,9 @@ export function PluginPanelView({ pluginId, panelId }: { pluginId: string; panel
           </p>
         </div>
       </header>
+      {/* The plugin's area: its own space, clipped to it, with no frame drawn around it. */}
       <div className="min-h-0 flex-1 px-2 pb-2 sm:px-4 sm:pb-4">
-        <div className="size-full overflow-hidden rounded-2xl border bg-background">
+        <div className="size-full overflow-hidden rounded-2xl">
           <PluginFrame
             plugin={plugin}
             panelId={panel.id}

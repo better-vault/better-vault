@@ -596,12 +596,13 @@
       "back": "Back",
       "source": "View its source on GitHub",
       "uninstall": "Uninstall",
-      "uninstallAsk": "Uninstall it? The app goes back to how it was.",
       "uninstalled": "Uninstalled {{name}}.",
       "installedOn": "Installed {{name}} and turned it on.",
       "downloadFailed": "Couldn't download it: {{error}}",
       "on": "On",
-      "off": "Off"
+      "off": "Off",
+      "uninstallTitle": "Uninstall {{name}}?",
+      "uninstallBody": "Its tools, panels, mods and theme are removed with everything it saved, and the app goes back to how it was."
     },
     "tabs": {
       "installed": "Installed",

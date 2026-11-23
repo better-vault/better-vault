@@ -445,8 +445,8 @@ function BotTurn({
 
   const finished = avatar !== null && blocks.some((block) => block.kind === "text");
   return (
-    <div className="flex items-end gap-2">
-      <div className="flex w-8 shrink-0 justify-center">
+    <div className="flex items-start gap-2">
+      <div className="flex w-8 shrink-0 justify-center pt-1">
         {finished ? <AnswerAvatar avatar={avatar} fresh={fresh} /> : null}
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
@@ -504,7 +504,7 @@ function BotTurn({
 function TypingIndicator({ bot }: { bot: Bot }) {
   const { t } = useTranslation("bot");
   return (
-    <div role="status" className="flex items-end gap-2">
+    <div role="status" className="flex items-start gap-2">
       <BotAvatar avatar={bot.avatar} size={32} mood="thinking" />
       <div
         aria-hidden
