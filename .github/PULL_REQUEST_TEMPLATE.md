@@ -16,4 +16,5 @@
 - [ ] UI text goes through `t()` and new strings are in `locales/en/*.json`
 - [ ] Icons come from Hugeicons and colours from theme tokens
 - [ ] Screenshots attached for UI changes (light and dark)
+- [ ] For UI changes: how it was checked for accessibility (keyboard, screen reader, zoom), as [ACCESSIBILITY.md](../ACCESSIBILITY.md) asks
 - [ ] `CHANGELOG.md` updated under "Unreleased" for user-facing changes
