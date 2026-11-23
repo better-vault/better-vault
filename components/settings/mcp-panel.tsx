@@ -1,5 +1,7 @@
 import {
   Calendar03Icon,
+  CodeIcon,
+  FilterHorizontalIcon,
   Copy01Icon,
   Files01Icon,
   MagicWand01Icon,
@@ -112,6 +114,7 @@ export function useMcpRunning(): boolean {
  */
 export function McpPanel() {
   const { t, i18n } = useTranslation("settings");
+  const { t: tCommon } = useTranslation();
   const bridge = desktopBridge();
   const [state, setState] = useState<McpState | null>(null);
   const [client, setClient] = useState<Client>("claude-code");
@@ -216,6 +219,27 @@ export function McpPanel() {
                   onChange={(value) => update({ [key]: value })}
                 />
               ))}
+            </div>
+          </Section>
+
+          <Section title={t("mcp.script.title")} hint={t("mcp.script.hint")}>
+            <div className="divide-y overflow-hidden rounded-2xl border">
+              <PermissionRow
+                icon={CodeIcon}
+                label={t("mcp.script.label")}
+                badge={tCommon("badges.beta")}
+                hint={t("mcp.script.labelHint")}
+                checked={state.vaultScript}
+                onChange={(vaultScript) => update({ vaultScript })}
+              />
+              <PermissionRow
+                icon={FilterHorizontalIcon}
+                label={t("mcp.script.only")}
+                hint={t("mcp.script.onlyHint")}
+                checked={state.vaultScript && state.vaultScriptOnly}
+                disabled={!state.vaultScript}
+                onChange={(vaultScriptOnly) => update({ vaultScriptOnly })}
+              />
             </div>
           </Section>
 
@@ -345,6 +369,7 @@ function Section({
 function PermissionRow({
   icon,
   label,
+  badge,
   hint,
   checked,
   disabled = false,
@@ -352,6 +377,8 @@ function PermissionRow({
 }: {
   icon: IconSvgElement;
   label: string;
+  /** A small tag after the label, such as "Beta". */
+  badge?: string;
   hint: string;
   checked: boolean;
   disabled?: boolean;
@@ -368,7 +395,14 @@ function PermissionRow({
         <Icon icon={icon} size={16} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium">{label}</span>
+        <span className="flex items-center gap-1.5 text-sm font-medium">
+          {label}
+          {badge ? (
+            <span className="rounded-full bg-info/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-info">
+              {badge}
+            </span>
+          ) : null}
+        </span>
         <span className="block text-xs text-muted-foreground">{hint}</span>
       </span>
       <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} />

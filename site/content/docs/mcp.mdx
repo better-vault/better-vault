@@ -41,7 +41,7 @@ Ask your agent about your notebooks. It starts with `describe_app`, which tells 
 
 | Part          | Read                                                                                     | Change (when allowed)                                                                  |
 | ------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Notebooks** | `list_vaults`, `list_folders`, `list_notebooks`                                          | `create_notebook`, `rename_notebook`                                                   |
+| **Notebooks** | `list_vaults`, `list_folders`, `list_notebooks`, `list_files`, `read_file`               | `create_notebook`, `rename_notebook`                                                   |
 | **Sources**   | `search_sources`, `read_source`                                                          | `add_source` (text, a link or a YouTube video), `set_source_selected`, `delete_source` |
 | **Notes**     | `list_notes`, `search_notes`, `read_note`, `list_backlinks`                              | `write_note`, `delete_note`                                                            |
 | **Skills**    | `list_skills`, `read_skill`, and each skill as a prompt                                  | `write_skill`, `delete_skill`                                                          |
@@ -52,3 +52,20 @@ Ask your agent about your notebooks. It starts with `describe_app`, which tells 
 Notes, sources and skills are also resources, at `note://`, `source://` and `skill://` addresses. [Creator mode](/docs/creator-mode) explains how an agent builds plugins.
 
 The web app can't run an MCP server, so Settings → MCP there links to the desktop app. **New token** in the same page stops every agent set up with the old one.
+
+## Vault script (beta)
+
+Vault script lets an agent write one short JavaScript program that calls the tools above, instead of calling them one at a time. The agent combines and filters the results in code and sends back only what it needs, so a task that took ten tool calls takes one, and uses far fewer tokens.
+
+Turn on **Allow Vault script** in Settings → MCP. Agents then get two more tools: `vault_api`, which lists the tools a script can call with their inputs, and `run_vault_script`, which runs the program. Turn on **Only list Vault script** as well to show agents just `describe_app` and the two script tools, which saves the most.
+
+A script looks like this:
+
+```js
+const notes = await tools.search_notes({ query: "photosynthesis" });
+const read = await Promise.all(notes.slice(0, 3).map((note) => tools.read_note({ id: note.id })));
+return read.map((note) => ({ title: note.title, words: note.body.split(/\s+/).length }));
+```
+
+Scripts run in a sandbox with no network, files or Node.js APIs, for at most 30 seconds. They reach your vault only through the same tools, so **Read only** and each area's switch still apply: a change that isn't allowed comes back as `{ error }` instead of being made.
+

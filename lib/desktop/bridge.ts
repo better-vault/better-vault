@@ -38,6 +38,10 @@ export interface McpState extends Record<McpPermission, boolean> {
   token: string;
   /** Agents may only read: every permission is off. */
   readOnly: boolean;
+  /** Vault script (beta): agents may run one sandboxed script instead of many tool calls. */
+  vaultScript: boolean;
+  /** With Vault script on, agents see only describe_app and the script tools. */
+  vaultScriptOnly: boolean;
   /** Why it could not start, such as the port being taken. */
   error: string | null;
   activity: McpActivity[];
@@ -78,7 +82,12 @@ export interface DesktopBridge {
     state(): Promise<McpState>;
     onState(listener: (state: McpState) => void): () => void;
     update(
-      patch: Partial<Pick<McpState, "enabled" | "port" | "readOnly" | McpPermission>>,
+      patch: Partial<
+        Pick<
+          McpState,
+          "enabled" | "port" | "readOnly" | "vaultScript" | "vaultScriptOnly" | McpPermission
+        >
+      >,
     ): Promise<McpState>;
     regenerateToken(): Promise<McpState>;
   };

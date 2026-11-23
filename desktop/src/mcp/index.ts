@@ -15,6 +15,7 @@ import { registerDescribeTool } from "./describe";
 import { registerNoteTools } from "./notes";
 import { registerNotebookTools } from "./notebooks";
 import { pluginGuide, registerPluginTools } from "./plugins";
+import { captureTools, registerScriptTools, type CapturedTool } from "./script";
 
 /**
  * A Model Context Protocol server in the desktop app, so AI agents (Claude
@@ -28,10 +29,16 @@ import { pluginGuide, registerPluginTools } from "./plugins";
  * exposed.
  */
 
-type McpSettings = { enabled: boolean; port: number; token: string; readOnly: boolean } & Record<
-  McpPermission,
-  boolean
->;
+type McpSettings = {
+  enabled: boolean;
+  port: number;
+  token: string;
+  readOnly: boolean;
+  /** Vault script (beta): agents may run one sandboxed script instead of many tool calls. */
+  vaultScript: boolean;
+  /** Only describe_app and the script tools are listed, which saves the most tokens. */
+  vaultScriptOnly: boolean;
+} & Record<McpPermission, boolean>;
 
 /** Each area's switch in Settings → MCP. */
 const permissionKeys = [
@@ -62,6 +69,8 @@ function loadSettings(): McpSettings {
     port: DEFAULT_PORT,
     token: newToken(),
     readOnly: false,
+    vaultScript: false,
+    vaultScriptOnly: false,
     allowNotebooks: true,
     allowSources: true,
     allowNotes: true,
@@ -119,6 +128,8 @@ export function startMcp(
       url: `http://127.0.0.1:${settings.port}/mcp`,
       token: settings.token,
       readOnly: settings.readOnly,
+      vaultScript: settings.vaultScript,
+      vaultScriptOnly: settings.vaultScriptOnly,
       ...Object.fromEntries(permissionKeys.map((key) => [key, settings[key]])),
       error,
       activity,
@@ -131,8 +142,13 @@ export function startMcp(
   /** One MCP server per request (stateless), so tools and skill prompts are always current. */
   function build(client: string): McpServer {
     const mcp = new McpServer({ name: "better-vault", version });
+    // Every tool is recorded for Vault script; with "only" on, agents see just the script tools.
+    const captured = new Map<string, CapturedTool>();
     const ctx: ToolContext = {
-      mcp,
+      mcp: captureTools(mcp, captured, {
+        exposeAll: !(settings.vaultScript && settings.vaultScriptOnly),
+        keep: new Set(["describe_app"]),
+      }),
       store,
       version,
       client,
@@ -151,6 +167,7 @@ export function startMcp(
     registerActivityTools(ctx);
     registerPluginTools(ctx);
     for (const group of groups) group(ctx);
+    if (settings.vaultScript) registerScriptTools(mcp, captured, ctx.log);
     return mcp;
   }
 
@@ -226,6 +243,10 @@ export function startMcp(
       ...settings,
       ...(typeof next.enabled === "boolean" ? { enabled: next.enabled } : {}),
       ...(typeof next.readOnly === "boolean" ? { readOnly: next.readOnly } : {}),
+      ...(typeof next.vaultScript === "boolean" ? { vaultScript: next.vaultScript } : {}),
+      ...(typeof next.vaultScriptOnly === "boolean"
+        ? { vaultScriptOnly: next.vaultScriptOnly }
+        : {}),
       ...Object.fromEntries(
         permissionKeys.flatMap((key) => (typeof next[key] === "boolean" ? [[key, next[key]]] : [])),
       ),

@@ -22,7 +22,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/code-mode": "^1.0.134",
     "@modelcontextprotocol/sdk": "^1.32.2",
+    "ai": "^7.0.177",
     "electron-updater": "^6.8.11",
     "zod": "^4.6.7"
   },

@@ -28,7 +28,8 @@
   },
   "badges": {
     "new": "New",
-    "soon": "Soon"
+    "soon": "Soon",
+    "beta": "Beta"
   },
   "sourceCount_one": "{{count}} source",
   "sourceCount_other": "{{count}} sources",

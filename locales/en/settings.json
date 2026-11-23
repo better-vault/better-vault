@@ -463,6 +463,14 @@
         "label": "Plugins",
         "hint": "Install plugins, turned off until you enable them"
       }
+    },
+    "script": {
+      "title": "Vault script",
+      "hint": "Agents write one short script that calls many tools, instead of calling them one by one. It runs in a sandbox and uses far fewer tokens.",
+      "label": "Allow Vault script",
+      "labelHint": "Adds vault_api and run_vault_script. Changes still follow the permissions above.",
+      "only": "Only list Vault script",
+      "onlyHint": "Agents see just describe_app and the script tools, which saves the most tokens."
     }
   },
   "subscription": {
