@@ -1,15 +1,67 @@
 import { useTranslation } from "react-i18next";
 import { Icon } from "@/components/icon";
 import type { PluginIcon } from "@/lib/plugins/manifest";
-import { pictureUrl } from "@/lib/plugins/registry";
+import { StarIcon } from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { avatarUrl, pictureUrl } from "@/lib/plugins/registry";
 import { cn } from "@/lib/utils";
 import { pluginIconSet } from "./plugin-icons";
 
 /**
- * A plugin as a card: its cover picture across the top, fading into the
- * card, its icon set over the cover's lower edge, then its name and a short
- * summary. Plugins without a cover get a soft gradient and a large icon.
+ * A plugin as a card, like a post: its cover picture across the top, fading
+ * into the card, its creator's GitHub avatar over the cover's lower edge,
+ * then its name, a short summary, the creator and the repository's stars.
+ * Plugins without a cover (installed from a file) get a soft gradient.
  */
+
+/** The creator's GitHub avatar, or the plugin's icon when there is none or it can't load. */
+export function CreatorAvatar({
+  owner,
+  icon,
+  className,
+}: {
+  owner?: string;
+  icon: PluginIcon;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span
+      className={cn(
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted",
+        className,
+      )}
+    >
+      {owner && !failed ? (
+        <img
+          src={avatarUrl(owner)}
+          alt=""
+          loading="lazy"
+          draggable={false}
+          onError={() => setFailed(true)}
+          className="size-full object-cover"
+        />
+      ) : (
+        <Icon icon={pluginIconSet[icon]} size={24} />
+      )}
+    </span>
+  );
+}
+
+/** "★ 128", the repository's stars. */
+export function Stars({ count, className }: { count: number; className?: string }) {
+  const { t, i18n } = useTranslation("settings");
+  return (
+    <span
+      className={cn("flex items-center gap-1 tabular-nums", className)}
+      title={t("plugins.card.stars", { count })}
+      aria-label={t("plugins.card.stars", { count })}
+    >
+      <Icon icon={StarIcon} size={13} />
+      {new Intl.NumberFormat(i18n.language, { notation: "compact" }).format(count)}
+    </span>
+  );
+}
 export function PluginCover({
   cover,
   icon,
@@ -48,10 +100,16 @@ export function PluginCard({
   cover,
   tags,
   status,
+  owner,
+  stars,
   onOpen,
 }: {
   name: string;
   author?: string;
+  /** The creator's GitHub login, for their avatar. */
+  owner?: string;
+  /** The repository's stars, when it is listed in the directory. */
+  stars?: number;
   summary: string;
   icon: PluginIcon;
   cover?: string;
@@ -70,11 +128,7 @@ export function PluginCard({
     >
       <PluginCover cover={cover} icon={icon} className="rounded-[1.15rem]" />
       <span className="relative -mt-9 flex items-end justify-between gap-3 px-3">
-        <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-card shadow-sm ring-4 ring-card">
-          <span className="flex size-full items-center justify-center rounded-full bg-muted">
-            <Icon icon={pluginIconSet[icon]} size={24} />
-          </span>
-        </span>
+        <CreatorAvatar owner={owner} icon={icon} className="size-14 shadow-sm ring-4 ring-card" />
         {status ? (
           <span
             className={cn(
@@ -98,6 +152,7 @@ export function PluginCard({
         <span className="line-clamp-2 text-sm text-muted-foreground">{summary}</span>
         <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {author ? <span>{t("plugins.card.by", { author })}</span> : null}
+          {stars !== undefined ? <Stars count={stars} /> : null}
           {tags.map((tag) => (
             <span key={tag} className="font-medium text-foreground/80">
               {tag}

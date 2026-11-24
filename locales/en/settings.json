@@ -576,9 +576,9 @@
       "meta": "{{version}} · by {{author}}",
       "unknownAuthor": "an unknown author",
       "thirdPartyTitle": "A third-party plugin",
-      "thirdPartyBody": "better-vault didn't write it. Plugins in the directory were reviewed before they were listed, but once on, a plugin can read and change what you allow below. Only install plugins you trust.",
+      "thirdPartyBody": "better-vault didn't write it. Plugins in the directory were reviewed before they were listed, but once on, a plugin can read and change what you allow above. Only install plugins you trust.",
       "unverifiedTitle": "An unverified plugin from a file",
-      "unverifiedBody": "Nobody reviewed this plugin. It runs in a sandbox, but once on it can read and change what you allow below. Install it only if you trust where it came from.",
+      "unverifiedBody": "Nobody reviewed this plugin. It runs in a sandbox, but once on it can read and change what you allow above. Install it only if you trust where it came from.",
       "adds": "What it adds",
       "addsTool": "A Studio tool: {{name}}",
       "addsPanel": "A Studio panel: {{name}}",
@@ -605,7 +605,10 @@
       "off": "Off",
       "uninstallTitle": "Uninstall {{name}}?",
       "uninstallBody": "Its tools, panels, mods and theme are removed with everything it saved, and the app goes back to how it was.",
-      "pictures": "What it looks like"
+      "pictures": "What it looks like",
+      "addsGraph": "A graph style: {{name}}",
+      "countGraph_one": "A graph style",
+      "countGraph_other": "{{count}} graph styles"
     },
     "tabs": {
       "installed": "Installed",
@@ -627,7 +630,10 @@
       "tool": "Studio tool",
       "panel": "Panel",
       "mod": "Mod",
-      "theme": "Theme"
+      "theme": "Theme",
+      "stars_one": "{{count}} star on GitHub",
+      "stars_other": "{{count}} stars on GitHub",
+      "graph": "Graph style"
     }
   }
 }

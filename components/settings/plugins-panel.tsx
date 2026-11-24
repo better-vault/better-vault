@@ -12,7 +12,12 @@ import { Tabs } from "@/components/panelui/tabs";
 import { usePlugins } from "@/lib/db/plugins";
 import { useRegistry } from "@/lib/plugins/directory";
 import { parsePluginBundle, type PluginManifest } from "@/lib/plugins/manifest";
-import { matchesSearch, REGISTRY_WEB, type RegistryEntry } from "@/lib/plugins/registry";
+import {
+  isNewerVersion,
+  matchesSearch,
+  REGISTRY_WEB,
+  type RegistryEntry,
+} from "@/lib/plugins/registry";
 
 /**
  * Settings → Plugins: what is installed, and the directory to find more.
@@ -117,23 +122,38 @@ function Installed({ query }: { query: string }) {
         <div className="flex flex-col gap-3">
           {shown.map((plugin) => {
             const listed = registry?.plugins.find((entry) => entry.id === plugin.id);
+            // The creator released a newer version through the directory.
+            const update = listed && isNewerVersion(listed.version, plugin.manifest.version);
             return (
               <PluginCard
                 key={plugin.id}
                 name={plugin.manifest.name}
                 author={
+                  listed?.owner ??
                   plugin.manifest.author ??
                   (plugin.updatedBy === "you" ? t("plugins.byYou") : plugin.updatedBy)
                 }
+                owner={listed?.owner}
+                stars={listed?.stars}
                 summary={plugin.manifest.description}
                 icon={plugin.manifest.icon}
                 cover={listed?.cover}
                 tags={addsOf(plugin.manifest, t)}
-                status={{
-                  label: plugin.enabled ? t("plugins.dialog.on") : t("plugins.dialog.off"),
-                  tone: plugin.enabled ? "on" : "off",
-                }}
-                onOpen={() => openPluginDialog({ kind: "installed", id: plugin.id })}
+                status={
+                  update
+                    ? { label: t("plugins.updateTag"), tone: "update" }
+                    : {
+                        label: plugin.enabled ? t("plugins.dialog.on") : t("plugins.dialog.off"),
+                        tone: plugin.enabled ? "on" : "off",
+                      }
+                }
+                onOpen={() =>
+                  openPluginDialog(
+                    update && listed
+                      ? { kind: "registry", entry: listed }
+                      : { kind: "installed", id: plugin.id },
+                  )
+                }
               />
             );
           })}
@@ -200,16 +220,18 @@ function Browse({ query }: { query: string }) {
               <PluginCard
                 key={entry.id}
                 name={entry.name}
-                author={entry.author}
+                author={entry.owner ?? entry.author}
+                owner={entry.owner}
+                stars={entry.stars}
                 summary={entry.description}
                 icon={entry.icon}
                 cover={entry.cover}
                 tags={countsOf(entry.adds, t)}
                 status={
                   have
-                    ? have.manifest.version === entry.version
-                      ? { label: t("plugins.installedTag"), tone: "on" }
-                      : { label: t("plugins.updateTag"), tone: "update" }
+                    ? isNewerVersion(entry.version, have.manifest.version)
+                      ? { label: t("plugins.updateTag"), tone: "update" }
+                      : { label: t("plugins.installedTag"), tone: "on" }
                     : undefined
                 }
                 onOpen={() => openPluginDialog({ kind: "registry", entry })}
@@ -240,6 +262,7 @@ function addsOf(manifest: PluginManifest, t: Translate): string[] {
     ...(panels.some((panel) => panel.slot === "studio") ? [t("plugins.card.panel")] : []),
     ...((mods ?? []).length ? [t("plugins.card.mod")] : []),
     ...(theme ? [t("plugins.card.theme")] : []),
+    ...(manifest.contributes.graph?.length ? [t("plugins.card.graph")] : []),
   ];
 }
 
@@ -249,5 +272,6 @@ function countsOf(adds: RegistryEntry["adds"], t: Translate): string[] {
     ...(adds.panels ? [t("plugins.card.panel")] : []),
     ...(adds.mods ? [t("plugins.card.mod")] : []),
     ...(adds.theme ? [t("plugins.card.theme")] : []),
+    ...(adds.graphStyles ? [t("plugins.card.graph")] : []),
   ];
 }

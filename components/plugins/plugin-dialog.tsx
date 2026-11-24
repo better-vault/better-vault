@@ -19,10 +19,9 @@ import { removePlugin, setPluginEnabled, usePlugins } from "@/lib/db/plugins";
 import type { Plugin } from "@/lib/db/types";
 import { fetchBundle, installConfirmed, useRegistry } from "@/lib/plugins/directory";
 import type { PluginBundle, PluginManifest, PluginPermission } from "@/lib/plugins/manifest";
-import { pictureUrl, REGISTRY_WEB, type RegistryEntry } from "@/lib/plugins/registry";
+import { isNewerVersion, pictureUrl, type RegistryEntry } from "@/lib/plugins/registry";
 import { cn } from "@/lib/utils";
-import { PluginCover } from "./plugin-card";
-import { pluginIconSet } from "./plugin-icons";
+import { CreatorAvatar, PluginCover, Stars } from "./plugin-card";
 
 /**
  * One dialog for a plugin, wherever it was chosen (the Plugins sheet, the
@@ -106,7 +105,9 @@ function PluginDialogContent({ target }: { target: Target }) {
 
   if (!manifest) return null;
   const updatable =
-    target.kind === "registry" && installed && installed.manifest.version !== target.entry.version;
+    target.kind === "registry" &&
+    installed &&
+    isNewerVersion(target.entry.version, installed.manifest.version);
 
   async function startInstall() {
     setBusy(true);
@@ -146,11 +147,12 @@ function PluginDialogContent({ target }: { target: Target }) {
         title={
           <span className="flex min-w-0 flex-col">
             <span className="truncate">{manifest.name}</span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
+            <span className="flex items-center gap-2 truncate text-xs font-normal text-muted-foreground">
               {t("plugins.dialog.meta", {
                 version: manifest.version,
-                author: manifest.author || t("plugins.dialog.unknownAuthor"),
+                author: listed?.owner ?? (manifest.author || t("plugins.dialog.unknownAuthor")),
               })}
+              {listed ? <Stars count={listed.stars} /> : null}
             </span>
           </span>
         }
@@ -159,26 +161,13 @@ function PluginDialogContent({ target }: { target: Target }) {
         <div className="flex flex-col gap-4">
           <div className="relative">
             <PluginCover cover={listed?.cover} icon={manifest.icon} className="rounded-2xl" />
-            <span className="absolute start-4 -bottom-5 flex size-14 items-center justify-center rounded-full bg-muted ring-4 ring-popover">
-              <Icon icon={pluginIconSet[manifest.icon]} size={24} />
-            </span>
+            <CreatorAvatar
+              owner={listed?.owner}
+              icon={manifest.icon}
+              className="absolute start-4 -bottom-5 size-14 ring-4 ring-popover"
+            />
           </div>
           <div className="h-2" />
-          <Alert tone={target.kind === "file" ? "destructive" : "warning"} variant="plain">
-            <Alert.Icon>
-              <Icon icon={Alert02Icon} />
-            </Alert.Icon>
-            <Alert.Title>
-              {target.kind === "file"
-                ? t("plugins.dialog.unverifiedTitle")
-                : t("plugins.dialog.thirdPartyTitle")}
-            </Alert.Title>
-            <Alert.Description>
-              {target.kind === "file"
-                ? t("plugins.dialog.unverifiedBody")
-                : t("plugins.dialog.thirdPartyBody")}
-            </Alert.Description>
-          </Alert>
 
           {step === "details" ? (
             <>
@@ -284,9 +273,9 @@ function PluginDialogContent({ target }: { target: Target }) {
             </label>
           ) : null}
 
-          {target.kind === "registry" ? (
+          {listed?.repo ? (
             <a
-              href={`${REGISTRY_WEB}/tree/main/plugins/${target.entry.id}`}
+              href={`https://github.com/${listed.repo}${listed.commit ? `/tree/${listed.commit}` : ""}`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
@@ -295,6 +284,23 @@ function PluginDialogContent({ target }: { target: Target }) {
               {t("plugins.dialog.source")}
             </a>
           ) : null}
+
+          {/* The third-party warning closes the dialog, beside the action it is about. */}
+          <Alert tone={target.kind === "file" ? "destructive" : "warning"} variant="plain">
+            <Alert.Icon>
+              <Icon icon={Alert02Icon} />
+            </Alert.Icon>
+            <Alert.Title>
+              {target.kind === "file"
+                ? t("plugins.dialog.unverifiedTitle")
+                : t("plugins.dialog.thirdPartyTitle")}
+            </Alert.Title>
+            <Alert.Description>
+              {target.kind === "file"
+                ? t("plugins.dialog.unverifiedBody")
+                : t("plugins.dialog.thirdPartyBody")}
+            </Alert.Description>
+          </Alert>
         </div>
       </Dialog.Body>
       <Dialog.Footer>
@@ -375,6 +381,9 @@ function describeAdds(
         .map((panel) => t("plugins.dialog.addsPanel", { name: panel.title })),
       ...(mods ?? []).map((mod) => t("plugins.dialog.addsMod", { name: mod.title })),
       ...(theme ? [t("plugins.dialog.addsTheme")] : []),
+      ...(manifest.contributes.graph ?? []).map((style) =>
+        t("plugins.dialog.addsGraph", { name: style.title }),
+      ),
     ];
   }
   if (target.kind !== "registry") return [];
@@ -384,5 +393,6 @@ function describeAdds(
     ...(adds.panels ? [t("plugins.dialog.countPanels", { count: adds.panels })] : []),
     ...(adds.mods ? [t("plugins.dialog.countMods", { count: adds.mods })] : []),
     ...(adds.theme ? [t("plugins.dialog.addsTheme")] : []),
+    ...(adds.graphStyles ? [t("plugins.dialog.countGraph", { count: adds.graphStyles })] : []),
   ];
 }
