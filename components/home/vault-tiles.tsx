@@ -178,7 +178,7 @@ export function FolderArt({
       {shown.map((sheet, at) => (
         <span
           key={at}
-          className="vault-sheet absolute flex items-start bg-(--vault-sheet) p-[5%] shadow-[0_1px_2px_oklch(0_0_0/0.25)]"
+          className="vault-sheet absolute flex items-start bg-(--vault-sheet) p-[5%] shadow-[0_1px_2px_oklch(0_0_0/0.25),0_0_0_1px_var(--vault-sheet-edge)]"
           style={
             {
               left: sheet.left,
@@ -204,7 +204,7 @@ export function FolderArt({
           // The folder's own colour, as chosen when it was made, as frosted glass: the
           // sheets behind show through, blurred. Lighter at the top, deeper at the foot.
           background: tint
-            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, color-mix(in oklch, var(--${tint}) 88%, var(--vault-sheet)) 74%, transparent), color-mix(in oklch, color-mix(in oklch, var(--${tint}) 80%, var(--vault-shade)) 84%, transparent) 80%)`
+            ? `radial-gradient(120% 85% at 45% 22%, color-mix(in oklch, color-mix(in oklch, var(--${tint}) 88%, var(--vault-sheet)) var(--vault-glass), transparent), color-mix(in oklch, color-mix(in oklch, var(--${tint}) 80%, var(--vault-shade)) var(--vault-glass-deep), transparent) 80%)`
             : "radial-gradient(120% 85% at 45% 22%, var(--vault-front-from), var(--vault-front-to) 78%)",
           backdropFilter: "blur(9px) saturate(1.5)",
           WebkitBackdropFilter: "blur(9px) saturate(1.5)",

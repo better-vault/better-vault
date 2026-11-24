@@ -63,7 +63,12 @@
   --vault-sheet: oklch(1 0 0);
   --vault-sheet-ink: oklch(0.82 0 0);
   --vault-shade: oklch(0.12 0 0);
-  --vault-back: oklch(0.145 0 0 / 0.05);
+  --vault-back: oklch(0.145 0 0 / 0.1);
+  /* A hairline round each sheet, so white paper shows against a light page, and how
+     much of the folder's colour the glass holds (less in light mode, so it reads as glass). */
+  --vault-sheet-edge: oklch(0 0 0 / 0.14);
+  --vault-glass: 62%;
+  --vault-glass-deep: 78%;
   --vault-front-from: oklch(0.8 0 0 / 0.74);
   --vault-front-to: oklch(0.62 0 0 / 0.86);
   --primary: oklch(0.205 0 0);
@@ -100,6 +105,9 @@
   --vault-sheet: oklch(0.97 0 0);
   --vault-sheet-ink: oklch(0.8 0 0);
   --vault-back: oklch(1 0 0 / 0.06);
+  --vault-sheet-edge: oklch(0 0 0 / 0);
+  --vault-glass: 74%;
+  --vault-glass-deep: 84%;
   --vault-front-from: oklch(0.56 0 0 / 0.72);
   --vault-front-to: oklch(0.29 0 0 / 0.86);
   --primary: oklch(0.922 0 0);
