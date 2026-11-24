@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Alert02Icon, ArrowLeft01Icon, Github01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowLeft01Icon, Github01Icon, StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { buttonVariants } from "@/components/panelui/button";
 import { PluginIcon } from "@/components/site/plugins/plugin-icon";
 import { absoluteUrl } from "@/lib/site/config";
 import {
+  avatarUrl,
   describeAdds,
   getPlugin,
   listPlugins,
@@ -50,17 +51,39 @@ export default async function PluginPage({ params }: Props) {
           All plugins
         </Link>
 
-        <header className="flex items-start gap-4">
-          <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-muted">
-            <PluginIcon icon={plugin.icon} className="size-7" />
-          </span>
-          <div className="flex min-w-0 flex-col gap-1">
+        {plugin.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element -- pictures from the plugins repo
+          <img
+            src={rawUrl(plugin.cover)}
+            alt=""
+            className="aspect-[1200/630] w-full rounded-2xl border object-cover object-top"
+          />
+        ) : null}
+
+        <header className="flex items-center gap-4">
+          {plugin.owner ? (
+            // eslint-disable-next-line @next/next/no-img-element -- the creator's GitHub avatar
+            <img
+              src={avatarUrl(plugin.owner, 128)}
+              alt=""
+              className="size-14 shrink-0 rounded-xl bg-muted"
+            />
+          ) : (
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted">
+              <PluginIcon icon={plugin.icon} className="size-6" />
+            </span>
+          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             <h1 className="font-heading text-3xl font-semibold tracking-tight">{plugin.name}</h1>
             <p className="text-sm text-muted-foreground">
-              by {plugin.author || "an unknown author"} · version {plugin.version}
+              by {plugin.owner ?? (plugin.author || "an unknown author")} · version {plugin.version}
               {updated ? ` · updated ${updated}` : ""}
             </p>
           </div>
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+            <HugeiconsIcon icon={StarIcon} className="size-4" aria-hidden="true" />
+            {plugin.stars}
+          </span>
         </header>
 
         <p className="text-lg text-pretty">{plugin.description}</p>
@@ -73,15 +96,6 @@ export default async function PluginPage({ params }: Props) {
             ))}
           </div>
         ) : null}
-
-        <div className="flex gap-3 rounded-2xl border border-warning/40 bg-warning/5 p-4 text-sm">
-          <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <p>
-            <strong className="font-medium">A third-party plugin.</strong> better-vault didn&apos;t
-            write it. It was reviewed before it was listed and runs in a sandbox, but once on it can
-            read and change what you allow. Only install plugins you trust.
-          </p>
-        </div>
 
         <section className="grid gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
@@ -118,7 +132,11 @@ export default async function PluginPage({ params }: Props) {
               Get better-vault
             </Link>
             <a
-              href={`${pluginsRepo}/tree/main/plugins/${plugin.id}`}
+              href={
+                plugin.repo
+                  ? `https://github.com/${plugin.repo}${plugin.commit ? `/tree/${plugin.commit}` : ""}`
+                  : pluginsRepo
+              }
               className={buttonVariants({ variant: "outline" })}
             >
               <HugeiconsIcon icon={Github01Icon} aria-hidden="true" />
@@ -126,6 +144,15 @@ export default async function PluginPage({ params }: Props) {
             </a>
           </div>
         </section>
+
+        <div className="flex gap-3 rounded-2xl border border-warning/40 bg-warning/5 p-4 text-sm">
+          <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <p>
+            <strong className="font-medium">A third-party plugin.</strong> better-vault didn&apos;t
+            write it. It was reviewed before it was listed and runs in a sandbox, but once on it can
+            read and change what you allow. Only install plugins you trust.
+          </p>
+        </div>
       </article>
     </main>
   );

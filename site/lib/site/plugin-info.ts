@@ -41,9 +41,26 @@ export const entry = z.object({
       panels: z.number().default(0),
       mods: z.number().default(0),
       theme: z.boolean().default(false),
+      graphStyles: z.number().default(0),
     })
-    .default({ studioTools: 0, panels: 0, mods: 0, theme: false }),
+    .default({ studioTools: 0, panels: 0, mods: 0, theme: false, graphStyles: 0 }),
+  /** The card's header picture and the pictures of it at work (paths in the directory repo). */
+  cover: z.string().max(200).optional(),
   screenshots: z.array(z.string().max(200)).max(6).default([]),
+  /** The creator's repository, the reviewed commit, its owner and its stars. */
+  repo: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{1,39}\/[\w.-]{1,100}$/)
+    .optional(),
+  commit: z
+    .string()
+    .regex(/^[0-9a-f]{40}$/)
+    .optional(),
+  owner: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{1,39}$/)
+    .optional(),
+  stars: z.number().int().nonnegative().default(0),
   size: z.number().default(0),
   updatedAt: z.string().default(""),
 });
@@ -51,6 +68,20 @@ export type PluginEntry = z.infer<typeof entry>;
 
 /** A picture in the plugin repo, as a URL. */
 export const rawUrl = (path: string) => `${RAW}${path}`;
+
+/** A creator's GitHub avatar. */
+export const avatarUrl = (login: string, size = 64) =>
+  `https://github.com/${encodeURIComponent(login)}.png?size=${size}`;
+
+/** Which kind of plugin it is, for the gallery's tabs. */
+export type PluginKind = "tools" | "mods" | "themes";
+export function kindsOf(adds: PluginEntry["adds"]): PluginKind[] {
+  return [
+    ...(adds.studioTools || adds.panels ? (["tools"] as const) : []),
+    ...(adds.mods ? (["mods"] as const) : []),
+    ...(adds.theme || adds.graphStyles ? (["themes"] as const) : []),
+  ];
+}
 
 /** What each permission lets a plugin do, as the app says it. */
 export const permissionLabels: Record<string, string> = {
@@ -73,5 +104,6 @@ export function describeAdds(adds: PluginEntry["adds"]): string[] {
     ...(adds.panels ? [plural(adds.panels, "Studio panel", "Studio panels")] : []),
     ...(adds.mods ? [plural(adds.mods, "mod", "mods")] : []),
     ...(adds.theme ? ["Theme"] : []),
+    ...(adds.graphStyles ? [plural(adds.graphStyles, "graph style", "graph styles")] : []),
   ];
 }

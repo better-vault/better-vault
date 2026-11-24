@@ -1,35 +1,52 @@
 ---
 title: "Publish a plugin"
-description: "Submit a plugin to the better-vault directory with a pull request: how it is checked and reviewed, and how it appears in the app and on the site after merge."
+description: "List a plugin from your own GitHub repository in the better-vault directory, prove that you own it, and release updates that only you are able to publish."
 ---
 
-Plugins reach the directory through a pull request to [better-vault-plugins](https://github.com/better-vault/better-vault-plugins), and appear in the app and on this site as soon as it is merged.
+Your plugin lives in your own public GitHub repository, and the [better-vault-plugins](https://github.com/better-vault/better-vault-plugins) directory lists it at a commit you choose. It appears in the app and on [better-vault.dev/plugins](/plugins) as soon as the listing is merged, with your GitHub avatar and your repository's stars.
 
 <Steps>
 
-### Add your folder
+### Prepare your repository
 
-Fork the repository and add your plugin as `plugins/<id>/`, with `manifest.json`, a `files` folder, a `README.md` and, if you like, pictures in `screenshots/`. [CONTRIBUTING.md](https://github.com/better-vault/better-vault-plugins/blob/main/CONTRIBUTING.md) shows the layout.
+Put `manifest.json`, a `files` folder, a `README.md` and an MIT `LICENSE` at the root of your repository. Add `cover.png`, 1200 × 630, for your card's header, and one to six pictures of the plugin at work in `screenshots/`. Both are required: a plugin without a cover or a screenshot is refused. Show sample data in them, never your own notes or sources.
+
+### Add your listing
+
+Push your plugin, then copy the full 40-character SHA of the commit to list with `git rev-parse HEAD`. Fork the directory and add `plugins/<id>.json`, named after your plugin's id:
+
+```json
+{
+  "repo": "your-name/your-plugin",
+  "commit": "0123456789abcdef0123456789abcdef01234567"
+}
+```
 
 ### Check it
 
-Run `npm install`, then `npm run validate`. It checks your manifest, your mod CSS and the size with the same rules as the app, and refuses pages that try to use the network.
+Run `npm install`, then `npm run validate` in the directory. It downloads that commit and checks the manifest, the mod CSS, the pictures and the size with the same rules as the app, and refuses pages that try to use the network.
 
 ### Open a pull request
 
-Fill in the template: what the plugin does and why it asks for each permission. The same checks run on your pull request.
+Fill in the template: what the plugin does and why it asks for each permission. The same checks run on your pull request, with one more.
 
 </Steps>
 
+## Ownership
+
+The pull request's checks confirm that **you own the repository you list**. For a repository under your account, the pull request must come from you; for one in an organization, you must be a public member of that organization. Nobody can list your work, or change your listing, without that access.
+
 ## Review
 
-A maintainer reads your code and tries the plugin. Reviews look for permissions that match what the plugin does, readable code with nothing minified, mods that keep the app usable in light and dark mode, and content you may share under the MIT licence.
+A maintainer reads your code at the listed commit and tries the plugin. Reviews look for permissions that match what the plugin does, readable code with nothing minified, mods that keep the app usable in light and dark mode, pictures that show what it really does, and content you may share under the MIT licence.
+
+## Updates
+
+To release an update, raise `version` in your manifest, push, and open a pull request that changes only the `commit` in your listing. The same ownership check runs, so only you can update your plugin, and an update can't move the listing to another repository. Once it is merged, people who installed your plugin see **Update** in Settings → Plugins.
 
 ## After merge
 
-A workflow rebuilds `registry.json` and the plugin's bundle, with its SHA-256. The app's **Browse** tab and [better-vault.dev/plugins](/plugins) read that file, so your plugin appears within the hour, with no release of the app. The app checks the SHA-256 before it installs anything.
-
-To update your plugin, raise its `version` and open another pull request. Users see **Update** in the app.
+A workflow downloads each listed commit, rebuilds the plugin's bundle with its SHA-256, copies its pictures, and records your repository's stars in `registry.json`. It runs on every merge and every six hours, so stars stay current. The app's **Browse** tab and this site read that file, so a plugin or update appears within the hour, with no release of the app. The app checks the SHA-256 before it installs anything.
 
 ## Request a plugin
 

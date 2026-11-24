@@ -10,7 +10,7 @@ import { listPlugins, pluginsRepo } from "@/lib/site/plugins";
 export const metadata: Metadata = {
   title: "Plugins",
   description:
-    "Browse better-vault plugins: Studio tools, mods and themes that extend the app, each reviewed before it is listed. Search, read the details and install from the app.",
+    "Browse better-vault plugins: Studio tools, mods and themes from their creators' repositories, each reviewed before it is listed. Search, sort and install from the app.",
   alternates: { canonical: absoluteUrl("/plugins") },
 };
 
@@ -19,34 +19,37 @@ export default async function PluginsPage() {
   const plugins = await listPlugins();
   return (
     <main className="flex flex-1 flex-col">
-      <section className="flex flex-col items-center px-6 pt-32 pb-12 text-center sm:pt-40">
-        <div className="flex w-full max-w-3xl flex-col items-center gap-6">
-          <p className="rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-            Reviewed · Sandboxed · Open source
-          </p>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-            Plugins
-          </h1>
-          <p className="max-w-2xl text-lg text-balance text-muted-foreground">
-            Studio tools, mods and themes that extend better-vault. Each one was reviewed before it
-            was listed, runs in a sandbox, and can only use what you allow.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/docs/plugins" className={buttonVariants({ size: "lg" })}>
-              Build a plugin
-            </Link>
-            <a
-              href={`${pluginsRepo}/issues/new/choose`}
-              className={buttonVariants({ size: "lg", variant: "outline" })}
-            >
-              Request a plugin
-              <HugeiconsIcon icon={ArrowUpRight01Icon} aria-hidden="true" />
-            </a>
+      <section className="px-6 pt-32 pb-12 sm:pt-40">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_minmax(0,24rem)] lg:items-end">
+          <div className="flex flex-col gap-6">
+            <p className="text-sm font-medium text-muted-foreground">Plugins</p>
+            <h1 className="font-heading text-5xl font-semibold tracking-tight text-balance sm:text-7xl">
+              Make it yours.
+              <span className="block text-muted-foreground">Tools, mods and themes.</span>
+            </h1>
+          </div>
+          <div className="flex flex-col gap-5">
+            <p className="text-lg text-pretty text-muted-foreground">
+              Each plugin lives in its creator&apos;s own repository and was reviewed before it was
+              listed. It runs in a sandbox and can only use what you allow.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/docs/plugins/publish" className={buttonVariants({ size: "lg" })}>
+                Share yours
+              </Link>
+              <a
+                href={`${pluginsRepo}/issues/new/choose`}
+                className={buttonVariants({ size: "lg", variant: "outline" })}
+              >
+                Request a plugin
+                <HugeiconsIcon icon={ArrowUpRight01Icon} aria-hidden="true" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
-      <section className="border-t px-6 py-12">
-        <div className="mx-auto max-w-5xl">
+      <section className="px-6 pb-20">
+        <div className="mx-auto max-w-6xl">
           {plugins.length ? (
             <PluginSearch plugins={plugins} />
           ) : (

@@ -8,6 +8,7 @@ import { entry, RAW, type PluginEntry } from "./plugin-info";
  * shows up here without a redeploy.
  */
 export {
+  avatarUrl,
   describeAdds,
   permissionLabels,
   pluginsRepo,
