@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-24
+
 ### Added
 
 - Whiteboard **Ask AI**: from the board's menu, ask in one line or by voice, and the answer is written and drawn on the board by hand behind a pen: headings, text, lists, steps, tables, formulas, notes, flows and small drawings, in the hand font (Aref Ruqaa for Arabic). It ends as one group and one undo step.
@@ -17,10 +19,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Appearance: upload a font for the whole app, and remove it again; choose the character shown beside the chat's finished answers.
 - Bots: sixteen new accessories and six colours, in rows that scroll.
 - An accessibility statement (ACCESSIBILITY.md) and an issue template for barriers.
-- Whiteboard: right-click a selection to ask the AI about it (in your words, or explain, make a table, quiz me, check it on the web), or to copy, duplicate, group, order, lock or delete it. The AI sees the selection's words and a picture of it, can search the web with its provider's own search, and lists its sources. Voice input also works with a Google key.
+- Whiteboard: right-click a selection to ask the AI about it (in your words, or explain, make a table, quiz me, check it on the web), or to copy, duplicate, group, order, lock or delete it. The AI sees the selection's words and a picture of it, can search the web with its provider's own search, and lists its sources.
 - Notes: tables, horizontal rules, pictures and `$$` formulas are drawn in place while the file stays Markdown; click one to edit its source.
 - The Notes graph has looks: Classic, and Constellation (a radial tree with curved branches and a ringed hub), chosen in Settings → Appearance or the graph's toolbar. Plugins can add their own (`contributes.graph`).
 - Plugins are shown as cards with a cover picture, and their dialog shows pictures of the plugin at work.
+- Plugins come from their creators' own GitHub repositories. Cards show the creator's GitHub avatar and the repository's stars; only a repository's owner can list or update its plugin, and installed plugins show **Update** when the creator releases a new version. Every plugin needs a cover and screenshots. The plugin dialog's warning sits at its bottom.
+- better-vault.dev/plugins is a gallery of posts: kind tabs, search, Popular or New, and cards with each plugin's picture, creator and stars.
+- Notes: tables are real tables you edit cell by cell (Tab, Enter, + for rows and columns, right-click to insert, delete or align), kept as Markdown.
+- Whiteboard: a slim Ask AI bar; voice is turned into text on your device with Whisper (no key, audio stays on the device); Ask AI reads the notebook's selected sources first.
 
 ### Changed
 
@@ -38,6 +44,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Piano coach counts a key in any octave, and its chips show the octave.
 - The Notes block handle no longer overlaps text on macOS, and appears again after the page scrolls or a block changes size.
 - The plugin dialog asks before uninstalling in a dialog of its own, instead of squeezing the question into its footer.
+- The Notes block handle sits just before the text on macOS, measured from the text itself.
+- Vault folders are frosted, see-through glass again, in light mode too.
 
 ## [0.10.0] - 2026-11-19
 
@@ -261,7 +269,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - i18next localisation with typed keys, a language registry ready for right-to-left languages, and `npm run i18n:check`.
 - Project documentation: README, AGENTS.md, CLAUDE.md, contributing guide, code of conduct, security policy, issue and pull request templates, and CI.
 
-[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/better-vault/better-vault/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/better-vault/better-vault/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/better-vault/better-vault/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/better-vault/better-vault/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/better-vault/better-vault/compare/v0.7.0...v0.8.0
