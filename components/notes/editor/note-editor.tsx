@@ -111,7 +111,20 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(function
           icons: false,
         }),
         livePreview({ resolves: (link) => latest.current.resolves(link), open }),
-        richBlocks(),
+        richBlocks({
+          addRow: t("table.addRow"),
+          addColumn: t("table.addColumn"),
+          rowAbove: t("table.rowAbove"),
+          rowBelow: t("table.rowBelow"),
+          columnLeft: t("table.columnLeft"),
+          columnRight: t("table.columnRight"),
+          deleteRow: t("table.deleteRow"),
+          deleteColumn: t("table.deleteColumn"),
+          alignLeft: t("table.alignLeft"),
+          alignCenter: t("table.alignCenter"),
+          alignRight: t("table.alignRight"),
+          source: t("table.source"),
+        }),
         blockHandle({
           labels: { add: t("blocks.add"), drag: t("blocks.drag") },
           onAdd: (editor, block) => {

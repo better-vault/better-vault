@@ -217,5 +217,19 @@
       "moveDown": "Move down",
       "delete": "Delete"
     }
+  },
+  "table": {
+    "addRow": "Add a row",
+    "addColumn": "Add a column",
+    "rowAbove": "Insert row above",
+    "rowBelow": "Insert row below",
+    "columnLeft": "Insert column left",
+    "columnRight": "Insert column right",
+    "deleteRow": "Delete row",
+    "deleteColumn": "Delete column",
+    "alignLeft": "Align left",
+    "alignCenter": "Align centre",
+    "alignRight": "Align right",
+    "source": "Edit as Markdown"
   }
 }

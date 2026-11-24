@@ -1,10 +1,11 @@
 import { syntaxTree } from "@codemirror/language";
 import { RangeSetBuilder, StateField, type EditorState, type Extension } from "@codemirror/state";
 import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
+import { EditableTableWidget, type TableLabels } from "./table-widget";
 
 /**
- * The blocks Live Preview draws as what they are, as Obsidian does: a table
- * as a table, `---` as a rule, `![alt](https://…)` as the picture and `$$…$$`
+ * The blocks Live Preview draws as what they are: a table as a table you
+ * edit cell by cell (table-widget.ts), `---` as a rule, `![alt](https://…)` as the picture and `$$…$$`
  * as a formula box. The note stays Markdown; when the cursor enters a block,
  * its source shows again for editing. Blocks that span lines can only be
  * replaced from a state field, hence this one beside livePreview.
@@ -18,80 +19,6 @@ function touches(state: EditorState, from: number, to: number) {
 function editAt(view: EditorView, pos: number) {
   view.dispatch({ selection: { anchor: pos } });
   view.focus();
-}
-
-const cellsOf = (line: string) =>
-  line
-    .trim()
-    .replace(/^\||\|$/g, "")
-    .split(/(?<!\\)\|/)
-    .map((cell) => cell.trim().replace(/\\\|/g, "|"));
-
-/** Inline Markdown in a cell, as text with bold, italics and code. */
-function inline(target: HTMLElement, text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*|_[^_]+_)/g);
-  for (const part of parts) {
-    if (!part) continue;
-    let el: HTMLElement | Text;
-    if (/^\*\*.+\*\*$/.test(part)) {
-      el = document.createElement("strong");
-      el.textContent = part.slice(2, -2);
-    } else if (/^`.+`$/.test(part)) {
-      el = document.createElement("code");
-      el.className = "cm-inline-code";
-      el.textContent = part.slice(1, -1);
-    } else if (/^(\*.+\*|_.+_)$/.test(part)) {
-      el = document.createElement("em");
-      el.textContent = part.slice(1, -1);
-    } else el = document.createTextNode(part);
-    target.append(el);
-  }
-}
-
-class TableWidget extends WidgetType {
-  constructor(
-    readonly source: string,
-    readonly from: number,
-  ) {
-    super();
-  }
-  eq(other: TableWidget) {
-    return other.source === this.source && other.from === this.from;
-  }
-  toDOM(view: EditorView) {
-    const lines = this.source.split("\n").filter((line) => line.trim());
-    const [head, , ...body] = lines;
-    const aligns = cellsOf(lines[1] ?? "").map((cell) =>
-      /^:-+:$/.test(cell) ? "center" : /-+:$/.test(cell) ? "right" : "left",
-    );
-    const wrap = document.createElement("div");
-    wrap.className = "cm-md-table";
-    const table = document.createElement("table");
-    const row = (cells: string[], tag: "th" | "td") => {
-      const tr = document.createElement("tr");
-      cells.forEach((cell, at) => {
-        const el = document.createElement(tag);
-        el.style.textAlign = aligns[at] ?? "left";
-        inline(el, cell);
-        tr.append(el);
-      });
-      return tr;
-    };
-    const thead = document.createElement("thead");
-    thead.append(row(cellsOf(head ?? ""), "th"));
-    const tbody = document.createElement("tbody");
-    for (const line of body) tbody.append(row(cellsOf(line), "td"));
-    table.append(thead, tbody);
-    wrap.append(table);
-    wrap.addEventListener("mousedown", (event) => {
-      event.preventDefault();
-      editAt(view, this.from);
-    });
-    return wrap;
-  }
-  ignoreEvent() {
-    return false;
-  }
 }
 
 class RuleWidget extends WidgetType {
@@ -151,7 +78,7 @@ class MathWidget extends WidgetType {
   }
 }
 
-function build(state: EditorState): DecorationSet {
+function build(state: EditorState, labels: TableLabels): DecorationSet {
   const found: { from: number; to: number; deco: Decoration }[] = [];
   const tree = syntaxTree(state);
   tree.iterate({
@@ -159,12 +86,14 @@ function build(state: EditorState): DecorationSet {
       if (node.name === "Table") {
         const from = state.doc.lineAt(node.from).from;
         const to = state.doc.lineAt(Math.max(node.from, node.to - 1)).to;
-        if (!touches(state, from, to))
+        // The cursor inside the table's source (from "Edit as Markdown") shows the Markdown.
+        const inside = state.selection.ranges.some((range) => range.head > from && range.head < to);
+        if (!inside)
           found.push({
             from,
             to,
             deco: Decoration.replace({
-              widget: new TableWidget(state.sliceDoc(from, to), from),
+              widget: new EditableTableWidget(state.sliceDoc(from, to), labels),
               block: true,
             }),
           });
@@ -220,26 +149,60 @@ function build(state: EditorState): DecorationSet {
   return builder.finish();
 }
 
-export function richBlocks(): Extension {
+export function richBlocks(labels: TableLabels): Extension {
   return [
     StateField.define<DecorationSet>({
-      create: build,
-      update: (value, tr) => (tr.docChanged || tr.selection ? build(tr.state) : value),
+      create: (state) => build(state, labels),
+      update: (value, tr) => (tr.docChanged || tr.selection ? build(tr.state, labels) : value),
       provide: (field) => EditorView.decorations.from(field),
     }),
     EditorView.theme({
-      ".cm-md-table": { overflowX: "auto", margin: "0.4em 0", cursor: "text" },
-      ".cm-md-table table": {
-        borderCollapse: "collapse",
-        width: "100%",
-        fontSize: "0.95em",
+      ".cm-md-table": { margin: "0.4em 0" },
+      ".cm-md-table-grid": {
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        gridTemplateRows: "auto auto",
+        columnGap: "4px",
+        rowGap: "4px",
       },
+      ".cm-md-table-scroll": { overflowX: "auto", minWidth: "0", gridColumn: "1", gridRow: "1" },
+      ".cm-md-table table": { borderCollapse: "collapse", width: "100%", fontSize: "0.95em" },
       ".cm-md-table th, .cm-md-table td": {
         border: "1px solid var(--border)",
         padding: "0.35em 0.7em",
         verticalAlign: "top",
+        minWidth: "4em",
+        outline: "none",
+        cursor: "text",
+        whiteSpace: "pre-wrap",
       },
       ".cm-md-table th": { backgroundColor: "var(--muted)", fontWeight: "600" },
+      ".cm-md-table th:focus, .cm-md-table td:focus": {
+        boxShadow: "inset 0 0 0 2px color-mix(in oklab, var(--info) 70%, transparent)",
+        borderRadius: "2px",
+      },
+      ".cm-md-table-add-row, .cm-md-table-add-column": {
+        appearance: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0",
+        border: "none",
+        borderRadius: "6px",
+        color: "var(--muted-foreground)",
+        backgroundColor: "transparent",
+        cursor: "pointer",
+        opacity: "0",
+        transition: "opacity 120ms, background-color 120ms",
+      },
+      ".cm-md-table-add-row": { height: "20px", gridColumn: "1", gridRow: "2" },
+      ".cm-md-table-add-column": { width: "20px", gridColumn: "2", gridRow: "1" },
+      ".cm-md-table:hover .cm-md-table-add-row, .cm-md-table:hover .cm-md-table-add-column, .cm-md-table[data-editing] .cm-md-table-add-row, .cm-md-table[data-editing] .cm-md-table-add-column":
+        { opacity: "1" },
+      ".cm-md-table-add-row:hover, .cm-md-table-add-column:hover": {
+        backgroundColor: "color-mix(in oklab, var(--foreground) 8%, transparent)",
+        color: "var(--foreground)",
+      },
       ".cm-md-rule": {
         height: "1px",
         backgroundColor: "var(--border)",

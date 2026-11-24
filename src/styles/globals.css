@@ -88,6 +88,57 @@ html[data-window-controls]
 
 /* Text written by the model (chat answers, reports). Tokens only. */
 @layer components {
+  /* The Notes table's right-click menu (components/notes/editor/table-widget.ts), drawn like Panel's menus. */
+  .cm-md-table-menu {
+    position: fixed;
+    z-index: 60;
+    display: flex;
+    min-width: 12rem;
+    flex-direction: column;
+    gap: 1px;
+    border-radius: 0.875rem;
+    background: var(--popover);
+    padding: 0.25rem;
+    color: var(--popover-foreground);
+    font-size: 0.8125rem;
+    box-shadow:
+      0 0 0 1px var(--border),
+      0 12px 32px -8px oklch(0 0 0 / 0.35);
+    animation: cm-md-menu-in 120ms ease-out;
+  }
+  .cm-md-table-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    text-align: start;
+    cursor: pointer;
+    outline: none;
+  }
+  .cm-md-table-menu button:hover:not(:disabled),
+  .cm-md-table-menu button:focus-visible {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+  .cm-md-table-menu button:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+  .cm-md-table-menu button[data-danger] {
+    color: var(--destructive);
+  }
+  .cm-md-table-menu button[data-checked]::after {
+    content: "✓";
+    margin-inline-start: auto;
+    color: var(--muted-foreground);
+  }
+  .cm-md-table-menu-rule {
+    margin: 0.2rem 0.35rem;
+    height: 1px;
+    background: var(--border);
+  }
+
   /* Vault tiles (components/home/vault-tiles.tsx). */
   .vault-frame {
     border-radius: 11% / 14.7%;
@@ -342,4 +393,11 @@ html[data-window-controls]
   src: url("/fonts/excalifont/excalifont-combining.woff2") format("woff2");
   font-display: swap;
   unicode-range: U+300-301, U+303;
+}
+
+@keyframes cm-md-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
