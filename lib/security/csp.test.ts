@@ -8,7 +8,7 @@ describe("content security policy", () => {
     const expected = `'sha256-${createHash("sha256").update("var a=1").digest("base64")}'`;
     expect(inlineScriptHashes(html)).toEqual([expected]);
     const policy = contentSecurityPolicy(inlineScriptHashes(html));
-    expect(policy).toContain(`script-src 'self' ${expected}`);
+    expect(policy).toContain(`script-src 'self' 'wasm-unsafe-eval' ${expected}`);
     expect(policy).not.toContain("'unsafe-inline' https://accounts.google.com https://apis");
     expect(policy).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
   });

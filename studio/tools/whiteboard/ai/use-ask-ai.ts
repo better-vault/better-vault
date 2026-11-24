@@ -4,7 +4,6 @@ import {
   credentialsFor,
   effortFor,
   getSettings,
-  isProviderReady,
   useSettings,
 } from "@/lib/db/settings";
 import type { Size } from "../actions";
@@ -195,14 +194,4 @@ export function useAskAi(board: BoardModel, size: () => Size) {
   );
 
   return { status, pen, error, ask, stop, ready: model !== null, settings };
-}
-
-/** Which provider can turn speech into text with the user's keys, if any. */
-export function voiceProvider(settings: ReturnType<typeof useSettings>) {
-  if (!settings) return null;
-  for (const id of ["openai", "elevenlabs", "google"] as const) {
-    if (isProviderReady(settings, id) && settings.providers[id].apiKey)
-      return { provider: id, apiKey: settings.providers[id].apiKey };
-  }
-  return null;
 }

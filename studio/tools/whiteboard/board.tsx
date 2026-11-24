@@ -35,7 +35,7 @@ import { toolForKey, type BoardTool } from "./tools-meta";
 import { useBoard } from "./use-board";
 import { toScreen, toWorld } from "./viewport";
 import { AskAiBar, PenCursor } from "./ai/ask-ai-bar";
-import { useAskAi, voiceProvider } from "./ai/use-ask-ai";
+import { useAskAi } from "./ai/use-ask-ai";
 
 const SAVE_DELAY = 800;
 
@@ -481,7 +481,6 @@ export function Board({
           <AskAiBar
             status={ai.status}
             ready={ai.ready}
-            voice={voiceProvider(ai.settings)}
             about={about?.length ?? 0}
             onClearAbout={() => setAbout(null)}
             onAsk={(question) => void ai.ask(question, about ?? undefined)}

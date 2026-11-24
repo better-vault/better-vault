@@ -35,7 +35,8 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
   };
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", ...scriptHashes, ...google.script],
+    // 'wasm-unsafe-eval' lets on-device speech to text (Whisper) run its WebAssembly.
+    "script-src": ["'self'", "'wasm-unsafe-eval'", ...scriptHashes, ...google.script],
     // React and Panel set inline styles; Tailwind's are in files.
     "style-src": ["'self'", "'unsafe-inline'", "https://accounts.google.com"],
     "img-src": ["'self'", "data:", "blob:", "https:"],
@@ -51,6 +52,10 @@ export function contentSecurityPolicy(scriptHashes: readonly string[]): string {
       // OneDrive's upload sessions answer with addresses on these hosts.
       "https://*.sharepoint.com",
       "https://*.files.1drv.com",
+      // The on-device speech model's files, downloaded once from Hugging Face.
+      "https://huggingface.co",
+      "https://*.huggingface.co",
+      "https://*.hf.co",
       // better-vault's own backend: account, subscription and Better Vault Cloud.
       new URL(BACKEND_URL).origin,
     ],

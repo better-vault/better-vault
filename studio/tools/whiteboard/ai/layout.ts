@@ -442,8 +442,7 @@ export function answerOrigin(
   });
   const near = box(about.length ? about : elements);
   const all = box(elements);
-  const free = ([x, y]: Point) =>
-    !elements.some((each) => overlaps({ x, y, ...ROOM }, each));
+  const free = ([x, y]: Point) => !elements.some((each) => overlaps({ x, y, ...ROOM }, each));
   const candidates: Point[] = [
     [near.maxX + 160, near.minY],
     [near.minX, near.maxY + 120],

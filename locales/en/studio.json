@@ -643,7 +643,7 @@
       "close": "Close Ask AI",
       "listening": "Listening…",
       "cancelRecording": "Cancel recording",
-      "finishRecording": "Use recording",
+      "finishRecording": "Done",
       "voiceError": "Couldn't hear that: {{error}}",
       "error": "Couldn't answer: {{error}}",
       "setUp": "Set up a chat model to ask the board.",
@@ -671,7 +671,10 @@
           "question": "Check what I selected against reliable sources on the web, correct anything wrong, and list the sources."
         }
       },
-      "placeholderAbout": "Ask about what you selected"
+      "placeholderAbout": "Ask about what you selected",
+      "voice": "Speak your question",
+      "transcribing": "Writing down what you said…",
+      "voiceLoading": "Getting voice ready on this device… {{percent}}%"
     }
   },
   "audio-overview": {
