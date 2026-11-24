@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   activeModel,
+  contextCharsFor,
   credentialsFor,
   effortFor,
   getSettings,
   useSettings,
 } from "@/lib/db/settings";
+import { getChunks, listSources } from "@/lib/db/sources";
+import { selectPassages, type Passage } from "@/lib/grounding/passages";
 import type { Size } from "../actions";
 import type { Point } from "../geometry";
 import { newId } from "../scene";
@@ -56,7 +59,7 @@ function boardText(elements: readonly BoardElement[]) {
  * streams in, and writes it by hand. When it is done the whole answer is one
  * group and one undo step, saved like any other change.
  */
-export function useAskAi(board: BoardModel, size: () => Size) {
+export function useAskAi(board: BoardModel, size: () => Size, notebookId?: string) {
   const settings = useSettings();
   const model = settings ? activeModel(settings) : null;
   const [status, setStatus] = useState<AskStatus>("idle");
@@ -134,6 +137,20 @@ export function useAskAi(board: BoardModel, size: () => Size) {
       run.current = { animator, abort };
       setStatus("thinking");
 
+      // The notebook's selected sources, as the chat reads them: the passages
+      // that best match the question, within the model's context budget.
+      let passages: Passage[] = [];
+      if (notebookId) {
+        const sources = (await listSources(notebookId)).filter((source) => source.selected);
+        if (sources.length)
+          passages = selectPassages({
+            sources,
+            chunks: await getChunks(sources.map((source) => source.id)),
+            budget: Math.min(60_000, contextCharsFor(saved, chosen.provider)),
+            query: [question, about ? boardText(about) : ""].join(" "),
+          });
+      }
+
       try {
         const response = await fetch("/api/whiteboard/ai", {
           method: "POST",
@@ -141,6 +158,7 @@ export function useAskAi(board: BoardModel, size: () => Size) {
           body: JSON.stringify({
             question,
             board: boardText(before.elements),
+            passages,
             ...(about
               ? {
                   selection: {
@@ -190,7 +208,7 @@ export function useAskAi(board: BoardModel, size: () => Size) {
         setStatus("idle");
       }
     },
-    [stop],
+    [notebookId, stop],
   );
 
   return { status, pen, error, ask, stop, ready: model !== null, settings };

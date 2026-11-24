@@ -242,6 +242,7 @@ export function OutputViewer({ id }: { id: string }) {
           ) : (
             <client.Viewer
               outputId={output.id}
+              notebookId={output.notebookId ?? undefined}
               onDataChange={saveData}
               onAnnotate={annotate ? () => void annotate() : undefined}
               chrome={chrome}

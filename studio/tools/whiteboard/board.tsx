@@ -52,8 +52,11 @@ export function Board({
   initial,
   onSave,
   chrome,
+  notebookId,
 }: {
   initial: BoardData;
+  /** The notebook whose selected sources Ask AI reads. */
+  notebookId?: string;
   onSave: (data: BoardData) => void;
   /** The board's name and actions, shown on the board. */
   chrome?: OutputChrome;
@@ -71,7 +74,7 @@ export function Board({
   const [asking, setAsking] = useState(false);
   // What the Ask AI field asks about: a selection, or the whole board.
   const [about, setAbout] = useState<BoardElement[] | null>(null);
-  const ai = useAskAi(board, size);
+  const ai = useAskAi(board, size, notebookId);
   useEffect(() => {
     if (ai.error) toast.error(t("whiteboard.ai.error", { error: ai.error }));
   }, [ai.error, t]);

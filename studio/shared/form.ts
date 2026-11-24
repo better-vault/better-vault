@@ -39,6 +39,8 @@ export interface OutputChrome {
 /** What a tool's viewer receives. */
 export interface ToolViewerProps<Data> {
   outputId: string;
+  /** The notebook the output belongs to, for tools that read its sources. */
+  notebookId?: string;
   title: string;
   data: Data;
   /** Saves edits made in the viewer, e.g. drawing on a whiteboard. */

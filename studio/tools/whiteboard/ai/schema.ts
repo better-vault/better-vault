@@ -76,7 +76,7 @@ Items:
 - formula: an equation or formula in plain text, e.g. "6CO2 + 6H2O → C6H12O6 + 6O2".
 - note: one key idea to remember, boxed.
 - flow: 2–5 short boxes joined by arrows, for a chain of causes or stages.
-- sources: last, when you looked things up: 1–4 short "Site – page title" lines.
+- sources: last, when you used the notebook's sources or looked things up: 1–4 short lines, "Notebook – title" or "Site – page title".
 - icons: 2–4 small drawings with a label each, to make ideas visual. Draw each with 2–8 simple shapes in a 100 × 100 box (circles, lines, rects, dots), in colour.
 
 Rules:
@@ -85,6 +85,9 @@ Rules:
 - Colours: ink for most writing, and blue, green, red, amber or violet to highlight.
 - Use what you know; be correct.
 - When the user selected something, answer about that: explain it, extend it, or do what they ask with it.`;
+
+/** Added when the notebook's sources come with the question. */
+export const sourcesRules = `The user's notebook sources are given in <sources>. Answer from them first: use their facts, terms and numbers, and say nothing that contradicts them. When you used them, end the board with a sources item listing the titles you drew on, written as "Notebook – <title>". Use what you know only to explain or fill gaps they leave.`;
 
 /** Added when the model has its provider's web search. */
 export const webRules = `You can search the web. Search when the question needs facts you aren't sure of, recent information, or numbers; then end the board with a sources item naming where they came from. Don't search for simple, well-known things.`;

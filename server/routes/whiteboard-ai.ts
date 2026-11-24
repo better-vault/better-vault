@@ -4,12 +4,31 @@ import { describeError } from "@/lib/ai/errors";
 import { providers } from "@/lib/ai/catalog";
 import { createLanguageModel, createWebSearchTools } from "@/lib/ai/providers";
 import { credentialsSchema, effortSchema, modelRefSchema } from "@/lib/ai/request";
-import { boardItem, webRules, whiteboardPrompt } from "@/studio/tools/whiteboard/ai/schema";
+import { formatPassages, type Passage } from "@/lib/grounding/passages";
+import { sourceFormats, sourceKinds } from "@/lib/sources/formats";
+import {
+  boardItem,
+  sourcesRules,
+  webRules,
+  whiteboardPrompt,
+} from "@/studio/tools/whiteboard/ai/schema";
+
+const passageSchema = z.object({
+  n: z.number().int().positive(),
+  chunkId: z.string(),
+  sourceId: z.string(),
+  title: z.string(),
+  kind: z.enum(sourceKinds),
+  format: z.enum(sourceFormats).optional(),
+  text: z.string(),
+});
 
 const bodySchema = z.object({
   question: z.string().min(1).max(4000),
   /** What is on the board already, as text, so the answer can build on it. */
   board: z.string().max(8000).default(""),
+  /** The notebook's selected sources: the passages that best match the question. */
+  passages: z.array(passageSchema).max(2000).default([]),
   /** What the user selected and asked about: its words, and a picture of it (PNG data URL). */
   selection: z
     .object({
@@ -35,6 +54,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request." }, { status: 400 });
   const { question, board, selection, model, credentials, effort } = parsed.data;
+  const passages = parsed.data.passages as Passage[];
 
   let languageModel;
   try {
@@ -48,6 +68,7 @@ export async function POST(request: Request) {
     ? undefined
     : createWebSearchTools(model, credentials);
   const context = [
+    passages.length ? `The notebook's sources:\n${formatPassages(passages)}` : "",
     board.trim() ? `On the board already:\n${board}` : "",
     selection?.text.trim() ? `The user selected this on the board:\n${selection.text}` : "",
     selection?.image ? "A picture of what the user selected is attached." : "",
@@ -69,7 +90,9 @@ export async function POST(request: Request) {
 
   const result = streamText({
     model: languageModel,
-    system: tools ? `${whiteboardPrompt}\n\n${webRules}` : whiteboardPrompt,
+    system: [whiteboardPrompt, passages.length ? sourcesRules : "", tools ? webRules : ""]
+      .filter(Boolean)
+      .join("\n\n"),
     messages,
     ...(tools ? { tools, stopWhen: stepCountIs(6) } : {}),
     output: Output.array({ element: boardItem }),
