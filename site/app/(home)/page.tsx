@@ -91,7 +91,7 @@ function jsonLd() {
         screenshot: {
           "@type": "ImageObject",
           url: absoluteUrl("/screenshots/studio-light.webp"),
-          caption: "A slide deck made from a notebook's sources, in the Studio tab",
+          caption: "A notebook with the Studio open, listing its tools and the outputs made from its sources",
           width: 2880,
           height: 1800,
         },

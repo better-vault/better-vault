@@ -1,8 +1,9 @@
 import Image from "next/image";
 
 /**
- * The app itself, under the hero: the Studio tab showing a slide deck made
- * from a notebook's sources, a 2× screenshot in each theme, picked by CSS.
+ * The app itself, under the hero: a notebook with the Studio sheet open,
+ * listing every tool and the outputs made from its sources, a 2× screenshot
+ * in each theme, picked by CSS.
  * Served as the WebP file it is (already compressed for the web) rather than
  * re-encoded by the image optimiser, which softened the text. Not
  * lazy-loaded, since it is near the top of the page.
@@ -13,7 +14,7 @@ export function ProductPreview() {
       <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border bg-card p-1.5 shadow-sm">
         <Image
           src="/screenshots/studio-light.webp"
-          alt="The Studio tab of a better-vault notebook, showing a five-slide deck on how cells make energy, made from three cited sources"
+          alt="A better-vault notebook with three sources and the Studio open, listing its twelve tools and the outputs made from the sources beside the chat"
           width={2880}
           height={1800}
           unoptimized
@@ -22,7 +23,7 @@ export function ProductPreview() {
         />
         <Image
           src="/screenshots/studio-dark.webp"
-          alt="The Studio tab in dark mode, showing a slide deck made from a notebook's sources"
+          alt="A better-vault notebook in dark mode, with the Studio tools and outputs beside the chat"
           width={2880}
           height={1800}
           unoptimized
