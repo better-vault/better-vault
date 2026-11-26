@@ -8,19 +8,16 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { buttonVariants } from "@/components/panelui/button";
-import { Suspense } from "react";
 import { Card } from "@/components/panelui/card";
 import { Hero } from "@/components/site/hero";
 import { IsoFigure } from "@/components/site/iso-figures";
 import { LayoutLink } from "@/components/site/layout-link";
 import { ModelHub } from "@/components/site/model-hub";
 import { NotesGraph } from "@/components/site/notes-graph";
-import { PluginIcon } from "@/components/site/plugins/plugin-icon";
 import { ProductPreview } from "@/components/site/product-preview";
 import { StudioStage } from "@/components/site/studio-stage/studio-stage";
 import { absoluteUrl, site } from "@/lib/site/config";
 import { lastModifiedByFile } from "@/lib/site/last-modified";
-import { listPlugins } from "@/lib/site/plugins";
 import { tools } from "@/lib/site/tools";
 import {
   comparison,
@@ -91,7 +88,8 @@ function jsonLd() {
         screenshot: {
           "@type": "ImageObject",
           url: absoluteUrl("/screenshots/studio-light.webp"),
-          caption: "A notebook with the Studio open, listing its tools and the outputs made from its sources",
+          caption:
+            "A notebook with the Studio open, listing its tools and the outputs made from its sources",
           width: 2880,
           height: 1800,
         },
@@ -224,46 +222,6 @@ const FOOTER: { title: string; links: { label: string; href: string }[] }[] = [
   },
 ];
 
-/** A few plugins from the gallery, most starred first. */
-async function FeaturedPlugins() {
-  const plugins = [...(await listPlugins())].sort((a, b) => b.stars - a.stars).slice(0, 4);
-  return <PluginList plugins={plugins} />;
-}
-
-function PluginList({ plugins }: { plugins: Awaited<ReturnType<typeof listPlugins>> }) {
-  if (!plugins.length) {
-    return (
-      <p className="self-center text-sm text-muted-foreground">
-        The gallery lists plugins reviewed by the project.{" "}
-        <Link href="/plugins" className="underline underline-offset-4">
-          See them all
-        </Link>
-        .
-      </p>
-    );
-  }
-  return (
-    <ul className="flex flex-col divide-y rounded-xl border bg-card">
-      {plugins.map((plugin) => (
-        <li key={plugin.id} className="relative flex items-start gap-3 px-4 py-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-            <PluginIcon icon={plugin.icon} className="size-4.5" />
-          </span>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <Link
-              href={`/plugins/${plugin.id}`}
-              className="font-medium after:absolute after:inset-0 hover:underline"
-            >
-              {plugin.name}
-            </Link>
-            <p className="line-clamp-2 text-sm text-muted-foreground">{plugin.description}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
@@ -304,7 +262,10 @@ export default function HomePage() {
         intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. A short tour plays when you get here; click anything to take over."
       >
         <StudioStage />
-        <nav aria-label="Studio tools" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+        <nav
+          aria-label="Studio tools"
+          className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm"
+        >
           {tools.map((tool) => (
             <LayoutLink
               key={tool.id}
@@ -350,52 +311,42 @@ export default function HomePage() {
         </LayoutLink>
       </Section>
 
-      <Section
-        id="plugins"
-        title="Make it yours with plugins"
-        intro="Plugins add Studio tools, mods and themes. Each one runs in a sandbox, uses only what you allow, and arrives turned off. Install one from the gallery, or ask an agent to build one for you."
-      >
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-          <ul className="flex flex-col gap-5">
+      <section className="min-w-0 border-t px-6 py-24" id="plugins" aria-labelledby="plugins-title">
+        <div className="mx-auto flex max-w-5xl flex-col gap-16">
+          <div className="flex flex-col gap-6">
+            <h2
+              id="plugins-title"
+              className="font-heading text-5xl font-semibold tracking-tight sm:text-7xl"
+            >
+              Make it yours.
+            </h2>
+            <p className="max-w-2xl text-xl text-pretty text-muted-foreground sm:text-2xl">
+              Install plugins from the gallery, or have an agent build one for you. Each runs in a
+              sandbox and uses only what you allow.{" "}
+              <Link href="/plugins" className="text-chart-5 underline-offset-4 hover:underline">
+                Browse plugins.
+              </Link>
+            </p>
+          </div>
+          <ul className="grid gap-10 sm:grid-cols-3 sm:gap-12">
             {pluginKinds.map((kind) => (
-              <li key={kind.title} className="flex flex-col gap-1">
-                <h3 className="font-medium">
+              <li key={kind.title} className="flex flex-col gap-3">
+                <HugeiconsIcon
+                  icon={kind.icon}
+                  className="size-7 text-chart-5"
+                  aria-hidden="true"
+                />
+                <h3 className="text-xl font-semibold">
                   <LayoutLink href={kind.href} className="underline-offset-4 hover:underline">
                     {kind.title}
                   </LayoutLink>
                 </h3>
-                <p className="text-sm text-muted-foreground">{kind.body}</p>
+                <p className="text-lg text-pretty text-muted-foreground">{kind.body}</p>
               </li>
             ))}
-            <li className="flex flex-col gap-1">
-              <h3 className="font-medium">
-                <LayoutLink href="/docs/creator-mode" className="underline-offset-4 hover:underline">
-                  Built by your agent
-                </LayoutLink>
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                In Creator mode, Claude Code, Cursor or Codex builds a plugin over MCP and installs it
-                for you to review.
-              </p>
-            </li>
           </ul>
-          <Suspense fallback={<PluginList plugins={[]} />}>
-            <FeaturedPlugins />
-          </Suspense>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/plugins" className={buttonVariants({ variant: "outline" })}>
-            Browse plugins
-          </Link>
-          <LayoutLink
-            href="/docs/plugins/build-your-first-plugin"
-            className="inline-flex items-center gap-1 self-center text-sm font-medium underline-offset-4 hover:underline"
-          >
-            Build your first plugin
-            <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" aria-hidden="true" />
-          </LayoutLink>
-        </div>
-      </Section>
+      </section>
 
       <Section
         id="providers"

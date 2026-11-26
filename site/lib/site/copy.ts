@@ -1,4 +1,11 @@
-import { Notebook01Icon, PencilEdit02Icon, SourceCodeIcon } from "@hugeicons/core-free-icons";
+import {
+  DashboardSquareAddIcon,
+  MagicWand01Icon,
+  Notebook01Icon,
+  PaintBoardIcon,
+  PencilEdit02Icon,
+  SourceCodeIcon,
+} from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { IsoFigureKind } from "@/components/site/iso-figures";
 
@@ -18,12 +25,42 @@ export interface Feature {
 }
 
 export const features: Feature[] = [
-  { figure: "citations", title: "Cited answers", body: "Every claim points to its passage.", href: "/docs/chat" },
-  { figure: "web", title: "Web mode", body: "Your provider's own search, when you want it.", href: "/docs/chat" },
-  { figure: "studio", title: "Studio tools", body: "From audio overviews to slide decks.", href: "/docs/studio" },
-  { figure: "providers", title: "Your key, your model", body: "OpenAI, Claude, Gemini or local.", href: "/docs/providers" },
-  { figure: "vault", title: "Local-first", body: "Notebooks stay on your device.", href: "/docs/privacy" },
-  { figure: "exports", title: "Real exports", body: "Word, PowerPoint, Anki, Excel, SVG.", href: "/docs/studio" },
+  {
+    figure: "citations",
+    title: "Cited answers",
+    body: "Every claim points to its passage.",
+    href: "/docs/chat",
+  },
+  {
+    figure: "web",
+    title: "Web mode",
+    body: "Your provider's own search, when you want it.",
+    href: "/docs/chat",
+  },
+  {
+    figure: "studio",
+    title: "Studio tools",
+    body: "From audio overviews to slide decks.",
+    href: "/docs/studio",
+  },
+  {
+    figure: "providers",
+    title: "Your key, your model",
+    body: "OpenAI, Claude, Gemini or local.",
+    href: "/docs/providers",
+  },
+  {
+    figure: "vault",
+    title: "Local-first",
+    body: "Notebooks stay on your device.",
+    href: "/docs/privacy",
+  },
+  {
+    figure: "exports",
+    title: "Real exports",
+    body: "Word, PowerPoint, Anki, Excel, SVG.",
+    href: "/docs/studio",
+  },
 ];
 
 /** `true` and `false` draw a mark; a string is shown as written. */
@@ -89,20 +126,23 @@ export const notesFeatures: { title: string; body: string }[] = [
 ];
 
 /** The landing page's plugins section: what a plugin can add, each with its guide. */
-export const pluginKinds: { title: string; body: string; href: string }[] = [
+export const pluginKinds: { icon: IconSvgElement; title: string; body: string; href: string }[] = [
   {
+    icon: DashboardSquareAddIcon,
     title: "Studio tools",
-    body: "New tools beside Reports and Flashcards, with their own dialog and viewer.",
+    body: "Add tools of your own beside Reports and Flashcards, each with its own dialog and viewer.",
     href: "/docs/plugins/studio-tools",
   },
   {
+    icon: MagicWand01Icon,
     title: "Mods",
-    body: "Small changes to how the app looks and works, turned on and off from Settings.",
+    body: "Reshape how the app looks and works, and turn each change on or off from Settings.",
     href: "/docs/plugins/mods",
   },
   {
-    title: "Themes and graph styles",
-    body: "Colours for the whole app, and new looks for the notes graph.",
+    icon: PaintBoardIcon,
+    title: "Themes",
+    body: "Recolour the whole app in light and dark, and give the notes graph a new look.",
     href: "/docs/plugins/themes",
   },
 ];
