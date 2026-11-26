@@ -13,15 +13,17 @@ export interface Feature {
   figure: IsoFigureKind;
   title: string;
   body: string;
+  /** The docs page that explains it. */
+  href: string;
 }
 
 export const features: Feature[] = [
-  { figure: "citations", title: "Cited answers", body: "Every claim points to its passage." },
-  { figure: "web", title: "Web mode", body: "Your provider's own search, when you want it." },
-  { figure: "studio", title: "Nine Studio tools", body: "From reports to slide decks." },
-  { figure: "providers", title: "Your key, your model", body: "OpenAI, Claude, Gemini or local." },
-  { figure: "vault", title: "Local-first", body: "Notebooks stay on your device." },
-  { figure: "exports", title: "Real exports", body: "Word, PowerPoint, Anki, Excel, SVG." },
+  { figure: "citations", title: "Cited answers", body: "Every claim points to its passage.", href: "/docs/chat" },
+  { figure: "web", title: "Web mode", body: "Your provider's own search, when you want it.", href: "/docs/chat" },
+  { figure: "studio", title: "Studio tools", body: "From audio overviews to slide decks.", href: "/docs/studio" },
+  { figure: "providers", title: "Your key, your model", body: "OpenAI, Claude, Gemini or local.", href: "/docs/providers" },
+  { figure: "vault", title: "Local-first", body: "Notebooks stay on your device.", href: "/docs/privacy" },
+  { figure: "exports", title: "Real exports", body: "Word, PowerPoint, Anki, Excel, SVG.", href: "/docs/studio" },
 ];
 
 /** `true` and `false` draw a mark; a string is shown as written. */
@@ -42,19 +44,22 @@ export const comparison: { label: string; vault: Cell; notebooklm: Cell }[] = [
   { label: "Reports, flashcards, quizzes, mind maps", vault: true, notebooklm: true },
   { label: "Slide decks and infographics", vault: true, notebooklm: true },
   { label: "Anatomy figures and whiteboard", vault: true, notebooklm: false },
-  { label: "Audio and video overviews", vault: false, notebooklm: true },
+  { label: "Audio overviews", vault: "Two hosts, ElevenLabs voices", notebooklm: true },
+  { label: "Video overviews", vault: false, notebooklm: true },
+  { label: "Notes with links and a graph", vault: true, notebooklm: false },
+  { label: "Bots and plugins", vault: true, notebooklm: false },
 ];
 
 export const roadmapTeaser: { icon: IconSvgElement; title: string; body: string }[] = [
   {
     icon: Notebook01Icon,
-    title: "Notes and a notebook guide",
-    body: "Save answers as notes, get a summary and suggested questions, and set the chat's goal and style.",
+    title: "A notebook guide",
+    body: "A summary, key topics and suggested questions for each notebook, and a goal, style and tutor mode for its chat.",
   },
   {
     icon: SourceCodeIcon,
-    title: "More sources and deep research",
-    body: "DOCX, EPUB, YouTube, images and audio, plus web research that adds sources for you.",
+    title: "Images, audio and deep research",
+    body: "Pictures read by vision models, audio files transcribed, and web research that finds sources for you.",
   },
   {
     icon: PencilEdit02Icon,
@@ -80,6 +85,25 @@ export const notesFeatures: { title: string; body: string }[] = [
   {
     title: "Skills your agents share",
     body: "Keep SKILL.md instructions in a vault, use them in chat, and let Claude Code, Cursor or Codex read and edit them through MCP.",
+  },
+];
+
+/** The landing page's plugins section: what a plugin can add, each with its guide. */
+export const pluginKinds: { title: string; body: string; href: string }[] = [
+  {
+    title: "Studio tools",
+    body: "New tools beside Reports and Flashcards, with their own dialog and viewer.",
+    href: "/docs/plugins/studio-tools",
+  },
+  {
+    title: "Mods",
+    body: "Small changes to how the app looks and works, turned on and off from Settings.",
+    href: "/docs/plugins/mods",
+  },
+  {
+    title: "Themes and graph styles",
+    body: "Colours for the whole app, and new looks for the notes graph.",
+    href: "/docs/plugins/themes",
   },
 ];
 
@@ -112,12 +136,12 @@ export const faq: { question: string; answer: string }[] = [
   {
     question: "Can I self-host it?",
     answer:
-      "Yes. better-vault is a Next.js app with no database. Run npm run build and npm start on any Node.js 20.9+ host, or deploy it to Vercel.",
+      "Yes. better-vault is a Vite app with a small API and no database. Run npm run build and npm start on any host with Node.js 22.12 or later, or use the desktop app for macOS, Windows and Linux.",
   },
   {
     question: "Does it make audio overviews like NotebookLM?",
     answer:
-      "No. Audio and video overviews are out of scope. better-vault focuses on cited chat and written and visual outputs.",
+      "Yes. An Audio Overview is a conversation between two hosts about your sources, written by your chat model and spoken with ElevenLabs voices, with a transcript that cites your sources. Video overviews are out of scope.",
   },
   {
     question: "Is there a desktop app?",

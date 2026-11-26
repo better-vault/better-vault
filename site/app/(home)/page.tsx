@@ -8,20 +8,26 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { buttonVariants } from "@/components/panelui/button";
+import { Suspense } from "react";
 import { Card } from "@/components/panelui/card";
 import { Hero } from "@/components/site/hero";
 import { IsoFigure } from "@/components/site/iso-figures";
 import { LayoutLink } from "@/components/site/layout-link";
 import { ModelHub } from "@/components/site/model-hub";
 import { NotesGraph } from "@/components/site/notes-graph";
+import { PluginIcon } from "@/components/site/plugins/plugin-icon";
 import { ProductPreview } from "@/components/site/product-preview";
 import { StudioStage } from "@/components/site/studio-stage/studio-stage";
 import { absoluteUrl, site } from "@/lib/site/config";
+import { lastModifiedByFile } from "@/lib/site/last-modified";
+import { listPlugins } from "@/lib/site/plugins";
+import { tools } from "@/lib/site/tools";
 import {
   comparison,
   faq,
   features,
   notesFeatures,
+  pluginKinds,
   roadmapTeaser,
   type Cell,
 } from "@/lib/site/copy";
@@ -34,6 +40,8 @@ export const metadata: Metadata = {
 
 /** Structured data for search engines and AI assistants. No ratings: we have none. */
 function jsonLd() {
+  const modified = lastModifiedByFile(["app/(home)/page.tsx", "lib/site/copy.ts"]);
+  const dateModified = [...modified.values()].sort((a, b) => b.getTime() - a.getTime())[0];
   const organization = {
     "@type": "Organization",
     "@id": absoluteUrl("/#organization"),
@@ -46,6 +54,18 @@ function jsonLd() {
     "@context": "https://schema.org",
     "@graph": [
       organization,
+      {
+        "@type": "WebPage",
+        "@id": absoluteUrl("/#webpage"),
+        url: absoluteUrl("/"),
+        name: `${site.name}: ${site.titleTagline}`,
+        description: site.description,
+        isPartOf: { "@id": absoluteUrl("/#website") },
+        about: { "@id": absoluteUrl("/#app") },
+        primaryImageOfPage: absoluteUrl("/screenshots/studio-light.webp"),
+        ...(dateModified ? { dateModified: dateModified.toISOString() } : {}),
+        inLanguage: "en",
+      },
       {
         "@type": "WebSite",
         "@id": absoluteUrl("/#website"),
@@ -67,7 +87,14 @@ function jsonLd() {
         applicationSubCategory: "AI research notebook",
         operatingSystem: "macOS, Windows, Linux",
         softwareRequirements:
-          "macOS 12, Windows 10 or a 64-bit Linux for the desktop app; or Node.js 20.9 and a web browser",
+          "macOS 12, Windows 10 or a 64-bit Linux for the desktop app; or Node.js 22.12 and a web browser",
+        screenshot: {
+          "@type": "ImageObject",
+          url: absoluteUrl("/screenshots/studio-light.webp"),
+          caption: "A slide deck made from a notebook's sources, in the Studio tab",
+          width: 2880,
+          height: 1800,
+        },
         isAccessibleForFree: true,
         license: "https://opensource.org/licenses/MIT",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -76,9 +103,14 @@ function jsonLd() {
           "Web mode using the provider's built-in search",
           "Reports, flashcards, quizzes, data tables and mind maps",
           "Slide decks, infographics, Anatomy figures and a whiteboard",
-          "Bring your own OpenAI, Anthropic or Google API key",
+          "Audio Overviews with two hosts, spoken with ElevenLabs voices",
+          "Obsidian-style notes with links, backlinks and a graph",
+          "Bots that read your notebooks, notes and calendar",
+          "Sandboxed plugins: Studio tools, mods and themes",
+          "An MCP server for agents such as Claude Code in the desktop app",
+          "Bring your own OpenAI, Anthropic, Google, OpenRouter, Kimi or DeepSeek API key",
           "Local models through Ollama and LM Studio",
-          "Local-first storage in the browser, no account",
+          "Local-first storage in the browser or a SQLite file, no account",
         ],
         publisher: { "@id": organization["@id"] },
         sameAs: [site.repo],
@@ -145,6 +177,93 @@ function Mark({ value }: { value: Cell }) {
   );
 }
 
+/** The footer's links: every main docs page, so readers and crawlers can reach them from here. */
+const FOOTER: { title: string; links: { label: string; href: string }[] }[] = [
+  {
+    title: "Product",
+    links: [
+      { label: "Download", href: "/download" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Plugins", href: "/plugins" },
+      { label: "Roadmap", href: "/docs/roadmap" },
+      { label: "Changelog", href: `${site.repo}/blob/main/CHANGELOG.md` },
+    ],
+  },
+  {
+    title: "Guides",
+    links: [
+      { label: "Quickstart", href: "/docs/quickstart" },
+      { label: "Sources", href: "/docs/sources" },
+      { label: "Chat", href: "/docs/chat" },
+      { label: "Studio", href: "/docs/studio" },
+      { label: "Notes", href: "/docs/notes" },
+      { label: "Bots", href: "/docs/bots" },
+    ],
+  },
+  {
+    title: "Setup",
+    links: [
+      { label: "AI providers", href: "/docs/providers" },
+      { label: "Storage", href: "/docs/storage" },
+      { label: "Desktop app", href: "/docs/desktop" },
+      { label: "MCP for agents", href: "/docs/mcp" },
+      { label: "Self-hosting", href: "/docs/self-hosting" },
+      { label: "Subscription", href: "/docs/subscription" },
+    ],
+  },
+  {
+    title: "About",
+    links: [
+      { label: "vs NotebookLM", href: "/docs/comparison" },
+      { label: "FAQ", href: "/docs/faq" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+      { label: "GitHub", href: site.repo },
+      { label: "llms.txt", href: "/llms.txt" },
+    ],
+  },
+];
+
+/** A few plugins from the gallery, most starred first. */
+async function FeaturedPlugins() {
+  const plugins = [...(await listPlugins())].sort((a, b) => b.stars - a.stars).slice(0, 4);
+  return <PluginList plugins={plugins} />;
+}
+
+function PluginList({ plugins }: { plugins: Awaited<ReturnType<typeof listPlugins>> }) {
+  if (!plugins.length) {
+    return (
+      <p className="self-center text-sm text-muted-foreground">
+        The gallery lists plugins reviewed by the project.{" "}
+        <Link href="/plugins" className="underline underline-offset-4">
+          See them all
+        </Link>
+        .
+      </p>
+    );
+  }
+  return (
+    <ul className="flex flex-col divide-y rounded-xl border bg-card">
+      {plugins.map((plugin) => (
+        <li key={plugin.id} className="relative flex items-start gap-3 px-4 py-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <PluginIcon icon={plugin.icon} className="size-4.5" />
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <Link
+              href={`/plugins/${plugin.id}`}
+              className="font-medium after:absolute after:inset-0 hover:underline"
+            >
+              {plugin.name}
+            </Link>
+            <p className="line-clamp-2 text-sm text-muted-foreground">{plugin.description}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
@@ -160,13 +279,18 @@ export default function HomePage() {
       {/* The definition, stated plainly near the top for readers and answer engines. */}
       <Section id="what" title="What is better-vault?" intro={site.definition}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map(({ figure, title, body }) => (
-            <Card key={title}>
+          {features.map(({ figure, title, body, href }) => (
+            <Card key={title} className="relative">
               <div className="border-b px-5 pt-4 pb-3">
                 <IsoFigure kind={figure} />
               </div>
               <Card.Header>
-                <Card.Title>{title}</Card.Title>
+                <Card.Title>
+                  {/* The whole card is the link, through the stretched ::after. */}
+                  <LayoutLink href={href} className="after:absolute after:inset-0 hover:underline">
+                    {title}
+                  </LayoutLink>
+                </Card.Title>
                 <Card.Description>{body}</Card.Description>
               </Card.Header>
             </Card>
@@ -180,6 +304,23 @@ export default function HomePage() {
         intro="Every Studio output is made from the sources you select, cites them where it can, and leaves with you as a file. A short tour plays when you get here; click anything to take over."
       >
         <StudioStage />
+        <nav aria-label="Studio tools" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+          {tools.map((tool) => (
+            <LayoutLink
+              key={tool.id}
+              href={`/docs/studio/${tool.id}`}
+              className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              {tool.name}
+            </LayoutLink>
+          ))}
+          <LayoutLink
+            href="/docs/studio/audio-overview"
+            className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            Audio Overview
+          </LayoutLink>
+        </nav>
       </Section>
 
       <Section
@@ -207,6 +348,53 @@ export default function HomePage() {
           Read about notes
           <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" aria-hidden="true" />
         </LayoutLink>
+      </Section>
+
+      <Section
+        id="plugins"
+        title="Make it yours with plugins"
+        intro="Plugins add Studio tools, mods and themes. Each one runs in a sandbox, uses only what you allow, and arrives turned off. Install one from the gallery, or ask an agent to build one for you."
+      >
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+          <ul className="flex flex-col gap-5">
+            {pluginKinds.map((kind) => (
+              <li key={kind.title} className="flex flex-col gap-1">
+                <h3 className="font-medium">
+                  <LayoutLink href={kind.href} className="underline-offset-4 hover:underline">
+                    {kind.title}
+                  </LayoutLink>
+                </h3>
+                <p className="text-sm text-muted-foreground">{kind.body}</p>
+              </li>
+            ))}
+            <li className="flex flex-col gap-1">
+              <h3 className="font-medium">
+                <LayoutLink href="/docs/creator-mode" className="underline-offset-4 hover:underline">
+                  Built by your agent
+                </LayoutLink>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                In Creator mode, Claude Code, Cursor or Codex builds a plugin over MCP and installs it
+                for you to review.
+              </p>
+            </li>
+          </ul>
+          <Suspense fallback={<PluginList plugins={[]} />}>
+            <FeaturedPlugins />
+          </Suspense>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/plugins" className={buttonVariants({ variant: "outline" })}>
+            Browse plugins
+          </Link>
+          <LayoutLink
+            href="/docs/plugins/build-your-first-plugin"
+            className="inline-flex items-center gap-1 self-center text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Build your first plugin
+            <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" aria-hidden="true" />
+          </LayoutLink>
+        </div>
       </Section>
 
       <Section
@@ -342,35 +530,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t px-6 py-10">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>MIT © 2026 the {site.name} contributors</p>
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
-            <LayoutLink href="/docs" className="hover:text-foreground">
-              Docs
-            </LayoutLink>
-            <LayoutLink href="/docs/roadmap" className="hover:text-foreground">
-              Roadmap
-            </LayoutLink>
-            <LayoutLink href="/docs/faq" className="hover:text-foreground">
-              FAQ
-            </LayoutLink>
-            <a href={`${site.repo}/blob/main/CHANGELOG.md`} className="hover:text-foreground">
-              Changelog
-            </a>
-            <a href={site.repo} className="hover:text-foreground">
-              GitHub
-            </a>
-            <a href="/llms.txt" className="hover:text-foreground">
-              llms.txt
-            </a>
-            <LayoutLink href="/privacy" className="hover:text-foreground">
-              Privacy
-            </LayoutLink>
-            <LayoutLink href="/terms" className="hover:text-foreground">
-              Terms
-            </LayoutLink>
+      <footer className="border-t px-6 py-12">
+        <div className="mx-auto flex max-w-5xl flex-col gap-10 text-sm">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+            {FOOTER.map((group) => (
+              <div key={group.title} className="flex flex-col gap-3">
+                <p className="font-medium">{group.title}</p>
+                <ul className="flex flex-col gap-2 text-muted-foreground">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      {link.href.startsWith("http") || link.href.endsWith(".txt") ? (
+                        <a href={link.href} className="hover:text-foreground">
+                          {link.label}
+                        </a>
+                      ) : (
+                        <LayoutLink href={link.href} className="hover:text-foreground">
+                          {link.label}
+                        </LayoutLink>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </nav>
+          <p className="text-muted-foreground">MIT © 2026 the {site.name} contributors</p>
         </div>
       </footer>
     </main>

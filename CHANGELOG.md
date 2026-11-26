@@ -5,6 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Website: screenshots of the app in the docs, in light and dark, and a Plugins section on the home page.
+- Website: the home page shows the Studio, links every Studio tool and the main docs pages, and docs pages tell search engines when they last changed.
+
+### Fixed
+
+- Website: every docs page's Markdown (`/llms.mdx/…`, "Copy Markdown" and what agents read) answered with a server error.
+- Website: the Studio walkthrough on the home page fits phone screens instead of being cut off.
+- Website: the home page's FAQ and llms.txt no longer say there are no Audio Overviews or that the app is built with Next.js.
+
 ## [0.11.0] - 2026-11-24
 
 ### Added
