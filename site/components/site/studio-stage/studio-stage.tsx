@@ -45,7 +45,9 @@ function noteLayout(note: Note, stage: { width: number; height: number }) {
   let place = note.beat.place;
   if (place === "above" && roomAbove < 72) place = "below";
   if (place === "below" && roomBelow < 96) place = "above";
-  const textX = Math.min(Math.max(centre + 32, 160), stage.width - 160);
+  // Narrow stages (phones) centre the note, which wraps instead of overflowing.
+  const textX =
+    stage.width < 480 ? stage.width / 2 : Math.min(Math.max(centre + 32, 160), stage.width - 160);
   const textY =
     place === "above"
       ? Math.max(scene.y - 40, 28)
@@ -76,6 +78,8 @@ export function StudioStage() {
   const [ring, setRing] = useState(0);
   const [note, setNote] = useState<Note | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  /** How far the scene is shrunk to fit the stage (phones), 1 when it fits. */
+  const [fit, setFit] = useState(1);
   const stageRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   /** The tool shown, for the tour to resume from. */
@@ -115,6 +119,28 @@ export function StudioStage() {
 
   /** The visitor's own click or key: the tour stops for good. */
   const takeOver = useCallback(() => setHandsOn(true), []);
+
+  // Scenes have fixed sizes; shrink the one shown until it fits the stage,
+  // leaving room for the side arrows where they are drawn (sm and up).
+  useEffect(() => {
+    const stage = stageRef.current;
+    const scene = sceneRef.current;
+    if (!stage || !scene) return;
+    const update = () => {
+      const wide = stage.clientWidth >= 640;
+      const roomX = stage.clientWidth - (wide ? 128 : 24);
+      const roomY = stage.clientHeight - 48;
+      const width = scene.offsetWidth;
+      const height = scene.offsetHeight;
+      if (!width || !height) return;
+      setFit(Math.min(1, roomX / width, roomY / height));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(stage);
+    observer.observe(scene);
+    return () => observer.disconnect();
+  }, [index]);
 
   // Whether the stage is on screen.
   useEffect(() => {
@@ -210,22 +236,19 @@ export function StudioStage() {
         aria-label="Studio tools"
         tabIndex={0}
         onKeyDown={onKeyDown}
-        className="relative h-[26rem] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-[28rem]"
+        className="relative h-[22rem] rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-[28rem]"
       >
         <div
           ref={stageRef}
           className={cn("overflow-hidden rounded-2xl border bg-card", "absolute inset-0")}
         >
-          <div className="absolute inset-0 flex items-center justify-center p-6 pb-6">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div
               key={tool.id}
               ref={sceneRef}
               onPointerDownCapture={takeOver}
-              className={cn(
-                // Phones get the scene a little smaller, rather than cut off.
-                "stage-note transition-transform duration-500 max-sm:scale-[0.82]",
-                walking && !reduced && "sm:scale-110",
-              )}
+              className="stage-note shrink-0 transition-transform duration-500"
+              style={{ transform: `scale(${fit * (walking && !reduced && fit === 1 ? 1.1 : 1)})` }}
             >
               <View step={step} go={setStep} />
             </div>
@@ -271,7 +294,7 @@ export function StudioStage() {
                 />
               </svg>
               <p
-                className="stage-note absolute -translate-x-1/2 -translate-y-1/2 font-[Excalifont] text-xl whitespace-nowrap sm:text-2xl"
+                className="stage-note absolute w-max max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 text-center font-[Excalifont] text-lg leading-tight sm:text-2xl"
                 style={{ left: layout.textX, top: layout.textY }}
               >
                 {shown.beat.note}
@@ -314,7 +337,7 @@ export function StudioStage() {
                 show(index - 1);
               }}
               aria-label="Previous tool"
-              className="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
+              className="absolute top-1/2 left-3 hidden size-9 -translate-y-1/2 items-center sm:flex justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
             >
               <HugeiconsIcon
                 icon={ArrowLeft01Icon}
@@ -329,7 +352,7 @@ export function StudioStage() {
                 show(index + 1);
               }}
               aria-label="Next tool"
-              className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
+              className="absolute top-1/2 right-3 hidden size-9 -translate-y-1/2 items-center sm:flex justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground"
             >
               <HugeiconsIcon
                 icon={ArrowRight01Icon}
@@ -375,6 +398,19 @@ export function StudioStage() {
             ))}
           </p>
         </div>
+        <div className="flex items-center gap-3">
+          {/* On phones the arrows sit here, so they never cover a scene. */}
+          <button
+            type="button"
+            onClick={() => {
+              takeOver();
+              show(index - 1);
+            }}
+            aria-label="Previous tool"
+            className="flex size-9 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground sm:hidden"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4 rtl:-scale-x-100" aria-hidden="true" />
+          </button>
         <div className="flex items-center gap-1.5 rounded-full border bg-card px-2 py-1.5">
           {tools.map((item, at) => (
             <button
@@ -396,6 +432,18 @@ export function StudioStage() {
               {at === index ? at + 1 : null}
             </button>
           ))}
+        </div>
+          <button
+            type="button"
+            onClick={() => {
+              takeOver();
+              show(index + 1);
+            }}
+            aria-label="Next tool"
+            className="flex size-9 items-center justify-center rounded-full border bg-background text-muted-foreground hover:text-foreground sm:hidden"
+          >
+            <HugeiconsIcon icon={ArrowRight01Icon} className="size-4 rtl:-scale-x-100" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </div>
