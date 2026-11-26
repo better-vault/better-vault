@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   // This folder is its own project inside the app's repository; without this,
   // Next would take the repository root (the app's lockfile) as the root.
   turbopack: { root: path.join(__dirname) },
+  // /llms.mdx reads each page's .mdx from disk when asked (getText("raw")).
+  // Serverless functions only ship the files Next traced, so ship the docs too;
+  // without them every /llms.mdx URL answered 500.
+  outputFileTracingIncludes: { "/llms.mdx/**": ["./content/docs/**/*"] },
   async headers() {
     return [
       {
