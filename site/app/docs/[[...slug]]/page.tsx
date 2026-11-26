@@ -11,6 +11,7 @@ import {
 } from "fumadocs-ui/layouts/notebook/page";
 import { getMDXComponents } from "@/mdx-components";
 import { absoluteUrl, site } from "@/lib/site/config";
+import { docsLastModified } from "@/lib/site/last-modified";
 import { source } from "@/lib/source";
 
 interface Crumb {
@@ -36,6 +37,16 @@ const SECTIONS: Record<string, string> = {
   contributing: "Contributing",
 };
 
+/** The page's social card, also its image in the JSON-LD. */
+function ogImageUrl(slug: string[] | undefined, title: string, description?: string) {
+  const eyebrow = (slug?.[0] && SECTIONS[slug[0]]) || `${site.name} docs`;
+  return absoluteUrl(
+    `/og?title=${encodeURIComponent(title)}` +
+      `&description=${encodeURIComponent(description ?? site.description)}` +
+      `&eyebrow=${encodeURIComponent(eyebrow)}`,
+  );
+}
+
 export default function Page({ params }: PageProps<"/docs/[[...slug]]">) {
   // Params are read inside Suspense (Cache Components). Every page is listed in
   // generateStaticParams, so the full page is still prerendered at build time.
@@ -56,6 +67,7 @@ async function DocsContent({ params }: Pick<PageProps<"/docs/[[...slug]]">, "par
   // The page's raw Markdown, served by app/llms.mdx/[[...slug]].
   const markdownUrl = `/llms.mdx/${page.slugs.join("/")}`;
   const trail = breadcrumbTrail(slug ?? [], page.data.title);
+  const modified = docsLastModified(page.path);
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -82,6 +94,8 @@ async function DocsContent({ params }: Pick<PageProps<"/docs/[[...slug]]">, "par
                 headline: page.data.title,
                 description: page.data.description,
                 url,
+                image: ogImageUrl(slug, page.data.title, page.data.description),
+                ...(modified ? { dateModified: modified.toISOString() } : {}),
                 isPartOf: { "@type": "WebSite", name: site.name, url: site.url },
                 about: { "@type": "SoftwareApplication", name: site.name, url: site.url },
                 author: { "@type": "Organization", name: `${site.name} contributors`, url: site.repo },
@@ -122,12 +136,8 @@ export async function generateMetadata({
   const url = absoluteUrl(page.url);
   const title = page.data.title;
   const description = page.data.description ?? site.description;
-  const eyebrow = (slug?.[0] && SECTIONS[slug[0]]) || `${site.name} docs`;
-  const ogImage = absoluteUrl(
-    `/og?title=${encodeURIComponent(title)}` +
-      `&description=${encodeURIComponent(description)}` +
-      `&eyebrow=${encodeURIComponent(eyebrow)}`,
-  );
+  const ogImage = ogImageUrl(slug, title, page.data.description);
+  const modified = docsLastModified(page.path);
   const image = { url: ogImage, width: 1200, height: 630, alt: title, type: "image/png" };
 
   return {
@@ -140,6 +150,7 @@ export async function generateMetadata({
     openGraph: {
       type: "article",
       url,
+      ...(modified ? { modifiedTime: modified.toISOString() } : {}),
       title: `${title} · ${site.name}`,
       description,
       siteName: site.name,
