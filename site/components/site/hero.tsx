@@ -104,9 +104,8 @@ export function Hero() {
         </h1>
 
         <p className="max-w-2xl text-lg text-balance text-muted-foreground">
-          The open-source NotebookLM alternative. Chat with your PDFs, notes and web pages with
-          cited answers, using your own OpenAI, Claude or Gemini key, or local models. Runs on
-          your machine; your notebooks never leave your browser.
+          The open-source NotebookLM alternative. Cited answers from your PDFs and notes, with
+          your own AI key or a local model.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
